@@ -1,1 +1,84 @@
-1
+## DATABASE 생성 및 선택
+DROP DATABASE IF EXISTS projectbob;
+CREATE DATABASE IF NOT EXISTS projectbob;
+use projectbob;
+
+-- 회원ID, 이름, 닉네임, 비밀번호, 연락처, 주소, 상세주소, 이메일, 포인트, 생년월일, 회원구분, 가입일, 수정일
+DROP TABLE IF EXISTS client;
+CREATE TABLE IF NOT EXISTS client(
+m_id VARCHAR(20) PRIMARY KEY,
+name VARCHAR(20) NOT NULL,
+n_name VARCHAR(20) NOT NULL UNIQUE,
+pass VARCHAR(255) NOT NULL,
+phone VARCHAR(11) NOT NULL,
+address1 VARCHAR(200) NOT NULL,
+address2 VARCHAR(50) NOT NULL,
+email VARCHAR(50) NOT NULL UNIQUE,
+point INT DEFAULT 0,
+birthday DATE NOT NULL,
+division VARCHAR(20) NOT NULL,
+reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+moodi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 가게ID, 회원ID, 가게이름, 연락처, 가게주소, 사업자 등록번호, 카테고리, 평점, 찜수, 운영시간, 휴무일, 최소주문금액, 사업자등록증, 영업신고증, 상태, 원산지, 가게공지사항, 가게정보, 등록일, 수정일
+-- 참조하는 회원이 있으면 가게 삭제 불가
+-- 회원(m_id)가 변경되면 가게 테이블의 m_id도 자동으로 변경
+DROP TABLE IF EXISTS shop;
+CREATE TABLE IF NOT EXISTS shop(
+  s_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+  m_id VARCHAR(20) NOT NULL,
+  name VARCHAR(50) NOT NULL,
+  phone VARCHAR(11) NOT NULL,
+  address VARCHAR(260) NOT NULL,
+  s_number INT NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  rating DECIMAL(2,1) DEFAULT 0.0,
+  heart INT DEFAULT 0,
+  op_hour VARCHAR(50) NOT NULL,
+  closed_day VARCHAR(50),
+  min_price VARCHAR(50) NOT NULL,
+  s_license VARCHAR(200) NOT NULL,
+  s_cert VARCHAR(200),
+  status VARCHAR(50) NOT NULL,
+  info VARCHAR(100) NOT NULL,
+  notice VARCHAR(250) NOT NULL,
+  s_info VARCHAR(200) NOT NULL,
+  reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_shop_member FOREIGN KEY (m_id) REFERENCES client(m_id)
+	ON DELETE RESTRICT ON UPDATE CASCADE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 메뉴ID, 가게ID, 카테고리, 메뉴이름, 가격, 메뉴설명, 메뉴사진, 인기도, 생성일, 수정일
+DROP TABLE IF EXISTS menu;
+CREATE TABLE IF NOT EXISTS menu(
+	m_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    s_id INTEGER NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    name VARCHAR(20) NOT NULL,
+    price int NOT NULL,
+    m_info VARCHAR(200),
+    m_picture VARCHAR(200),
+    liked INT DEFAULT 0,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_menu_shop FOREIGN KEY (s_id) REFERENCES SHOP(s_id)
+		ON DELETE CASCADE ON UPDATE CASCADE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+--  메뉴옵션id, 메뉴id, 옵션, 내용, 가격, 생성일, 수정일, 상태
+DROP TABLE IF EXISTS menu_option;
+CREATE TABLE IF NOT EXISTS menu_option(
+	mo_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    m_id INTEGER NOT NULL,
+    m_option VARCHAR(50) NOT NULL,
+    content VARCHAR(250) NOT NULL,
+    price INT NOT NULL,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    status VARCHAR(50) NOT NULL,
+    CONSTRAINT fk_menu_option_menu FOREIGN KEY (m_id) REFERENCES menu(m_id)
+		ON DELETE CASCADE ON UPDATE CASCADE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
