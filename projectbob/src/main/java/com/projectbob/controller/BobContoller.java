@@ -11,4 +11,13 @@ public class BobContoller {
 		return "views/main";
 	}
 	
+    @GetMapping("/ownermain")
+    public String ownermain() {
+        return "views/ownermain"; // ownermain.html로 이동
+    }
+    
+    @GetMapping("/ownerservice")
+    public String ownerservice() {
+    	return "views/ownerservice"; // ownerservice.html로 이동
+    }
 }

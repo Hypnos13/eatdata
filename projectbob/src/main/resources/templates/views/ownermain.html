@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>요기요 사장님</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <style>
+    /* 메인 커스텀 */
+    .mains-promo-box { background: #e6f6fd; border-radius: 12px; padding: 32px 28px 20px 28px; margin-bottom: 28px; }
+    .mains-promo-img { width: 88px; float: right; }
+    .mains-promo-big { font-size: 1.55rem; font-weight: 700; margin-bottom: 10px; }
+    .mains-promo-desc { color: #555; font-size: 1.05rem; }
+    .mains-icon-grid .col { text-align: center; }
+    .mains-icon { font-size: 2.1rem; margin-bottom: 6px; }
+    .mains-icon-label { font-size: 1.02rem; margin-top: 6px; }
+    .mains-login-card .btn { width: 100%; }
+    .mains-recommend img { width: 100%; max-width: 250px; border-radius: 10px; }
+    .mains-notice-list { font-size: .98rem; }
+    .mains-tip-card { min-width: 260px; }
+    @media (max-width: 991px) {
+      .mains-promo-box, .mains-notice-list, .mains-tip-card { padding-left: 12px; padding-right: 12px; }
+      .mains-recommend img { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 헤더 include -->
+  <div th:replace="fragments/ownerheader :: headerFragment('main')"></div>
+
+  <main class="container my-4">
+<!--     
+    프로모션/배너
+    <section class="mains-promo-box mb-4 d-flex align-items-center justify-content-between">
+      <div>
+        <div class="mains-promo-big">내 환급액 조회만해도<br>5만원 드려요</div>
+        <div class="mains-promo-desc">사장님 평균 환급액 960만원</div>
+      </div>
+      <img src="https://cdn-icons-png.flaticon.com/512/3076/3076936.png" class="mains-promo-img" alt="프로모션 일러스트">
+      <div class="text-secondary position-absolute end-0 bottom-0 pe-4 pb-2" style="font-size:1.05rem;">1/9</div>
+    </section>
+ -->
+    <!-- 상단 메뉴 & 로그인 카드 -->
+    <div class="row mb-3">
+      <div class="col-lg-8 mb-3 mb-lg-0">
+        <div class="row gmains-icon-grid g-3 px-2 py-3 bg-white rounded-3 shadow-sm align-items-center">
+		  <div class="col">
+		    <a href="/store-hours" class="d-block text-center text-dark text-decoration-none">
+		      <div class="mains-icon text-secondary"><i class="bi bi-clock"></i></div>
+		      <div class="mains-icon-label">영업시간</div>
+		    </a>
+		  </div>
+		  <div class="col">
+		    <a href="/coupon" class="d-block text-center text-dark text-decoration-none">
+		      <div class="mains-icon text-danger"><i class="bi bi-ticket-perforated-fill"></i></div>
+		      <div class="mains-icon-label">쿠폰관리</div>
+		    </a>
+		  </div>
+		  <div class="col">
+		    <a href="/delivery-fee" class="d-block text-center text-dark text-decoration-none">
+		      <div class="mains-icon text-dark"><i class="bi bi-truck"></i></div>
+		      <div class="mains-icon-label">배달요금</div>
+		    </a>
+		  </div>
+		  <div class="col">
+		    <a href="/ads" class="d-block text-center text-dark text-decoration-none">
+		      <div class="mains-icon text-primary"><i class="bi bi-megaphone"></i></div>
+		      <div class="mains-icon-label">추천광고</div>
+		    </a>
+		  </div>
+		  <div class="col">
+		    <a href="/menu-quality" class="d-block text-center text-dark text-decoration-none">
+		      <div class="mains-icon text-warning"><i class="bi bi-list-check"></i></div>
+		      <div class="mains-icon-label">메뉴품질</div>
+		    </a>
+		  </div>
+		  <div class="col">
+		    <a href="/holiday" class="d-block text-center text-dark text-decoration-none">
+		      <div class="mains-icon text-danger"><i class="bi bi-calendar-x"></i></div>
+		      <div class="mains-icon-label">휴무일</div>
+		    </a>
+		  </div>
+		  <div class="col">
+		    <a href="/settlement" class="d-block text-center text-dark text-decoration-none">
+		      <div class="mains-icon text-success"><i class="bi bi-coin"></i></div>
+		      <div class="mains-icon-label">정산/세금</div>
+		    </a>
+		  </div>
+		  <div class="col">
+		    <a href="/review" class="d-block text-center text-dark text-decoration-none">
+		      <div class="mains-icon text-warning"><i class="bi bi-chat-left-text"></i></div>
+		      <div class="mains-icon-label">리뷰관리</div>
+		    </a>
+		  </div>
+		</div>
+        <div class="mt-3 p-3 rounded-3" style="background:#e6f6fd;">
+          <span class="fw-bold">주문이 늘수록 커지는 혜택<br>바로, 요기요 입점신청</span>
+        </div>
+      </div>
+      <!-- 로그인 카드 -->
+      <div class="col-lg-4">
+        <div class="card shadow-sm mains-login-card mb-3">
+          <div class="card-body text-center">
+            <div class="mb-2">요기요 사장님 반갑습니다<br>로그인해주세요 :)</div>
+            <a href="/login" class="btn btn-primary mb-2">사장님 로그인</a>
+            <div class="d-flex justify-content-between">
+              <a href="#" class="small text-muted">아이디 / 비밀번호 찾기</a>
+              <a href="/signup" class="small text-muted">회원가입</a>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-warning py-2 mb-2">
+          <strong>주문을 이끄는 메뉴와 설명</strong><br>
+          <span class="small text-secondary">메뉴의 매력을 느낄 수 있도록 메뉴와 메뉴 설명을 작성해보세요!</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 사장님 추천/광고 영역 (간단화) -->
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="bg-white rounded-3 shadow-sm p-3 mb-2">
+          <b>사장님을 위한 추천</b>
+          <div class="d-flex flex-row gap-3 mt-3 mains-recommend">
+            <div>
+              <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=300&q=80" alt="추천1">
+              <div class="fw-bold small mt-2">여름철 조심해야 할 식중독균 3가지</div>
+              <div class="text-secondary small">위생/청결</div>
+            </div>
+            <div>
+              <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&q=80" alt="추천2">
+              <div class="fw-bold small mt-2">음식점 '노쇼 사기' 주의하세요</div>
+              <div class="text-secondary small">매장운영</div>
+            </div>
+            <div>
+              <img src="https://images.unsplash.com/photo-1520880867055-1e30d1cb001c?w=300&q=80" alt="추천3">
+              <div class="fw-bold small mt-2">사장님, 배달비 30만원 지원받으세요</div>
+              <div class="text-secondary small">정책</div>
+            </div>
+            <div class="d-flex align-items-center ms-2"><a href="#" class="small">+ 더보기</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 공지사항/이벤트 & 사장님 맞춤 TIP 영역 등은 생략 또는 카드로 예시 가능 -->
+    <div class="row mb-3">
+      <div class="col-lg-8 mb-3 mb-lg-0">
+        <div class="bg-white rounded-3 shadow-sm p-3">
+          <b>공지사항·이벤트</b>
+          <ul class="list-group list-group-flush mains-notice-list">
+            <li class="list-group-item px-0">
+              7월 3일(목) 시스템 점검에 따른 고객센터 이용 제한 <span class="badge bg-danger ms-2">N</span>
+              <span class="float-end text-secondary small">2025-07-02</span>
+            </li>
+            <li class="list-group-item px-0">6월 25일(수) '리뷰관리' 메뉴 시스템 점검 안내 <span class="float-end text-secondary small">2025-06-25</span></li>
+            <li class="list-group-item px-0">‘주문내역’ 메뉴 내 주문 상세 및 다운로드 자료 개… <span class="float-end text-secondary small">2025-06-09</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="bg-white rounded-3 shadow-sm p-3 mb-3">
+          <div><b>서비스 이용법</b></div>
+          <a href="#" class="d-block py-1 text-decoration-none text-dark">요기요 사장님 A to Z</a>
+          <a href="#" class="d-block py-1 text-decoration-none text-dark">자주 묻는 질문</a>
+          <a href="#" class="d-block py-1 text-decoration-none text-dark">주문접수 이용방법</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 사장님 맞춤 TIP 카드 (예시 3개) -->
+    <div class="mb-4">
+      <div><b>사장님 맞춤 Tip</b></div>
+      <div class="d-flex gap-3 mt-3 flex-wrap">
+        <div class="bg-light rounded-3 shadow-sm p-3 mains-tip-card">
+          <div class="fw-bold mb-2">고객 부담을 낮추는 배달요금</div>
+          <div class="mb-2 small text-secondary">배달요금을 잘 설정하면 고객 부담은 낮아지고 주문수는 올라요!</div>
+          <a href="#" class="btn btn-outline-danger btn-sm">배달요금 설정하기</a>
+        </div>
+        <div class="bg-light rounded-3 shadow-sm p-3 mains-tip-card">
+          <div class="fw-bold mb-2">주문받기 전까지 광고비 0원!</div>
+          <div class="mb-2 small text-secondary">AI로 주문확률이 높은 고객에게 우리 가게를 추천해요!</div>
+          <a href="#" class="btn btn-outline-primary btn-sm">추천광고 설정하기</a>
+        </div>
+        <div class="bg-warning-subtle rounded-3 shadow-sm p-3 mains-tip-card">
+          <div class="fw-bold mb-2">주문을 이끄는 메뉴와 설명</div>
+          <div class="mb-2 small text-secondary">메뉴의 매력을 느낄 수 있도록 메뉴와 메뉴 설명을 작성해보세요!</div>
+          <a href="#" class="btn btn-outline-secondary btn-sm">메뉴 관리하기</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ, 하단 서비스 박스 등은 별도 -->
+    <div class="mb-5">
+      <div class="fw-bold mb-3">자주 묻는 질문</div>
+      <div class="bg-white rounded-3 shadow-sm p-3">
+        <div class="mb-2">
+          <button class="btn btn-dark btn-sm me-2">전체</button>
+          <button class="btn btn-outline-secondary btn-sm me-2">주문접수PC</button>
+          <button class="btn btn-outline-secondary btn-sm me-2">쿠폰관리</button>
+          <button class="btn btn-outline-secondary btn-sm">정산</button>
+        </div>
+        <div>
+          <div class="border-bottom py-2">
+            <span class="fw-bold">Q</span> 요타임딜에 노출되는 가게 시간을 변경하고 싶어요.
+          </div>
+          <div class="border-bottom py-2">
+            <span class="fw-bold">Q</span> 요타임딜 진행 중 '오늘 중지' 또는 '임시 중지'를 했는데 이용료가 부과되었어요.
+          </div>
+          <div class="border-bottom py-2">
+            <span class="fw-bold">Q</span> 요기요의 광고와 마케팅 서비스는 함께 이용할 수 있나요?
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- 푸터 include -->
+  <div th:replace="fragments/ownerfooter :: footerFragment"></div>
+
+  <!-- Bootstrap JS, Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

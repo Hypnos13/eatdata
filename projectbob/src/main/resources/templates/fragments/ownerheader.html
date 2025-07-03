@@ -1,0 +1,16 @@
+<!-- templates/fragments/header.html -->
+<header th:class="${pageType == 'service'} ? 'service-header' : 'main-header'"
+			th:fragment="headerFragment(pageType)">
+  	<nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm mb-4">
+    	<div th:class="${pageType == 'service'} ? 'container-fluid' : 'container'">
+            <div>
+            	<a class="navbar-brand fw-bold" href="ownermain">메인페이지용링크</a>
+            	<a class="navbar-brand fw-bold" href="ownerservice">서비스페이지용링크</a>
+            </div>
+            <div>
+                <a class="btn btn-outline-secondary me-2" href="/login">로그인</a>
+                <a class="btn btn-danger" href="/signup">회원가입</a>
+            </div>
+        </div>
+    </nav>
+</header>
