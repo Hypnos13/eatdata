@@ -1,0 +1,9 @@
+.classpath
+.project
+.settings/.jsdtscope
+.settings/org.eclipse.wst.jsdt.ui.superType.container
+.settings/org.eclipse.wst.jsdt.ui.superType.name
+bin/com/projectbob/ProjectbobApplication.class
+bin/com/projectbob/ProjectbobApplicationTests.class
+bin/com/projectbob/controller/BobContoller.class
+projectbob/src/main/resources/SQL/111.rej
