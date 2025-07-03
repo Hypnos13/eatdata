@@ -11,4 +11,12 @@ public class BobContoller {
 		return "views/main";
 	}
 	
+	@GetMapping("/main2")
+	public String Main2() {
+		return "views/main2";
+	}
+	@GetMapping("/menu")
+	public String menu() {
+		return "views/MenuDetail";
+	}
 }
