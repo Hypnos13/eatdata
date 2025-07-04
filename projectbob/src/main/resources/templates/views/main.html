@@ -1,10 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>메인</title>
+<title>저기요</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 부트스트랩 CDN -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<style>
+body {
+	background-color: #f9f9f9;
+}
+
+.top-bar {
+	background-color: #43d091;
+	color: white;
+	padding: 10px 0;
+}
+
+.top-bar a {
+	color: white;
+	text-decoration: none;
+	margin-right: 15px;
+}
+
+.search-box {
+	background-image:
+		url('https://images.deliveryhero.io/image/foodpanda/bg/bg_header.jpg');
+	background-size: cover;
+	background-position: center;
+	height: 220px;
+	color: white;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	padding: 20px;
+}
+
+.category-card {
+  aspect-ratio: 1/1;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.category-title {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #000; /* 검정색으로 변경 */
+  z-index: 2;
+}
+
+.category-image {
+	width: 100%;
+	height: 100%;
+	background-size: cover;
+	background-position: center;
+	border-radius: 0.25rem;
+}
+
+.footer {
+	font-size: 0.9rem;
+	color: gray;
+	padding: 20px 0;
+	border-top: 1px solid #ddd;
+}
+</style>
 </head>
 <body>
-<h1>메인</h1>
+
+	<!-- 상단 바 -->
+	<div class="top-bar text-center">
+		<div
+			class="container d-flex justify-content-between align-items-center">
+			<h2 class="m-0 text-white fw-bold">저기요</h2>
+			<div>
+				<a href="#" class="border border-white px-2 py-1">로그인</a> <a
+					href="#" class="border border-white px-2 py-1">주문표(0)</a>
+			</div>
+		</div>
+	</div>
+
+	<!-- 배경 + 검색 -->
+	<div class="search-box">
+
+		<p style="color: black;">배달받으실 주소 또는 건물명을 검색해주세요</p>
+		<div class="d-flex justify-content-center mt-2">
+			<button class="btn text-white me-2 d-flex align-items-center"
+				style="background-color: #43d091;">
+				<img src="https://img.icons8.com/ios-filled/24/000000/marker.png"
+					alt="위치" class="me-1" />
+			</button>
+			<input type="text" class="form-control w-25 me-2"
+				placeholder="서울특별시 관악구...">
+			<button class="btn text-dark fw-semibold"
+				style="background-color: #43d091">검색</button>
+		</div>
+	</div>
+
+	<!-- 카테고리 -->
+<div class="container my-4">
+  <div class="row g-3">
+    <!-- 1 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-01.png');">
+        <div class="category-title">전체보기</div>
+      </div>
+    </div>
+    <!-- 2 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-02.png');">
+        <div class="category-title">1인분 주문</div>
+      </div>
+    </div>
+    <!-- 3 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-03.png');">
+        <div class="category-title">프랜차이즈</div>
+      </div>
+    </div>
+    <!-- 4 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-04.png');">
+        <div class="category-title">치킨</div>
+      </div>
+    </div>
+    <!-- 5 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-05.png');">
+        <div class="category-title">피자/양식</div>
+      </div>
+    </div>
+    <!-- 6 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-06.png');">
+        <div class="category-title">중국집</div>
+      </div>
+    </div>
+    <!-- 7 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-07.png');">
+        <div class="category-title">한식</div>
+      </div>
+    </div>
+    <!-- 8 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-08.png');">
+        <div class="category-title">일식/돈가스</div>
+      </div>
+    </div>
+    <!-- 9 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-09.png');">
+        <div class="category-title">족발/보쌈</div>
+      </div>
+    </div>
+    <!-- 10 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-10.png');">
+        <div class="category-title">야식</div>
+      </div>
+    </div>
+    <!-- 11 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-11.png');">
+        <div class="category-title">분식</div>
+      </div>
+    </div>
+    <!-- 12 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-12.png');">
+        <div class="category-title">카페/디저트</div>
+      </div>
+    </div>
+    <!-- 13 -->
+    <div class="col-6 col-md-3">
+      <div class="category-card" style="background-image: url('images/category-13.png');">
+        <div class="category-title">편의점/마트</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+	<!-- 푸터 -->
+	<div class="footer text-center mt-5">
+		<p>주식회사 위대한상상 | 서울특별시 강남구 ... 사업자등록번호: 211-88-68802</p>
+		<p>고객센터: support@yogiyo.co.kr | 제휴문의: partnership@yogiyo.co.kr</p>
+		<p>© Yogiyo Clone by ChatGPT</p>
+	</div>
+
 </body>
 </html>
