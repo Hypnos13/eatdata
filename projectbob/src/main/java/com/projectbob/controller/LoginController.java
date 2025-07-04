@@ -3,6 +3,7 @@ package com.projectbob.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import com.projectbob.service.LoginService;
 
@@ -13,10 +14,34 @@ public class LoginController {
 	LoginService loginService;
 
 	@GetMapping("/login")
-	public String Main() {
+	public String loginForm() {
 		return "members/login";
 	}
 	
 	
+	@PostMapping("/login")
+	public String login() {
+		return "views/main";
+	}
+	
+	@PostMapping("/joinMember")
+	public String joinMember() {
+		return "views/main";
+	}
+	
+	@PostMapping("/searchIdPass")
+	public String searchIdPass() {
+		return "views/main";
+	}
+	
+	@GetMapping("/myProfile")
+	public String myProfile() {
+		return "members/updateMemberships";
+	}
+	
+	@PostMapping("/updateMember")
+	public String updateMember() {
+		return "views/main";
+	}
 	
 }

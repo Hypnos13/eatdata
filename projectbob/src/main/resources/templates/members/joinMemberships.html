@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<div class ="container">
+	<Form name="joinMemberForm" id="joinMemberForm" method="post" action="joinMember">
+		<div class="row my-2 mt-5">
+			<div class="col-5 text-end">
+				분류 :
+			</div>
+			<div class="col-5 btn-group" role="group" aria-label="Basic radio toggle button group">
+				<input type="radio" class="btn-check" name="disivion" id="client" autocomplete="off" checked>
+				<label class="btn btn-outline-primary" for="client">고객님</label>
+				<input type="radio" class="btn-check" name="disivion" id="owner" autocomplete="off">
+				<label class="btn btn-outline-primary" for="owner">사장님</label>
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-5 text-end">
+				*아이디 : 
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="id" id="id" type="text" placeholder="아이디를 입력해주세요">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-5 text-end">
+				*비밀번호 : 
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="pass" id="pass" type="password" placeholder="비밀번호를 입력해주세요">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-5 text-end">
+				*이름 : 
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="name" id="name" type="text" placeholder="이름을 입력해주세요">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-5 text-end">
+				별명 : 
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="nickname" id="nickname" type="text" placeholder="별명을 입력해주세요 (미입력시 이름이 입력됩니다)">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-5 text-end">
+				*생년월일 : 
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="birthday" id="birthday" type="text" placeholder="생년월일을 입력해주세요 (ex.20250101)">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-5 text-end">
+				*주소 : 
+			</div>
+			<div class="col-4">
+				<input class="form-control" name="address1" id="address1" type="text" placeholder="주소 찾기를 눌러주세요" readonly="true">
+			</div>
+			<div class="col-2">
+				<input class="form-control btn btn-success" id="btnAdress" value="주소 찾기">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-5 text-end">
+				*상세주소 : 
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="address2" id="address2" type="text" placeholder="상세 주소를 입력해주세요">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-5 text-end">
+				*이메일 : 
+			</div>
+			<div class="col-5">
+				<input type="email" class="form-control" name="email" id="email" placeholder="이메일을 입력해주세요. (ex.name@example.com)">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-5 text-end">
+				*연락처 : 
+			</div>
+			<div class="col-5">
+				<input type="text" class="form-control" name="phone" id="phone" placeholder="연락처를 입력해주세요. (ex.010-1234-5678)">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-6 mx-auto">
+				<input type="submit" class="form-control btn btn-success" value="가입하기">
+			</div>
+		</div>
+	</Form>
+</div>	
+</th:block>
+</html>

@@ -5,13 +5,13 @@
 <th:block layout:fragment="content">
 <div class ="container">
 	<div class="row border mt-5">
-		<div class="col-10">
+		<form name="loginForm" id="loginForm" method="post" action="login" class="col-10">
 			<div class="row my-2">
 				<div class="col-5 text-end">
 					아이디 : 
 			  	</div>
 			  	<div class="col-5">
-			  		<input class="form-control" type="text" placeholder="아이디를 입력해주세요">
+			  		<input class="form-control" name="id" id="id" type="text" placeholder="아이디를 입력해주세요">
 			  	</div>
 			</div>
 			<div class="row my-2">
@@ -19,12 +19,12 @@
 					비밀번호 : 
 			  	</div>
 			  	<div class="col-5">
-			  		<input class="form-control" type="pass" placeholder="비밀번호를 입력해주세요">
+			  		<input class="form-control" name="pass" id="pass" type="password" placeholder="비밀번호를 입력해주세요">
 			  	</div>
 			</div>
 			<div class="row my-2">
 				<div class="col-12 text-center">
-					<button type="submit" class="btn btn-primary">로그인</button>
+					<button type="submit" class="btn btn-success">로그인</button>
 				</div>
 			</div>
 			<div class="row my-2">
@@ -37,19 +37,19 @@
 					카카오 로그인 연동
 			  	</div>
 			</div>
+			</form>
 		</div>
 	</div>
 	<div class="row border mt-2">
 		<div class="col-10">
 			<div class="row my-2">
 				<div class="col-12 text-center">
-					<a class="text-decoration-none" href="login">아이디찾기</a> | 
-					<a class="text-decoration-none" href="login">비밀번호찾기</a> | 
-					<a class="text-decoration-none" href="login">회원가입</a>
+					<a class="text-decoration-none" href="searchIdPassForm">아이디찾기</a> | 
+					<a class="text-decoration-none" href="searchIdPassForm">비밀번호찾기</a> | 
+					<a class="text-decoration-none" href="joinMemberForm">회원가입</a>
 				</div>
 			</div>
 		</div>
 	</div>
-</div>
 </th:block>
 </html>

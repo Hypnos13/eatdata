@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<div class="row border mt-5">
+		<form name="searchIdPassForm" id="searchIdPassForm" method="post" action="searchIdPass" class="col-10">
+			<div class="row my-2 mt-5 justify-content-center">
+				<div class="col-7 btn-group" role="group" aria-label="Basic radio toggle button group">
+					<input type="radio" class="btn-check" name="receive" id="rEmail" autocomplete="off" checked>
+					<label class="btn btn-outline-primary" for="rEmail">이메일로 찾기</label>
+					<input type="radio" class="btn-check" name="receive" id="rPhone" autocomplete="off">
+					<label class="btn btn-outline-primary" for="rPhone">휴대전화로 찾기</label>
+				</div>
+			</div>
+			<div class="row my-2">
+				<div class="col-5 text-end">
+					아이디 : 
+			  	</div>
+			  	<div class="col-5">
+			  		<input class="form-control" name="id" id="id" type="text" placeholder="아이디를 입력해주세요">
+			  	</div>
+			</div>
+			<div class="row my-2">
+				<div class="col-5 text-end">
+					이름 : 
+				</div>
+				<div class="col-5">
+					<input class="form-control" name="name" id="name" type="text" placeholder="이름을 입력해주세요">
+				</div>
+			</div>
+			<div class="row my-2">
+				<div class="col-5 text-end">
+					이메일 : 
+				</div>
+				<div class="col-5">
+					<input type="email" class="form-control" name="email" id="email" placeholder="이메일을 입력해주세요. (ex.name@example.com)">
+				</div>
+			</div>
+			<div class="row my-2">
+				<div class="col-5 text-end">
+					연락처 : 
+				</div>
+				<div class="col-5">
+					<input type="email" class="form-control" name="phone" id="phone" placeholder="연락처를 입력해주세요. (ex.010-1234-5678)">
+				</div>
+			</div>
+			<div class="row my-2">
+				<div class="col-12 text-center">
+					<button type="submit" class="btn btn-success">찾기</button>
+				</div>
+			</div>
+			</form>
+		</div>
+	</div>
+</th:block>
+</html>
