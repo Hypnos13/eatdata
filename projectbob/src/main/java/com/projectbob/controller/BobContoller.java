@@ -19,4 +19,13 @@ public class BobContoller {
 	public String menu() {
 		return "views/MenuDetail";
 	}
+	
+	@GetMapping("/pay")
+	public String pay() {
+		return "views/pay";
+	}
+	@GetMapping("/end")
+	public String completed() {
+		return "views/completed";
+	}
 }
