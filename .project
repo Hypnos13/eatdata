@@ -7,30 +7,43 @@
 	<buildSpec>
 		<buildCommand>
 <<<<<<< HEAD
+<<<<<<< HEAD
 			<name>org.eclipse.jdt.core.javabuilder</name>
 =======
 			<name>org.eclipse.wst.validation.validationbuilder</name>
 >>>>>>> c9b9dd025bb15e6718ca267d76b24175c2894d79
+=======
+			<name>org.eclipse.wst.validation.validationbuilder</name>
+>>>>>>> 5790997ed4828f8fe2f9b1047373393b7e094bfc
 			<arguments>
 			</arguments>
 		</buildCommand>
 		<buildCommand>
 <<<<<<< HEAD
+<<<<<<< HEAD
 			<name>org.eclipse.wst.validation.validationbuilder</name>
 =======
 			<name>org.eclipse.jdt.core.javabuilder</name>
 >>>>>>> c9b9dd025bb15e6718ca267d76b24175c2894d79
+=======
+			<name>org.eclipse.jdt.core.javabuilder</name>
+>>>>>>> 5790997ed4828f8fe2f9b1047373393b7e094bfc
 			<arguments>
 			</arguments>
 		</buildCommand>
 	</buildSpec>
 	<natures>
 <<<<<<< HEAD
+<<<<<<< HEAD
 		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 =======
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
 >>>>>>> c9b9dd025bb15e6718ca267d76b24175c2894d79
+=======
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
+>>>>>>> 5790997ed4828f8fe2f9b1047373393b7e094bfc
 	</natures>
 </projectDescription>
