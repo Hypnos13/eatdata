@@ -17,15 +17,24 @@ public class BobController {
 	public String Main() {
 		return "views/main";
 	}
-	
-	@Autowired
-	private BobService bobService;
-	// 가게 전체 게시글 리스트 요청을 처리하는 메서드
-	@GetMapping("/shopList")
-	public String shopList(Model model) {
-		log.info("BobController: shopList() called");
-		model.addAttribute("sList", bobService.shopList());
-		return "shopList";
+
+	/*
+	 * @GetMapping("/main2") public String Main2() { return "views/main2"; }
+	 */
+	@GetMapping("/menu")
+	public String menu() {
+		return "views/MenuDetail";
 	}
+	
+	
+	  @Autowired private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
+	  
+	  @GetMapping("/shopList") 
+	  public String shopList(Model model) {
+	  log.info("BobController: shopList() called"); 
+	  model.addAttribute("sList",bobService.shopList()); 
+	  	return "views/shopList"; 
+	  }
+	 
 	
 }
