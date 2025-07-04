@@ -1,12 +1,13 @@
 $(function(){
 	
-	$(document).ready(function(){
+
 		// 전체보기 버튼 클릭 이벤트
 		$('#allCategoryBtn').on('click', function(){
+			console.log("전체보기 버튼 클릭");
 			window.location.href = '/shopList';
 		});
 		
-		// 검색 버튼 클릭 이벤트
+	/*	// 검색 버튼 클릭 이벤트
 		const $searchInput = $('.search-box input[type="text"]');
 		const $searchButton = $('.search-box button.btn.text-dark');
 		
@@ -28,8 +29,10 @@ $(function(){
 			} else {
 				window.location.href = '/shopList?category=' + encodeURIComponent(categoryTitle);
 			}
-		});
-	});
+			
+		});*/
+		
+
 	
 	
 	
@@ -50,5 +53,4 @@ $(function(){
 	
 	
 	
-	
-});
+});// end
