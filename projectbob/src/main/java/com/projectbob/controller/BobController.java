@@ -25,6 +25,14 @@ public class BobController {
 	public String menu() {
 		return "views/MenuDetail";
 	}
+	@GetMapping("/pay")
+	public String pay() {
+		return "views/pay";
+	}
+	@GetMapping("/end")
+	public String completed() {
+		return "views/completed";
+	}
 	
 	
 	  @Autowired private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
