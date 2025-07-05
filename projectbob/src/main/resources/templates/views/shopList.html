@@ -225,17 +225,16 @@
       </div>
       
       <div class="col-12 col-md-6" th:block th:each="shop, status: ${sList}">
+      <a th:href="@{MenuDetail(s_id=${shop.s_id})}" style="text-decoration: none; color: inherit;">
         <div class="store-box">
-          <img
-            src="https://via.placeholder.com/100"
-            alt="가게"
-          />
+          <img src="https://via.placeholder.com/100" alt="가게 이미지" />
           <div>
             <h5>[[ ${shop.name}]]</h5>
-            <p class="text-muted" th:href="@{MenuDetail(s_id=${shop.s_id})}">[[ ${shop.address}]], 10분 거리</p>
-            <p class="text-success fw-semibold">[[ ${shop.rating}]]</p>
+            <p class="text-muted">[[ ${shop.address}]], 10분 거리</p>
+            <p class="text-success fw-semibold">평점 ★[[ ${shop.rating}]]</p>
           </div>
         </div>
+      </a>
       </div>
             
     </div>

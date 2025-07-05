@@ -24,5 +24,11 @@ public class BobService {
 		return bobMapper.shopList();
 	}
 	
+	// s_id에 해당하는 게시글을 읽어와 반환하는 메서드
+	public Shop getMenuDetail(int s_id) {
+		log.info("BobService: getMenuDetail(int s_id)");
+		return bobMapper.getMenuDetail(s_id);
+	}
+	
 
 }

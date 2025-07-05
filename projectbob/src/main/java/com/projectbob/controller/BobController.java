@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.projectbob.service.BobService;
 
@@ -42,6 +43,13 @@ public class BobController {
 	  log.info("BobController: shopList() called"); 
 	  model.addAttribute("sList",bobService.shopList()); 
 	  	return "views/shopList"; 
+	  }
+	  
+	  // 가게 상세보기 메서드
+	  @GetMapping("/MenuDetail")
+	  public String getMenuDetail(Model model, @RequestParam("s_id") int s_id) {
+		  model.addAttribute("shop",bobService.getMenuDetail(s_id));
+		  return "views/MenuDetail";
 	  }
 	 
 	
