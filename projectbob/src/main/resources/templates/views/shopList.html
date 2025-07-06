@@ -224,8 +224,9 @@
         </div>
       </div>
       
+      <th:block th:if="${not #lists.isEmpty(sList)}">
       <div class="col-12 col-md-6" th:block th:each="shop, status: ${sList}">
-      <a th:href="@{MenuDetail(s_id=${shop.s_id})}" style="text-decoration: none; color: inherit;">
+      <a th:href="@{/MenuDetail(s_id=${shop.s_id})}" style="text-decoration: none; color: inherit;">
         <div class="store-box">
           <img src="https://via.placeholder.com/100" alt="가게 이미지" />
           <div>
@@ -236,6 +237,14 @@
         </div>
       </a>
       </div>
+      </th:block>
+     
+     <th:block th:unless="${not #lists.isEmpty(sList)}">    
+     	<div class="alert alert-info text-center">
+     		근처에 등록된 식당이 없습니다.
+     	</div>
+     	<p>no 식당 no 먹을거</p>
+     </th:block>
             
     </div>
   </div>
