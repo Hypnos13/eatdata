@@ -11,4 +11,9 @@ public class BobContoller {
 		return "views/main";
 	}
 	
+	@GetMapping({"/oMain"})
+	public String oMain() {
+		return "views/oMain";
+	}
+	
 }
