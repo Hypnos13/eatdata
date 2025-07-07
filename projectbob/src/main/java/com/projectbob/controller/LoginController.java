@@ -28,7 +28,11 @@ public class LoginController {
 	@PostMapping("/joinMember")
 	public String joinMember(Model model, Member member) {
 		
-		//loginService.joinMember(member);
+		if(member.getNickname().equals("")) {
+			member.setNickname(member.getName());
+		}
+		
+		loginService.joinMember(member);
 		
 		return "views/main";
 	}
