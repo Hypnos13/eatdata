@@ -2,13 +2,34 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
-<select id="getMenuDetail" resultType="com.projectbob.domain.Shop">
+<!-- 가게 상세 페이지에 필요한 xml -->
+<select id="getMenuListByShopId" resultType="com.projectbob.domain.Menu">
+	SELECT
+	*
+	FROM menu
+	WHERE s_id = #{s_id} ORDER BY category, name
+</select>
+<select id="getMenuOptionsByMenuId" resultType="com.projectbob.domain.MenuOption">
+	SELECT
+	*
+	FROM menu_Option
+	WHERE m_id = #{m_id} ORDER BY price
+</select>
+<select id="getMenuCategoriesByShopId" resultType="java.lang.String">
+	SELECT DISTINCT category FROM menu
+	WHERE s_id = #{s_id} ORDER BY category
+</select>
+<!-- getMenuCategoriesByShopId는 주문표에 필요한 xml -->
+
+<!-- 가게 리스트에서 가게 버튼 누를때 -->
+<select id="getShopDetail" resultType="com.projectbob.domain.Shop">
 	SELECT
 	*
 	FROM shop
 	WHERE s_id = #{s_id}
 </select>
 
+<!-- 메인에서 전체보기 버튼 누를때 -->
 <select id="shopList" resultType="com.projectbob.domain.Shop">
 	SELECT
 	*

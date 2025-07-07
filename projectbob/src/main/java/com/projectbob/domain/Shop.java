@@ -18,13 +18,14 @@ public class Shop {
 	private String id;
 	private String name;
 	private String phone;
-	private String address;
+	private String address1;
+	private String address2;
 	private String s_number;
 	private String category;
 	private double rating;
 	private int heart;
-	private String op_hour;
-	private String closed_day;
+	private String op_time;
+	private String off_day;
 	private String min_price;
 	private String s_license;
 	private String s_cert;

@@ -1,11 +1,15 @@
 package com.projectbob.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.projectbob.domain.Menu;
+import com.projectbob.domain.Shop;
 import com.projectbob.service.BobService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +52,17 @@ public class BobController {
 	  // 가게 상세보기 메서드
 	  @GetMapping("/MenuDetail")
 	  public String getMenuDetail(Model model, @RequestParam("s_id") int s_id) {
-		  model.addAttribute("shop",bobService.getMenuDetail(s_id));
+		  // 가게 정보 가져오기
+		  Shop shop = bobService.getShopDetail(s_id);
+		  model.addAttribute("shop", shop);
+		  // 해당 가게의 메뉴 목록 가져오기
+		  List<Menu> menuList = bobService.getMenuListOption(s_id);
+		  model.addAttribute("menuList",menuList);
+		  // 메뉴 카테고리 목록 가져오기
+		  List<String> menuCategory = bobService.getMenuCategoriesByShopId(s_id);
+		  model.addAttribute("menuCategory", menuCategory);
+		  
+		 
 		  return "views/MenuDetail";
 	  }
 	 
