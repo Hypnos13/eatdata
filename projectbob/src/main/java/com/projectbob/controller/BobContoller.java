@@ -6,18 +6,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class BobContoller {
 
-	@GetMapping({"/", "/main"})
-	public String Main() {
-		return "views/main";
-	}
-	
-    @GetMapping("/ownermain")
-    public String ownermain() {
-        return "views/ownermain"; // ownermain.html로 이동
+	@GetMapping("/oMain")
+    public String oMain() {
+    	return "views/oMain"; // oMain.html로 이동
     }
     
-    @GetMapping("/ownerservice")
-    public String ownerservice() {
-    	return "views/ownerservice"; // ownerservice.html로 이동
+    @GetMapping("/oService")
+    public String oService() {
+    	return "views/oService"; // oService.html로 이동
     }
 }
