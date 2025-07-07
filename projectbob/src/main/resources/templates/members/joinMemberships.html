@@ -3,6 +3,7 @@
 		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
 		layout:decorate="~{layouts/main_layout}">
 <th:block layout:fragment="content">
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <div class ="container">
 	<Form name="joinMemberForm" id="joinMemberForm" method="post" action="joinMember">
 		<div class="row my-2 mt-5">
@@ -25,6 +26,11 @@
 			</div>
 		</div>
 		<div class="row my-2">
+			<div class="col-10 text-end">
+				<input class="form-control" name="idInfo" id="idInfo" type="hidden">
+			</div>
+		</div>
+		<div class="row my-2">
 			<div class="col-5 text-end">
 				*비밀번호 : 
 			</div>
@@ -33,11 +39,21 @@
 			</div>
 		</div>
 		<div class="row my-2">
+			<div class="col-10 text-end">
+				<input class="form-control" name="passInfo" id="passInfo" type="hidden">
+			</div>
+		</div>
+		<div class="row my-2">
 			<div class="col-5 text-end">
 				*이름 : 
 			</div>
 			<div class="col-5">
 				<input class="form-control" name="name" id="name" type="text" placeholder="이름을 입력해주세요">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-10 text-end">
+				<input class="form-control" name="nameInfo" id="nameInfo" type="hidden">
 			</div>
 		</div>
 		<div class="row my-2">
@@ -57,19 +73,29 @@
 			</div>
 		</div>
 		<div class="row my-2">
+			<div class="col-10 text-end">
+				<input class="form-control" name="birthdayInfo" id="birthdayInfo" type="hidden">
+			</div>
+		</div>
+		<div class="row my-2">
 			<div class="col-5 text-end">
 				*주소 : 
 			</div>
 			<div class="col-4">
-				<input class="form-control" name="address1" id="address1" type="text" placeholder="주소 찾기를 눌러주세요" readonly="true">
+				<input class="form-control" name="address1" id="address1" type="text" placeholder="주소 찾기를 눌러주세요">
 			</div>
 			<div class="col-2">
 				<input class="form-control btn btn-success" id="btnAdress" value="주소 찾기">
 			</div>
 		</div>
 		<div class="row my-2">
+			<div class="col-10 text-end">
+				<input class="form-control" name="address1Info" id="address1Info" type="hidden">
+			</div>
+		</div>
+		<div class="row my-2">
 			<div class="col-5 text-end">
-				*상세주소 : 
+				상세주소 : 
 			</div>
 			<div class="col-5">
 				<input class="form-control" name="address2" id="address2" type="text" placeholder="상세 주소를 입력해주세요">
@@ -84,11 +110,21 @@
 			</div>
 		</div>
 		<div class="row my-2">
+			<div class="col-10 text-end">
+				<input class="form-control" name="emailInfo" id="emailInfo" type="hidden">
+			</div>
+		</div>
+		<div class="row my-2">
 			<div class="col-5 text-end">
 				*연락처 : 
 			</div>
 			<div class="col-5">
 				<input type="text" class="form-control" name="phone" id="phone" placeholder="연락처를 입력해주세요. (ex.010-1234-5678)">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-10 text-end">
+				<input class="form-control" name="phoneInfo" id="phoneInfo" type="hidden">
 			</div>
 		</div>
 		<div class="row my-2">
