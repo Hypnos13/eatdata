@@ -23,29 +23,29 @@ import jakarta.servlet.http.HttpSession;
 public class LoginController {
 
     private final ProjectbobApplication projectbobApplication;
-
     private final BobContoller bobContoller;
 	
 	@Autowired
 	LoginService loginService;
 
+	
     LoginController(BobContoller bobContoller, ProjectbobApplication projectbobApplication) {
         this.bobContoller = bobContoller;
         this.projectbobApplication = projectbobApplication;
     }
 
+    
 	@GetMapping("/login")
 	public String loginForm() {
 		return "members/login";
 	}
+	
 	
 	@PostMapping("/login")
 	public String login(Model model, @RequestParam("id") String id, @RequestParam("pass") String pass, HttpSession session,
 			HttpServletResponse response )throws ServletException, IOException {
 		
 		int login = loginService.login(id, pass);
-		
-		System.out.println("로그인 중 --- "+ login);
 		
 		if(login == -1) {
 			response.setContentType("text/html; charset=utf-8");
@@ -75,6 +75,7 @@ public class LoginController {
 		return "redirect:/main";
 	}
 	
+	
 	@PostMapping("/joinMember")
 	public String joinMember(Model model, Member member) {
 		
@@ -87,10 +88,24 @@ public class LoginController {
 		return "views/main";
 	}
 	
+	
 	@PostMapping("/searchIdPass")
 	public String searchIdPass() {
-		return "views/main";
+		return "members/login";
 	}
+	
+	@GetMapping("/searchIdPassForm")
+	public String searchIdPassForm(Model model, @RequestParam("search") String search) {
+		
+		boolean searchPass = false;
+		
+		if(search.equals("pass")) { searchPass = true;}
+		
+		model.addAttribute("searchPass", searchPass);
+		
+		return "members/searchIdPass";
+	}
+	
 	
 	@GetMapping("/myProfile")
 	public String myProfile(Model model, HttpSession session) {
@@ -101,6 +116,7 @@ public class LoginController {
 		
 		return "members/updateMemberships";
 	}
+	
 	
 	@PostMapping("/updateMember")
 	public String updateMember(Model model, Member member, HttpSession session, HttpServletResponse response) throws ServletException, IOException {
@@ -123,13 +139,13 @@ public class LoginController {
 		return "views/main";
 	}
 	
+	
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
-		
 		session.invalidate();
-		
 		return "members/login";
 	}
+	
 	
 	@PostMapping("/deleteMember")
 	public String deleteMember( @RequestParam("userId") String id, @RequestParam("userPass") String pass, HttpSession session, 
