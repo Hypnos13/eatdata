@@ -11,9 +11,9 @@
 				분류 :
 			</div>
 			<div class="col-5 btn-group" role="group" aria-label="Basic radio toggle button group">
-				<input type="radio" class="btn-check" name="disivion" id="client" autocomplete="off" checked>
+				<input type="radio" class="btn-check" name="disivion" id="client" value="client" checked>
 				<label class="btn btn-outline-primary" for="client">고객님</label>
-				<input type="radio" class="btn-check" name="disivion" id="owner" autocomplete="off">
+				<input type="radio" class="btn-check" name="disivion" id="owner" value="owner">
 				<label class="btn btn-outline-primary" for="owner">사장님</label>
 			</div>
 		</div>
@@ -27,7 +27,7 @@
 		</div>
 		<div class="row my-2">
 			<div class="col-10 text-end">
-				<input class="form-control" name="idInfo" id="idInfo" type="hidden">
+				<div class="text-danger text-center" id="idInfo"></div>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -40,7 +40,7 @@
 		</div>
 		<div class="row my-2">
 			<div class="col-10 text-end">
-				<input class="form-control" name="passInfo" id="passInfo" type="hidden">
+				<div class="text-danger text-center" id="passInfo"></div>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -53,7 +53,7 @@
 		</div>
 		<div class="row my-2">
 			<div class="col-10 text-end">
-				<input class="form-control" name="nameInfo" id="nameInfo" type="hidden">
+				<div class="text-danger text-center" id="nameInfo"></div>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -74,7 +74,7 @@
 		</div>
 		<div class="row my-2">
 			<div class="col-10 text-end">
-				<input class="form-control" name="birthdayInfo" id="birthdayInfo" type="hidden">
+				<div class="text-danger text-center" id="birthdayInfo"></div>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -82,7 +82,7 @@
 				*주소 : 
 			</div>
 			<div class="col-4">
-				<input class="form-control" name="address1" id="address1" type="text" placeholder="주소 찾기를 눌러주세요">
+				<input class="form-control" name="address1" id="address1" type="text" placeholder="주소 찾기를 눌러주세요" readonly="true">
 			</div>
 			<div class="col-2">
 				<input class="form-control btn btn-success" id="btnAdress" value="주소 찾기">
@@ -90,7 +90,7 @@
 		</div>
 		<div class="row my-2">
 			<div class="col-10 text-end">
-				<input class="form-control" name="address1Info" id="address1Info" type="hidden">
+				<div class="text-danger text-center" id="address1Info"></div>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -111,7 +111,7 @@
 		</div>
 		<div class="row my-2">
 			<div class="col-10 text-end">
-				<input class="form-control" name="emailInfo" id="emailInfo" type="hidden">
+				<div class="text-danger text-center" id="emailInfo"></div>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -124,7 +124,7 @@
 		</div>
 		<div class="row my-2">
 			<div class="col-10 text-end">
-				<input class="form-control" name="phoneInfo" id="phoneInfo" type="hidden">
+				<div class="text-danger text-center" id="phoneInfo"></div>
 			</div>
 		</div>
 		<div class="row my-2">

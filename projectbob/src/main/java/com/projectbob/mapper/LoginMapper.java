@@ -8,5 +8,6 @@ import com.projectbob.domain.Member;
 public interface LoginMapper {
 	
 	void joinMember(Member member);
+	Member getMember(String id);
 
 }
