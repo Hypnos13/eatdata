@@ -31,6 +31,14 @@ public class BobController {
 	public String completed() {
 		return "views/completed";
 	}
+	@GetMapping("/oMain")
+	public String oMain() {
+		return "views/oMain";
+	}
+	@GetMapping("/oService")
+	public String oService() {
+		return "views/oService";
+	}
 	
 	
 	  @Autowired private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
