@@ -52,7 +52,7 @@ public class BobController {
 	  // 가게 상세보기 메서드
 	  @GetMapping("/MenuDetail")
 	  public String getMenuDetail(Model model, 
-			  @RequestParam(value = "s_id", required = false, defaultValue = "1") int s_id) {
+			  @RequestParam("s_id") int s_id) {
 		  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", s_id);
 		  // 가게 정보 가져오기
 		  Shop shop = bobService.getShopDetail(s_id);

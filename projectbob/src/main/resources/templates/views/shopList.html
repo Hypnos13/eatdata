@@ -168,62 +168,7 @@
     <!-- 가게 메뉴 영역 (2개씩 한 줄) -->
     <div class="row g-3">
     
-      <div class="col-12 col-md-6">
-        <div class="store-box">
-          <img
-            src="https://via.placeholder.com/100"
-            alt="가게1"
-          />
-          <div>
-            <h5>가게 이름 1</h5>
-            <p class="text-muted">서울 관악구, 10분 거리</p>
-            <p class="text-success fw-semibold">평점 ★4.5</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-md-6">
-        <div class="store-box">
-          <img
-            src="https://via.placeholder.com/100"
-            alt="가게2"
-          />
-          <div>
-            <h5>가게 이름 2</h5>
-            <p class="text-muted">서울 강남구, 5분 거리</p>
-            <p class="text-success fw-semibold">평점 ★4.2</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-md-6">
-        <div class="store-box">
-          <img
-            src="https://via.placeholder.com/100"
-            alt="가게3"
-          />
-          <div>
-            <h5>가게 이름 3</h5>
-            <p class="text-muted">서울 마포구, 15분 거리</p>
-            <p class="text-success fw-semibold">평점 ★4.8</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-md-6">
-        <div class="store-box">
-          <img
-            src="https://via.placeholder.com/100"
-            alt="가게4"
-          />
-          <div>
-            <h5>가게 이름 4</h5>
-            <p class="text-muted">서울 강동구, 20분 거리</p>
-            <p class="text-success fw-semibold">평점 ★4.1</p>
-          </div>
-        </div>
-      </div>
-      
+           
       <th:block th:if="${not #lists.isEmpty(sList)}">
       <div class="col-12 col-md-6"  th:each="shop, status: ${sList}">
       <a th:href="@{/MenuDetail(s_id=${shop.s_id})}" style="text-decoration: none; color: inherit;">
