@@ -20,27 +20,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-public class LoginController {
+public class LoginController<BobContoller> {
 
-<<<<<<< HEAD
-    private final BobController bobContoller;
-=======
-    private final ProjectbobApplication projectbobApplication;
 
-    private final BobContoller bobContoller;
->>>>>>> dba283eeb56bb866a496156a70281787e5650b0b
-	
+
+
 	@Autowired
 	LoginService loginService;
 
-<<<<<<< HEAD
-    LoginController(BobController bobContoller) {
-=======
-    LoginController(BobContoller bobContoller, ProjectbobApplication projectbobApplication) {
->>>>>>> dba283eeb56bb866a496156a70281787e5650b0b
-        this.bobContoller = bobContoller;
-        this.projectbobApplication = projectbobApplication;
-    }
+  
 
 	@GetMapping("/login")
 	public String loginForm() {
