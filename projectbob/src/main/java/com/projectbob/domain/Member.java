@@ -14,7 +14,7 @@ import lombok.Setter;
 public class Member {
 
 	private String id, name, nickname, pass, phone, address1, address2, email, birthday, disivion;
-	private int pont;
+	private int point;
 	private Timestamp regdate, modi_date;
 	
 }

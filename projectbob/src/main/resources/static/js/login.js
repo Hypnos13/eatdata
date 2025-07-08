@@ -23,6 +23,7 @@ $(function(){
 		}
 	});
 	
+	
 	$("#id").on("focusout",CheckId);
 	$("#pass").on("focusout",CheckPass);
 	$("#name").on("focusout",CheckName);
@@ -31,6 +32,32 @@ $(function(){
 	$("#email").on("focusout",CheckEmail);
 	$("#phone").on("focusout",CheckPhone);
 	$("#btnAdress").on("click", findAddress);
+	
+	// 내정보 수정하기 유효성 검사
+	$("#updateMemberForm").on("submit",function(){
+			
+			let check = 0;
+				
+			check += CheckId();	
+			
+			check += CheckPass();		
+
+	    	check += CheckName();		
+
+			check += CheckBirthday();	
+				
+			check += CheckAddress();
+			
+			check += CheckEmail();
+			
+			check += CheckPhone();
+			
+			if(check != 7){
+				return false;
+			}
+		});
+	
+	
 	
 	
 	// 로그인 시
@@ -45,6 +72,24 @@ $(function(){
 			alert("비밀번호를 입력해주세요.");
 			return false;
 		}
+	});
+	
+	// 회원 탈퇴 시
+	$("#deleteMemberForm").on("submit",function(){
+			let check = 0;
+			
+			check += CheckPass();
+			
+			if(check != 1){
+				return false;
+			}
+			
+			if (!confirm("정말로 탈퇴 하시겠습니까? (복원이 불가능합니다.)")) {
+			      return false;
+			} else {
+			    $("#userPass").val($("#pass").val());
+			}
+				
 	});
 	
 });
@@ -74,8 +119,6 @@ function findAddress() {
             addr += extraAddr;
             
 			$("#address1").val(addr);
-			
-			// 커서를 상세주소 입력상자로 이동한다.
 			$("#address2").focus();
        	}
 	}).open();
