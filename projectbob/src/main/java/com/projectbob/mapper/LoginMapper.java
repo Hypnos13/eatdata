@@ -9,5 +9,7 @@ public interface LoginMapper {
 	
 	void joinMember(Member member);
 	Member getMember(String id);
+	void updateMember(Member member);
+	void deleteMember(String id);
 
 }
