@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<div th:fragment="header" class="top-bar row border-bottom border-primary">
+<div th:fragment="header" class="top-bar row border-bottom border-primary align-items-center py-1">
   <div class="col-5 text-center">
-  	<a href="main">
-  		<img src="images/Logo.png" width="200px" height ="50px"/>
-  	</a>
+    <a href="main">
+      <img src="images/Logo.png" width="180px" height="45px" />
+    </a>
   </div>
-  <div class="col-5 text-end fs-3">
-	<th:block th:if="${session.isLogin}">
-  		<a>[[${session.loginNickname}]] 님 어서오세요.</a>
-  		<a class="text-decoration-none" href="logout">로그아웃</a>
-  		<a class="text-decoration-none" href="myProfile">내정보수정</a>
-  	</th:block>
-  	<th:block th:unless="${session.isLogin}">
-		<a class="text-decoration-none" href="login">로그인</a>
-	</th:block>
+  <div class="col-7 text-end fs-6">
+    <th:block th:if="${session.isLogin}">
+      <a class="me-2">[[${session.loginNickname}]] 님 어서오세요.</a>
+      <a href="logout" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">로그아웃</a>
+      <a href="myProfile" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">내정보수정</a>
+      <a href="orderList" class="border border-white px-2 py-1 text-decoration-none" style="font-size: 0.85rem;">주문표(0)</a>
+    </th:block>
+    <th:block th:unless="${session.isLogin}">
+      <a href="login" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">로그인</a>
+      <a href="orderList" class="border border-white px-2 py-1 text-decoration-none" style="font-size: 0.85rem;">주문표(0)</a>
+    </th:block>
   </div>
 </div>

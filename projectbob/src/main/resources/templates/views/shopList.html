@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/main_layout}">
+<head>
+<title>메인2 페이지</title>
+</head>
+<body>
+	<div layout:fragment="content">
+		<!-- 배경 + 검색 -->
+		<div class="search-box">
+			<div class="d-flex justify-content-center mt-2">
+				<button id="btn-search-toggle"
+					class="btn text-white me-2 d-flex align-items-center"
+					style="background-color: #43d091" title="검색창 열기/닫기">
+					<img src="https://img.icons8.com/ios-filled/24/000000/marker.png"
+						alt="위치" class="me-1" />
+				</button>
+				<input type="text" class="form-control w-25 me-2"
+					placeholder="서울특별시 관악구..." />
+				<button class="btn text-dark fw-semibold"
+					style="background-color: #43d091">검색</button>
+			</div>
+		</div>
+
+		<!-- 네비게이션 (한줄, 버튼 없음, 스크롤 가능) -->
+		<div class="container my-4">
+			<nav class="navbar overflow-auto">
+				<ul class="nav">
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '전체보기' ? ' active'"
+						href="#">전체보기</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '1인분 주문' ? ' active'"
+						href="#">1인분 주문</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '프랜차이즈' ? ' active'"
+						href="#">프랜차이즈</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '치킨' ? ' active'" href="#">치킨</a>
+					</li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '피자/양식' ? ' active'"
+						href="#">피자/양식</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '중국집' ? ' active'" href="#">중국집</a>
+					</li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '한식' ? ' active'" href="#">한식</a>
+					</li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '일식/돈까스' ? ' active'"
+						href="#">일식/돈까스</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '족발/보쌈' ? ' active'"
+						href="#">족발/보쌈</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '야식' ? ' active'" href="#">야식</a>
+					</li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '분식' ? ' active'" href="#">분식</a>
+					</li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '카페/디저트' ? ' active'"
+						href="#">카페/디저트</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '편의점/마트' ? ' active'"
+						href="#">편의점/마트</a></li>
+				</ul>
+			</nav>
+
+
+			<th:block th:if="${not #lists.isEmpty(sList)}">
+				<div class="col-12 col-md-6" th:block
+					th:each="shop, status: ${sList}">
+					<a th:href="@{/MenuDetail(s_id=${shop.s_id})}"
+						style="text-decoration: none; color: inherit;">
+						<div class="store-box">
+							<img src="https://via.placeholder.com/100" alt="가게 이미지" />
+							<div>
+								<h5>[[ ${shop.name}]]</h5>
+								<p class="text-muted">[[ ${shop.address}]], 10분 거리</p>
+								<p class="text-success fw-semibold">평점 ★[[ ${shop.rating}]]</p>
+							</div>
+						</div>
+					</a>
+				</div>
+			</th:block>
+
+			<th:block th:unless="${not #lists.isEmpty(sList)}">
+				<div class="alert alert-info text-center">근처에 등록된 식당이 없습니다.</div>
+				<p>no 식당 no 먹을거</p>
+			</th:block>
+
+
+		</div>
+</body>
+</html>

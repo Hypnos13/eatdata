@@ -1,9 +1,10 @@
-@charset "UTF-8";
+/* main.css */
 
 body {
 	background-color: #f9f9f9;
 }
 
+/* 상단 바 */
 .top-bar {
 	background-color: #43d091;
 	color: white;
@@ -16,9 +17,9 @@ body {
 	margin-right: 15px;
 }
 
+/* 검색 영역 */
 .search-box {
-	background-image:
-		url('https://images.deliveryhero.io/image/foodpanda/bg/bg_header.jpg');
+	background-image: url('https://images.deliveryhero.io/image/foodpanda/bg/bg_header.jpg');
 	background-size: cover;
 	background-position: center;
 	height: 220px;
@@ -30,31 +31,136 @@ body {
 	padding: 20px;
 }
 
+/* 카테고리 카드 */
 .category-card {
-  aspect-ratio: 1/1;
-  background-size: cover;
-  background-position: center;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
+	aspect-ratio: 1/1;
+	background-size: cover;
+	background-position: center;
+	overflow: hidden;
+	position: relative;
+	cursor: pointer;
+	width: 100%;
+	height: 100%;
 }
 
 .category-title {
-  position: absolute;
-  top: 0.4rem;
-  left: 0.5rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #000; /* 검정색으로 변경 */
-  z-index: 2;
+	position: absolute;
+	top: 0.4rem;
+	left: 0.5rem;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #000;
+	z-index: 2;
 }
 
-.category-image {
-	width: 100%;
-	height: 100%;
-	background-size: cover;
-	background-position: center;
-	border-radius: 0.25rem;
+/* footer */
+.footer {
+	font-size: 0.9rem;
+	color: gray;
+	padding: 20px 0;
+	border-top: 1px solid #ddd;
+}
+
+/* 네비게이션 바 */
+nav.navbar {
+	background-color: #f8f9fa;
+	padding: 0.25rem 1rem;
+	border-radius: 0;
+	margin-bottom: 1.5rem;
+	overflow-x: auto;
+	scrollbar-width: thin; /* Firefox */
+}
+
+/* 스크롤바 스타일 (크롬용) */
+nav.navbar::-webkit-scrollbar {
+	height: 6px;
+}
+
+nav.navbar::-webkit-scrollbar-thumb {
+	background-color: #43d091;
+	border-radius: 3px;
+}
+
+/* nav 내부 항목 */
+nav.navbar .nav {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 0.5rem;
+	white-space: nowrap;
+}
+
+nav.navbar .nav-link {
+	border-radius: 0;
+	font-size: 0.85rem;
+	padding: 0.35rem 0.75rem;
+	color: #333;
+}
+
+nav.navbar .nav-link:hover {
+  background-color: #d3f0de; /* 연한 녹색 배경 효과 (선택 사항) */
+}
+
+/* 활성화된 nav 항목 */
+nav.navbar .nav-link.active {
+	background-color: #43d091;
+	color: white !important;
+	font-weight: bold;
+	border-bottom: 2px solid #43d091;
+}
+
+/* menudetail 영역 추가  */
+.category-bar {
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none; /* Firefox */
+}
+
+.category-bar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.category-btn {
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: 1px solid #e1e1e1;
+  background: #f9f9f9;
+  color: #333;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.category-btn.active,
+.category-btn:hover {
+  background-color: #43d091;
+  border-color: #43d091;
+  color: white;
+}
+
+
+/* pay영역 추가 */
+.section-title {
+  background: #444;
+  color: white;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.order-summary {
+  background: #fff;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+
+/* pay영역 추가 */
+.complete-box {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 30px;
+  margin-top: 40px;
 }
