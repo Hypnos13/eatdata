@@ -1,5 +1,4 @@
-@charset "UTF-8";
-
+/* main.css */
 body {
 	background-color: #f9f9f9;
 }
@@ -17,8 +16,7 @@ body {
 }
 
 .search-box {
-	background-image:
-		url('https://images.deliveryhero.io/image/foodpanda/bg/bg_header.jpg');
+	background-image: url('https://images.deliveryhero.io/image/foodpanda/bg/bg_header.jpg');
 	background-size: cover;
 	background-position: center;
 	height: 220px;
@@ -31,24 +29,24 @@ body {
 }
 
 .category-card {
-  aspect-ratio: 1/1;
-  background-size: cover;
-  background-position: center;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
+	aspect-ratio: 1/1;
+	background-size: cover;
+	background-position: center;
+	overflow: hidden;
+	position: relative;
+	cursor: pointer;
+	width: 100%;
+	height: 100%;
 }
 
 .category-title {
-  position: absolute;
-  top: 0.4rem;
-  left: 0.5rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #000; /* 검정색으로 변경 */
-  z-index: 2;
+	position: absolute;
+	top: 0.4rem;
+	left: 0.5rem;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #000; /* 검정색 */
+	z-index: 2;
 }
 
 .category-image {
@@ -57,4 +55,11 @@ body {
 	background-size: cover;
 	background-position: center;
 	border-radius: 0.25rem;
+}
+
+.footer {
+	font-size: 0.9rem;
+	color: gray;
+	padding: 20px 0;
+	border-top: 1px solid #ddd;
 }
