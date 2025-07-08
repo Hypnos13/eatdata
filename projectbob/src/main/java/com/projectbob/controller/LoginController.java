@@ -20,10 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-public class LoginController<BobContoller> {
-
-
-
+public class LoginController {
 
 	@Autowired
 	LoginService loginService;
