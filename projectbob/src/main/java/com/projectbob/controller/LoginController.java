@@ -21,18 +21,9 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class LoginController {
-
-    private final ProjectbobApplication projectbobApplication;
-    private final BobContoller bobContoller;
 	
 	@Autowired
 	LoginService loginService;
-
-	
-    LoginController(BobContoller bobContoller, ProjectbobApplication projectbobApplication) {
-        this.bobContoller = bobContoller;
-        this.projectbobApplication = projectbobApplication;
-    }
 
     
 	@GetMapping("/login")
