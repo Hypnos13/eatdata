@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BobController {
 
 	@GetMapping({"/", "/main"})
-	public String Main() {
+	public String Main() {		
 		return "views/main";
 	}
 	 
@@ -49,8 +49,8 @@ public class BobController {
 	  
 	  @GetMapping("/shopList") 
 	  public String shopList(Model model) {
-//	  log.info("BobController: shopList() called"); 
-//	  model.addAttribute("sList",bobService.shopList()); 
+	  log.info("BobController: shopList() called"); 
+	  model.addAttribute("sList",bobService.shopList()); 
 	  	return "views/shopList"; 
 	  }
 	  

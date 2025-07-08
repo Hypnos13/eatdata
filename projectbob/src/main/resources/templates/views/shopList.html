@@ -3,114 +3,7 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{layouts/main_layout}">
 <head>
-<<<<<<< HEAD
-<meta charset="UTF-8" />
-<title>저기요</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<!-- 부트스트랩 CDN -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<style>
-  body {
-    background-color: #f9f9f9;
-  }
-  .top-bar {
-    background-color: #43d091;
-    color: white;
-    padding: 10px 0;
-  }
-  .top-bar a {
-    color: white;
-    text-decoration: none;
-    margin-right: 15px;
-  }
-  .search-box {
-    background-image: url("https://images.deliveryhero.io/image/foodpanda/bg/bg_header.jpg");
-    background-size: cover;
-    background-position: center;
-    height: 220px;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-  }
-  /* 네비게이션 스타일 (뾰족한 모서리) */
-  nav.navbar {
-    background-color: #f8f9fa;
-    padding: 0.25rem 1rem;
-    border-radius: 0; /* 뾰족 */
-    margin-bottom: 1.5rem;
-    overflow-x: auto; /* 가로 스크롤 가능하게 */
-  }
-  nav.navbar::-webkit-scrollbar {
-    height: 6px;
-  }
-  nav.navbar::-webkit-scrollbar-thumb {
-    background-color: #43d091;
-    border-radius: 3px;
-  }
-  nav.navbar .nav {
-    display: flex;
-    flex-wrap: nowrap; /* 한 줄에 모두 */
-    gap: 0.5rem;
-    white-space: nowrap;
-  }
-  nav.navbar .nav-link {
-    border-radius: 0; /* 뾰족 */
-    font-size: 0.85rem;
-    padding: 0.35rem 0.75rem;
-    color: #333;
-  }
-  nav.navbar .nav-link.active {
-    background-color: #43d091;
-    color: white !important;
-  }
-  /* 가게 메뉴 카드 */
-  .store-box {
-    border: 1px solid #ddd;
-    border-radius: 0; /* 뾰족하게 */
-    padding: 12px 16px;
-    height: 120px;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.15s ease-in-out;
-    background-color: white;
-  }
-  .store-box:hover {
-    background-color: #e6f7f1;
-  }
-  .store-box img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 0; /* 뾰족 */
-    margin-right: 1rem;
-  }
-  .store-box h5 {
-    margin-bottom: 0.25rem;
-    font-size: 1rem;
-  }
-  .store-box p {
-    margin-bottom: 0.15rem;
-    font-size: 0.85rem;
-  }
-  .store-box p.text-success {
-    font-weight: 600;
-  }
-  /* footer */
-  .footer {
-    font-size: 0.9rem;
-    color: gray;
-    padding: 20px 0;
-    border-top: 1px solid #ddd;
-  }
-</style>
-=======
 <title>메인2 페이지</title>
->>>>>>> develop
 </head>
 <body>
 	<div layout:fragment="content">
@@ -177,45 +70,6 @@
 			</nav>
 
 
-<<<<<<< HEAD
-    <!-- 가게 메뉴 영역 (2개씩 한 줄) -->
-    <div class="row g-3">
-    
-           
-      <th:block th:if="${not #lists.isEmpty(sList)}">
-      <div class="col-12 col-md-6"  th:each="shop, status: ${sList}">
-      <a th:href="@{/MenuDetail(s_id=${shop.s_id})}" style="text-decoration: none; color: inherit;">
-        <div class="store-box">
-          <img src="https://via.placeholder.com/100" alt="가게 이미지" />
-          <div>
-            <h5><span th:text="${shop.name}">가게이름</span></h5>
-            <p class="text-muted">[[ ${shop.address1}]],[[ ${shop.address2}]], 10분 거리</p>
-            <p class="text-success fw-semibold">평점 ★[[ ${shop.rating}]]</p>
-          </div>
-        </div>
-      </a>
-      </div>
-      </th:block>
-     
-     <th:block th:unless="${not #lists.isEmpty(sList)}">    
-     	<div class="alert alert-info text-center">
-     		근처에 등록된 식당이 없습니다.
-     	</div>
-     	<p>no 식당 no 먹을거</p>
-     </th:block>
-            
-    </div>
-  </div>
-
-  <!-- 푸터 -->
-  <div class="footer text-center mt-5">
-    <p>주식회사 위대한상상 | 서울특별시 강남구 ... 사업자등록번호: 211-88-68802</p>
-    <p>고객센터: support@yogiyo.co.kr | 제휴문의: partnership@yogiyo.co.kr</p>
-    <p>© Yogiyo Clone by ChatGPT</p>
-  </div>
-<script src="http://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/shopcheck.js"></script>
-=======
 			<th:block th:if="${not #lists.isEmpty(sList)}">
 				<div class="col-12 col-md-6" th:block
 					th:each="shop, status: ${sList}">
@@ -225,7 +79,7 @@
 							<img src="https://via.placeholder.com/100" alt="가게 이미지" />
 							<div>
 								<h5>[[ ${shop.name}]]</h5>
-								<p class="text-muted">[[ ${shop.address}]], 10분 거리</p>
+								<p class="text-muted">[[ ${shop.address1}]],[[ ${shop.address2} ]], 10분 거리</p>
 								<p class="text-success fw-semibold">평점 ★[[ ${shop.rating}]]</p>
 							</div>
 						</div>
@@ -238,8 +92,7 @@
 				<p>no 식당 no 먹을거</p>
 			</th:block>
 
-
 		</div>
->>>>>>> develop
+		</div>
 </body>
 </html>
