@@ -1,0 +1,18 @@
+$(function() {
+	$("#shopJoinForm").on("submit", )
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+});
