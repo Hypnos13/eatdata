@@ -7,6 +7,12 @@
 	VALUES (#{id}, #{pass}, #{name}, #{nickname}, #{birthday}, #{address1}, #{address2}, #{email}, #{phone}, #{disivion}, SYSDATE(), SYSDATE())
 </insert>
 
+<select id="getMember" resultType="Member">
+	SELECT *
+	FROM client
+	WHERE id = #{id}
+</select>
+
 </mapper>	
 
 

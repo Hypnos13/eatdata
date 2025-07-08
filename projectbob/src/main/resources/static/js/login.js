@@ -30,8 +30,22 @@ $(function(){
 	$("#address1").on("focusout",CheckAddress);
 	$("#email").on("focusout",CheckEmail);
 	$("#phone").on("focusout",CheckPhone);
-	
 	$("#btnAdress").on("click", findAddress);
+	
+	
+	// 로그인 시
+	$("#loginForm").on("submit",function(){
+		if($("#id").val().length <= 0){
+			alert("아이디를 입력해주세요.");
+			return false;
+		}
+		
+		
+		if($("#pass").val().length <= 0){
+			alert("비밀번호를 입력해주세요.");
+			return false;
+		}
+	});
 	
 });
 // 주소 찾기 API 연동

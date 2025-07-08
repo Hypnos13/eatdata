@@ -7,8 +7,13 @@
   	</a>
   </div>
   <div class="col-5 text-end fs-3">
-	<a class="text-decoration-none" href="login">로그인</a>
-	<a class="text-decoration-none" href="myProfile">내정보수정</a>
+	<th:block th:if="${session.isLogin}">
+  		<a>[[${session.loginNickname}]] 님 어서오세요.</a>
+  		<a class="text-decoration-none" href="logout">로그아웃</a>
+  		<a class="text-decoration-none" href="myProfile">내정보수정</a>
+  	</th:block>
+  	<th:block th:unless="${session.isLogin}">
+		<a class="text-decoration-none" href="login">로그인</a>
+	</th:block>
   </div>
-</div>
 </div>
