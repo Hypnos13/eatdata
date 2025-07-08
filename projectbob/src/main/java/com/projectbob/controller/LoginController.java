@@ -21,12 +21,12 @@ import lombok.RequiredArgsConstructor;
 @Controller
 public class LoginController {
 
-    private final BobContoller bobContoller;
+    private final BobController bobContoller;
 	
 	@Autowired
 	LoginService loginService;
 
-    LoginController(BobContoller bobContoller) {
+    LoginController(BobController bobContoller) {
         this.bobContoller = bobContoller;
     }
 

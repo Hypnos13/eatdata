@@ -1,83 +1,34 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main_layout}">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>결제 완료 - 저기요</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <style>
-    body {
-      background-color: #f9f9f9;
-    }
-    .top-bar {
-      background-color: #43d091;
-      color: white;
-      padding: 10px 0;
-    }
-    .top-bar a {
-      color: white;
-      text-decoration: none;
-      margin-right: 15px;
-    }
-    .complete-box {
-      background-color: white;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 30px;
-      margin-top: 40px;
-    }
-    .footer {
-      font-size: 0.9rem;
-      color: gray;
-      padding: 20px 0;
-      border-top: 1px solid #ddd;
-      text-align: center;
-    }
-  </style>
+    <title>결제 완료</title>
 </head>
 <body>
-  <!-- 헤더 -->
-  <div class="top-bar text-center">
-    <div class="container d-flex justify-content-between align-items-center">
-      <h2 class="m-0 text-white fw-bold">저기요</h2>
-      <div>
-        <a href="#" class="border border-white px-2 py-1">홈으로</a>
-        <a href="#" class="border border-white px-2 py-1">주문 내역</a>
-      </div>
+    <div layout:fragment="content">
+        <div class="complete-box text-center my-4">
+            <h3 class="mb-3 text-success fw-bold">🎉 결제가 완료되었습니다!</h3>
+            <p>주문번호 <strong>#A20250704</strong>로 주문이 정상적으로 접수되었습니다.</p>
+            <hr />
+            <h5 class="text-start">주문 정보</h5>
+            <ul class="list-group text-start mb-3">
+                <li class="list-group-item">가게명: <strong>맥도날드 - 신림점</strong></li>
+                <li class="list-group-item">메뉴: 더블 맥스파이시® 상하이 버거 세트 x 1</li>
+                <li class="list-group-item">결제금액: 12,200원</li>
+                <li class="list-group-item">배달비: 3,000원</li>
+                <li class="list-group-item">총 결제금액: <strong>15,200원</strong></li>
+            </ul>
+
+            <h5 class="text-start">배송 정보</h5>
+            <ul class="list-group text-start mb-4">
+                <li class="list-group-item">배달 주소: 서울특별시 관악구 신림로 123</li>
+                <li class="list-group-item">전화번호: 010-1234-5678</li>
+                <li class="list-group-item">요청사항: 초인종 누르지 말고 문자주세요</li>
+            </ul>
+
+            <a href="/" class="btn btn-success px-4">다른 메뉴 보러가기</a>
+        </div>
     </div>
-  </div>
-
-  <!-- 결제 완료 메시지 -->
-  <div class="container">
-    <div class="complete-box text-center">
-      <h3 class="mb-3 text-success fw-bold">🎉 결제가 완료되었습니다!</h3>
-      <p>주문번호 <strong>#A20250704</strong>로 주문이 정상적으로 접수되었습니다.</p>
-      <hr />
-      <h5 class="text-start">주문 정보</h5>
-      <ul class="list-group text-start mb-3">
-        <li class="list-group-item">가게명: <strong>맥도날드 - 신림점</strong></li>
-        <li class="list-group-item">메뉴: 더블 맥스파이시® 상하이 버거 세트 x 1</li>
-        <li class="list-group-item">결제금액: 12,200원</li>
-        <li class="list-group-item">배달비: 3,000원</li>
-        <li class="list-group-item">총 결제금액: <strong>15,200원</strong></li>
-      </ul>
-
-      <h5 class="text-start">배송 정보</h5>
-      <ul class="list-group text-start mb-4">
-        <li class="list-group-item">배달 주소: 서울특별시 관악구 신림로 123</li>
-        <li class="list-group-item">전화번호: 010-1234-5678</li>
-        <li class="list-group-item">요청사항: 초인종 누르지 말고 문자주세요</li>
-      </ul>
-
-      <a href="#" class="btn btn-success px-4">다른 메뉴 보러가기</a>
-    </div>
-  </div>
-
-  <!-- 푸터 -->
-  <div class="footer mt-5">
-    <p>주식회사 위대한상상 | 서울특별시 강남구 ... 사업자등록번호: 211-88-68802</p>
-    <p>고객센터: support@yogiyo.co.kr | 제휴문의: partnership@yogiyo.co.kr</p>
-    <p>© Yogiyo Clone by ChatGPT</p>
-  </div>
 </body>
 </html>

@@ -1,261 +1,98 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/main_layout}">
 <head>
-<meta charset="UTF-8" />
-<title>저기요</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<!-- 부트스트랩 CDN -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery/jquery.min.js"></script>
-<style>
-  body {
-    background-color: #f9f9f9;
-  }
-  .top-bar {
-    background-color: #43d091;
-    color: white;
-    padding: 10px 0;
-  }
-  .top-bar a {
-    color: white;
-    text-decoration: none;
-    margin-right: 15px;
-  }
-  .search-box {
-    background-image: url("https://images.deliveryhero.io/image/foodpanda/bg/bg_header.jpg");
-    background-size: cover;
-    background-position: center;
-    height: 220px;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-  }
-  /* 네비게이션 스타일 (뾰족한 모서리) */
-  nav.navbar {
-    background-color: #f8f9fa;
-    padding: 0.25rem 1rem;
-    border-radius: 0; /* 뾰족 */
-    margin-bottom: 1.5rem;
-    overflow-x: auto; /* 가로 스크롤 가능하게 */
-  }
-  nav.navbar::-webkit-scrollbar {
-    height: 6px;
-  }
-  nav.navbar::-webkit-scrollbar-thumb {
-    background-color: #43d091;
-    border-radius: 3px;
-  }
-  nav.navbar .nav {
-    display: flex;
-    flex-wrap: nowrap; /* 한 줄에 모두 */
-    gap: 0.5rem;
-    white-space: nowrap;
-  }
-  nav.navbar .nav-link {
-    border-radius: 0; /* 뾰족 */
-    font-size: 0.85rem;
-    padding: 0.35rem 0.75rem;
-    color: #333;
-  }
-  nav.navbar .nav-link.active {
-    background-color: #43d091;
-    color: white !important;
-  }
-  /* 가게 메뉴 카드 */
-  .store-box {
-    border: 1px solid #ddd;
-    border-radius: 0; /* 뾰족하게 */
-    padding: 12px 16px;
-    height: 120px;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.15s ease-in-out;
-    background-color: white;
-  }
-  .store-box:hover {
-    background-color: #e6f7f1;
-  }
-  .store-box img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 0; /* 뾰족 */
-    margin-right: 1rem;
-  }
-  .store-box h5 {
-    margin-bottom: 0.25rem;
-    font-size: 1rem;
-  }
-  .store-box p {
-    margin-bottom: 0.15rem;
-    font-size: 0.85rem;
-  }
-  .store-box p.text-success {
-    font-weight: 600;
-  }
-  /* footer */
-  .footer {
-    font-size: 0.9rem;
-    color: gray;
-    padding: 20px 0;
-    border-top: 1px solid #ddd;
-  }
-</style>
+<title>메인2 페이지</title>
 </head>
 <body>
-  <!-- 상단 바 -->
-  <div class="top-bar text-center">
-    <div class="container d-flex justify-content-between align-items-center">
-      <h2 class="m-0 text-white fw-bold">저기요</h2>
-      <div>
-        <a href="#" class="border border-white px-2 py-1">로그인</a>
-        <a href="#" class="border border-white px-2 py-1">주문표(0)</a>
-      </div>
-    </div>
-  </div>
+	<div layout:fragment="content">
+		<!-- 배경 + 검색 -->
+		<div class="search-box">
+			<div class="d-flex justify-content-center mt-2">
+				<button id="btn-search-toggle"
+					class="btn text-white me-2 d-flex align-items-center"
+					style="background-color: #43d091" title="검색창 열기/닫기">
+					<img src="https://img.icons8.com/ios-filled/24/000000/marker.png"
+						alt="위치" class="me-1" />
+				</button>
+				<input type="text" class="form-control w-25 me-2"
+					placeholder="서울특별시 관악구..." />
+				<button class="btn text-dark fw-semibold"
+					style="background-color: #43d091">검색</button>
+			</div>
+		</div>
 
-  <!-- 배경 + 검색 -->
-  <div class="search-box">
-    <p style="color: black;">배달받으실 주소 또는 건물명을 검색해주세요</p>
-    <div class="d-flex justify-content-center mt-2">
-      <button
-        id="btn-search-toggle"
-        class="btn text-white me-2 d-flex align-items-center"
-        style="background-color: #43d091"
-        title="검색창 열기/닫기"
-      >
-        <img
-          src="https://img.icons8.com/ios-filled/24/000000/marker.png"
-          alt="위치"
-          class="me-1"
-        />
-      </button>
-      <input
-        type="text"
-        class="form-control w-25 me-2"
-        placeholder="서울특별시 관악구..."
-      />
-      <button class="btn text-dark fw-semibold" style="background-color: #43d091">
-        검색
-      </button>
-    </div>
-  </div>
+		<!-- 네비게이션 (한줄, 버튼 없음, 스크롤 가능) -->
+		<div class="container my-4">
+			<nav class="navbar overflow-auto">
+				<ul class="nav">
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '전체보기' ? ' active'"
+						href="#">전체보기</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '1인분 주문' ? ' active'"
+						href="#">1인분 주문</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '프랜차이즈' ? ' active'"
+						href="#">프랜차이즈</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '치킨' ? ' active'" href="#">치킨</a>
+					</li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '피자/양식' ? ' active'"
+						href="#">피자/양식</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '중국집' ? ' active'" href="#">중국집</a>
+					</li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '한식' ? ' active'" href="#">한식</a>
+					</li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '일식/돈까스' ? ' active'"
+						href="#">일식/돈까스</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '족발/보쌈' ? ' active'"
+						href="#">족발/보쌈</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '야식' ? ' active'" href="#">야식</a>
+					</li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '분식' ? ' active'" href="#">분식</a>
+					</li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '카페/디저트' ? ' active'"
+						href="#">카페/디저트</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:classappend="${selectedCategory} == '편의점/마트' ? ' active'"
+						href="#">편의점/마트</a></li>
+				</ul>
+			</nav>
 
-  <!-- 네비게이션 (한줄, 버튼 없음, 스크롤 가능) -->
-  <div class="container my-4">
-    <nav class="navbar">
-      <ul class="nav">
-        <li class="nav-item"><a class="nav-link active" href="#">전체보기</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">1인분 주문</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">프랜차이즈</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">치킨</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">피자/양식</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">중국집</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">한식</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">일식/돈까스</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">족발/보쌈</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">야식</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">분식</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">카페/디저트</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">편의점/마트</a></li>
-      </ul>
-    </nav>
 
-    <!-- 가게 메뉴 영역 (2개씩 한 줄) -->
-    <div class="row g-3">
-    
-      <div class="col-12 col-md-6">
-        <div class="store-box">
-          <img
-            src="https://via.placeholder.com/100"
-            alt="가게1"
-          />
-          <div>
-            <h5>가게 이름 1</h5>
-            <p class="text-muted">서울 관악구, 10분 거리</p>
-            <p class="text-success fw-semibold">평점 ★4.5</p>
-          </div>
-        </div>
-      </div>
+			<th:block th:if="${not #lists.isEmpty(sList)}">
+				<div class="col-12 col-md-6" th:block
+					th:each="shop, status: ${sList}">
+					<a th:href="@{/MenuDetail(s_id=${shop.s_id})}"
+						style="text-decoration: none; color: inherit;">
+						<div class="store-box">
+							<img src="https://via.placeholder.com/100" alt="가게 이미지" />
+							<div>
+								<h5>[[ ${shop.name}]]</h5>
+								<p class="text-muted">[[ ${shop.address}]], 10분 거리</p>
+								<p class="text-success fw-semibold">평점 ★[[ ${shop.rating}]]</p>
+							</div>
+						</div>
+					</a>
+				</div>
+			</th:block>
 
-      <div class="col-12 col-md-6">
-        <div class="store-box">
-          <img
-            src="https://via.placeholder.com/100"
-            alt="가게2"
-          />
-          <div>
-            <h5>가게 이름 2</h5>
-            <p class="text-muted">서울 강남구, 5분 거리</p>
-            <p class="text-success fw-semibold">평점 ★4.2</p>
-          </div>
-        </div>
-      </div>
+			<th:block th:unless="${not #lists.isEmpty(sList)}">
+				<div class="alert alert-info text-center">근처에 등록된 식당이 없습니다.</div>
+				<p>no 식당 no 먹을거</p>
+			</th:block>
 
-      <div class="col-12 col-md-6">
-        <div class="store-box">
-          <img
-            src="https://via.placeholder.com/100"
-            alt="가게3"
-          />
-          <div>
-            <h5>가게 이름 3</h5>
-            <p class="text-muted">서울 마포구, 15분 거리</p>
-            <p class="text-success fw-semibold">평점 ★4.8</p>
-          </div>
-        </div>
-      </div>
 
-      <div class="col-12 col-md-6">
-        <div class="store-box">
-          <img
-            src="https://via.placeholder.com/100"
-            alt="가게4"
-          />
-          <div>
-            <h5>가게 이름 4</h5>
-            <p class="text-muted">서울 강동구, 20분 거리</p>
-            <p class="text-success fw-semibold">평점 ★4.1</p>
-          </div>
-        </div>
-      </div>
-      
-      <th:block th:if="${not #lists.isEmpty(sList)}">
-      <div class="col-12 col-md-6" th:block th:each="shop, status: ${sList}">
-      <a th:href="@{/MenuDetail(s_id=${shop.s_id})}" style="text-decoration: none; color: inherit;">
-        <div class="store-box">
-          <img src="https://via.placeholder.com/100" alt="가게 이미지" />
-          <div>
-            <h5>[[ ${shop.name}]]</h5>
-            <p class="text-muted">[[ ${shop.address}]], 10분 거리</p>
-            <p class="text-success fw-semibold">평점 ★[[ ${shop.rating}]]</p>
-          </div>
-        </div>
-      </a>
-      </div>
-      </th:block>
-     
-     <th:block th:unless="${not #lists.isEmpty(sList)}">    
-     	<div class="alert alert-info text-center">
-     		근처에 등록된 식당이 없습니다.
-     	</div>
-     	<p>no 식당 no 먹을거</p>
-     </th:block>
-            
-    </div>
-  </div>
-
-  <!-- 푸터 -->
-  <div class="footer text-center mt-5">
-    <p>주식회사 위대한상상 | 서울특별시 강남구 ... 사업자등록번호: 211-88-68802</p>
-    <p>고객센터: support@yogiyo.co.kr | 제휴문의: partnership@yogiyo.co.kr</p>
-    <p>© Yogiyo Clone by ChatGPT</p>
-  </div>
-<script src="http://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/shopcheck.js"></script>
+		</div>
 </body>
 </html>

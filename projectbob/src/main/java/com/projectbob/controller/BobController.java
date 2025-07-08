@@ -18,13 +18,10 @@ public class BobController {
 	public String Main() {
 		return "views/main";
 	}
-
-	/*
-	 * @GetMapping("/main2") public String Main2() { return "views/main2"; }
-	 */
+	 
 	@GetMapping("/menu")
 	public String menu() {
-		return "views/MenuDetail";
+		return "views/menudetail";
 	}
 	@GetMapping("/pay")
 	public String pay() {
@@ -40,8 +37,8 @@ public class BobController {
 	  
 	  @GetMapping("/shopList") 
 	  public String shopList(Model model) {
-	  log.info("BobController: shopList() called"); 
-	  model.addAttribute("sList",bobService.shopList()); 
+//	  log.info("BobController: shopList() called"); 
+//	  model.addAttribute("sList",bobService.shopList()); 
 	  	return "views/shopList"; 
 	  }
 	  
