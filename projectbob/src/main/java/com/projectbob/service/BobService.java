@@ -31,8 +31,17 @@ public class BobService implements BobServiceIf{
 	// s_id에 해당하는 게시글을 읽어와 반환하는 메서드
 	@Override
 	public Shop getShopDetail(int s_id) {
-		log.info("BobService: getShopDetail(int s_id)");		
-		return bobMapper.getShopDetail(s_id);
+		//log.info("BobService: getShopDetail(int s_id)");		
+		//return bobMapper.getShopDetail(s_id);
+		log.info("BobService: getShopDetail(int s_id) 호출, 요청 s_id: {}", s_id);
+		Shop resultShop = bobMapper.getShopDetail(s_id);
+		
+		if(resultShop == null) {
+			log.warn("BobService: 경고!DB에서 s_id에 해당하는 가게를 찾을 수 없음.", s_id);
+		} else {
+			log.info("BobService: 가게 조회 성공. s_id: {}, 이름: {}", resultShop.getS_id(),resultShop.getName());
+		}
+		return resultShop;
 	}
 	
 	

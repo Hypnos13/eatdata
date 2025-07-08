@@ -51,9 +51,19 @@ public class BobController {
 	  
 	  // 가게 상세보기 메서드
 	  @GetMapping("/MenuDetail")
-	  public String getMenuDetail(Model model, @RequestParam("s_id") int s_id) {
+	  public String getMenuDetail(Model model, 
+			  @RequestParam(value = "s_id", required = false, defaultValue = "1") int s_id) {
+		  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", s_id);
 		  // 가게 정보 가져오기
 		  Shop shop = bobService.getShopDetail(s_id);
+		  
+		  if(shop == null) {
+			  log.error("BobController: 서비스에서 s_id에 해당하는 shop 객체를 찾을 수 없습니다(null 반환)",s_id);
+			  return "redirect:/shopList";
+		  }else {
+			  log.info("BobController: 모델에 shop 객체 추가 완료. shop 이름:{}", shop.getName());
+		  }
+		  
 		  model.addAttribute("shop", shop);
 		  // 해당 가게의 메뉴 목록 가져오기
 		  List<Menu> menuList = bobService.getMenuListOption(s_id);
