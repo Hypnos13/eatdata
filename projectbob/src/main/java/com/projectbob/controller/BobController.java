@@ -22,13 +22,10 @@ public class BobController {
 	public String Main() {
 		return "views/main";
 	}
-
-	/*
-	 * @GetMapping("/main2") public String Main2() { return "views/main2"; }
-	 */
+	 
 	@GetMapping("/menu")
 	public String menu() {
-		return "views/MenuDetail";
+		return "views/menudetail";
 	}
 	@GetMapping("/pay")
 	public String pay() {
@@ -38,14 +35,22 @@ public class BobController {
 	public String completed() {
 		return "views/completed";
 	}
+	@GetMapping("/oMain")
+	public String oMain() {
+		return "views/oMain";
+	}
+	@GetMapping("/oService")
+	public String oService() {
+		return "views/oService";
+	}
 	
 	
 	  @Autowired private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	  
 	  @GetMapping("/shopList") 
 	  public String shopList(Model model) {
-	  log.info("BobController: shopList() called"); 
-	  model.addAttribute("sList",bobService.shopList()); 
+//	  log.info("BobController: shopList() called"); 
+//	  model.addAttribute("sList",bobService.shopList()); 
 	  	return "views/shopList"; 
 	  }
 	  

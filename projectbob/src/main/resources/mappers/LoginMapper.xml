@@ -7,6 +7,23 @@
 	VALUES (#{id}, #{pass}, #{name}, #{nickname}, #{birthday}, #{address1}, #{address2}, #{email}, #{phone}, #{disivion}, SYSDATE(), SYSDATE())
 </insert>
 
+<select id="getMember" resultType="Member">
+	SELECT *
+	FROM client
+	WHERE id = #{id}
+</select>
+
+<update id="updateMember" parameterType="Member">
+	UPDATE client
+	SET pass=#{pass}, nickname=#{nickname}, address1 = #{address1}, address2=#{address2}, email = #{email}, phone = #{phone}, modi_date = SYSDATE()
+	WHERE id = #{id}
+</update>
+
+<delete id="deleteMember">
+	DELETE FROM client
+	WHERE id = #{id}
+</delete>
+
 </mapper>	
 
 

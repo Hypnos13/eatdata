@@ -3,19 +3,24 @@
 		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
 		layout:decorate="~{layouts/main_layout}">
 <th:block layout:fragment="content">
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <div class ="container">
-	<Form name="updateMemberForm" id="updateMemberForm" method="post" action="updateMember">
-		<div class="row my-2 mt-5 justify-content-center">
+	<Form name="deleteMemberForm" id="deleteMemberForm" method="post" action="deleteMember">
+	<div class="row my-2 mt-5 justify-content-center">
 			<div class="col-5 text-end">
-				<input class="form-control btn btn-danger" id="btnAdress" value="탈퇴하기">
+				<input class="form-control" name="userId" id="userId" type="hidden" th:value="${Member.id}" readonly>
+				<input class="form-control" name="userPass" id="userPass" type="hidden">
+				<input type="submit" class="form-control btn btn-danger" id="btnUnsubscript" value="탈퇴하기">
 			</div>
-		</div>
+	</div>
+	</Form>
+	<Form name="updateMemberForm" id="updateMemberForm" method="post" action="updateMember">
 		<div class="row my-2">
 			<div class="col-5 text-end">
 				*아이디 : 
 			</div>
 			<div class="col-5">
-				<input class="form-control" name="id" id="id" type="text" value="이미 정한 아이디" readonly="true">
+				<input class="form-control" name="id" id="id" type="text" th:value="${Member.id}" readonly>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -27,11 +32,16 @@
 			</div>
 		</div>
 		<div class="row my-2">
+			<div class="col-10 text-end">
+				<div class="text-danger text-center" id="passInfo"></div>
+			</div>
+		</div>
+		<div class="row my-2">
 			<div class="col-5 text-end">
 				*이름 : 
 			</div>
 			<div class="col-5">
-				<input class="form-control" name="name" id="name" type="text" value="나의 이름" readonly="true">
+				<input class="form-control" name="name" id="name" type="text" th:value="${Member.name}" readonly>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -39,7 +49,7 @@
 				별명 : 
 			</div>
 			<div class="col-5">
-				<input class="form-control" name="nickname" id="nickname" type="text" value="별명">
+				<input class="form-control" name="nickname" id="nickname" type="text" th:value="${Member.nickname}">
 			</div>
 		</div>
 		<div class="row my-2">
@@ -47,7 +57,7 @@
 				*생년월일 : 
 			</div>
 			<div class="col-5">
-				<input class="form-control" name="birthday" id="birthday" type="text" value="20250101" readonly="true">
+				<input class="form-control" name="birthday" id="birthday" type="text" th:value="${Member.birthday}" readonly>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -55,7 +65,7 @@
 				*주소 : 
 			</div>
 			<div class="col-4">
-				<input class="form-control" name="address1" id="address1" type="text" placeholder="주소 찾기를 눌러주세요" readonly="true">
+				<input class="form-control" name="address1" id="address1" th:value="${Member.address1}" readonly>
 			</div>
 			<div class="col-2">
 				<input class="form-control btn btn-success" id="btnAdress" value="주소 찾기">
@@ -66,7 +76,7 @@
 				*상세주소 : 
 			</div>
 			<div class="col-5">
-				<input class="form-control" name="address2" id="address2" type="text" value="401호" placeholder="상세 주소를 입력해주세요">
+				<input class="form-control" name="address2" id="address2" type="text" th:value="${Member.address2}" placeholder="상세 주소를 입력해주세요">
 			</div>
 		</div>
 		<div class="row my-2">
@@ -74,7 +84,12 @@
 				*이메일 : 
 			</div>
 			<div class="col-5">
-				<input type="email" class="form-control" name="email" id="email" value="name@example.com" placeholder="이메일을 입력해주세요. (ex.name@example.com)">
+				<input type="email" class="form-control" name="email" id="email" th:value="${Member.email}" placeholder="이메일을 입력해주세요. (ex.name@example.com)">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-10 text-end">
+				<div class="text-danger text-center" id="emailInfo"></div>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -82,7 +97,12 @@
 				*연락처 : 
 			</div>
 			<div class="col-5">
-				<input type="text" class="form-control" name="phone" id="phone" value="010-1234-5678" placeholder="연락처를 입력해주세요. (ex.010-1234-5678)">
+				<input type="text" class="form-control" name="phone" id="phone" th:value="${Member.phone}" placeholder="연락처를 입력해주세요. (ex.010-1234-5678)">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-10 text-end">
+				<div class="text-danger text-center" id="phoneInfo"></div>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -90,7 +110,7 @@
 				내포인트 :
 			</div>
 			<div class="col-5">
-				<input type="text" class="form-control" name="point" id="point" value="0" readonly = "true">
+				<input type="text" class="form-control" name="point" id="point" th:value="${Member.point}" readonly>
 			</div>
 		</div>
 		<div class="row my-2">
