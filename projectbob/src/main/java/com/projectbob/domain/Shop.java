@@ -20,6 +20,7 @@ public class Shop {
 	private String phone;
 	private String address1;
 	private String address2;
+	private String owner;
 	private String s_number;
 	private String category;
 	private double rating;

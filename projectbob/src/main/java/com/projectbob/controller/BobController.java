@@ -64,7 +64,7 @@ public class BobController {
 		  
 		  if(shop == null) {
 			  log.error("BobController: 서비스에서 s_id에 해당하는 shop 객체를 찾을 수 없습니다(null 반환)",s_id);
-			  return "redirect:/shopList";
+			  //return "redirect:/shopList";
 		  }else {
 			  log.info("BobController: 모델에 shop 객체 추가 완료. shop 이름:{}", shop.getName());
 		  }

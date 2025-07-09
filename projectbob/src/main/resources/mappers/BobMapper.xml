@@ -29,7 +29,7 @@
 	WHERE s_id = #{s_id}
 </select>
 
-<!-- 메인에서 전체보기 버튼 누를때 -->
+<!-- 메인에서 버튼 누를때 -->
 <select id="shopList" resultType="com.projectbob.domain.Shop">
 	SELECT
 	*

@@ -24,9 +24,10 @@ public class BobService implements BobServiceIf{
 	// 전체 게시글을 읽어와 반환하는 메서드
 	@Override
 	public List<Shop> shopList(){
-		log.info("BobService: shopList()");
+		log.info("BobService: shopList()");		
 		return bobMapper.shopList();
 	}
+
 	
 	// s_id에 해당하는 게시글을 읽어와 반환하는 메서드
 	@Override
