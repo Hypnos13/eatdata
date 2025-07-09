@@ -13,10 +13,16 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @Slf4j
 public class BobController {
+
+    private final LoginController loginController;
 	
 	@Autowired private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	
 	@Autowired private ShopService shopService;
+
+    BobController(LoginController loginController) {
+        this.loginController = loginController;
+    }
 
 	@GetMapping({"/", "/main"})
 	public String Main() {
@@ -41,6 +47,7 @@ public class BobController {
 	}
 	@PostMapping("/insertShop")
 	public String insertShop(Shop shop) {
+		System.out.println("id test"+shop.getId());
 		shopService.insertShop(shop);
 		return "redirect:oMain";
 	}
