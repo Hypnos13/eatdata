@@ -1,0 +1,100 @@
+## DATABASE 생성 및 선택
+DROP DATABASE IF EXISTS projectbob;
+CREATE DATABASE IF NOT EXISTS projectbob;
+use projectbob;
+
+show tables;
+
+-- 회원ID, 이름, 닉네임, 비밀번호, 연락처, 주소, 상세주소, 이메일, 포인트, 생년월일, 회원구분, 가입일, 수정일
+DROP TABLE IF EXISTS client;
+CREATE TABLE IF NOT EXISTS client(
+id VARCHAR(20) PRIMARY KEY,
+pass VARCHAR(255) NOT NULL,
+name VARCHAR(20) NOT NULL,
+nickname VARCHAR(20) NOT NULL UNIQUE,
+birthday VARCHAR(8) NOT NULL,
+address1 VARCHAR(200) NOT NULL,
+address2 VARCHAR(50) NOT NULL,
+email VARCHAR(50) NOT NULL UNIQUE,
+phone VARCHAR(13) NOT NULL,
+point INT NULL DEFAULT 0,
+division VARCHAR(20) NOT NULL,
+reg_date TIMESTAMP NOT NULL,
+modi_date TIMESTAMP NOT NULL
+);
+
+INSERT INTO client (id,name,nickname,pass,phone,address1,address2,email,point,birthday,division,reg_date,modi_date) VALUES ('admin','1234','관리자','방구맨','19930303','서울시','관악구','1234@1234.com','01012341234',0,'관리자','2022-12-22 11:44:58','2022-12-22 11:44:58');
+
+-- 가게ID, 회원ID, 가게이름, 연락처, 가게주소, 가게 상세주소, 사업자 등록번호, 카테고리, 평점, 찜수, 운영시간, 휴무일, 최소주문금액, 사업자등록증, 영업신고증, 상태, 원산지, 가게공지사항, 가게정보, 등록일, 수정일
+-- 참조하는 회원이 있으면 가게 삭제 불가
+-- 회원(id)가 변경되면 가게 테이블의 id도 자동으로 변경
+DROP TABLE IF EXISTS shop;
+CREATE TABLE IF NOT EXISTS shop(
+  s_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(20) NOT NULL,
+  name VARCHAR(50) NOT NULL,
+  phone VARCHAR(11) NOT NULL,
+  address1 VARCHAR(100) NOT NULL,
+  address2 VARCHAR(80) NOT NULL,
+  s_number INT NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  rating DECIMAL(2,1) DEFAULT 0.0,
+  heart INT DEFAULT 0,
+  op_time VARCHAR(50) NOT NULL,
+  off_day VARCHAR(50),
+  min_price VARCHAR(50) NOT NULL,
+  s_license VARCHAR(200) NOT NULL,
+  s_cert VARCHAR(200),
+  status VARCHAR(50) NOT NULL,
+  info VARCHAR(100) NOT NULL,
+  notice VARCHAR(250) NOT NULL,
+  s_info VARCHAR(200) NOT NULL,
+  reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_shop_member FOREIGN KEY (id) REFERENCES client(id)
+	ON DELETE RESTRICT ON UPDATE CASCADE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO shop (s_id,id,name,phone,address1,address2,s_number,category,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info,reg_date,modi_date) VALUES (1,'admin','싹싹김치','01012341234','관악구','신림동',557241,'치킨',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보','2022-12-22 11:44:58','2022-12-22 11:44:58');
+INSERT INTO shop (id,name,phone,address1,address2,s_number,category,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info,reg_date,modi_date) VALUES ('admin','싹싹김치','01012341234','관악구','신림동',557241,'치킨',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보','2022-12-22 11:44:58','2022-12-22 11:44:58');
+INSERT INTO shop (id,name,phone,address1,address2,s_number,category,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info,reg_date,modi_date) VALUES ('admin','싹싹김치','01012341234','관악구','신림동',557241,'치킨',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보','2022-12-22 11:44:58','2022-12-22 11:44:58');
+INSERT INTO shop (id,name,phone,address1,address2,s_number,category,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info,reg_date,modi_date) VALUES ('admin','싹싹김치','01012341234','관악구','신림동',557241,'치킨',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보','2022-12-22 11:44:58','2022-12-22 11:44:58');
+INSERT INTO shop (id,name,phone,address1,address2,s_number,category,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info,reg_date,modi_date) VALUES ('admin','싹싹김치','01012341234','관악구','신림동',557241,'치킨',0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보','2022-12-22 11:44:58','2022-12-22 11:44:58');
+
+
+-- 메뉴ID, 가게ID, 카테고리, 메뉴이름, 가격, 메뉴설명, 메뉴사진, 인기도, 생성일, 수정일
+DROP TABLE IF EXISTS menu;
+CREATE TABLE IF NOT EXISTS menu(
+	m_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    s_id INTEGER NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    name VARCHAR(20) NOT NULL,
+    price int NOT NULL,
+    m_info VARCHAR(200),
+    m_picture VARCHAR(200),
+    liked INT DEFAULT 0,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_menu_shop FOREIGN KEY (s_id) REFERENCES SHOP(s_id)
+		ON DELETE CASCADE ON UPDATE CASCADE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO menu (m_id,s_id,category,name,price,m_info,m_picture,liked,reg_date,modi_date) VALUES (1,1,'치킨','싹싹치킨',15000,'참맛나다','사진',0,'2022-12-22 11:44:58','2022-12-22 11:44:58');
+
+
+--  메뉴옵션id, 메뉴id, 옵션, 내용, 가격, 생성일, 수정일, 상태
+DROP TABLE IF EXISTS menu_option;
+CREATE TABLE IF NOT EXISTS menu_option(
+	mo_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    m_id INTEGER NOT NULL,
+    m_option VARCHAR(50) NOT NULL,
+    content VARCHAR(250) NOT NULL,
+    price INT NOT NULL,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    status VARCHAR(50) NOT NULL,
+    CONSTRAINT fk_menu_option_menu FOREIGN KEY (m_id) REFERENCES menu(m_id)
+		ON DELETE CASCADE ON UPDATE CASCADE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO menu_option (mo_id,m_id,m_option,content,price,reg_date,modi_date,status) VALUES (1,1,'옵션','내용',1000,'2022-12-22 11:44:58','2022-12-22 11:44:58','상태');
