@@ -35,11 +35,13 @@ public class BobController {
 	
 	  @Autowired private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	  
-	  @GetMapping("/shopList") 
-	  public String shopList(Model model) {
-//	  log.info("BobController: shopList() called"); 
-//	  model.addAttribute("sList",bobService.shopList()); 
-	  	return "views/shopList"; 
+
+	  @GetMapping("/shopList")
+	  public String shopList(@RequestParam(name="category", defaultValue="전체보기") String category, Model model) {
+	      model.addAttribute("selectedCategory", category);
+//		  log.info("BobController: shopList() called"); 
+//		  model.addAttribute("sList",bobService.shopList()); 
+	      return "views/shopList"; 
 	  }
 	  
 	  // 가게 상세보기 메서드
