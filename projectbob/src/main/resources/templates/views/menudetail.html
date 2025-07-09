@@ -18,8 +18,8 @@
           <div class="d-flex align-items-center mb-3">
             <img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
             <div class="ms-3">
-              <h5 class="mb-0">맥도날드 - 신림점</h5>
-              <small>★ 4.5 / 최소주문금액 8,000원</small>
+              <h5 class="mb-0">[[ ${shop.name} ]]</h5>
+              <small>★ [[ ${shop.rating} ]] / 최소주문금액 [[ ${shop.min_price} ]]원</small>
             </div>
           </div>
 
@@ -39,20 +39,26 @@
           <div class="tab-content mt-3">
             <div class="tab-pane fade show active" id="menu">
               <div class="row">
+              
                 <div class="col-md-6 menu-item text-center mb-3">
-                  <img src="https://i.imgur.com/Sg4b61a.png" alt="버거" />
+                  <img src="https://i.imgur.com/Sg4b61a.png" alt="메뉴" />
                   <div>
                     더블 맥스파이시® 상하이 버거 세트<br />
                     <strong>12,200원</strong>
                   </div>
                 </div>
+                
+                <div th:block th:each="menu, status: ${menuList}">
                 <div class="col-md-6 menu-item text-center mb-3">
-                  <img src="https://i.imgur.com/Sg4b61a.png" alt="버거" />
+                  <img src="https://i.imgur.com/Sg4b61a.png" alt="메뉴" />
+                  <p>[[ ${menu.m_id} ]]</p>
                   <div>
-                    1955® 크리미버거 세트<br />
-                    <strong>11,300원</strong>
+                    [[ ${menu.name} ]]<br />
+                    <strong>[[ ${#numbers.formatInteger(menu.price, 0, 'COMMA')} ]]원</strong>
                   </div>
                 </div>
+                </div>                
+                
               </div>
             </div>
             <div class="tab-pane fade" id="review">

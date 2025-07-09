@@ -7,7 +7,7 @@
 	SELECT
 	*
 	FROM menu
-	WHERE s_id = #{s_id} ORDER BY category, name
+	WHERE s_id = #{sId} ORDER BY m_id ASC
 </select>
 <select id="getMenuOptionsByMenuId" resultType="com.projectbob.domain.MenuOption">
 	SELECT
@@ -31,9 +31,12 @@
 
 <!-- 메인에서 버튼 누를때 -->
 <select id="shopList" resultType="com.projectbob.domain.Shop">
-	SELECT
-	*
-	FROM shop
+	SELECT	*	FROM shop
+	<where>
+		<if test="category != null and category != '전체보기'">
+			category = #{category}
+		</if>
+	</where>
 	ORDER BY s_id DESC
 </select>
 

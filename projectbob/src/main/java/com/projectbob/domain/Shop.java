@@ -14,14 +14,14 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class Shop {
-	private int s_id;
+	private int sId;
 	private String id;
 	private String name;
 	private String phone;
 	private String address1;
 	private String address2;
 	private String owner;
-	private String s_number;
+	private int s_number;
 	private String category;
 	private double rating;
 	private int heart;

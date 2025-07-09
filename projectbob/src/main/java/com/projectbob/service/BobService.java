@@ -23,45 +23,32 @@ public class BobService implements BobServiceIf{
 	
 	// 전체 게시글을 읽어와 반환하는 메서드
 	@Override
-	public List<Shop> shopList(){
-		log.info("BobService: shopList()");		
-		return bobMapper.shopList();
+	public List<Shop> shopList(String category){
+		log.info("BobService: shopList(), category={}", category);		
+		return bobMapper.shopList(category);
 	}
 
 	
 	// s_id에 해당하는 게시글을 읽어와 반환하는 메서드
 	@Override
-	public Shop getShopDetail(int s_id) {
-		//log.info("BobService: getShopDetail(int s_id)");		
-		//return bobMapper.getShopDetail(s_id);
-		log.info("BobService: getShopDetail(int s_id) 호출, 요청 s_id: {}", s_id);
-		Shop resultShop = bobMapper.getShopDetail(s_id);
-		
-		if(resultShop == null) {
-			log.warn("BobService: 경고!DB에서 s_id에 해당하는 가게를 찾을 수 없음.", s_id);
-		} else {
-			log.info("BobService: 가게 조회 성공. s_id: {}, 이름: {}", resultShop.getS_id(),resultShop.getName());
-		}
-		return resultShop;
+	public Shop getShopDetail(int sId) {
+		log.info("BobService: getShopDetail(int s_id) 호출, 요청 s_id: {}",sId);
+		return bobMapper.getShopDetail(sId);
 	}
 	
 	
 	
 	// menudetail 페이지
 	@Override
-	public List<Menu> getMenuListOption(int s_id){
-		List<Menu> menuList = bobMapper.getMenuListByShopId(s_id);
-		for (Menu menu : menuList) {
-			//각 메뉴의 ID로 해당 메뉴의 옵션 목록을 가져와 Menu 객체에 설정
-			List<MenuOption> options = bobMapper.getMenuOptionsByMenuId(menu.getM_id());
-			menu.setOptions(options);
-		}
-		return menuList;
+	public List<Menu> getMenuListByShopId(int sId){
+		
+		return bobMapper.getMenuListByShopId(sId);
 	}
-	@Override
-	public List<String> getMenuCategoriesByShopId(int s_id){
-		return bobMapper.getMenuCategoriesByShopId(s_id);
-	}
+	
+	//@Override
+//	public List<String> getMenuCategoriesByShopId(int s_id){
+//		return bobMapper.getMenuCategoriesByShopId(s_id);
+//	}
 
 	
 	
