@@ -8,6 +8,11 @@ import com.projectbob.domain.*;
 
 @Mapper
 public interface ShopMapper {
+	
+	//가게 등록
+	public void insertShop(Shop shop);
+	
+	//가게리스트
 	public List<Shop> shopList();
-
+	
 }
