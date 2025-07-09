@@ -9,6 +9,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 			<name>org.eclipse.jdt.core.javabuilder</name>
 =======
 			<name>org.eclipse.wst.validation.validationbuilder</name>
@@ -19,6 +20,9 @@
 =======
 			<name>org.eclipse.jdt.core.javabuilder</name>
 >>>>>>> develop
+=======
+			<name>org.eclipse.wst.validation.validationbuilder</name>
+>>>>>>> Hyeok
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -26,6 +30,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 			<name>org.eclipse.wst.validation.validationbuilder</name>
 =======
 			<name>org.eclipse.jdt.core.javabuilder</name>
@@ -36,6 +41,9 @@
 =======
 			<name>org.eclipse.wst.validation.validationbuilder</name>
 >>>>>>> develop
+=======
+			<name>org.eclipse.jdt.core.javabuilder</name>
+>>>>>>> Hyeok
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -44,6 +52,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 =======
@@ -58,5 +67,9 @@
 		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 >>>>>>> develop
+=======
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
+>>>>>>> Hyeok
 	</natures>
 </projectDescription>
