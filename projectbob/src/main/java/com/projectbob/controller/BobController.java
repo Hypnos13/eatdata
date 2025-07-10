@@ -1,18 +1,28 @@
 package com.projectbob.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-import com.projectbob.service.BobService;
+import com.projectbob.domain.*;
+import com.projectbob.service.*;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @Slf4j
 public class BobController {
+
+    private final LoginController loginController;
+	
+	@Autowired private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
+	
+	@Autowired private ShopService shopService;
+
+    BobController(LoginController loginController) {
+        this.loginController = loginController;
+    }
 
 	@GetMapping({"/", "/main"})
 	public String Main() {
@@ -35,13 +45,21 @@ public class BobController {
 	public String oMain() {
 		return "views/oMain";
 	}
+	@PostMapping("/insertShop")
+	public String insertShop(Shop shop) {
+		System.out.println("id test"+shop.getId());
+		shopService.insertShop(shop);
+		return "redirect:oMain";
+	}
+	
+	
 	@GetMapping("/oService")
 	public String oService() {
 		return "views/oService";
 	}
 	
 	
-	  @Autowired private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
+	
 	  
 	  @GetMapping("/shopList") 
 	  public String shopList(Model model) {
