@@ -14,12 +14,12 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class MenuOption {
-	private int mo_id;
-	private int m_id;
-	private String m_option;
+	private int moId;
+	private int mId;
+	private String mOption;
 	private String content;
 	private int price;
-	private Timestamp reg_date;
-	private Timestamp modi_date;
+	private Timestamp regDate;
+	private Timestamp modiDate;
 	private String status;
 }

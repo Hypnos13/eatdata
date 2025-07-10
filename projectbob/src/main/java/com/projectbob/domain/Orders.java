@@ -1,7 +1,6 @@
 package com.projectbob.domain;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,17 +13,17 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Menu {
-	private int mId;
+public class Orders {
+	private int oNo;
 	private int sId;
-	private String category;
-	private String name;
-	private int price;
-	private String mInfo;
-	private String mPicture;
-	private int liked;
+	private String id;
+	private int totalPrice;
+	private String payment;
+	private String oAddress;
+	private String request;
 	private Timestamp regDate;
 	private Timestamp modiDate;
-	
-	private List<MenuOption> options;
+	private String status;
+	private int quantity;
+
 }
