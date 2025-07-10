@@ -65,12 +65,7 @@ public class BobController {
 	}
 	
 	
-<<<<<<< HEAD
-	  @Autowired private BobService bobService; // 가게 게시글 리스트 요청을 처리하는 메서드
-	  
 
-=======
->>>>>>> develop
 	  @GetMapping("/shopList") 
 	  public String shopList(@RequestParam(value="category",required=false,
 			  	defaultValue="전체보기") String category,
@@ -80,7 +75,7 @@ public class BobController {
 	  model.addAttribute("selectedCategory", category);
 	  	return "views/shopList"; 
 	  }
-<<<<<<< HEAD
+
 /*
 	  @GetMapping("/shopList")
 	  public String shopList(@RequestParam(name="category", defaultValue="전체보기") String category, Model model) {
@@ -90,14 +85,6 @@ public class BobController {
 	      return "views/shopList"; 
 =======
 
-
-//	  @GetMapping("/shopList")
-//	  public String shopList(@RequestParam(name="category", defaultValue="전체보기") String category, Model model) {
-//	      model.addAttribute("selectedCategory", category);
-//		  log.info("BobController: shopList() called"); 
-//		  model.addAttribute("sList",bobService.shopList()); 
-//	      return "views/shopList"; 
->>>>>>> develop
 
 	  
 	  */

@@ -156,7 +156,7 @@
 		<img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
 		<div class="ms-3">
 			<h5 class="mb-0">[[ ${shop.name} ]]</h5>
-			<small>★ [[ ${shop.rating} ]] / 최소주문금액 [[ ${shop.min_price}
+			<small>★ [[ ${shop.rating} ]] / 최소주문금액 [[ ${shop.minPrice}
 				]]원</small>
 		</div>
 	</div>
@@ -175,10 +175,10 @@
 				<div th:block th:each="menu, status: ${menuList}">
 					<div class="col-md-6 menu-item text-center mb-3">
 						<img src="https://i.imgur.com/Sg4b61a.png" alt="메뉴" />
-						<p>[[ ${menu.m_id} ]]</p>
+						<p>[[ ${menu.mId} ]]</p>
 						<div>
-							[[ ${menu.name} ]]<br /> <strong>[[
-								${#numbers.formatInteger(menu.price, 0, 'COMMA')} ]]원</strong>
+							[[ ${menu.name} ]]<br /> <strong>
+							[[ ${#numbers.formatInteger(menu.price, 0, 'COMMA')} ]]원</strong>
 						</div>
 					</div>
 				</div>

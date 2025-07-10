@@ -5,9 +5,11 @@ import java.sql.*;
 
 import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Shop {
 	private int sId;
 	private String id;
