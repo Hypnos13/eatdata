@@ -13,26 +13,12 @@ public class Shop {
 	private String id;
 	private String name;
 	private String phone;
-<<<<<<< HEAD
-	private String zipcode;
-	private String address1;
-	private String address2;
-	private String owner;
-	private int s_number;
-	private String category;
-	private double rating;
-	private int heart;
-	private String op_time;
-	private String off_day;
-	private String min_price;
-	private String s_license;
-	private String s_cert;
-=======
 	private String address1;
 	private String address2;
 	private String owner;
 	private int sNumber;
 	private String category;
+	private String sPicture;
 	private double rating;
 	private int heart;
 	private String opTime;
@@ -40,7 +26,6 @@ public class Shop {
 	private String minPrice;
 	private String sLicense;
 	private String sCert;
->>>>>>> seon
 	private String status;
 	private String info;
 	private String notice;

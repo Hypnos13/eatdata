@@ -217,7 +217,6 @@ nav.navbar .nav-link.active {
   font-weight: bold;
 }
 
-<<<<<<< HEAD
 
 /*FAQ 영역*/
 .faq-type {
@@ -239,7 +238,6 @@ nav.navbar .nav-link.active {
 	font-weight: bold;
 	padding: 10px 10px;
 }
-=======
 /* 주문표 항목 정렬 */
 .order-item {
   display: flex;
@@ -302,4 +300,4 @@ nav.navbar .nav-link.active {
   margin-left: 1rem;
   margin-bottom: 0.25rem;
 }
->>>>>>> seon
+

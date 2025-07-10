@@ -1,24 +1,18 @@
 package com.projectbob.controller;
 
-<<<<<<< HEAD
 import org.springframework.beans.factory.annotation.*;
-=======
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
->>>>>>> seon
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-<<<<<<< HEAD
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
-=======
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.Shop;
 import com.projectbob.service.BobService;
->>>>>>> seon
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,13 +65,6 @@ public class BobController {
 	}
 	
 	
-<<<<<<< HEAD
-	
-	  
-=======
-	  @Autowired private BobService bobService; // 가게 게시글 리스트 요청을 처리하는 메서드
-
->>>>>>> seon
 	  @GetMapping("/shopList") 
 	  public String shopList(@RequestParam(value="category",required=false,
 			  	defaultValue="전체보기") String category,
