@@ -102,5 +102,12 @@ public class BobController {
 		  return "views/MenuDetail"; 
 		  }
 		  
+	// 모달창 메뉴옵션보기 메서드
+		  @GetMapping("/menuOptions")
+		  @ResponseBody
+		  public List<MenuOption> menuOptions(@RequestParam("mId") int mId){
+			  return bobService.getMenuOptionsByMenuId(mId);
+		  }
+		  
 		 
 }

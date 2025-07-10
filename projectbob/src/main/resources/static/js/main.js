@@ -1,24 +1,49 @@
 console.log('main.js 실행 시작');
 
-let count = 0;
+// 메뉴 클릭 -> 모달
+// 메뉴 옵션 모달창 불러오기
+
 let selectedMenuId = null;
-let addedExtras = [];
-
-const menuMap = {
-  "1": { name: "더블 맥스파이시®", price: 12200 },
-  "2": { name: "1955® 크리미버거", price: 11300 },
-  "3": { name: "치킨버거", price: 11000 },
-  "4": { name: "베이컨치즈버거", price: 12500 }
-};
-
-const extrasMap = {
-  "extra1": { name: "감자튀김", price: 2000 },
-  "extra2": { name: "콜라", price: 1500 },
-  "extra3": { name: "치즈 추가", price: 1000 }
-};
+let selectedMenuName = '';
+let selectedMenuPrice = 0;
 
 const deliveryFee = 3000;
 
+$(document).on('click','.menu-card', function(){
+	var mId = $(this).data('id');
+	selectedMenuId = $(this).data('id');
+	selectedMenuName = $(this).data('name');
+	selectedMenuPrice = $(this).data('price');
+	
+	count = 1;
+	addedExtras = [];
+	
+	$.ajax({
+		url: '/ajax/menu/options',
+		data: { mId: mId },
+		success: function(options){
+			let html = '';
+			options.forEach(function(option){
+				html += `
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="option-${option.moId}" value="${option.moId}">
+						<label class="form-check-label" for="option-${option.moId}">
+							${option.content} (+${option.price.toLocaleString()}원)
+						</label>
+						</div>	`;
+			});
+			$('#optionArea').html(html);
+			
+			const modal = new bootstrap.Modal(document.getElementById("addMenuModal"));
+			modal.show();
+		}
+	})
+});
+
+
+
+
+// 모달창에서 주문표로
 function updateOrder() {
   const itemCountEl = document.getElementById("itemCount");
   const totalPriceEl = document.getElementById("totalPrice");
@@ -34,14 +59,14 @@ function updateOrder() {
   }
 
   itemCountEl.innerText = count;
-  const mainMenu = menuMap[selectedMenuId];
+  //const mainMenu = menuMap[selectedMenuId];
 
   orderList.innerHTML = '';
 
   // 메인 메뉴 표시
   const mainMenuDiv = document.createElement('div');
   mainMenuDiv.classList.add('fw-bold');
-  mainMenuDiv.innerText = `${mainMenu.name} × ${count} (${(mainMenu.price * count).toLocaleString()}원)`;
+  mainMenuDiv.innerText = `${selectedMenuName} × ${count} (${(selectedMenuPrice * count).toLocaleString()}원)`;
   orderList.appendChild(mainMenuDiv);
 
   // 추가 메뉴 표시
@@ -53,16 +78,38 @@ function updateOrder() {
   } else {
     addedExtras.forEach(extra => {
       const extraDiv = document.createElement('div');
-      extraDiv.innerText = `- ${extra.name} (+${extra.price.toLocaleString()}원)`;
+      extraDiv.innerText = `- ${extra.content} (+${extra.price.toLocaleString()}원)`;
       extraDiv.classList.add('text-muted', 'ms-3');
       orderList.appendChild(extraDiv);
     });
   }
 
   const extrasTotal = addedExtras.reduce((sum, item) => sum + item.price, 0);
-  const total = mainMenu.price * count + extrasTotal + deliveryFee;
+  const total = selectedMenuPrice * count + extrasTotal + deliveryFee;
   totalPriceEl.innerText = total.toLocaleString() + "원";
 }
+
+  // 추가 메뉴 선택 후 추가하기
+$('#btnAddExtras').on('click', function(){
+	addedExtras = [];
+	$('#addMenuModal .form-check-input:checked').each(function(){
+		const label = $(this).next('label').text();
+		const priceMatch = label.match(/\+([\d,]+)원/);
+		const price = priceMatch ? parseInt(priceMatch[1].replace(/,/g, '')) : 0;
+		const content = label.split('(+')[0].trim();
+		addedExtras.push({
+			content: content,
+			price: price
+		});
+	});
+	console.log('추가옵션:', addedExtras);
+    updateOrder();
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('addMenuModal'));
+   // const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    //if (modalInstance) modalInstance.hide();
+		modal.hide();
+  });
+
 
 function plus() {
   if (!selectedMenuId) {
@@ -80,6 +127,7 @@ function minus() {
   }
 }
 
+// 가게 지도
 function showStoreOnMap() {
   const address = document.getElementById('storeAddress')?.innerText;
   if (!address) return;
@@ -107,6 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateOrder();
 
   // 메뉴 클릭 -> 모달
+	/*
   document.querySelectorAll('.card.text-center.p-3').forEach(card => {
     card.style.cursor = 'pointer';
 
@@ -129,18 +178,8 @@ document.addEventListener("DOMContentLoaded", () => {
       updateOrder();
     });
   });
+*/
 
-  // 추가 메뉴 선택 후 추가하기
-  document.getElementById('btnAddExtras')?.addEventListener('click', () => {
-    addedExtras = [...document.querySelectorAll('#addMenuModal .form-check-input:checked')]
-      .map(chk => extrasMap[chk.id])
-      .filter(Boolean);
-
-    updateOrder();
-    const modalEl = document.getElementById('addMenuModal');
-    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-    if (modalInstance) modalInstance.hide();
-  });
 
   // 주문하기 버튼
   document.getElementById('btnOrderNow')?.addEventListener('click', () => {
