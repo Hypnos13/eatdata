@@ -19,8 +19,25 @@ public class CustomerServiceService {
 		return faqList;
 	}
 	
+	
 	public void writeFAQ(CustomerService cs) {
 		csMapper.writeFAQ(cs);
 	}
 	
+	
+	public CustomerService getFAQ(int csNo) {
+		
+		CustomerService FAQ =  csMapper.getFAQ(csNo);
+		
+		return FAQ;
+	}
+	
+	
+	public void updateFAQ(CustomerService cs) {
+		csMapper.updateFAQ(cs);
+	}
+	
+	public void deleteFAQ(int csNo) {
+		csMapper.deleteFAQ(csNo);
+	}
 }

@@ -18,6 +18,7 @@ public class CustomerServiceController {
 	@Autowired
 	CustomerServiceService csService;
 	
+	
 	@GetMapping("/faqList")
 	public String FAQList(Model model, @RequestParam(name = "type", defaultValue = "") String type) {
 		
@@ -26,12 +27,38 @@ public class CustomerServiceController {
 		return "admin/FAQList";
 	}
 
+	
 	@PostMapping("/writeFAQ")
 	public String writeFAQ(Model model, CustomerService cs) {
 		
 		csService.writeFAQ(cs);
 		
-		return "admin/FAQList";
+		return "redirect:/faqList";
 	}
 	
+	
+	@GetMapping("/updateFAQForm")
+	public String updateFAQForm(Model model, @RequestParam("csNo") int csNo) {
+		
+		model.addAttribute("csFAQ", csService.getFAQ(csNo));
+		
+		return "admin/updateFAQForm";
+	}
+	
+	
+	@PostMapping("/updateFAQ")
+	public String updateFAQ(Model model, CustomerService cs) {
+		
+		csService.updateFAQ(cs);
+		
+		return "redirect:/faqList";
+	}
+	
+	@GetMapping("/deleteFAQ")
+	public String deleteFAQ(@RequestParam("csNo") int csNo) {
+		
+		csService.deleteFAQ(csNo);
+		
+		return "redirect:/faqList";
+	}
 }

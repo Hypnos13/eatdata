@@ -1,12 +1,9 @@
 $(function(){
 	// FAQ에 유형 버튼 누를 때
 	$(".faq-type").on("click",function(){
-		$(".faq-type-selected").addClass("faq-type");
-		$(".faq-type-selected").removeClass("faq-type-selected");
-		$(this).addClass("faq-type-selected");
-		$(this).removeClass("faq-type");
-		window.location.href="/faqList?type=" + $(this).text();
+		window.location.replace("/faqList?type=" + $(this).text());
 	});
+	
 	
 	// FAQ 작성 시 유효성 검사
 	$("#writeFAQform").on("submit",function(){
@@ -21,4 +18,27 @@ $(function(){
 			return false;
 		}
 	});
+	
+	
+	// 관리자가 FAQ 수정 버튼을 누를 때
+	$(".uBtn").on("click", function(e){
+		let csNo = $(this).attr("data-btn-no");
+		window.location.href="/updateFAQForm?csNo="+csNo;
+	});
+	
+	
+	// 관리자가 FAQ 삭제 버튼을 누를 때
+	$(".dBtn").on("click", function(e){
+		let csNo = $(this).attr("data-btn-no");
+		
+		if (!confirm("정말로 글을 삭제 하시겠습니까?")) {
+			return false;
+		} else {
+			window.location.href="/deleteFAQ?csNo="+csNo;
+		}				
+	});
+	
 });
+
+
+	

@@ -2,10 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.CustomerServiceMapper" >
+
 <insert id="writeFAQ" parameterType="CustomerService">
 	INSERT INTO customerservice(type, title, content, reg_date)
 	VALUES(#{type}, #{title}, #{content}, SYSDATE())
 </insert>
+
 <select id="FAQList" resultType="CustomerService">
 	SELECT *
 	FROM customerservice
@@ -30,6 +32,23 @@
 		</if>	
 	</where>
 </select>
+
+<select id="getFAQ" resultType="customerService">
+	SELECT *
+	FROM customerservice
+	WHERE cs_no = #{csNo}
+</select>
+
+<update id="updateFAQ" parameterType="CustomerService">
+	UPDATE customerservice
+	SET title = #{title} , content = #{content}, type = #{type} , reg_date=SYSDATE()
+	WHERE cs_no = #{csNo}
+</update>
+
+<delete id="deleteFAQ">
+	DELETE FROM customerservice
+	WHERE cs_no = #{csNo}
+</delete>
 </mapper>	
 
 

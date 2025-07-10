@@ -34,7 +34,11 @@
 						<div class="accordion-item">
 							<h2 class="accordion-header faq-accordion-head">
 								<button class="accordion-button collapsed  faq-accordion-head" type="button" data-bs-toggle="collapse" th:data-bs-target="|#${cs.csNo}|">
-									<[[${cs.type}]]> [[${cs.title}]]
+									<th:block th:if="${session.loginDisivion == 'master'}">
+										<div class="btn uBtn btn-sm btn-warning mx-2" th:data-btn-no="${cs.csNo}">수정</div> 
+										<div class="btn dBtn btn-sm btn-danger mx-3" th:data-btn-no="${cs.csNo}">삭제</div>
+									</th:block>
+									<[[${cs.type}]]> [[${cs.title}]]      
 								</button>
 							</h2>
 							 <div th:id="${cs.csNo}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">

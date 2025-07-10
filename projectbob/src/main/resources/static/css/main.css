@@ -174,13 +174,6 @@ nav.navbar .nav-link.active {
 	padding: 10px 0;
 }
 
-.faq-type-selected {
-	background-color: white;
-	color: #43d091;
-	font-weight: bold;
-	padding: 10px 0;
-}
-
 .faq-accordion-head {
 	background-color:  #43d091;
 	font-weight: bold;
