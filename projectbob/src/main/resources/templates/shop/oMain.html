@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      		layout:decorate="~{layouts/oMain_layout}">
+	<th:block layout:fragment="content">
+
+	  	<!-- 상단 메뉴 & 로그인 카드 (넓게 펼침) -->
+	    <div class="container-fluid">
+	        <div class="mains-row">
+	            <!-- 아이콘 박스 -->
+	            <div class="mains-icons-col">
+	                <div class="mains-icon-grid">
+	                    <div class="icon-col">
+	                        <a href="/store-hours" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-clock"></i></div>
+	                            <div class="mains-icon-label">영업시간</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
+	                        <a href="/coupon" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-ticket-perforated-fill"></i></div>
+	                            <div class="mains-icon-label">쿠폰관리</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
+	                        <a href="/delivery-fee" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-truck"></i></div>
+	                            <div class="mains-icon-label">배달요금</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
+	                        <a href="/ads" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
+	                            <div class="mains-icon-label">추천광고</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
+	                        <a href="/menu-quality" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-list-check"></i></div>
+	                            <div class="mains-icon-label">메뉴품질</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
+	                        <a href="/holiday" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-calendar-x"></i></div>
+	                            <div class="mains-icon-label">휴무일</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
+	                        <a href="/settlement" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-coin"></i></div>
+	                            <div class="mains-icon-label">정산/세금</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
+	                        <a href="/review" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-chat-left-text"></i></div>
+	                            <div class="mains-icon-label">리뷰관리</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
+	                        <a href="/store-info" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-shop"></i></div>
+	                            <div class="mains-icon-label">가게정보</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
+	                        <a href="/ads/event" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-gift"></i></div>
+	                            <div class="mains-icon-label">이벤트관리</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
+	                        <a href="/stat/sales" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-graph-up-arrow"></i></div>
+	                            <div class="mains-icon-label">매출통계</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
+	                        <a href="/setting/profile" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-person-circle"></i></div>
+	                            <div class="mains-icon-label">프로필설정</div>
+	                        </a>
+	                    </div>
+	                </div>
+	            </div>
+	            <!-- 로그인 카드 -->
+	            <div class="mains-login-col">
+	                <div class="card shadow-sm mains-login-card mb-3">
+	                    <div class="card-body text-center">
+	                        <a href="/login" class="btn btn-outline-success mains-login-btn mb-2">사장님 로그인</a>
+	                        <div class="d-flex justify-content-between">
+	                            <a href="#" class="small text-muted">아이디 / 비밀번호 찾기</a>
+	                            <a href="/signup" class="small text-muted">회원가입</a>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	
+	    <main>
+	        <section class="hero">
+	            <h1>사장님의 가게에 날개를 달아주세요</h1>
+	            <p>간편한 입점 신청으로 더 많은 고객을 만나보세요.<br>저희가 사장님의 성공적인 비즈니스를 돕겠습니다.</p>
+	            <a href="/owner/apply" class="btn-cta">지금 바로 입점신청하기</a>
+	        </section>
+	
+	        <section id="benefits" class="section">
+	            <h2>왜 Project Bob 인가요?</h2>
+	            <div class="benefits-grid">
+	                <div class="benefit-card">
+	                    <div class="icon">✓</div>
+	                    <h3>수많은 이용자</h3>
+	                    <p>이미 확보된 많은 사용자들이 <br>사장님의 가게를 기다리고 있습니다.</p>
+	                </div>
+	                <div class="benefit-card">
+	                    <div class="icon">✓</div>
+	                    <h3>간편한 주문 관리</h3>
+	                    <p>직관적인 관리자 페이지에서 <br>주문 접수부터 배달까지 손쉽게 처리하세요.</p>
+	                </div>
+	                <div class="benefit-card">
+	                    <div class="icon">✓</div>
+	                    <h3>투명한 정산 시스템</h3>
+	                    <p>복잡한 정산 과정 없이, <br>투명하고 정확하게 매출을 확인할 수 있습니다.</p>
+	                </div>
+	            </div>
+	        </section>
+	
+	        <section id="process" class="section">
+	            <h2>입점 절차 안내</h2>
+	            <div class="process-steps">
+	                <div class="step">
+	                    <div class="step-number">1</div>
+	                    <h3>온라인 입점신청</h3>
+	                    <p>홈페이지에서 간편하게 <br>입점 신청서를 작성하고 제출합니다.</p>
+	                </div>
+	                <div class="step">
+	                    <div class="step-number">2</div>
+	                    <h3>서류 심사</h3>
+	                    <p>제출하신 서류를 바탕으로 <br>신속하게 입점 가능 여부를 심사합니다.</p>
+	                </div>
+	                <div class="step">
+	                    <div class="step-number">3</div>
+	                    <h3>영업 시작</h3>
+	                    <p>심사 완료 후 바로 가게를 오픈하고 <br>주문을 받을 수 있습니다.</p>
+	                </div>
+	            </div>
+	        </section>
+	    </main>
+    
+    </th:block>
+</html>
