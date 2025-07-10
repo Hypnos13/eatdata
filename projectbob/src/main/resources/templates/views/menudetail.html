@@ -1,19 +1,148 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/main_layout}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/main_layout}">
 <head>
-  <title>메인 페이지</title>
+<meta charset="UTF-8">
+<title>메인 페이지</title>
+
+<!-- Bootstrap CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- 사용자 정의 CSS -->
+<link rel="stylesheet" href="/css/main.css">
+<link rel="stylesheet" href="/css/main_additional.css">
+
+<!-- Bootstrap Bundle JS -->
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-  <div layout:fragment="content">
+	<div layout:fragment="content">
 
-    <!-- 메인 영역 8:4 -->
-    <div class="container mt-4">
-      <div class="row">
-        <!-- 왼쪽: 메뉴/탭 8 -->
-        <div class="col-md-8">
+		<div class="container mt-4">
+			<div class="row">
+				<!-- 왼쪽: 메뉴 영역 -->
+				<div class="col-md-8">
+					<div class="d-flex align-items-center mb-3">
+						<img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
+						<div class="ms-3">
+							<h5 class="mb-0">맥도날드 - 신림점</h5>
+							<small>★ 4.5 / 최소주문금액 8,000원</small>
+						</div>
+					</div>
 
+					<!-- 탭 메뉴 -->
+					<ul class="nav nav-tabs w-100 justify-content-between">
+						<li class="nav-item flex-fill text-center"><a
+							class="nav-link active" data-bs-toggle="tab" href="#menu">메뉴</a>
+						</li>
+						<li class="nav-item flex-fill text-center"><a
+							class="nav-link" data-bs-toggle="tab" href="#review">클린리뷰</a></li>
+						<li class="nav-item flex-fill text-center"><a
+							class="nav-link" data-bs-toggle="tab" href="#info">정보</a></li>
+					</ul>
+
+					<div class="tab-content mt-3">
+						<!-- 메뉴 탭 -->
+						<div class="tab-pane fade show active" id="menu">
+							<div class="row">
+
+								<!-- 메뉴 카드 1 -->
+								<div class="col-md-6 mb-4">
+									<div class="card text-center p-3" data-id="1">
+										<div
+											class="d-flex justify-content-between align-items-center mb-2">
+											<span class="menu-title">더블 맥스파이시®</span>
+
+										</div>
+										<img src="https://i.imgur.com/Sg4b61a.png" alt="버거"
+											class="img-fluid mb-2" />
+										<div class="fw-semibold">상하이 버거 세트</div>
+										<div class="menu-price">12,200원</div>
+									</div>
+								</div>
+
+								<!-- 메뉴 카드 2 -->
+								<div class="col-md-6 mb-4">
+									<div class="card text-center p-3" data-id="2">
+										<div
+											class="d-flex justify-content-between align-items-center mb-2">
+											<span class="menu-title">1955® 크리미버거</span>
+
+										</div>
+										<img src="https://i.imgur.com/Sg4b61a.png" alt="버거"
+											class="img-fluid mb-2" />
+										<div class="fw-semibold">세트</div>
+										<div class="menu-price">11,300원</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- 리뷰 탭 -->
+						<div class="tab-pane fade" id="review">
+							<p>총 10,706개의 리뷰가 있습니다.</p>
+							<ul>
+								<li>"햄버거가 따뜻하고 맛있어요!"</li>
+								<li>"포장이 깔끔하고 배달이 빨라요."</li>
+								<li>"소스가 넉넉하게 들어있어요."</li>
+							</ul>
+						</div>
+
+						<!-- 정보 탭 -->
+						<div class="tab-pane fade" id="info">
+							<p>
+								영업시간: 10:00~23:00<br /> 위치: 서울특별시 관악구 신림로 123<br /> 전화:
+								02-1234-5678
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- 주문표 -->
+				<div class="col-md-4">
+					<div class="card order-summary p-3">
+						<h5 class="card-title">🛒 주문표</h5>
+
+						<div class="order-item-list mb-3">
+							<!-- 주문 메뉴 및 추가 메뉴가 여기 동적으로 들어갑니다 -->
+						</div>
+
+						<hr />
+						<p>
+							총 가격: <strong id="totalPrice">0원</strong><br /> <small
+								class="text-muted">(배달비 포함)</small>
+						</p>
+
+						<!-- 수량 조절 영역 -->
+						<div class="qty-control d-flex flex-row align-items-center mb-3">
+							<button class="btn btn-outline-secondary btn-qty"
+								onclick="minus()">−</button>
+							<span id="itemCount" class="mx-3">0</span>
+							<button class="btn btn-outline-secondary btn-qty"
+								onclick="plus()">＋</button>
+						</div>
+
+						<!-- 주문 초기화(삭제) 버튼 -->
+						<button class="btn btn-danger w-100 mb-2" id="btnRemoveItem">주문
+							취소</button>
+
+						<button class="btn text-white w-100"
+							style="background-color: #43d091;" id="btnOrderNow">
+							주문하기</button>
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+
+	</div>
+
+<<<<<<< HEAD
           <!-- 가게 정보 -->
           <div class="d-flex align-items-center mb-3">
             <img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
@@ -22,20 +151,11 @@
               <small>★ [[ ${shop.rating} ]] / 최소주문금액 [[ ${shop.min_price} ]]원</small>
             </div>
           </div>
+=======
+>>>>>>> 64250a810bb92fa73ea407fac98699ed5a1bfa06
 
-          <!-- 탭 메뉴 -->
-          <ul class="nav nav-tabs w-100 justify-content-between" id="menuTabs">
-            <li class="nav-item flex-fill text-center">
-              <a class="nav-link active" href="#menu" data-bs-toggle="tab">메뉴</a>
-            </li>
-            <li class="nav-item flex-fill text-center">
-              <a class="nav-link" href="#review" data-bs-toggle="tab">클린리뷰</a>
-            </li>
-            <li class="nav-item flex-fill text-center">
-              <a class="nav-link" href="#info" data-bs-toggle="tab">정보</a>
-            </li>
-          </ul>
 
+<<<<<<< HEAD
           <div class="tab-content mt-3">
             <div class="tab-pane fade show active" id="menu">
               <div class="row">
@@ -73,23 +193,9 @@
             </div>
           </div>
         </div>
+=======
+>>>>>>> 64250a810bb92fa73ea407fac98699ed5a1bfa06
 
-        <!-- 오른쪽: 주문표 4 -->
-        <div class="col-md-4">
-          <div class="card" style="position: sticky; top: 100px; z-index: 10;">
-            <div class="card-body">
-              <h5 class="card-title">주문표</h5>
-              <p>더블 맥스파이시® 상하이 버거 세트 - 1개</p>
-              <p>
-                총 가격: <strong>12,200원</strong> + 배달비 3,000원
-              </p>
-              <button class="btn text-white w-100" style="background-color: #43d091">주문하기</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-  </div>
 </body>
 </html>
