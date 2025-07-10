@@ -23,6 +23,7 @@ public class Shop {
 	private String owner;
 	private int sNumber;
 	private String category;
+	private String sPicture;
 	private double rating;
 	private int heart;
 	private String opTime;
