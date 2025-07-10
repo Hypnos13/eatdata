@@ -49,7 +49,7 @@ public class BobController {
 	}
 	@GetMapping("/oMain")
 	public String oMain() {
-		return "views/oMain";
+		return "shop/oMain";
 	}
 	@PostMapping("/insertShop")
 	public String insertShop(Shop shop) {
@@ -61,7 +61,7 @@ public class BobController {
 	
 	@GetMapping("/oService")
 	public String oService() {
-		return "views/oService";
+		return "shop/oService";
 	}
 	
 	
