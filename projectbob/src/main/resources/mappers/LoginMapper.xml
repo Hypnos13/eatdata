@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.projectbob.mapper.LoginMapper" >
+<insert id="joinMember" parameterType="Member">
+	INSERT INTO client(id, pass, name, nickname, birthday, address1, address2, email, phone, disivion, reg_date, modi_date) 
+	VALUES (#{id}, #{pass}, #{name}, #{nickname}, #{birthday}, #{address1}, #{address2}, #{email}, #{phone}, #{disivion}, SYSDATE(), SYSDATE())
+</insert>
+
+<select id="getMember" resultType="Member">
+	SELECT *
+	FROM client
+	WHERE id = #{id}
+</select>
+
+<update id="updateMember" parameterType="Member">
+	UPDATE client
+	SET pass=#{pass}, nickname=#{nickname}, address1 = #{address1}, address2=#{address2}, email = #{email}, phone = #{phone}, modi_date = SYSDATE()
+	WHERE id = #{id}
+</update>
+
+<delete id="deleteMember">
+	DELETE FROM client
+	WHERE id = #{id}
+</delete>
+
+<select id="searchId">
+	SELECT id 
+	FROM client
+	WHERE name = #{name}
+	<if test="receive == 'email'">
+		and email = #{email}
+	</if>
+	<if test="receive == 'phone'">
+		and phone = #{phone}
+	</if>
+</select>
+
+<select id="searchPassword">
+	SELECT pass
+	FROM client
+	WHERE  id = #{id}
+	and    name = #{name}
+	<if test="receive == 'email'">
+		and email = #{email}
+	</if>
+	<if test="receive == 'phone'">
+		and phone = #{phone}
+	</if>
+</select>
+
+</mapper>	
+
+
+

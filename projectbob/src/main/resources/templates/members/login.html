@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{js/login.js}"></script>
+<div class ="container">
+	<div class="row border mt-5">
+		<form name="loginForm" id="loginForm" method="post" action="login" class="col-10">
+			<div class="row my-2">
+				<div class="col-5 text-end">
+					아이디 : 
+			  	</div>
+			  	<div class="col-5">
+			  		<input class="form-control" name="id" id="id" type="text" placeholder="아이디를 입력해주세요">
+			  	</div>
+			</div>
+			<div class="row my-2">
+				<div class="col-5 text-end">
+					비밀번호 : 
+			  	</div>
+			  	<div class="col-5">
+			  		<input class="form-control" name="pass" id="pass" type="password" placeholder="비밀번호를 입력해주세요">
+			  	</div>
+			</div>
+			<div class="row my-2">
+				<div class="col-12 text-center">
+					<button type="submit" class="btn btn-success">로그인</button>
+				</div>
+			</div>
+			<div class="row my-2">
+				<div class="col text-center">
+					네이버 로그인 연동
+			  	</div>
+			</div>
+			<div class="row my-2">
+				<div class="col text-center">
+					카카오 로그인 연동
+			  	</div>
+			</div>
+			</form>
+		</div>
+	</div>
+	<div class="row border mt-2">
+		<div class="col-10">
+			<div class="row my-2">
+				<div class="col-12 text-center">
+					<a class="text-decoration-none" href="searchIdPassForm?search=id">아이디찾기</a> | 
+					<a class="text-decoration-none" href="searchIdPassForm?search=pass">비밀번호찾기</a> | 
+					<a class="text-decoration-none" href="joinMemberForm">회원가입</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</th:block>
+</html>

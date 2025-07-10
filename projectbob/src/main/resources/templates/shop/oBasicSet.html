@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/oService_layout}">
+	<th:block layout:fragment="content">
+		
+		<!-- 옵션리스트 (탭/버튼 네비) -->
+	  <nav class="nav nav-tabs mb-4" style="margin-left: 8px;">
+	    <a class="nav-link active" href="/oBasicSet">기본설정</a>
+	    <a class="nav-link" href="/oBizInfo">사업자정보</a>
+	    <a class="nav-link" href="/oAccountSet">계좌관리</a>
+	  </nav>
+		
+		<!-- 여기엔 본문 내용만 -->
+		<div class="main-content-card card shadow-sm p-4" style="margin-left:8px; min-height:480px;">
+		    <form method="post" enctype="multipart/form-data" action="/store/update">
+		      <div class="row mb-3">
+		        <label class="col-sm-2 col-form-label">가게명*</label>
+		        <div class="col-sm-10">
+		          <input type="text" name="name" class="form-control" value="기존값">
+		        </div>
+		      </div>
+		      <div class="row mb-3">
+		        <label class="col-sm-2 col-form-label">대표자명*</label>
+		        <div class="col-sm-10">
+		          <input type="text" name="owner" class="form-control" value="기존값">
+		        </div>
+		      </div>
+		      <div class="row mb-3">
+		        <label class="col-sm-2 col-form-label">사업자등록번호*</label>
+		        <div class="col-sm-10">
+		          <input type="text" name="s_number" class="form-control" value="기존값">
+		        </div>
+		      </div>
+		      <div class="row mb-3">
+		        <label class="col-sm-2 col-form-label">가게사진</label>
+		        <div class="col-sm-10">
+		          <input type="file" name="s_picture" class="form-control">
+		        </div>
+		      </div>
+		      <!-- ...생략: 추가 필드들... -->
+		      <button type="submit" class="btn btn-success">저장</button>
+		    </form>
+		  </div>
+		
+	</th:block>
+</html>

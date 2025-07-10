@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.projectbob.mapper.ShopMapper" >
+
+	<!-- 가게 등록 -->
+	<insert id="insertShop" parameterType="Shop" useGeneratedKeys="true" keyProperty="s_id">
+		INSERT INTO shop(id, name, phone, zipcode, address1, address2, owner, s_number, reg_date) 
+		VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{s_number}, SYSDATE())
+	</insert>
+	
+	<!-- 가게리스트 불러오기 -->
+	<select id="shopList" resultType="Shop">
+		SELECT * From shop
+	</select>
+	
+</mapper>	
