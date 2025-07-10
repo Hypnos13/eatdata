@@ -43,7 +43,12 @@ public class BobController {
 	}
 	@GetMapping("/oMain")
 	public String oMain() {
-		return "views/oMain";
+		return "shop/oMain";
+	}
+	
+	@GetMapping("/shopJoinForm")
+	public String shopJoinForm() {
+		return "shop/shopJoinForm";
 	}
 	@PostMapping("/insertShop")
 	public String insertShop(Shop shop) {
@@ -51,14 +56,21 @@ public class BobController {
 		shopService.insertShop(shop);
 		return "redirect:oMain";
 	}
-	
+	@GetMapping("/menuJoinForm")
+	public String menuJoinForm() {
+		return "shop/menuJoinForm";
+	}
+	@PostMapping("/insertMenu")
+	public String insertMenu(Menu menu) {
+		System.out.println("sId test"+menu.getSId());
+		shopService.insertMenu(menu);
+		return "redirect:oMain";
+	}
 	
 	@GetMapping("/oService")
 	public String oService() {
-		return "views/oService";
+		return "shop/oService";
 	}
-	
-	
 	
 	  
 	  @GetMapping("/shopList") 

@@ -17,6 +17,11 @@ public class ShopService {
 	@Autowired
 	private ShopMapper shopMapper;
 	
+	//메뉴 등록
+	public void insertMenu(Menu menu) {
+		shopMapper.insertMenu(menu);
+	}
+	
 	//가게 등록
 	public void insertShop(Shop shop) {
 		shopMapper.insertShop(shop);
