@@ -17,5 +17,8 @@
       <a href="login" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">로그인</a>
       <a href="orderList" class="border border-white px-2 py-1 text-decoration-none" style="font-size: 0.85rem;">주문표(0)</a>
     </th:block>
+    <th:block th:if="${session.loginDisivion == 'master'}">
+    	<a href="faqList" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">FAQ관리</a>
+    </th:block>
   </div>
 </div>

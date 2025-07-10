@@ -164,3 +164,32 @@ nav.navbar .nav-link.active {
   padding: 30px;
   margin-top: 40px;
 }
+
+
+/*FAQ 영역*/
+.faq-type {
+	background-color: #43d091;
+	color: white;
+	font-weight: bold;
+	padding: 10px 0;
+}
+
+.faq-type-selected {
+	background-color: white;
+	color: #43d091;
+	font-weight: bold;
+	padding: 10px 0;
+}
+
+.faq-accordion-head {
+	background-color:  #43d091;
+	font-weight: bold;
+	padding: 10px 10px;
+}
+
+.faq-accordion-body{
+	background-color: white;
+	border: 5px solid #43d091;
+	font-weight: bold;
+	padding: 10px 10px;
+}
