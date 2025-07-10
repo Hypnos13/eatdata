@@ -1,18 +1,13 @@
 package com.projectbob.domain;
 
-import java.sql.Timestamp;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.sql.*;
 
-@Getter
-@Setter
+import lombok.*;
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class Shop {
 	private int sId;
 	private String id;

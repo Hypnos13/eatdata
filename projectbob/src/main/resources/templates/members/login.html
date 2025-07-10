@@ -3,6 +3,7 @@
 		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
 		layout:decorate="~{layouts/main_layout}">
 <th:block layout:fragment="content">
+<script th:src="@{js/login.js}"></script>
 <div class ="container">
 	<div class="row border mt-5">
 		<form name="loginForm" id="loginForm" method="post" action="login" class="col-10">
@@ -44,8 +45,8 @@
 		<div class="col-10">
 			<div class="row my-2">
 				<div class="col-12 text-center">
-					<a class="text-decoration-none" href="searchIdPassForm">아이디찾기</a> | 
-					<a class="text-decoration-none" href="searchIdPassForm">비밀번호찾기</a> | 
+					<a class="text-decoration-none" href="searchIdPassForm?search=id">아이디찾기</a> | 
+					<a class="text-decoration-none" href="searchIdPassForm?search=pass">비밀번호찾기</a> | 
 					<a class="text-decoration-none" href="joinMemberForm">회원가입</a>
 				</div>
 			</div>

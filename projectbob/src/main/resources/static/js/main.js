@@ -34,12 +34,7 @@ function updateOrder() {
   }
 
   itemCountEl.innerText = count;
-
   const mainMenu = menuMap[selectedMenuId];
-  if (!mainMenu) {
-    orderList.innerHTML = '<div class="text-muted fst-italic">메인 메뉴를 선택하세요.</div>';
-    return;
-  }
 
   orderList.innerHTML = '';
 
@@ -66,7 +61,6 @@ function updateOrder() {
 
   const extrasTotal = addedExtras.reduce((sum, item) => sum + item.price, 0);
   const total = mainMenu.price * count + extrasTotal + deliveryFee;
-
   totalPriceEl.innerText = total.toLocaleString() + "원";
 }
 
@@ -86,108 +80,69 @@ function minus() {
   }
 }
 
-// 카카오 지도 검색 함수 (필요 시 사용)
-function runKakaoScript() {
-  kakao.maps.load(() => {
-    const searchButton = document.getElementById('btn-search-toggle');
-    const inputField = document.getElementById('location-input');
-    if (!searchButton || !inputField) return;
+function showStoreOnMap() {
+  const address = document.getElementById('storeAddress')?.innerText;
+  if (!address) return;
 
-    searchButton.addEventListener('click', () => {
-      if (!navigator.geolocation) {
-        alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-          const geocoder = new kakao.maps.services.Geocoder();
-          const coord = new kakao.maps.LatLng(lat, lon);
+  const mapContainer = document.getElementById('map');
+  if (!mapContainer) return;
 
-          geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
-            if (status === kakao.maps.services.Status.OK) {
-              inputField.value = result[0].address.address_name;
-            } else {
-              alert('주소 변환 실패');
-            }
-          });
-        },
-        (error) => {
-          alert('위치 정보를 가져오지 못했습니다: ' + error.message);
-        }
-      );
-    });
+  const map = new kakao.maps.Map(mapContainer, {
+    center: new kakao.maps.LatLng(33.450701, 126.570667),
+    level: 3
+  });
+
+  const geocoder = new kakao.maps.services.Geocoder();
+
+  geocoder.addressSearch(address, function(result, status) {
+    if (status === kakao.maps.services.Status.OK) {
+      const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+      const marker = new kakao.maps.Marker({ map: map, position: coords });
+      map.setCenter(coords);
+    }
   });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   updateOrder();
 
-  if (typeof kakao === 'undefined' || !kakao.maps) {
-    let retryCount = 0;
-    const interval = setInterval(() => {
-      if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.load) {
-        clearInterval(interval);
-        runKakaoScript();
-      } else if (++retryCount > 20) {
-        clearInterval(interval);
-        console.error('Kakao SDK 로드 시간 초과');
-      }
-    }, 500);
-  } else {
-    runKakaoScript();
-  }
-
-  // 메뉴 카드 클릭 -> 메인 메뉴 선택, 모달 띄우기
+  // 메뉴 클릭 -> 모달
   document.querySelectorAll('.card.text-center.p-3').forEach(card => {
     card.style.cursor = 'pointer';
 
     card.addEventListener('click', () => {
       const menuId = card.getAttribute('data-id');
-      if (!menuMap[menuId]) {
-        alert('해당 메뉴 정보를 찾을 수 없습니다.');
-        return;
-      }
+      if (!menuMap[menuId]) return;
 
       selectedMenuId = menuId;
       count = 1;
       addedExtras = [];
 
-      const modalEl = document.getElementById('addMenuModal');
-      if (!modalEl) {
-        console.error('모달 요소가 없습니다.');
-        return;
-      }
+      document.querySelectorAll('#addMenuModal .form-check-input').forEach(chk => chk.checked = false);
 
       const modalLabel = document.getElementById('addMenuModalLabel');
       modalLabel.innerText = `${menuMap[menuId].name} 추가 메뉴 선택`;
 
-      // 체크박스 초기화
-      document.querySelectorAll('#addMenuModal .form-check-input').forEach(chk => chk.checked = false);
-
-      const modal = new bootstrap.Modal(modalEl);
+      const modal = new bootstrap.Modal(document.getElementById('addMenuModal'));
       modal.show();
 
       updateOrder();
     });
   });
 
-  // 추가하기 버튼 - 추가 메뉴 저장 후 주문표 갱신 및 모달 닫기
-  const btnAddExtras = document.getElementById('btnAddExtras');
-  btnAddExtras?.addEventListener('click', () => {
+  // 추가 메뉴 선택 후 추가하기
+  document.getElementById('btnAddExtras')?.addEventListener('click', () => {
     addedExtras = [...document.querySelectorAll('#addMenuModal .form-check-input:checked')]
       .map(chk => extrasMap[chk.id])
       .filter(Boolean);
 
     updateOrder();
-
     const modalEl = document.getElementById('addMenuModal');
     const modalInstance = bootstrap.Modal.getInstance(modalEl);
     if (modalInstance) modalInstance.hide();
   });
 
-  // 주문하기 버튼 클릭
+  // 주문하기 버튼
   document.getElementById('btnOrderNow')?.addEventListener('click', () => {
     if (!selectedMenuId) {
       alert('메뉴를 선택해주세요.');
@@ -196,12 +151,29 @@ document.addEventListener("DOMContentLoaded", () => {
     alert('주문이 완료되었습니다!');
   });
 
-  // 주문 취소 버튼 클릭 -> 초기화
-  const btnRemoveItem = document.getElementById('btnRemoveItem');
-  btnRemoveItem?.addEventListener('click', () => {
-    count = 0;
+  // 주문 취소 버튼
+  document.getElementById('btnRemoveItem')?.addEventListener('click', () => {
     selectedMenuId = null;
+    count = 0;
     addedExtras = [];
     updateOrder();
   });
+
+  // 지도 탭 들어갔을 때 표시
+  const infoTab = document.querySelector('a[href="#info"]');
+  infoTab?.addEventListener('shown.bs.tab', () => {
+    showStoreOnMap();
+  });
+
+  // Kakao SDK 로딩 검사
+  if (typeof kakao === 'undefined' || !kakao.maps) {
+    const interval = setInterval(() => {
+      if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.load) {
+        clearInterval(interval);
+        showStoreOnMap();
+      }
+    }, 300);
+  } else {
+    showStoreOnMap();
+  }
 });
