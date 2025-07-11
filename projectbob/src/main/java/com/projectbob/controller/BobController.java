@@ -58,9 +58,9 @@ public class BobController {
 		return "shop/shopInfo";
 	}
 	
-	@GetMapping("/oBasicSet")
-	public String oBasicSet() {
-		return "shop/oBasicSet";
+	@GetMapping("/shopBasicSet")
+	public String shopBasicSet() {
+		return "shop/shopBasicSet";
 	}
 	
 	
