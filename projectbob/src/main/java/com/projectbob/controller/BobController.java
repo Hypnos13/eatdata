@@ -109,5 +109,23 @@ public class BobController {
 			  return bobService.getMenuOptionsByMenuId(mId);
 		  }
 		  
+		  
+
+		  // menudetail 에서 pay로 
+		  @PostMapping("/pay")
+		  public String payPage(
+				  @RequestParam("menuId") Long menuId,
+				  @RequestParam("count") int count,
+				  @RequestParam("optionIds") String optionIds,
+				  @RequestParam("totalPrice") int totalPrice,
+				  Model model) {
+			  model.addAttribute("menuId", menuId);
+			  model.addAttribute("count", count);
+			  model.addAttribute("optionIds", optionIds);
+			  model.addAttribute("totalPrice", totalPrice);
+			  
+			  return "views/pay";			  
+		  }
+		  
 		 
 }

@@ -1,5 +1,5 @@
 console.log('main.js 실행 시작');
-
+console.log('orderMenuId 존재 여부:', document.getElementById('orderMenuId'));
 // 메뉴 클릭 -> 모달
 // 메뉴 옵션 모달창 불러오기
 
@@ -16,6 +16,8 @@ $(document).on('click','.menu-card', function(){
 	selectedMenuId = $(this).data('id');
 	selectedMenuName = $(this).data('name');
 	selectedMenuPrice = $(this).data('price');
+	count = 1;
+	addedExtras = [];
 	console.log(count, selectedMenuId, selectedMenuName, selectedMenuPrice,addedExtras)
 
 	
@@ -97,11 +99,13 @@ $(document).on('click','#btnAddExtras', function(){
 	console.log('1.추가하기 버튼 클릭됨');	
 	addedExtras = [];
 	$('#addMenuModal .form-check-input:checked').each(function(){
+		const moId = $(this).val();
 		const label = $(this).next('label').text();
 		const priceMatch = label.match(/\+([\d,]+)원/);
 		const price = priceMatch ? parseInt(priceMatch[1].replace(/,/g, '')) : 0;
 		const content = label.split('(+')[0].trim();
 		addedExtras.push({
+			moId: moId,
 			content: content,
 			price: price
 		});
@@ -197,6 +201,35 @@ function showStoreOnMap() {
 document.addEventListener("DOMContentLoaded", () => {
   updateOrder();
 
+// 주문표 전송하기~
+document.getElementById('btnOrderNow')?.addEventListener('click', function(){
+	if (!selectedMenuId){
+		alert('메뉴를 선택해주세요.');
+		return;
+	}
+	// 주문 정보를 form에 채워넣기
+	document.getElementById('orderMenuId').value = selectedMenuId;
+	document.getElementById('orderCount').value = count;
+	// 옵션 id를 ,로 구분해 넘긴다(optionIds)
+	document.getElementById('orderOptionIds').value =
+		addedExtras.map(e => e.moId || e.id || e.content).join(',');
+	document.getElementById('orderTotalPrice').value = 
+		selectedMenuPrice * count + 
+		addedExtras.reduce((sum, item) => sum + item.price, 0) +
+		deliveryFee;
+		
+		console.log({
+			menuId: selectedMenuId,
+			count: count,
+			optionIds: addedExtras.map(e =>e.moId).join(','),
+			totalPrice: document.getElementById('orderTotalPrice').value
+		});
+		
+	document.getElementById('orderForm').submit();
+});
+	
+	
+	
   // 메뉴 클릭 -> 모달
 	/*
   document.querySelectorAll('.card.text-center.p-3').forEach(card => {
@@ -225,13 +258,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // 주문하기 버튼
-  document.getElementById('btnOrderNow')?.addEventListener('click', () => {
+	
+  /*document.getElementById('btnOrderNow')?.addEventListener('click', () => {
     if (!selectedMenuId) {
       alert('메뉴를 선택해주세요.');
       return;
     }
     alert('주문이 완료되었습니다!');
   });
+	*/
 
   // 주문 취소 버튼
   document.getElementById('btnRemoveItem')?.addEventListener('click', () => {
