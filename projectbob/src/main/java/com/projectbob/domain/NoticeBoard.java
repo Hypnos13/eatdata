@@ -1,5 +1,6 @@
 package com.projectbob.domain;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 import lombok.AllArgsConstructor;
@@ -11,10 +12,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member {
+public class NoticeBoard {
 
-	private String id, name, nickname, pass, phone, address1, address2, email, birthday, disivion;
-	private int point;
-	private Timestamp regDate, modiDate;
+	int no;
+	String title, content, disivion;
+	Timestamp regDate, modiDate, startDay, endDay;
 	
 }
