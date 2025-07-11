@@ -62,6 +62,10 @@ public class LoginController {
 		session.setAttribute("loginNickname", member.getNickname());
 		session.setAttribute("loginDisivion", member.getDisivion());
 		
+		if(member.getDisivion().equals("owner")){
+			return "redirect:/oMain";
+		}
+		
 		return "redirect:/main";
 	}
 	

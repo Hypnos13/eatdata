@@ -49,6 +49,11 @@
 	DELETE FROM customerservice
 	WHERE cs_no = #{csNo}
 </delete>
+
+<insert id="writeNotice" parameterType="NoticeBoard">
+	INSERT INTO noticeboard(title, content, startday, endday, disivion, reg_date, modi_date)
+	VALUES (#{title}, #{content}, #{startDay}, #{endDay}, #{disivion}, SYSDATE(), SYSDATE())
+</insert>
 </mapper>	
 
 

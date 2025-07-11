@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.projectbob.domain.CustomerService;
+import com.projectbob.domain.NoticeBoard;
 import com.projectbob.mapper.CustomerServiceMapper;
 
 @Service
@@ -39,5 +40,9 @@ public class CustomerServiceService {
 	
 	public void deleteFAQ(int csNo) {
 		csMapper.deleteFAQ(csNo);
+	}
+	
+	public void writeNotice(NoticeBoard noticeBoard){
+		csMapper.writeNotice(noticeBoard);
 	}
 }

@@ -38,6 +38,31 @@ $(function(){
 		}				
 	});
 	
+	// 공지사항 글 게시하기
+	$("#writeNoticeform").on("submit",function(){
+		
+		if($("#start").val().length <= 0){
+			alert("게시 시작 일을 정해주세요.");
+			return false;
+		}
+		
+		if($("#end").val().length <= 0){
+			alert("게시 종료 일을 정해주세요.");
+			return false;
+		}
+		
+		if($("#title").val().length <= 0){
+			alert("공지 제목을 정해주세요.");
+			return false;
+		}
+		
+		if($("#content").val().length <= 0){
+			alert("공지 제목을 정해주세요.");
+			return false;
+		}
+	
+	});
+	
 });
 
 

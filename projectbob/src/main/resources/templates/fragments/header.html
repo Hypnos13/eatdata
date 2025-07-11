@@ -2,11 +2,23 @@
 
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <div th:fragment="header" class="top-bar row border-bottom border-primary align-items-center py-1">
-  <div class="col-5 text-center">
+  <th:block th:unless="${session.loginDisivion == 'master'}">
+  <div class="col-5 text-start">
     <a href="main">
       <img src="images/Logo.png" width="180px" height="45px" />
     </a>
   </div>
+  </th:block>
+  <th:block th:if="${session.loginDisivion == 'master'}">
+  <div class="col-5 text-start">
+    <a href="main">
+      <img src="images/Client.png" width="180px" height="45px" />
+    </a>
+    <a href="oMain">
+      <img src="images/Owner.png" width="180px" height="45px" />
+    </a>
+  </div>
+  </th:block>
   <div class="col-7 text-end fs-6">
     <th:block th:if="${session.isLogin}">
       <a class="me-2">[[${session.loginNickname}]] 님 어서오세요.</a>
@@ -20,6 +32,7 @@
     </th:block>
     <th:block th:if="${session.loginDisivion == 'master'}">
     	<a href="faqList" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">FAQ관리</a>
+    	<a href="noticeList" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">공지사항관리</a>
     </th:block>
   </div>
 </div>
