@@ -41,9 +41,9 @@ public class BobController {
 	public String completed() {
 		return "views/completed";
 	}
-	@GetMapping("/oMain")
-	public String oMain() {
-		return "shop/oMain";
+	@GetMapping("/shopMain")
+	public String shopMain() {
+		return "shop/shopMain";
 	}
 	@PostMapping("/insertShop")
 	public String insertShop(Shop shop) {
@@ -53,9 +53,9 @@ public class BobController {
 	}
 	
 	
-	@GetMapping("/oService")
-	public String oService() {
-		return "shop/oService";
+	@GetMapping("/shopInfo")
+	public String shopInfo() {
+		return "shop/shopInfo";
 	}
 	
 	@GetMapping("/oBasicSet")
