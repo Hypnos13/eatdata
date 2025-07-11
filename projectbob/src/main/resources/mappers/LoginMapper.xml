@@ -49,6 +49,18 @@
 	</if>
 </select>
 
+<select id="userList" resultType="Member">
+	SELECT *
+	FROM client
+	ORDER BY disivion, id
+</select>
+
+<update id="updateIsuse">
+	UPDATE client
+	SET isuse = #{isuse}
+	WHERE id = #{id}
+</update>
+
 </mapper>	
 
 

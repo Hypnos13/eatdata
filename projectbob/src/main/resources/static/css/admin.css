@@ -1,0 +1,44 @@
+@charset "UTF-8";
+
+.table-custom {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 15px;
+  background-color: white;
+}
+
+
+.table-custom thead {
+  background-color: #00c99c;
+  color: white;
+}
+
+.table-custom th, .table-custom td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.table-custom tbody tr:hover {
+  background-color: #e8f7f3;
+  cursor: pointer;
+}
+
+/* 검색 행 wrapper (row 전체) */
+.row.text-center {
+  justify-content: center;
+  gap: 10px;
+}
+
+
+#searchDisivion, #keyword {
+  width: 100%;
+  max-width : 500px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: white;
+  color: #333;
+}

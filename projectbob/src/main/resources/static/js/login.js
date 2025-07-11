@@ -127,6 +127,15 @@ $(function(){
 		}
 		
 	});
+	
+	
+	// 관리자 페이지 사용여부 저장
+	$(".btn-save").on("click",function(){
+		let id = $(this).parent().parent().find('#id').text();
+		let isuse = $(this).parent().parent().find('#isuse').val();
+		
+		window.location.href="updateIsuse?id="+id+"&isuse="+isuse;
+	});
 });
 
 
