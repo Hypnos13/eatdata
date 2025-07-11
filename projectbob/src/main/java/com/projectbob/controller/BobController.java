@@ -63,7 +63,10 @@ public class BobController {
 	public String shopInfo() {
 		return "shop/shopInfo";
 	}
-	
+	@GetMapping("/shopBasicSet")
+	public String shopBasicSet() {
+		return "shop/shopBasicSet";
+	}
 	
 	  @GetMapping("/shopList") 
 	  public String shopList(@RequestParam(value="category",required=false,
