@@ -116,30 +116,31 @@
 
 						<div class="order-item-list mb-3">
 							<!-- 주문 메뉴 및 추가 메뉴가 여기 동적으로 들어갑니다 -->
+							<div class="text-muted fst-italic">주문한 메뉴가 없습니다.</div>
+						</div>
+
+						<!-- 수량 조절 영역 -->
+						<div class="qty-control d-flex align-items-center mb-3">
+							<button type="button"
+								class="btn btn-outline-secondary btn-qty me-3" id="btnMinus">−</button>
+							<span id="itemCount" class="fs-5">0</span>
+							<button type="button"
+								class="btn btn-outline-secondary btn-qty ms-3" id="btnPlus">＋</button>
 						</div>
 
 						<hr />
+
 						<p>
 							총 가격: <strong id="totalPrice">0원</strong><br /> <small
 								class="text-muted">(배달비 포함)</small>
 						</p>
-
-						<!-- 수량 조절 영역 -->
-						<div class="qty-control d-flex flex-row align-items-center mb-3">
-							<button class="btn btn-outline-secondary btn-qty"
-								onclick="minus()">−</button>
-							<span id="itemCount" class="mx-3">0</span>
-							<button class="btn btn-outline-secondary btn-qty"
-								onclick="plus()">＋</button>
-						</div>
 
 						<!-- 주문 초기화(삭제) 버튼 -->
 						<button class="btn btn-danger w-100 mb-2" id="btnRemoveItem">주문
 							취소</button>
 
 						<button class="btn text-white w-100"
-							style="background-color: #43d091;" id="btnOrderNow">
-							주문하기</button>
+							style="background-color: #43d091;" id="btnOrderNow">주문하기</button>
 					</div>
 				</div>
 
@@ -149,7 +150,7 @@
 
 	</div>
 
-	<<<<<<< HEAD
+
 	<!-- 가게 정보 -->
 	<div class="d-flex align-items-center mb-3">
 		<img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
@@ -159,18 +160,10 @@
 				]]원</small>
 		</div>
 	</div>
-	======= >>>>>>> 64250a810bb92fa73ea407fac98699ed5a1bfa06 <<<<<<< HEAD
+
 	<div class="tab-content mt-3">
 		<div class="tab-pane fade show active" id="menu">
 			<div class="row">
-
-				<div class="col-md-6 menu-item text-center mb-3">
-					<img src="https://i.imgur.com/Sg4b61a.png" alt="메뉴" />
-					<div>
-						더블 맥스파이시® 상하이 버거 세트<br /> <strong>12,200원</strong>
-					</div>
-				</div>
-
 				<div th:block th:each="menu, status: ${menuList}">
 					<div class="col-md-6 menu-item text-center mb-3">
 						<img src="https://i.imgur.com/Sg4b61a.png" alt="메뉴" />
@@ -181,22 +174,20 @@
 						</div>
 					</div>
 				</div>
-
 			</div>
 		</div>
+
 		<div class="tab-pane fade" id="review">
 			<p>총 10,706개의 리뷰가 있습니다.</p>
 			<p>"햄버거가 따뜻하고 맛있어요!"</p>
 		</div>
+
 		<div class="tab-pane fade" id="info">
 			<p>
 				영업시간: 10:00~23:00<br /> 위치: 서울특별시 관악구 신림로
 			</p>
 		</div>
 	</div>
-	</div>
-	======= >>>>>>> 64250a810bb92fa73ea407fac98699ed5a1bfa06
-
 
 </body>
 </html>

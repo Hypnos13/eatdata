@@ -30,27 +30,36 @@ function updateOrder() {
   const totalPriceEl = document.getElementById("totalPrice");
   const orderList = document.querySelector('.order-item-list');
 
-  if (!itemCountEl || !totalPriceEl || !orderList) return;
+  const plusBtn = document.getElementById('btnPlus');
+  const minusBtn = document.getElementById('btnMinus');
+
+  if (!itemCountEl || !totalPriceEl || !orderList || !plusBtn || !minusBtn) return;
 
   if (!selectedMenuId || count <= 0) {
-    itemCountEl.innerText = 0;
+    itemCountEl.innerText = "";
     totalPriceEl.innerText = "0원";
     orderList.innerHTML = '<div class="text-muted fst-italic">주문한 메뉴가 없습니다.</div>';
+
+    // 수량 조절 버튼 숨기기
+    plusBtn.style.display = 'none';
+    minusBtn.style.display = 'none';
     return;
   }
+	
+	plusBtn.style.display = '';
+	minusBtn.style.display = '';
+
 
   itemCountEl.innerText = count;
   const mainMenu = menuMap[selectedMenuId];
 
   orderList.innerHTML = '';
 
-  // 메인 메뉴 표시
   const mainMenuDiv = document.createElement('div');
   mainMenuDiv.classList.add('fw-bold');
   mainMenuDiv.innerText = `${mainMenu.name} × ${count} (${(mainMenu.price * count).toLocaleString()}원)`;
   orderList.appendChild(mainMenuDiv);
 
-  // 추가 메뉴 표시
   if (addedExtras.length === 0) {
     const noExtrasDiv = document.createElement('div');
     noExtrasDiv.innerText = '추가 메뉴 없음';
@@ -147,6 +156,8 @@ function showStoreOnMap() {
       const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
       const marker = new kakao.maps.Marker({ map: map, position: coords });
       map.setCenter(coords);
+    } else {
+      console.warn("지도 좌표 변환 실패");
     }
   });
 }
@@ -157,10 +168,9 @@ function showStoreOnMap() {
 document.addEventListener("DOMContentLoaded", () => {
   updateOrder();
 
-  // 메뉴 클릭 -> 모달 띄우기
+  // 메뉴 카드 클릭 시 모달 띄우기
   document.querySelectorAll('.card.text-center.p-3').forEach(card => {
     card.style.cursor = 'pointer';
-
     card.addEventListener('click', () => {
       const menuId = card.getAttribute('data-id');
       if (!menuMap[menuId]) return alert('메뉴 정보를 찾을 수 없습니다.');
@@ -181,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 추가 메뉴 선택 후 추가하기 버튼 클릭
+  // 추가 메뉴 선택 후 버튼 클릭
   document.getElementById('btnAddExtras')?.addEventListener('click', () => {
     addedExtras = [...document.querySelectorAll('#addMenuModal .form-check-input:checked')]
       .map(chk => extrasMap[chk.id])
@@ -211,6 +221,10 @@ document.addEventListener("DOMContentLoaded", () => {
     updateOrder();
   });
 
+  // 수량 조절 버튼 클릭 이벤트 연결
+  document.getElementById('btnPlus')?.addEventListener('click', plus);
+  document.getElementById('btnMinus')?.addEventListener('click', minus);
+
   // 정보 탭 클릭 시 지도 표시 (Bootstrap 탭 이벤트)
   const infoTab = document.querySelector('a[href="#info"]');
   infoTab?.addEventListener('shown.bs.tab', () => {
@@ -234,4 +248,12 @@ document.addEventListener("DOMContentLoaded", () => {
     runKakaoScript();
     showStoreOnMap();
   }
+
+  // 돋보기 버튼 클릭 시 검색창 토글
+  const searchBtn = document.getElementById('searchBtn');
+  const searchBox = document.getElementById('searchBox');
+
+  searchBtn?.addEventListener('click', () => {
+    searchBox?.classList.toggle('d-none');
+  });
 });
