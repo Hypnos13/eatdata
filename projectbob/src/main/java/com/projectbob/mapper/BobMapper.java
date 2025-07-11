@@ -16,7 +16,11 @@ public interface BobMapper {
 		
 	// menuDetail 페이지에 사용
 	public List<Menu> getMenuListByShopId(int sId); 	
-	public List<MenuOption> getMenuOptionsByMenuId(int m_id);
+	
+	// 메뉴옵션 선택하는 모달창에서 사용
+	public List<MenuOption> getMenuOptionsByMenuId(int mId);
+	
+	
 	public List<String> getMenuCategoriesByShopId(int sId);
 }
 

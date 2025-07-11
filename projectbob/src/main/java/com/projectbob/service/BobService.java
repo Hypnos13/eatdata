@@ -45,6 +45,12 @@ public class BobService implements BobServiceIf{
 		return bobMapper.getMenuListByShopId(sId);
 	}
 	
+	// 메뉴 옵션 모달창
+	@Override
+	public List<MenuOption> getMenuOptionsByMenuId(int mId){
+		return bobMapper.getMenuOptionsByMenuId(mId);
+	}
+	
 	//@Override
 //	public List<String> getMenuCategoriesByShopId(int s_id){
 //		return bobMapper.getMenuCategoriesByShopId(s_id);
