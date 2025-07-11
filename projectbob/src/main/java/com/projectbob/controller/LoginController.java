@@ -175,7 +175,11 @@ public class LoginController {
 		loginService.updateMember(member);
 		session.setAttribute("loginNickname", member.getNickname());
 		
-		return "views/main";
+		if(session.getAttribute("loginDisivion").equals("owner")) {
+			return "redirect:/oMain";
+		}
+		
+		return "redirect:/main";
 	}
 	
 	// 로그아웃
