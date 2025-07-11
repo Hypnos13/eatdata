@@ -1,5 +1,8 @@
 console.log('main.js 실행 시작');
 
+// ==============================
+// 전역 변수 정의
+// ==============================
 let count = 0;
 let selectedMenuId = null;
 let addedExtras = [];
@@ -19,6 +22,9 @@ const extrasMap = {
 
 const deliveryFee = 3000;
 
+// ==============================
+// 주문표 업데이트 함수
+// ==============================
 function updateOrder() {
   const itemCountEl = document.getElementById("itemCount");
   const totalPriceEl = document.getElementById("totalPrice");
@@ -64,6 +70,9 @@ function updateOrder() {
   totalPriceEl.innerText = total.toLocaleString() + "원";
 }
 
+// ==============================
+// 수량 조절 함수
+// ==============================
 function plus() {
   if (!selectedMenuId) {
     alert('먼저 메뉴를 선택해주세요.');
@@ -80,6 +89,45 @@ function minus() {
   }
 }
 
+// ==============================
+// Kakao 지도 (사용자 위치 검색용)
+// ==============================
+function runKakaoScript() {
+  kakao.maps.load(() => {
+    const searchButton = document.getElementById('btn-search-toggle');
+    const inputField = document.getElementById('location-input');
+    if (!searchButton || !inputField) return;
+
+    searchButton.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          const geocoder = new kakao.maps.services.Geocoder();
+          const coord = new kakao.maps.LatLng(lat, lon);
+
+          geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+            if (status === kakao.maps.services.Status.OK) {
+              inputField.value = result[0].address.address_name;
+            } else {
+              alert('주소 변환 실패');
+            }
+          });
+        },
+        (error) => alert('위치 정보를 가져오지 못했습니다: ' + error.message)
+      );
+    });
+  });
+}
+
+// ==============================
+// 가게 주소로 지도 표시 (정보 탭)
+// ==============================
 function showStoreOnMap() {
   const address = document.getElementById('storeAddress')?.innerText;
   if (!address) return;
@@ -103,16 +151,19 @@ function showStoreOnMap() {
   });
 }
 
+// ==============================
+// DOMContentLoaded 이벤트 내 실행
+// ==============================
 document.addEventListener("DOMContentLoaded", () => {
   updateOrder();
 
-  // 메뉴 클릭 -> 모달
+  // 메뉴 클릭 -> 모달 띄우기
   document.querySelectorAll('.card.text-center.p-3').forEach(card => {
     card.style.cursor = 'pointer';
 
     card.addEventListener('click', () => {
       const menuId = card.getAttribute('data-id');
-      if (!menuMap[menuId]) return;
+      if (!menuMap[menuId]) return alert('메뉴 정보를 찾을 수 없습니다.');
 
       selectedMenuId = menuId;
       count = 1;
@@ -130,19 +181,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 추가 메뉴 선택 후 추가하기
+  // 추가 메뉴 선택 후 추가하기 버튼 클릭
   document.getElementById('btnAddExtras')?.addEventListener('click', () => {
     addedExtras = [...document.querySelectorAll('#addMenuModal .form-check-input:checked')]
       .map(chk => extrasMap[chk.id])
       .filter(Boolean);
 
     updateOrder();
+
     const modalEl = document.getElementById('addMenuModal');
     const modalInstance = bootstrap.Modal.getInstance(modalEl);
     if (modalInstance) modalInstance.hide();
   });
 
-  // 주문하기 버튼
+  // 주문하기 버튼 클릭
   document.getElementById('btnOrderNow')?.addEventListener('click', () => {
     if (!selectedMenuId) {
       alert('메뉴를 선택해주세요.');
@@ -151,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
     alert('주문이 완료되었습니다!');
   });
 
-  // 주문 취소 버튼
+  // 주문 취소 버튼 클릭
   document.getElementById('btnRemoveItem')?.addEventListener('click', () => {
     selectedMenuId = null;
     count = 0;
@@ -159,21 +211,27 @@ document.addEventListener("DOMContentLoaded", () => {
     updateOrder();
   });
 
-  // 지도 탭 들어갔을 때 표시
+  // 정보 탭 클릭 시 지도 표시 (Bootstrap 탭 이벤트)
   const infoTab = document.querySelector('a[href="#info"]');
   infoTab?.addEventListener('shown.bs.tab', () => {
     showStoreOnMap();
   });
 
-  // Kakao SDK 로딩 검사
+  // Kakao SDK 로드 확인 후 위치검색 기능 실행 및 지도 표시
   if (typeof kakao === 'undefined' || !kakao.maps) {
+    let retryCount = 0;
     const interval = setInterval(() => {
       if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.load) {
         clearInterval(interval);
+        runKakaoScript();
         showStoreOnMap();
+      } else if (++retryCount > 20) {
+        clearInterval(interval);
+        console.warn('Kakao SDK 로드 실패');
       }
-    }, 300);
+    }, 500);
   } else {
+    runKakaoScript();
     showStoreOnMap();
   }
 });
