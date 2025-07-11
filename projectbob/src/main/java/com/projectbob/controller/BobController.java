@@ -59,9 +59,9 @@ public class BobController {
 	}
 	
 	
-	@GetMapping("/oService")
-	public String oService() {
-		return "shop/oService";
+	@GetMapping("/shopInfo")
+	public String shopInfo() {
+		return "shop/shopInfo";
 	}
 	
 	
