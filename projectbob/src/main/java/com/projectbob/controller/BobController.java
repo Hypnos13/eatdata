@@ -1,17 +1,14 @@
 package com.projectbob.controller;
 
-import org.springframework.beans.factory.annotation.*;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
-import com.projectbob.domain.Menu;
-import com.projectbob.domain.Shop;
 import com.projectbob.service.BobService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -50,14 +47,10 @@ public class BobController {
 	@GetMapping("/oMain")
 	public String oMain() {
 		return "shop/oMain";
-<<<<<<< HEAD
 	}
-	
 	@GetMapping("/shopJoinForm")
 	public String shopJoinForm() {
 		return "shop/shopJoinForm";
-=======
->>>>>>> develop
 	}
 	@PostMapping("/insertShop")
 	public String insertShop(Shop shop) {
@@ -81,11 +74,7 @@ public class BobController {
 		return "shop/oService";
 	}
 	
-<<<<<<< HEAD
-	  
-=======
-	
->>>>>>> develop
+
 	  @GetMapping("/shopList") 
 	  public String shopList(@RequestParam(value="category",required=false,
 			  	defaultValue="전체보기") String category,
