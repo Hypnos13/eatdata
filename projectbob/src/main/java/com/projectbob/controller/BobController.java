@@ -57,8 +57,16 @@ public class BobController {
 		shopService.insertShop(shop);
 		return "redirect:shopMain";
 	}
-	
-	
+	@PostMapping("/insertMenu")
+	public String insertMenu(Menu menu) {
+		System.out.println("id test"+menu.getSId());
+		shopService.insertMenu(menu);
+		return "redirect:shopMain";
+	}
+	@GetMapping("/menuJoinForm")
+	public String menuJoinForm() {
+		return "shop/menuJoinForm";
+	}
 	@GetMapping("/shopInfo")
 	public String shopInfo() {
 		return "shop/shopInfo";
