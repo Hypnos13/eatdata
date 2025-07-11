@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{js/faq.js}"></script>
+
+	<form name = "updateNoticeForm" id = "updateNoticeForm" method = "post" action="updateNotice">
+		<input type="hidden" name="no" id="no" th:value="${notice.no}">
+		<div class="row mt-5">
+			<div class="col-3 text-center">
+				<h3>게시 범위 :</h3>
+			</div>
+			<div class="col-7">
+				<input class="form-check-input" type="radio" name="disivion" id="all" value="all" th:checked="${notice.disivion == 'all'}">
+				<label class="form-check-label" for="all">모두에게 게시</label>
+				<input class="form-check-input ms-5" type="radio" name="disivion" id="client" value="client" th:checked="${notice.disivion == 'client'}">
+				<label class="form-check-label" for="client">고객님에게만 게시</label>
+				<input class="form-check-input ms-5" type="radio" name="disivion" id="owner" value="owner" th:checked="${notice.disivion == 'owner'}">
+				<label class="form-check-label" for="owner">사장님에게만 게시</label>
+				<input class="form-check-input ms-5" type="radio" name="disivion" id="none" value="none" th:checked="${notice.disivion == 'none'}">
+				<label class="form-check-label" for="none">미공개</label>
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-3 text-center">
+				<h3>게시 시작일 :</h3>
+			</div>
+			<div class="col-7">
+				<input class="form-control" type="date" name="start" id="start" th:value="${#dates.format(notice.startDay,'yyyy-MM-dd')}">
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-3 text-center">
+				<h3>게시 종료기간 :</h3>
+			</div>
+			<div class="col-7">
+				<input class="form-control" type="date" name="end" id="end" th:value="${#dates.format(notice.endDay,'yyyy-MM-dd')}">
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-3 text-center">
+				<h3>제목 :</h3>
+			</div>
+			<div class="col-7">
+				<input class="form-control form-control-lg" name="title" id="title" type="text" placeholder="제목을 작성해주세요." th:value="${notice.title}">
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-3 text-center">
+				<h3>내용 :</h3>
+			</div>
+			<div class="col-7">
+				<textarea class="form-control" name="content" id="content" style="height: 500px" placeholder="내용을 작성해주세요.">[[${notice.content}]]</textarea>
+			</div>
+		</div>
+		<div class="row mt-5">
+			<div class="col-10 text-center">
+				<input class="btn btn-secondary btn-lg" type="submit" value="수정하기">
+			</div>
+
+		</div>
+	</form>
+</th:block>
+</html>

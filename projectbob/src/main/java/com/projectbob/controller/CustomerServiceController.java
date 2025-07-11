@@ -15,6 +15,8 @@ import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.NoticeBoard;
 import com.projectbob.service.CustomerServiceService;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class CustomerServiceController {
 
@@ -68,9 +70,14 @@ public class CustomerServiceController {
 	
 	// 공지사항 페이지
 	@GetMapping("/noticeList")
-	public String noticeList(Model model) {
+	public String noticeList(Model model, NoticeBoard noticeBoard  , HttpSession session) {
 		
+		String userDv = (String) session.getAttribute("loginDisivion");
+		if(userDv == null) { userDv="client";}
 		
+		List<NoticeBoard> notice =  csService.noticeList(userDv);
+		
+		model.addAttribute("noticeList", notice);
 		
 		return "admin/noticeList";
 	}
@@ -87,7 +94,50 @@ public class CustomerServiceController {
 		
 		csService.writeNotice(noticeBoard);
 			
-		return "admin/noticeList";
+		return "redirect:/noticeList";
 	}
 	
+	// 공지사항 자세히 보기
+	@GetMapping("/noticeDetail")
+	public String noticeDetail(Model model, @RequestParam("no") int no) {
+		
+		NoticeBoard notice =  csService.getNotice(no);
+		model.addAttribute("notice", notice);
+		
+		return "admin/noticeDetail";
+	}
+	
+	//공지사항 수정하기 폼 
+	@GetMapping("/updateNoticeForm")
+	public String updateNoticeForm(Model model, @RequestParam("no") int no) {
+		
+		NoticeBoard notice =  csService.getNotice(no);
+		model.addAttribute("notice", notice);
+		
+		return "admin/updateNoticeForm";
+	}	
+	
+	// 공지사항 수정하기 
+	@PostMapping("/updateNotice")
+	public String updateNotice(Model model, NoticeBoard noticeBoard, @RequestParam("start") Date start, @RequestParam("end") Date end) {
+			
+		Timestamp startDay = new  Timestamp(start.getTime());
+		Timestamp endDay = new  Timestamp(end.getTime());
+			
+		noticeBoard.setStartDay(startDay);
+		noticeBoard.setEndDay(endDay);
+		
+		csService.updateNotice(noticeBoard);
+			
+		return "redirect:/noticeList";
+	}
+	
+	// 공지사항 삭제하기
+	@GetMapping("/deleteNotice")
+	public String deleteNotice(@RequestParam("no") int no) {
+		
+		csService.deleteNotice(no);
+		
+		return "redirect:/noticeList";
+	}
 }

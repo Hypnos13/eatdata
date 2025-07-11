@@ -54,6 +54,43 @@
 	INSERT INTO noticeboard(title, content, startday, endday, disivion, reg_date, modi_date)
 	VALUES (#{title}, #{content}, #{startDay}, #{endDay}, #{disivion}, SYSDATE(), SYSDATE())
 </insert>
+
+<select id="noticeList" resultType="NoticeBoard">
+	SELECT *
+	FROM noticeboard
+	<where>
+		<if test = "userDisivion == 'client'">
+			disivion in ('all', 'client')
+			AND SYSDATE() BETWEEN startday AND endday
+		</if>
+		<if test = "userDisivion == 'owner'">
+			disivion in ('all', 'owner')
+			AND SYSDATE() BETWEEN startday AND endday
+		</if>
+		<if test = "userDisivion == 'master'">
+			disivion in ('all', 'client' ,'owner', 'none')
+		</if>
+	</where>
+	ORDER BY startDay DESC , no DESC
+</select>
+
+<select id="getNotice" resultType="NoticeBoard">
+	SELECT *
+	FROM noticeboard
+	WHERE no = #{no}
+</select>
+
+<update id="updateNotice" parameterType="noticeBoard">
+	UPDATE noticeboard
+	SET title = #{title}, content = #{content}, startday = #{startDay}, endday = #{endDay}, disivion = #{disivion}, modi_date = SYSDATE()
+	WHERE no = #{no}
+</update>
+
+<delete id="deleteNotice">
+	DELETE FROM noticeboard
+	WHERE no = #{no}
+</delete>
+
 </mapper>	
 
 

@@ -15,5 +15,9 @@ public interface CustomerServiceMapper {
 	CustomerService getFAQ(int csNo);
 	void updateFAQ(CustomerService customerservice);
 	void deleteFAQ(int csNo);
-	void writeNotice(NoticeBoard noticeBaord);
+	void writeNotice(NoticeBoard noticeBoard);
+	List<NoticeBoard> noticeList(String userDisivion);
+	NoticeBoard getNotice(int no);
+	void updateNotice(NoticeBoard noticeBoard);
+	void deleteNotice(int no);
 }
