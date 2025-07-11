@@ -71,7 +71,7 @@ public class LoginController {
 		session.setAttribute("loginDisivion", member.getDisivion());
 		
 		if(member.getDisivion().equals("owner")){
-			return "redirect:/oMain";
+			return "redirect:/shopMain";
 		}
 		
 		return "redirect:/main";
@@ -184,7 +184,7 @@ public class LoginController {
 		session.setAttribute("loginNickname", member.getNickname());
 		
 		if(session.getAttribute("loginDisivion").equals("owner")) {
-			return "redirect:/oMain";
+			return "redirect:/shopMain";
 		}
 		
 		return "redirect:/main";
