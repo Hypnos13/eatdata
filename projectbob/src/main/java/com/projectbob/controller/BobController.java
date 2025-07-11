@@ -74,6 +74,10 @@ public class BobController {
 		return "shop/oService";
 	}
 	
+<<<<<<< HEAD
+=======
+	
+>>>>>>> origin/hong
 
 	  @GetMapping("/shopList") 
 	  public String shopList(@RequestParam(value="category",required=false,
@@ -85,15 +89,18 @@ public class BobController {
 	  	return "views/shopList"; 
 	  }
 
+/*
+	  @GetMapping("/shopList")
+	  public String shopList(@RequestParam(name="category", defaultValue="전체보기") String category, Model model) {
+	      model.addAttribute("selectedCategory", category);
+		  log.info("BobController: shopList() called"); 
+		  model.addAttribute("sList",bobService.shopList()); 
+	      return "views/shopList"; 
+=======
 
-//	  @GetMapping("/shopList")
-//	  public String shopList(@RequestParam(name="category", defaultValue="전체보기") String category, Model model) {
-//	      model.addAttribute("selectedCategory", category);
-//		  log.info("BobController: shopList() called"); 
-//		  model.addAttribute("sList",bobService.shopList()); 
-//	      return "views/shopList"; 
 
 	  
+	  */
 	  
 	  	// 가게 상세보기 메서드		
 		  @GetMapping("/MenuDetail") 
@@ -106,6 +113,13 @@ public class BobController {
 		  model.addAttribute("menuList", menuList);
 		  
 		  return "views/MenuDetail"; 
+		  }
+		  
+	// 모달창 메뉴옵션보기 메서드
+		  @GetMapping("/menuOptions")
+		  @ResponseBody
+		  public List<MenuOption> menuOptions(@RequestParam("mId") int mId){
+			  return bobService.getMenuOptionsByMenuId(mId);
 		  }
 		  
 		 

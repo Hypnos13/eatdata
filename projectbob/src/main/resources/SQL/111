@@ -36,7 +36,7 @@ INSERT INTO client (id,name,nickname,pass,phone,address1,address2,email,point,bi
 INSERT INTO client (id,name,nickname,pass,phone,address1,address2,email,point,birthday,division,reg_date,modi_date) VALUES ('muyaho','1234','회원','뿡뿡맨','20000303','광명시','광명동','12345@123a4.com','01001041234',0,'우수회원','2022-12-22 11:44:58','2022-12-22 11:44:58');
 
 -- 가게 테이블
--- 가게ID, 회원ID, 가게이름, 연락처, 우편번호, 가게주소, 가게 상세주소, 대표자명, 사업자 등록번호, 카테고리, 평점, 찜수, 운영시간, 휴무일, 최소주문금액, 사업자등록증, 영업신고증, 상태, 원산지, 가게공지사항, 가게정보, 등록일, 수정일
+-- 가게ID, 회원ID, 가게이름, 연락처, 우편번호, 가게주소, 가게 상세주소, 대표자명, 사업자 등록번호, 카테고리, 가게사진, 평점, 찜수, 운영시간, 휴무일, 최소주문금액, 사업자등록증, 영업신고증, 상태, 원산지, 가게공지사항, 가게정보, 등록일, 수정일
 -- 참조하는 회원이 있으면 가게 삭제 불가
 -- 회원(id)가 변경되면 가게 테이블의 id도 자동으로 변경
 DROP TABLE IF EXISTS shop;
@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS shop(
   owner VARCHAR(20) NOT NULL,
   s_number INT NOT NULL,
   category VARCHAR(50),
+  s_picture VARCHAR(250),
   rating DECIMAL(2,1) DEFAULT 0.0,
   heart INT DEFAULT 0,
   op_time VARCHAR(50),
@@ -68,12 +69,12 @@ CREATE TABLE IF NOT EXISTS shop(
 	ON DELETE RESTRICT ON UPDATE CASCADE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('admin','싹싹김치','01012341234','12345','관악구','신림동','홍길동',557241,'한식',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
-INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('admin','싹싹치킨','01012341234','12345','관악구','신림동','길동홍',557242,'치킨',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
-INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('admin','싹싹피자','01012341234','12345','관악구','신림동','동길홍',557243,'피자',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
-INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('admin','싹싹보쌈','01012341234','12345','관악구','신림동','홍동길',557244,'야식',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
-INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('admin','분식','01012341234','12345','관악구','신림동','흥흥흥',557245,'분식',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
-INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('muyaho','어쩔티비','01001041234','12345','광명시','광명동','동동동',667241,'1인분 주문',0.0,0,'8~20','화요일','9000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
+INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,s_picture,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('admin','싹싹김치','01012341234','12345','관악구','신림동','홍길동',557241,'한식','가게사진',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
+INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,s_picture,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('admin','싹싹치킨','01012341234','12345','관악구','신림동','길동홍',557242,'치킨','가게사진',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
+INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,s_picture,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('admin','싹싹피자','01012341234','12345','관악구','신림동','동길홍',557243,'피자','가게사진',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
+INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,s_picture,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('admin','싹싹보쌈','01012341234','12345','관악구','신림동','홍동길',557244,'야식','가게사진',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
+INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,s_picture,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('admin','분식','01012341234','12345','관악구','신림동','흥흥흥',557245,'분식','가게사진',0.0,0,'8~20','월요일','10000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
+INSERT INTO shop (id,name,phone,zipcode,address1,address2,owner,s_number,category,s_picture,rating,heart,op_time,off_day,min_price,s_license,s_cert,status,info,notice,s_info) VALUES ('muyaho','어쩔티비','01001041234','12345','광명시','광명동','동동동',667241,'1인분 주문','가게사진',0.0,0,'8~20','화요일','9000','사업자등록증','영업신고증','오픈','원산지','가게공지사항','가게정보');
 
 
 -- 메뉴 테이블
@@ -183,4 +184,23 @@ CREATE TABLE IF NOT EXISTS coupon(
     status VARCHAR(50) NOT NULL,
     CONSTRAINT fk_coupon_id FOREIGN KEY (id) REFERENCES client(id)
 		ON DELETE CASCADE ON UPDATE CASCADE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 리뷰 테이블
+-- 리뷰번호, 회원id, 가게id, 메뉴id, 내용, 별정, 리뷰사진, 좋아요, 작성일, 수정일, 상태
+DROP TABLE IF EXISTS review;
+CREATE TABLE IF NOT EXISTS review(
+	r_no INTEGER AUTO_INCREMENT PRIMARY KEY,
+    id VARCHAR(20) NOT NULL,
+    s_id int NOT NULL,
+    m_id int NOT NULL,
+    content VARCHAR(250) NOT NULL,
+    rating int NOT NULL,
+    r_picture VARCHAR(250),
+    liked int NOT NULL,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_review_id FOREIGN KEY (s_id) REFERENCES shop(id)
+		ON DELETE CASCADE ON UPDATE CASCADE	
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
