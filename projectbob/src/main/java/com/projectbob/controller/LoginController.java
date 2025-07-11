@@ -53,6 +53,14 @@ public class LoginController {
 			out.println("	history.back();");
 			out.println("</script>");
 			return null;
+		}else if(login == -2){
+			response.setContentType("text/html; charset=utf-8");
+			PrintWriter out = response.getWriter();
+			out.println("<script>");
+			out.println("	alert('사용이 금지된 아이디입니다.');");
+			out.println("	history.back();");
+			out.println("</script>");
+			return null;
 		}
 		
 		Member member = loginService.getMember(id);
@@ -212,5 +220,29 @@ public class LoginController {
 		
 		return "members/login";
 	}
+	
+	// 관리자권한 - 사용자관리
+	@GetMapping("/userList")
+	public String userList(Model model) {
+		
+		List<Member> userList = loginService.userList();
+		model.addAttribute("userList", userList);
+		
+		return "admin/userList";
+	}
+	
+	// 관리자권한 - 사용자사용권한변경
+	@GetMapping("/updateIsuse")
+	public String updateIsuse(Model model, @RequestParam("id") String id, @RequestParam("isuse") String isuse, HttpSession session) {
+		
+		String loginDisivion = (String) session.getAttribute("loginDisivion");
+		
+		if(loginDisivion.equals("master")) {
+			loginService.updateIsuse(id, isuse);
+		}
+		
+		return "redirect:/userList";
+	}
+	
 	
 }
