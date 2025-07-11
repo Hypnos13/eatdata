@@ -74,10 +74,7 @@ public class BobController {
 		return "shop/oService";
 	}
 	
-<<<<<<< HEAD
-=======
-	
->>>>>>> origin/hong
+
 
 	  @GetMapping("/shopList") 
 	  public String shopList(@RequestParam(value="category",required=false,
