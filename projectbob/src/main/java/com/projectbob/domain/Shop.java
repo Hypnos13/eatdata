@@ -13,12 +13,12 @@ public class Shop {
 	private String id;
 	private String name;
 	private String phone;
-	private String zipcode;
 	private String address1;
 	private String address2;
 	private String owner;
 	private int sNumber;
 	private String category;
+	private String sPicture;
 	private double rating;
 	private int heart;
 	private String opTime;

@@ -24,13 +24,13 @@ public class LoginController {
 	@Autowired
 	LoginService loginService;
 
-
+	//로그인 폼
 	@GetMapping("/login")
 	public String loginForm() {
 		return "members/login";
 	}
 	
-	
+	// 로그인
 	@PostMapping("/login")
 	public String login(Model model, @RequestParam("id") String id, @RequestParam("pass") String pass, HttpSession session,
 			HttpServletResponse response )throws ServletException, IOException {
@@ -62,10 +62,14 @@ public class LoginController {
 		session.setAttribute("loginNickname", member.getNickname());
 		session.setAttribute("loginDisivion", member.getDisivion());
 		
+		if(member.getDisivion().equals("owner")){
+			return "redirect:/oMain";
+		}
+		
 		return "redirect:/main";
 	}
 	
-	
+	// 회원가입
 	@PostMapping("/joinMember")
 	public String joinMember(Model model, Member member) {
 		
@@ -78,7 +82,7 @@ public class LoginController {
 		return "views/main";
 	}
 	
-	
+	// 아이디, 비밀번호 찾기
 	@PostMapping("/searchIdPass")
 	public String searchIdPass(Model model,@RequestParam(name = "id", defaultValue = "") String id, @RequestParam(name = "name", defaultValue = "") String name, 
 			@RequestParam(name = "phone", defaultValue = "") String phone, @RequestParam(name = "email", defaultValue = "") String email, 
@@ -126,6 +130,7 @@ public class LoginController {
 		}
 	}
 	
+	// 아이디, 비밀번호 찾기 폼
 	@GetMapping("/searchIdPassForm")
 	public String searchIdPassForm(Model model, @RequestParam("search") String search) {
 		
@@ -139,6 +144,7 @@ public class LoginController {
 	}
 	
 	
+	// 내 정보 수정 폼
 	@GetMapping("/myProfile")
 	public String myProfile(Model model, HttpSession session) {
 		
@@ -150,6 +156,7 @@ public class LoginController {
 	}
 	
 	
+	// 내 정보 수정
 	@PostMapping("/updateMember")
 	public String updateMember(Model model, Member member, HttpSession session, HttpServletResponse response) throws ServletException, IOException {
 		
@@ -171,14 +178,14 @@ public class LoginController {
 		return "views/main";
 	}
 	
-	
+	// 로그아웃
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
 		session.invalidate();
 		return "members/login";
 	}
 	
-	
+	// 회원 탈퇴
 	@PostMapping("/deleteMember")
 	public String deleteMember( @RequestParam("userId") String id, @RequestParam("userPass") String pass, HttpSession session, 
 			HttpServletResponse response) throws ServletException, IOException {

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{js/faq.js}"></script>
+
+<div class ="container">
+	<th:block th:if="${session.loginDisivion == 'master'}">
+		<div class="row mt-2">
+			<div class="col-12 text-end ">
+				<a th:href="@{writeNoticeForm}" class="btn btn-success">공지작성</a>
+			</div>
+		</div>
+	</th:block>
+	
+	<div class="row mt-4">
+		<th:block th:each="notice, status: ${noticeList}">
+			<div class="col-11 noticeContain border bg-body mx-auto" th:data-no="${notice.No}">
+				<div class= "row">
+					<div class="col mt-2 mx-2 fw-bold">
+						<span style="font-size: 18px;">[[${notice.title}]]</span>
+					</div>
+				</div>
+				<div class= "row">
+					<div class="col mb-2 mx-2 text-black-50">
+						<span style="font-size: 14px;">[[${#dates.format(notice.startDay, 'yyyy-MM-dd')}]] ~ [[${#dates.format(notice.endDay, 'yyyy-MM-dd')}]]</span>
+					</div>
+				</div>
+			</div>
+		</th:block>
+	</div>
+				
+</div>
+
+</th:block>
+</html>

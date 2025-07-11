@@ -13,18 +13,16 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Client {
+public class Coupon {
+	private int cNo;
 	private String id;
 	private String name;
-	private String nickname;
-	private String pass;
-	private String phone;
-	private String address1;
-	private String address2;
-	private String email;
-	private int point;
-	private String birthday;
-	private String division;
-	private Timestamp reg_date;
-	private Timestamp modi_date;
+	private String content;
+	private int disPrice;
+	private int minPrice;
+	private Timestamp regDate;
+	private Timestamp modiDate;
+	private Timestamp delDate;
+	private String status;
+
 }

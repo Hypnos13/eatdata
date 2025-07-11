@@ -11,10 +11,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member {
+public class CustomerService {
 
-	private String id, name, nickname, pass, phone, address1, address2, email, birthday, disivion;
-	private int point;
-	private Timestamp regDate, modiDate;
+	int csNo;
+	String type, title, content;
+	Timestamp regDate;
 	
 }

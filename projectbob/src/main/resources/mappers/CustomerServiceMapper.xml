@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.projectbob.mapper.CustomerServiceMapper" >
+
+<insert id="writeFAQ" parameterType="CustomerService">
+	INSERT INTO customerservice(type, title, content, reg_date)
+	VALUES(#{type}, #{title}, #{content}, SYSDATE())
+</insert>
+
+<select id="FAQList" resultType="CustomerService">
+	SELECT *
+	FROM customerservice
+	<where>
+		<if test="type == '주문'">
+				type = "주문"
+		</if>
+		<if test="type == '서비스'">
+				type = "서비스"
+		</if>
+		<if test="type == '회원정보'">
+				type = "회원정보"
+		</if>
+		<if test="type == '결제'">
+				type = "결제"
+		</if>
+		<if test="type == '리뷰'">
+				type = "리뷰"
+		</if>
+		<if test="type == '기타'">
+				type = "기타"
+		</if>	
+	</where>
+</select>
+
+<select id="getFAQ" resultType="customerService">
+	SELECT *
+	FROM customerservice
+	WHERE cs_no = #{csNo}
+</select>
+
+<update id="updateFAQ" parameterType="CustomerService">
+	UPDATE customerservice
+	SET title = #{title} , content = #{content}, type = #{type} , reg_date=SYSDATE()
+	WHERE cs_no = #{csNo}
+</update>
+
+<delete id="deleteFAQ">
+	DELETE FROM customerservice
+	WHERE cs_no = #{csNo}
+</delete>
+
+<insert id="writeNotice" parameterType="NoticeBoard">
+	INSERT INTO noticeboard(title, content, startday, endday, disivion, reg_date, modi_date)
+	VALUES (#{title}, #{content}, #{startDay}, #{endDay}, #{disivion}, SYSDATE(), SYSDATE())
+</insert>
+
+<select id="noticeList" resultType="NoticeBoard">
+	SELECT *
+	FROM noticeboard
+	<where>
+		<if test = "userDisivion == 'client'">
+			disivion in ('all', 'client')
+			AND SYSDATE() BETWEEN startday AND endday
+		</if>
+		<if test = "userDisivion == 'owner'">
+			disivion in ('all', 'owner')
+			AND SYSDATE() BETWEEN startday AND endday
+		</if>
+		<if test = "userDisivion == 'master'">
+			disivion in ('all', 'client' ,'owner', 'none')
+		</if>
+	</where>
+	ORDER BY startDay DESC , no DESC
+</select>
+
+<select id="getNotice" resultType="NoticeBoard">
+	SELECT *
+	FROM noticeboard
+	WHERE no = #{no}
+</select>
+
+<update id="updateNotice" parameterType="noticeBoard">
+	UPDATE noticeboard
+	SET title = #{title}, content = #{content}, startday = #{startDay}, endday = #{endDay}, disivion = #{disivion}, modi_date = SYSDATE()
+	WHERE no = #{no}
+</update>
+
+<delete id="deleteNotice">
+	DELETE FROM noticeboard
+	WHERE no = #{no}
+</delete>
+
+</mapper>	
+
+
+

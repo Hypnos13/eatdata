@@ -1,114 +1,115 @@
-/* main.css */
+/* =====================
+   main 영역
+===================== */
 
+/* 기본 배경 */
 body {
-	background-color: #f9f9f9;
+  background-color: #f9f9f9;
 }
 
 /* 상단 바 */
 .top-bar {
-	background-color: #43d091;
-	color: white;
-	padding: 10px 0;
+  background-color: #43d091;
+  color: white;
+  padding: 10px 0;
 }
 
 .top-bar a {
-	color: white;
-	text-decoration: none;
-	margin-right: 15px;
-}
-
-/* 검색 영역 */
-.search-box {
-	background-image: url('https://images.deliveryhero.io/image/foodpanda/bg/bg_header.jpg');
-	background-size: cover;
-	background-position: center;
-	height: 220px;
-	color: white;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	text-align: center;
-	padding: 20px;
-}
-
-/* 카테고리 카드 */
-.category-card {
-	aspect-ratio: 1/1;
-	background-size: cover;
-	background-position: center;
-	overflow: hidden;
-	position: relative;
-	cursor: pointer;
-	width: 100%;
-	height: 100%;
-}
-
-.category-title {
-	position: absolute;
-	top: 0.4rem;
-	left: 0.5rem;
-	font-size: 0.8rem;
-	font-weight: 600;
-	color: #000;
-	z-index: 2;
+  color: white;
+  text-decoration: none;
+  margin-right: 15px;
 }
 
 /* footer */
 .footer {
-	font-size: 0.9rem;
-	color: gray;
-	padding: 20px 0;
-	border-top: 1px solid #ddd;
+  font-size: 0.9rem;
+  color: gray;
+  padding: 20px 0;
+  border-top: 1px solid #ddd;
 }
 
 /* 네비게이션 바 */
 nav.navbar {
-	background-color: #f8f9fa;
-	padding: 0.25rem 1rem;
-	border-radius: 0;
-	margin-bottom: 1.5rem;
-	overflow-x: auto;
-	scrollbar-width: thin; /* Firefox */
+  background-color: #f8f9fa;
+  padding: 0.25rem 1rem;
+  border-radius: 0;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  scrollbar-width: thin; /* Firefox */
 }
 
-/* 스크롤바 스타일 (크롬용) */
 nav.navbar::-webkit-scrollbar {
-	height: 6px;
+  height: 6px;
 }
 
 nav.navbar::-webkit-scrollbar-thumb {
-	background-color: #43d091;
-	border-radius: 3px;
+  background-color: #43d091;
+  border-radius: 3px;
 }
 
-/* nav 내부 항목 */
 nav.navbar .nav {
-	display: flex;
-	flex-wrap: nowrap;
-	gap: 0.5rem;
-	white-space: nowrap;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  white-space: nowrap;
 }
 
 nav.navbar .nav-link {
-	border-radius: 0;
-	font-size: 0.85rem;
-	padding: 0.35rem 0.75rem;
-	color: #333;
+  border-radius: 0;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  color: #333;
 }
 
 nav.navbar .nav-link:hover {
-  background-color: #d3f0de; /* 연한 녹색 배경 효과 (선택 사항) */
+  background-color: #d3f0de;
 }
 
-/* 활성화된 nav 항목 */
 nav.navbar .nav-link.active {
-	background-color: #43d091;
-	color: white !important;
-	font-weight: bold;
-	border-bottom: 2px solid #43d091;
+  background-color: #43d091;
+  color: white !important;
+  font-weight: bold;
+  border-bottom: 2px solid #43d091;
 }
 
-/* menudetail 영역 추가  */
+/* 결제 제목 */
+.section-title {
+  background: #444;
+  color: white;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+/* 결제 완료 박스 */
+.complete-box {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 30px;
+  margin-top: 40px;
+}
+
+/* 검색 영역 */
+.search-box {
+  background-image: url('https://images.deliveryhero.io/image/foodpanda/bg/bg_header.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 220px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+}
+
+
+/* =====================
+   shopList 영역
+===================== */
+
+/* 카테고리 바 */
 .category-bar {
   display: flex;
   overflow-x: auto;
@@ -120,6 +121,7 @@ nav.navbar .nav-link.active {
   display: none; /* Chrome, Safari */
 }
 
+/* 카테고리 버튼 */
 .category-btn {
   flex: 0 0 auto;
   margin-right: 0.5rem;
@@ -140,27 +142,162 @@ nav.navbar .nav-link.active {
   color: white;
 }
 
-
-/* pay영역 추가 */
-.section-title {
-  background: #444;
-  color: white;
-  padding: 10px;
-  margin-bottom: 15px;
-  font-weight: bold;
+/* 카테고리 카드 */
+.category-card {
+  aspect-ratio: 1/1;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
 }
 
+.category-title {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #000;
+  z-index: 2;
+}
+
+
+/* =====================
+   menu 영역
+===================== */
+
+/* 메뉴 카드 공통 */
+.card.menu-card {
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+}
+
+.card.menu-card:hover {
+  transform: translateY(-5px);
+}
+
+/* 수량 조절 영역 */
+.qty-control {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; 
+}
+.qty-control button {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+/* 메뉴 타이틀 및 가격 */
+.menu-title {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.menu-price {
+  font-weight: bold;
+  color: #43d091;
+}
+
+/* 주문표 영역 */
 .order-summary {
   background: #fff;
   padding: 20px;
   border: 1px solid #ccc;
+  position: sticky;
+  top: 100px;
+  z-index: 10;
 }
 
-/* pay영역 추가 */
-.complete-box {
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 30px;
-  margin-top: 40px;
+.order-summary .card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
 }
+
+
+/*FAQ 영역*/
+.faq-type {
+	background-color: #43d091;
+	color: white;
+	font-weight: bold;
+	padding: 10px 0;
+}
+
+.faq-accordion-head {
+	background-color:  #43d091;
+	font-weight: bold;
+	padding: 10px 10px;
+}
+
+.faq-accordion-body{
+	background-color: white;
+	border: 5px solid #43d091;
+	font-weight: bold;
+	padding: 10px 10px;
+}
+/* 주문표 항목 정렬 */
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 주문표 메뉴명 */
+.order-item-name {
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  width: 100%;
+}
+
+/* 버튼 크기 조절 및 가로 정렬 유지 */
+.btn-qty {
+  width: 18px;   
+  height: 18px;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* 주문 아이템 내 삭제(제거) 버튼 스타일 */
+.order-item-left .btn-remove-item {
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  font-weight: bold;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: #dc3545; /* Bootstrap danger 색상 */
+  border: 1px solid #dc3545;
+  background: transparent;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.order-item-left .btn-remove-item:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* 주문 추가 메뉴(서브메뉴) 들여쓰기 및 스타일 */
+.order-list-item.ms-4 {
+  font-size: 0.9rem;
+  color: #6c757d; /* Bootstrap text-muted 색상 */
+  padding-left: 0.5rem;
+  border-left: 2px solid #43d091;
+  margin-left: 1rem;
+  margin-bottom: 0.25rem;
+}
+
