@@ -9,11 +9,13 @@
 	FROM menu
 	WHERE s_id = #{sId} ORDER BY m_id ASC
 </select>
+
+<!-- 모달창 메뉴옵션에 필요한 xml -->
 <select id="getMenuOptionsByMenuId" resultType="com.projectbob.domain.MenuOption">
 	SELECT
 	*
 	FROM menu_Option
-	WHERE m_id = #{m_id} ORDER BY price
+	WHERE m_id = #{mId} ORDER BY price
 </select>
 <select id="getMenuCategoriesByShopId" resultType="java.lang.String">
 	SELECT DISTINCT category FROM menu
