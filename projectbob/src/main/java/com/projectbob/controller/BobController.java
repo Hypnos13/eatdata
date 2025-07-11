@@ -1,14 +1,17 @@
 package com.projectbob.controller;
 
+import org.springframework.beans.factory.annotation.*;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
+import com.projectbob.domain.Menu;
+import com.projectbob.domain.Shop;
 import com.projectbob.service.BobService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -44,38 +47,24 @@ public class BobController {
 	public String completed() {
 		return "views/completed";
 	}
-	@GetMapping("/oMain")
-	public String oMain() {
-		return "shop/oMain";
-	}
-	@GetMapping("/shopJoinForm")
-	public String shopJoinForm() {
-		return "shop/shopJoinForm";
+	@GetMapping("/shopMain")
+	public String shopMain() {
+		return "shop/shopMain";
 	}
 	@PostMapping("/insertShop")
 	public String insertShop(Shop shop) {
 		System.out.println("id test"+shop.getId());
 		shopService.insertShop(shop);
-		return "redirect:oMain";
+		return "redirect:shopMain";
 	}
-	@GetMapping("/menuJoinForm")
-	public String menuJoinForm() {
-		return "shop/menuJoinForm";
-	}
-	@PostMapping("/insertMenu")
-	public String insertMenu(Menu menu) {
-		System.out.println("sId test"+menu.getSId());
-		shopService.insertMenu(menu);
-		return "redirect:oMain";
-	}
+	
 	
 	@GetMapping("/oService")
 	public String oService() {
 		return "shop/oService";
 	}
 	
-
-
+	
 	  @GetMapping("/shopList") 
 	  public String shopList(@RequestParam(value="category",required=false,
 			  	defaultValue="전체보기") String category,
@@ -86,18 +75,15 @@ public class BobController {
 	  	return "views/shopList"; 
 	  }
 
-/*
-	  @GetMapping("/shopList")
-	  public String shopList(@RequestParam(name="category", defaultValue="전체보기") String category, Model model) {
-	      model.addAttribute("selectedCategory", category);
-		  log.info("BobController: shopList() called"); 
-		  model.addAttribute("sList",bobService.shopList()); 
-	      return "views/shopList"; 
-=======
 
+//	  @GetMapping("/shopList")
+//	  public String shopList(@RequestParam(name="category", defaultValue="전체보기") String category, Model model) {
+//	      model.addAttribute("selectedCategory", category);
+//		  log.info("BobController: shopList() called"); 
+//		  model.addAttribute("sList",bobService.shopList()); 
+//	      return "views/shopList"; 
 
 	  
-	  */
 	  
 	  	// 가게 상세보기 메서드		
 		  @GetMapping("/MenuDetail") 
@@ -110,13 +96,6 @@ public class BobController {
 		  model.addAttribute("menuList", menuList);
 		  
 		  return "views/MenuDetail"; 
-		  }
-		  
-	// 모달창 메뉴옵션보기 메서드
-		  @GetMapping("/menuOptions")
-		  @ResponseBody
-		  public List<MenuOption> menuOptions(@RequestParam("mId") int mId){
-			  return bobService.getMenuOptionsByMenuId(mId);
 		  }
 		  
 		 

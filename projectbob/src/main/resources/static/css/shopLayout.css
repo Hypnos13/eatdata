@@ -1,0 +1,130 @@
+/* /static/css/shopLayout.css */
+
+/* === 공통 색상 변수 === */
+:root {
+  --main-color: #43D091;
+  --dark-color: #2c3e50;
+  --light-color: #ffffff;
+  --text-color: #34495e;
+  --light-gray: #f9f9f9;
+}
+
+/* === 헤더 === */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 50px;
+  background-color: var(--light-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.09);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header .logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--main-color);
+  text-decoration: none;
+  letter-spacing: -1px;
+  border-bottom: none !important; /* 밑줄 방지 */
+}
+
+.header nav {
+  display: flex;
+  align-items: flex-start;
+}
+
+.header nav a {
+  margin-left: 20px;
+  text-decoration: none;
+  color: var(--text-color);
+  font-weight: 500;
+  padding: 8px 15px;
+  border-radius: 5px;
+  transition: all 0.3s;
+}
+
+.header nav a.btn-login {
+  border: 1px solid var(--main-color);
+  color: var(--main-color);
+}
+.header nav a.btn-login:hover {
+  background-color: var(--main-color);
+  color: var(--light-color);
+}
+.header nav a.btn-register {
+  background-color: var(--main-color);
+  color: var(--light-color);
+}
+.header nav a.btn-register:hover {
+  opacity: 0.85;
+}
+
+/* === 반응형 헤더 (991px 이하) === */
+@media (max-width: 991px) {
+  .header { 
+    flex-direction: column; 
+    padding: 15px 12px; 
+    align-items: flex-start;
+  }
+  .header nav { 
+    margin-top: 10px;
+    flex-direction: column;
+    width: 100%;
+    gap: 6px;
+  }
+  .header nav a {
+    margin-left: 0;
+    width: 100%;
+    text-align: left;
+  }
+  .header nav a.btn-login,
+  .header nav a.btn-register {
+    max-width: 220px;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+    display: block;
+  }
+}
+
+/* === 푸터 === */
+.footer {
+  background-color: var(--dark-color);
+  color: var(--light-gray);
+  padding: 40px 20px;
+  text-align: center;
+  margin-top: 80px;
+}
+
+.footer a {
+  color: var(--light-gray);
+  margin: 0 10px;
+  text-decoration: none;
+}
+
+/* 푸터 메뉴(있는 경우) */
+.footer-menu {
+  font-size: 0.99rem;
+  color: #ccc;
+  text-align: left;
+  padding-left: 12px;
+  margin-bottom: 6px;
+}
+.footer-menu a {
+  color: #eee;
+  text-decoration: none;
+  margin: 0 8px;
+  transition: color 0.13s;
+}
+.footer-menu a.active, .footer-menu a:active {
+  font-weight: 700;
+  color: #fff;
+}
+@media (max-width: 767px) {
+  .footer { padding: 32px 8px; }
+  .footer-menu { font-size: 0.95rem; padding-left: 0;}
+}
