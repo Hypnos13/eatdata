@@ -99,6 +99,9 @@ public class BobController {
 		  model.addAttribute("shop", shop);
 		  model.addAttribute("menuList", menuList);
 		  
+		  List<Review> reviewList = bobService.reviewList(sId);
+		  model.addAttribute("reviewList", reviewList);
+		  
 		  return "views/MenuDetail"; 
 		  }
 		  
