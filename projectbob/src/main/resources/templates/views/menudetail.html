@@ -81,7 +81,7 @@
 						<!-- 리뷰 탭 상단 -->
 						<div class="border rounded p-3 mb-3 bg-white">
 							<div class="d-flex align-items-center mb-2">
-								<h2 class="fw-bold me-3" th:text="${shop.rating}">4.9</h2>
+								<h2 class="fw-bold me-3" th:text="${#numbers.formatDecimal(reviewAvg, 1, 1)}">4.9</h2>
 								<div>
 									<span class="fs-5">별점</span>
 									<span class="ms-2 text-warning">
@@ -93,12 +93,13 @@
 								리뷰 <span th:text="${reviewList.size()}">0</span>개
 							</div>
 						</div>
+						----------
 						<!-- 리뷰 리스트 -->
 						<div th:if="${not #lists.isEmpty(reviewList)}">
 							<div th:each="review : ${reviewList}" class="border-bottom pb-3 mb-3">
 								<div class="d-flex align-items-center mb-1">
 									<span class="fw-bold" th:text="${#strings.substring(review.id,0,2) + '**님'}">ad**님</span>
-									<span class="text-muted small ms-2" th:text="${#dates.format(review.regDate, 'yyyy-MM-dd')}">오늘</span>
+									<span class="text-muted small ms-2" th:text="${#dates.format(review.regDate, 'yyyy-MM-dd')}">날짜</span>
 									<span class="ms-auto text-danger small" style="cursor:pointer">신고</span>
 								</div>
 								<!-- 별점  -->

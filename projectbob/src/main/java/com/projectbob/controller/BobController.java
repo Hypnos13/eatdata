@@ -102,6 +102,12 @@ public class BobController {
 		  List<Review> reviewList = bobService.reviewList(sId);
 		  model.addAttribute("reviewList", reviewList);
 		  
+		  double reviewAvg = 0.0;
+		  if (!reviewList.isEmpty()) {
+			  reviewAvg = reviewList.stream().mapToInt(Review::getRating).average().orElse(0.0);			  
+		  }
+		  model.addAttribute("reviewAvg", reviewAvg);
+		  
 		  return "views/MenuDetail"; 
 		  }
 		  
