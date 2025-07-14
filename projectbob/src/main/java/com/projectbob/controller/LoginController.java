@@ -89,7 +89,7 @@ public class LoginController {
 		
 		loginService.joinMember(member);
 		
-		return "views/login";
+		return "members/login";
 	}
 	
 	// 아이디, 비밀번호 찾기
