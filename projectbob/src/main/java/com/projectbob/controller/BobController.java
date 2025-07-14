@@ -60,17 +60,53 @@ public class BobController {
 //		  model.addAttribute("sList",bobService.shopList()); 
 //	      return "views/shopList"; 
 
-	  // 가게 상세보기 메서드		
-	  @GetMapping("/MenuDetail") 
-	  public String getMenuDetail(Model model,		  
-	  @RequestParam("sId") int sId) {
-	  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", sId); // 가게 정보 가져오기
-	  Shop shop = bobService.getShopDetail(sId);
-	  List<Menu> menuList = bobService.getMenuListByShopId(sId);
-	  model.addAttribute("shop", shop);
-	  model.addAttribute("menuList", menuList);
-	  
-	  return "views/MenuDetail"; 
-	  }
-	  
+
+	  	// 가게 상세보기 메서드		
+		  @GetMapping("/MenuDetail") 
+		  public String getMenuDetail(Model model,		  
+		  @RequestParam("sId") int sId) {
+		  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", sId); // 가게 정보 가져오기
+		  Shop shop = bobService.getShopDetail(sId);
+		  List<Menu> menuList = bobService.getMenuListByShopId(sId);
+		  model.addAttribute("shop", shop);
+		  model.addAttribute("menuList", menuList);
+		  
+		  List<Review> reviewList = bobService.reviewList(sId);
+		  model.addAttribute("reviewList", reviewList);
+		  
+		  double reviewAvg = 0.0;
+		  if (!reviewList.isEmpty()) {
+			  reviewAvg = reviewList.stream().mapToInt(Review::getRating).average().orElse(0.0);			  
+		  }
+		  model.addAttribute("reviewAvg", reviewAvg);
+		  
+		  return "views/MenuDetail"; 
+		  }
+		  
+	// 모달창 메뉴옵션보기 메서드
+		  @GetMapping("/menuOptions")
+		  @ResponseBody
+		  public List<MenuOption> menuOptions(@RequestParam("mId") int mId){
+			  return bobService.getMenuOptionsByMenuId(mId);
+		  }
+		  
+		  
+
+		  // menudetail 에서 pay로 
+		  @PostMapping("/pay")
+		  public String payPage(
+				  @RequestParam("menuId") Long menuId,
+				  @RequestParam("count") int count,
+				  @RequestParam("optionIds") String optionIds,
+				  @RequestParam("totalPrice") int totalPrice,
+				  Model model) {
+			  model.addAttribute("menuId", menuId);
+			  model.addAttribute("count", count);
+			  model.addAttribute("optionIds", optionIds);
+			  model.addAttribute("totalPrice", totalPrice);
+			  
+			  return "views/pay";			  
+		  }
+		  
+
 }
