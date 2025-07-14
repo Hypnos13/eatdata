@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @Slf4j
-@RequestMapping("/owner")
 public class ShopController {
 	
 	@Autowired
@@ -28,10 +27,10 @@ public class ShopController {
 	
 	@PostMapping("/insertShop")
 	public String insertShop(
-			@RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 
+			@RequestParam("sNumber") Integer sNumber, @RequestParam("owner") String owner, 
 			@RequestParam("phone") String phone, @RequestParam("name") String name, 
 			@RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1, 
-			@RequestParam("address2") String address2, @RequestParam("sLicenseFile") MultipartFile sLicenseFile, 
+			@RequestParam("address2") String address2, @RequestParam("sLicense") MultipartFile sLicenseFile, 
 			Model model ) {
 		
 		String sLicenseUrl = null; // DB에 저장할 사업자등록증 URL
@@ -51,30 +50,26 @@ public class ShopController {
 
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage()); // 파일이 비어있는 경우
-            return "owner/shop_register_form";
+            return "/shopJoinForm";
         } catch (IOException e) {
             e.printStackTrace();
             model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-            return "owner/shop_register_form";
+            return "/shopJoinForm";
         }
-
-        // 3. 모든 정보 (sLicenseUrl 포함)를 DB에 저장하는 로직
-        // (가정) Shop 엔티티와 ShopService를 사용
-        // Shop shop = new Shop();
-        // shop.setsNumber(sNumber);
-        // shop.setOwner(owner);
-        // shop.setPhone(phone);
-        // shop.setName(shopName);
-        // shop.setZipcode(zipcode);
-        // shop.setAddress1(address1);
-        // shop.setAddress2(address2);
-        // shop.setsLicenseUrl(sLicenseUrl); // DB에 파일의 웹 접근 URL 저장
-        // // if (shopImageUrl != null) shop.setShopImageUrl(shopImageUrl); // 가게사진도 있다면 저장
-
-        // shopService.saveShop(shop); // DB 저장 로직 호출
+        
+        Shop shop = new Shop();
+        shop.setSNumber(sNumber);
+        shop.setOwner(owner);
+        shop.setPhone(phone);
+        shop.setName(name);
+        shop.setZipcode(zipcode);
+        shop.setAddress1(address1);
+        shop.setAddress2(address2);
+        shop.setSLicenseURL(sLicenseUrl);
+        shopService.insertShop(shop);
 
         model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
-		return "redirect:oMain";
+		return "redirect:shopMain";
 	}
 	
 	

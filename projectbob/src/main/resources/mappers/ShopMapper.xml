@@ -11,8 +11,8 @@
 
 	<!-- 가게 등록 -->
 	<insert id="insertShop" parameterType="Shop" useGeneratedKeys="true" keyProperty="sId">
-		INSERT INTO shop(id, name, phone, zipcode, address1, address2, owner, s_number, reg_date) 
-		VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{sNumber}, SYSDATE())
+		INSERT INTO shop(id, name, phone, zipcode, address1, address2, owner, s_number, s_licenseURL, reg_date) 
+		VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{sNumber}, #{sLicenseURL}, SYSDATE())
 	</insert>
 	
 	<!-- 가게리스트 불러오기 -->
