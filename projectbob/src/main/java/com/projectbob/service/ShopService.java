@@ -17,6 +17,11 @@ public class ShopService {
 	@Autowired
 	private ShopMapper shopMapper;
 	
+	//메뉴 옵션 등록
+	public void insertMenuOption(MenuOption menuOption) {
+		shopMapper.insertMenuOption(menuOption);
+	}
+	
 	//메뉴 등록
 	public void insertMenu(Menu menu) {
 		shopMapper.insertMenu(menu);

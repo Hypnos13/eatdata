@@ -2,6 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.ShopMapper" >
+	<!-- 메뉴 옵션 등록 -->
+	<insert id="insertMenuOption" parameterType="MenuOption" useGeneratedKeys="true" keyProperty="moId">
+		INSERT INTO menu_option(m_id, m_option, content, price, reg_date) 
+		VALUES(#{mId}, #{mOption}, #{content}, #{price}, SYSDATE())
+	</insert>
 
 	<!-- 메뉴 등록 -->
 	<insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">

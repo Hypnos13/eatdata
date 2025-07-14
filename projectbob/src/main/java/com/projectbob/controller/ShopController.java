@@ -3,8 +3,6 @@ package com.projectbob.controller;
 import org.springframework.beans.factory.annotation.*;
 
 import java.io.IOException;
-import java.util.*;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -106,6 +104,23 @@ public class ShopController {
 		return "redirect:menuJoinForm";
 	}
 	
+	@PostMapping("/insertMenuOption")
+	public String insertMenuOption( @RequestParam("mId") Integer mId,
+			@RequestParam("mOption") String mOption, @RequestParam("content") String content, 
+			@RequestParam("price") Integer price, Model model ) {
+		
+        MenuOption menuOption = new MenuOption();
+        menuOption.setMId(mId);
+        menuOption.setMOption(mOption);
+        menuOption.setContent(content);
+        menuOption.setPrice(price);
+        
+        shopService.insertMenuOption(menuOption);
+
+        model.addAttribute("message", "메뉴옵션 정보가 성공적으로 등록되었습니다.");
+		return "redirect:optionJoinForm";
+	}
+	
 	@GetMapping("/shopMain")
 	public String shopMain() {
 		return "shop/shopMain";
@@ -114,6 +129,11 @@ public class ShopController {
 	@GetMapping("/menuJoinForm")
 	public String menuJoinForm() {
 		return "shop/menuJoinForm";
+	}
+	
+	@GetMapping("/optionJoinForm")
+	public String optionJoinForm() {
+		return "shop/optionJoinForm";
 	}
 	
 	@GetMapping("/shopInfo")
