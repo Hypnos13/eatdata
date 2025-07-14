@@ -74,9 +74,9 @@ public class LoginService {
 		return pass;
 	}
 	
-	public List<Member> userList(){
+	public List<Member> userList(String disivion, String keyword){
 		
-		List<Member> userList = loginMapper.userList();
+		List<Member> userList = loginMapper.userList(disivion, keyword);
 		return userList;
 	}
 	

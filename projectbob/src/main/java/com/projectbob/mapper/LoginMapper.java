@@ -16,6 +16,6 @@ public interface LoginMapper {
 	void deleteMember(String id);
 	List<String> searchId(@Param("name") String name, @Param("email") String email, @Param("phone") String phone, @Param("receive") String receive);
 	String searchPassword(@Param("id") String id, @Param("name") String name, @Param("email") String email, @Param("phone") String phone, @Param("receive") String receive);
-	List<Member> userList();
+	List<Member> userList(@Param("disivion") String disivion, @Param("keyword") String keyword );
 	void updateIsuse(@Param("id") String id, @Param("isuse") String isuse);
 }

@@ -52,6 +52,14 @@
 <select id="userList" resultType="Member">
 	SELECT *
 	FROM client
+	<where>
+    	<if test="disivion != null and disivion != ''">
+        	disivion = #{disivion}
+    	</if>
+    	<if test="keyword != null and keyword != ''">
+        	AND id LIKE CONCAT('%', #{keyword}, '%') 
+    	</if>
+</where>
 	ORDER BY disivion, id
 </select>
 

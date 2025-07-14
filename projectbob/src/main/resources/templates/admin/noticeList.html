@@ -15,6 +15,7 @@
 	</th:block>
 	
 	<div class="row mt-4">
+		<input type="hidden" id="from" th:value="${from}">
 		<th:block th:each="notice, status: ${noticeList}">
 			<div class="col-11 noticeContain border bg-body mx-auto" th:data-no="${notice.No}">
 				<div class= "row">

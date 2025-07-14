@@ -26,7 +26,10 @@ public class LoginController {
 
 	//로그인 폼
 	@GetMapping("/login")
-	public String loginForm() {
+	public String loginForm(Model model, @RequestParam(name ="from", defaultValue = "client") String from) {
+		
+		model.addAttribute("from", from);
+		
 		return "members/login";
 	}
 	
@@ -69,7 +72,6 @@ public class LoginController {
 		session.setAttribute("loginId", id);
 		session.setAttribute("loginNickname", member.getNickname());
 		session.setAttribute("loginDisivion", member.getDisivion());
-		
 		if(member.getDisivion().equals("owner")){
 			return "redirect:/shopMain";
 		}
@@ -87,7 +89,7 @@ public class LoginController {
 		
 		loginService.joinMember(member);
 		
-		return "views/main";
+		return "views/login";
 	}
 	
 	// 아이디, 비밀번호 찾기
@@ -193,8 +195,14 @@ public class LoginController {
 	// 로그아웃
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
+		String path = "";
+		if(session.getAttribute("loginDisivion").equals("owner")) {
+			path = "redirect:/shopMain";
+		}else {
+			path = "redirect:/main";
+		}
 		session.invalidate();
-		return "members/login";
+		return path;
 	}
 	
 	// 회원 탈퇴
@@ -223,10 +231,13 @@ public class LoginController {
 	
 	// 관리자권한 - 사용자관리
 	@GetMapping("/userList")
-	public String userList(Model model) {
+	public String userList(Model model, @RequestParam(name = "disivion", defaultValue = "") String disivion, @RequestParam(name="keyword", defaultValue = "") String keyword) {
 		
-		List<Member> userList = loginService.userList();
+		List<Member> userList = loginService.userList(disivion, keyword);
 		model.addAttribute("userList", userList);
+		if(disivion != "") {
+			model.addAttribute("disivion", disivion);
+		}
 		
 		return "admin/userList";
 	}

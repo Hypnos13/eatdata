@@ -1,7 +1,8 @@
 $(function(){
 	// FAQ에 유형 버튼 누를 때
 	$(".faq-type").on("click",function(){
-		window.location.replace("/faqList?type=" + $(this).text());
+		let from = $("#from").val();
+		window.location.replace("/faqList?type=" + $(this).text()+"&from="+from);
 	});
 	
 	
@@ -66,7 +67,8 @@ $(function(){
 	// 공지사항을 클릭
 	$(".noticeContain").on("click",function(){
 		let no =  $(this).attr("data-no")
-		window.location.href="noticeDetail?no="+no;
+		let from = $("#from").val();
+		window.location.href="noticeDetail?no="+no+"&from="+from;
 	});
 	
 	//공지사항 수정하기 버튼 누를 때
