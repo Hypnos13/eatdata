@@ -1,16 +1,11 @@
 package com.projectbob.domain;
 
-import java.sql.Timestamp;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -25,6 +20,7 @@ public class Menu {
 	private int liked;
 	private Timestamp regDate;
 	private Timestamp modiDate;
-	
+
 	private List<MenuOption> options;
+
 }

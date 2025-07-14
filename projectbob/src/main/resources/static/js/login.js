@@ -127,6 +127,34 @@ $(function(){
 		}
 		
 	});
+	
+	
+	// 관리자 페이지 - 사용자관리 - 사용여부 저장
+	$(".btn-save").on("click",function(){
+		let id = $(this).parent().parent().find('#id').text();
+		let isuse = $(this).parent().parent().find('#isuse').val();
+		
+		window.location.href="updateIsuse?id="+id+"&isuse="+isuse;
+	});
+	
+	
+	// 관리자 페이지 - 사용자관리 - 검색어 검색
+	$("#btn_search").on("click",function(){
+		let searchDisivion = $("#searchDisivion").val();
+		let keyword = $("#keyword").val();
+		
+		window.location.href="userList?disivion="+searchDisivion+"&keyword="+keyword;		
+	});
+	
+	// 관리자 페이지 - 사용자관리 - 검색어 검색시
+	$("#keyword").on("keydown",function(e){
+		if(e.key == 'Enter'){
+			let searchDisivion = $("#searchDisivion").val();
+			let keyword = $("#keyword").val();
+					
+			window.location.href="userList?disivion="+searchDisivion+"&keyword="+keyword;	
+		}
+	});
 });
 
 

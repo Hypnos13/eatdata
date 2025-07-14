@@ -1,0 +1,10 @@
+CREATE TABLE noticeboard (
+	no	int AUTO_INCREMENT	primary key,
+	title	varchar(50)	NOT NULL,
+	content	varchar(500)	NOT NULL,
+    startday timestamp not null,
+    endday timestamp not null,
+    disivion varchar(20) not null,
+	reg_date	timestamp	NOT NULL,
+    modi_date timestamp not null
+);

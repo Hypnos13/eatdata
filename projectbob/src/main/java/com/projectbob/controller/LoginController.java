@@ -26,7 +26,10 @@ public class LoginController {
 
 	//로그인 폼
 	@GetMapping("/login")
-	public String loginForm() {
+	public String loginForm(Model model, @RequestParam(name ="from", defaultValue = "client") String from) {
+		
+		model.addAttribute("from", from);
+		
 		return "members/login";
 	}
 	
@@ -53,6 +56,14 @@ public class LoginController {
 			out.println("	history.back();");
 			out.println("</script>");
 			return null;
+		}else if(login == -2){
+			response.setContentType("text/html; charset=utf-8");
+			PrintWriter out = response.getWriter();
+			out.println("<script>");
+			out.println("	alert('사용이 금지된 아이디입니다.');");
+			out.println("	history.back();");
+			out.println("</script>");
+			return null;
 		}
 		
 		Member member = loginService.getMember(id);
@@ -61,6 +72,9 @@ public class LoginController {
 		session.setAttribute("loginId", id);
 		session.setAttribute("loginNickname", member.getNickname());
 		session.setAttribute("loginDisivion", member.getDisivion());
+		if(member.getDisivion().equals("owner")){
+			return "redirect:/shopMain";
+		}
 		
 		return "redirect:/main";
 	}
@@ -75,7 +89,7 @@ public class LoginController {
 		
 		loginService.joinMember(member);
 		
-		return "views/main";
+		return "views/login";
 	}
 	
 	// 아이디, 비밀번호 찾기
@@ -171,14 +185,24 @@ public class LoginController {
 		loginService.updateMember(member);
 		session.setAttribute("loginNickname", member.getNickname());
 		
-		return "views/main";
+		if(session.getAttribute("loginDisivion").equals("owner")) {
+			return "redirect:/shopMain";
+		}
+		
+		return "redirect:/main";
 	}
 	
 	// 로그아웃
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
+		String path = "";
+		if(session.getAttribute("loginDisivion").equals("owner")) {
+			path = "redirect:/shopMain";
+		}else {
+			path = "redirect:/main";
+		}
 		session.invalidate();
-		return "members/login";
+		return path;
 	}
 	
 	// 회원 탈퇴
@@ -204,5 +228,32 @@ public class LoginController {
 		
 		return "members/login";
 	}
+	
+	// 관리자권한 - 사용자관리
+	@GetMapping("/userList")
+	public String userList(Model model, @RequestParam(name = "disivion", defaultValue = "") String disivion, @RequestParam(name="keyword", defaultValue = "") String keyword) {
+		
+		List<Member> userList = loginService.userList(disivion, keyword);
+		model.addAttribute("userList", userList);
+		if(disivion != "") {
+			model.addAttribute("disivion", disivion);
+		}
+		
+		return "admin/userList";
+	}
+	
+	// 관리자권한 - 사용자사용권한변경
+	@GetMapping("/updateIsuse")
+	public String updateIsuse(Model model, @RequestParam("id") String id, @RequestParam("isuse") String isuse, HttpSession session) {
+		
+		String loginDisivion = (String) session.getAttribute("loginDisivion");
+		
+		if(loginDisivion.equals("master")) {
+			loginService.updateIsuse(id, isuse);
+		}
+		
+		return "redirect:/userList";
+	}
+	
 	
 }

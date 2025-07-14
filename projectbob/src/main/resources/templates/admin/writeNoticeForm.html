@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{js/faq.js}"></script>
+
+	<form name = "writeNoticeform" id = "writeNoticeform" method = "post" action="writeNotice">
+		<div class="row mt-5">
+			<div class="col-3 text-center">
+				<h3>게시 범위 :</h3>
+			</div>
+			<div class="col-7">
+				<input class="form-check-input" type="radio" name="disivion" id="all" value="all" checked>
+				<label class="form-check-label" for="all">모두에게 게시</label>
+				<input class="form-check-input ms-5" type="radio" name="disivion" id="client" value="client">
+				<label class="form-check-label" for="client">고객님에게만 게시</label>
+				<input class="form-check-input ms-5" type="radio" name="disivion" id="owner" value="owner">
+				<label class="form-check-label" for="owner">사장님에게만 게시</label>
+				<input class="form-check-input ms-5" type="radio" name="disivion" id="none" value="none">
+				<label class="form-check-label" for="none">미공개</label>
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-3 text-center">
+				<h3>게시 시작일 :</h3>
+			</div>
+			<div class="col-7">
+				<input class="form-control" type="date" name="start" id="start">
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-3 text-center">
+				<h3>게시 종료기간 :</h3>
+			</div>
+			<div class="col-7">
+				<input class="form-control" type="date" name="end" id="end">
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-3 text-center">
+				<h3>제목 :</h3>
+			</div>
+			<div class="col-7">
+				<input class="form-control form-control-lg" name="title" id="title" type="text" placeholder="제목을 작성해주세요.">
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-3 text-center">
+				<h3>내용 :</h3>
+			</div>
+			<div class="col-7">
+				<textarea class="form-control" name="content" id="content" style="height: 500px" placeholder="내용을 작성해주세요."></textarea>
+			</div>
+		</div>
+		<div class="row mt-5">
+			<div class="col-10 text-center">
+				<input class="btn btn-secondary btn-lg" type="submit" value="게시하기">
+			</div>
+
+		</div>
+	</form>
+</th:block>
+</html>

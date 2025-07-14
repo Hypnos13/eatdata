@@ -1,11 +1,32 @@
 $(function() {
 	
 	$("#shopJoinForm").on("submit", shopJoinFormCheck);
+	$("#menuJoinForm").on("submit", menuJoinFormCheck);
 
 	//우편번호찾기
 	$("#btnZipcode").click(findZipcode);
 	
 });
+
+function menuJoinFormCheck() {
+	if($("#category").val().length ==0 ) {
+		alert("카테고리를 입력해주세요.")
+		return false;
+	}
+	if($("#name").val().length ==0 ) {
+		alert("메뉴 이름을 입력해주세요.")
+		return false;
+	}
+	if($("#price").val().length ==0 ) {
+		alert("가격을 입력해주세요.")
+		return false;
+	}
+	if($("#mInfo").val().length ==0 ) {
+		alert("메뉴 설명을 입력해주세요.")
+		return false;
+	}
+}
+
 
 function shopJoinFormCheck(isShopJoinForm) {
 	if($("#sNumber").val().length != 10 ) {

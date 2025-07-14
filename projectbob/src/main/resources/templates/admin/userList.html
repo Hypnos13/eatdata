@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{js/login.js}"></script>
+<link th:href="@{css/admin.css}" rel="stylesheet" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<div class ="container">
+	<th:block th:if="${session.loginDisivion == 'master'}">
+
+	
+	<div class="row text-center mt-5">
+		<div class="col-2 text-end">
+			<select id="searchDisivion" name="searchDisivion">
+				<option value="client" th:selected="${disivion == 'client'}">고객</option>
+				<option value="master" th:selected="${disivion == 'master'}">관리자</option>
+				<option value="owner" th:selected="${disivion == 'owner'}">사장</option>
+			</select>
+		</div>
+		<div class="col-5 text-start">
+			<input type="text" id="keyword" name="keyword">
+		</div>
+		<div class="col-2 text-start">
+			<input type="button" class="btn btn-primary" id="btn_search" name="btn_search" value="검색">
+		</div>
+	</div>
+
+	<div class="row text-center mt-5">
+		<div class="col-10 mx-auto">
+			<th:block th:unless="${#lists.isEmpty(userList)}">
+				<table class = "table-custom">
+					<thead>
+					<tr><th>아이디</th><th>구분</th><th>이름</th><th>닉네임</th><th>주소</th><th colspan="2">사용여부</th></tr>
+					</thead>
+					<th:block th:each="user, status: ${userList}">
+					<tr>
+						<td><span id="id" th:text="${user.id}"></span></td>
+						<td><span id="disivion" th:text="${user.disivion == 'client' ? '고객' : user.disivion == 'owner' ? '사장' : '관리자' }"></span></td>
+						<td><span id="name" th:text="${user.name}"></span></td>
+						<td><span id="nickname" th:text="${user.nickname}"></span></td>
+						<td><span id="address1" th:text="${user.address1}"></span></td>
+						<td>
+							<select id="isuse" name="isuse">
+							<option value="Y" th:selected="${user.isuse=='Y'}">Y</option>
+							<option value="N" th:selected="${user.isuse=='N'}">N</option>
+							</select>	
+						</td>
+						<td>
+							<button class="btn btn-success ml-5 btn-save">저장</button>
+						</td>
+					</tr>
+					</th:block>
+				</table>
+			</th:block>	
+			<th:block th:if="${#lists.isEmpty(userList)}">
+				<table class = "table-custom">
+					<thead>
+					<tr><th>아이디</th><th>구분</th><th>이름</th><th>닉네임</th><th>주소</th><th colspan="2">사용여부</th></tr>
+					</thead>
+					<tr>
+						<td class="text-center" colspan="6">검색 결과가 없습니다.</td>
+					</tr>
+				</table>
+			</th:block>		
+		</div>
+	</div>	
+	
+	</th:block>
+</div>
+ 
+</th:block>
+</html>

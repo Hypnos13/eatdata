@@ -2,24 +2,40 @@
 
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <div th:fragment="header" class="top-bar row border-bottom border-primary align-items-center py-1">
-  <div class="col-5 text-center">
-    <a href="main">
-      <img src="images/Logo.png" width="180px" height="45px" />
+  <th:block th:if="${(session.loginDisivion == 'client' || session.loginDisivion == null && from != 'owner' )}">
+  <div class="col-5 text-start">
+    <a href="main"><img src="images/Logo.png" width="180px" height="45px" /></a>
+  </div>
+  </th:block>
+  <th:block th:if="${session.loginDisivion == 'owner' || from == 'owner'}">
+  <div class="col-5 text-start">
+    <a href="shopMain"><img src="images/Logo.png" width="180px" height="45px" /></a>
+  </div>
+  </th:block>
+  <th:block th:if="${session.loginDisivion == 'master'}">
+  <div class="col-5 text-start">	
+    <a href="main"><img src="images/Client.png" width="180px" height="45px"/></a>
+    <a href="shopMain">
+      <img src="images/Owner.png" width="180px" height="45px" />
     </a>
   </div>
+  </th:block>
   <div class="col-7 text-end fs-6">
     <th:block th:if="${session.isLogin}">
       <a class="me-2">[[${session.loginNickname}]] 님 어서오세요.</a>
       <a href="logout" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">로그아웃</a>
       <a href="myProfile" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">내정보수정</a>
-      <a href="orderList" class="border border-white px-2 py-1 text-decoration-none" style="font-size: 0.85rem;">주문표(0)</a>
     </th:block>
     <th:block th:unless="${session.isLogin}">
-      <a href="login" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">로그인</a>
-      <a href="orderList" class="border border-white px-2 py-1 text-decoration-none" style="font-size: 0.85rem;">주문표(0)</a>
+      <a href="login" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">로그인</a>  
+    </th:block>
+    <th:block th:if="${session.loginDisivion == 'client'}">
+    	<a href="orderList" class="border border-white px-2 py-1 text-decoration-none" style="font-size: 0.85rem;">주문표(0)</a>
     </th:block>
     <th:block th:if="${session.loginDisivion == 'master'}">
     	<a href="faqList" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">FAQ관리</a>
+    	<a href="noticeList" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">공지사항관리</a>
+    	<a href="userList" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">사용자관리</a>
     </th:block>
   </div>
 </div>

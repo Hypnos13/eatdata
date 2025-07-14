@@ -1,86 +1,90 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
-		layout:decorate="~{layouts/shop_layout}">
-	<th:block layout:fragment="content">   
-	<script src=
-	"https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-		<div class="row my-5" id="global-content">
-			<div class="col">
-				<div class="row my-3 text-center">
-					<div class="col">
-						<h2 class="fs-3 fw-bold">가게 정보 입력</h2>
-					</div>
-				</div>
-				<form action="insertShop" name="shopJoinForm" method="post" id="shopJoinForm">
-					
-					<input type="hidden" name="isSNumCheck" id="isSNumCheck" value="false"/>
-					<input type="hidden" name="id" id="id" th:value="${session.loginId}"/>
-					<div class="row mt-5 mb-3">
-					<div class="col-8 offset-2">
-							<label for="sNumber" class="form-label">* 사업자등록번호 : </label>
-							<div class="row">
-								<div class="col-4">
-									<input type="text" class="form-control" name="sNumber" id="sNumber">
-								</div>
-								<div class="col-4">
-									<input type="button" class="btn btn-warning" id="btnOverlapSNum" value="번호 조회">
-								</div>
-							</div>
-						</div>
-						
-					</div>
-					<div class="row my-3">
-						<div class="col-8 offset-2">
-							<label for="owner" class="form-label">* 대표자명 : </label>
-							<input type="text" class="form-control" name="owner" id="owner" >
-						</div>
-					</div>
-					<div class="row my-3">
-						<div class="col-8 offset-2">
-							<label for="phone" class="form-label">* 대표자 연락처 : </label>
-							<input type="text" class="form-control" name="phone" id="phone" >
-						</div>
-					</div>
-					<div class="row my-3">
-						<div class="col-8 offset-2">
-							<label for="name" class="form-label">* 가게 이름 : </label>
-							<input type="text" class="form-control" name="name" id="name" >
-						</div>
-					</div>
-					<div class="row my-3">
-						<div class="col-8 offset-2">
-							<label for="zipcode" class="form-label">* 우편번호 : </label>
-							<div class="row">
-								<div class="col-4">
-									<input type="text" class="form-control" name="zipcode" id="zipcode" maxlength="5" readonly>
-								</div>
-								<div class="col-4">
-									<input type="button" class="btn btn-warning" id="btnZipcode" value="우편번호 찾기">
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="row my-3">
-						<div class="col-8 offset-2">
-							<label for="address1" class="form-label">* 가게주소 : </label>
-							<input type="text" class="form-control" name="address1" id="address1"  readonly>
-						</div>	
-					</div>
-					<div class="row my-3">
-						<div class="col-8 offset-2">
-							<label for="address2" class="form-label">상세주소 : </label>				
-							<input type="text" class="form-control" name="address2" id="address2">
-						</div>
-					</div>
-					
-					<div class="row mb-3 mt-5">				
-						<div class="col-8 offset-2">
-							<input type="submit" value="입점신청하기" class="btn btn-primary">
-						</div>
-					</div>
-				</form>
-			</div>
-		</div>
-	</th:block>		
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layouts/shop_layout}">
+    <th:block layout:fragment="content">
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+        <div class="row my-5" id="global-content">
+            <div class="col">
+                <div class="row my-3 text-center">
+                    <div class="col">
+                        <h2 class="fs-3 fw-bold">가게 정보 입력</h2>
+                    </div>
+                </div>
+                <form action="insertShop" name="shopJoinForm" method="post" id="shopJoinForm" enctype="multipart/form-data">
+
+                    <input type="hidden" name="isSNumCheck" id="isSNumCheck" value="false"/>
+                    <input type="hidden" name="id" id="id" th:value="${session.loginId}"/>
+                    <div class="row mt-5 mb-3">
+                        <div class="col-8 offset-2">
+                            <label for="sNumber" class="form-label">* 사업자등록번호 : </label>
+                            <div class="row">
+                                <div class="col-4">
+                                    <input type="text" class="form-control" name="sNumber" id="sNumber">
+                                </div>
+                                <div class="col-4">
+                                    <input type="button" class="btn btn-warning" id="btnOverlapSNum" value="번호 조회">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row my-3">
+                        <div class="col-8 offset-2">
+                            <label for="owner" class="form-label">* 대표자명 : </label>
+                            <input type="text" class="form-control" name="owner" id="owner" >
+                        </div>
+                    </div>
+                    <div class="row my-3">
+                        <div class="col-8 offset-2">
+                            <label for="phone" class="form-label">* 대표자 연락처 : </label>
+                            <input type="text" class="form-control" name="phone" id="phone" >
+                        </div>
+                    </div>
+                    <div class="row my-3">
+                        <div class="col-8 offset-2">
+                            <label for="name" class="form-label">* 가게 이름 : </label>
+                            <input type="text" class="form-control" name="name" id="name" >
+                        </div>
+                    </div>
+                    <div class="row my-3">
+                        <div class="col-8 offset-2">
+                            <label for="zipcode" class="form-label">* 우편번호 : </label>
+                            <div class="row">
+                                <div class="col-4">
+                                    <input type="text" class="form-control" name="zipcode" id="zipcode" maxlength="5" readonly>
+                                </div>
+                                <div class="col-4">
+                                    <input type="button" class="btn btn-warning" id="btnZipcode" value="우편번호 찾기">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row my-3">
+                        <div class="col-8 offset-2">
+                            <label for="address1" class="form-label">* 가게주소 : </label>
+                            <input type="text" class="form-control" name="address1" id="address1"  readonly>
+                        </div>
+                    </div>
+                    <div class="row my-3">
+                        <div class="col-8 offset-2">
+                            <label for="address2" class="form-label">* 상세주소 : </label>
+                            <input type="text" class="form-control" name="address2" id="address2">
+                        </div>
+                    </div>
+
+                    <div class="row my-3">
+                        <div class="col-8 offset-2">
+                            <label for="sLicense">* 사업자 등록증 : </label>
+                            <input type="file" id="sLicense" name="sLicense"> </div>
+                    </div>
+                    <div class="row mb-3 mt-5">
+                        <div class="col-8 offset-2">
+                            <input type="submit" value="입점신청하기" class="btn btn-primary">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </th:block>
 </html>
