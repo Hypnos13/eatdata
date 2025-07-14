@@ -23,56 +23,42 @@
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label">가게명*</label>
                     <div class="col-sm-10">
-                        <input type="text" name="name" class="form-control"/>
-<!--                  <input type="text" name="name" class="form-control" th:value="${shop.name}" /> -->
+                        <input type="text" name="name" class="form-control" th:value="${shop.name}" />
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label">대표자명*</label>
                     <div class="col-sm-10">
-                        <input type="text" name="owner" class="form-control"/>
-<!--                         <input type="text" name="owner" class="form-control" th:value="${shop.owner}" /> -->
+                        <input type="text" name="owner" class="form-control" th:value="${shop.owner}" />
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label">사업자등록번호*</label>
                     <div class="col-sm-10">
-                        <input type="text" name="s_number" class="form-control" />
-<!--                         <input type="text" name="s_number" class="form-control" th:value="${shop.s_number}" /> -->
+                        <input type="text" name="s_number" class="form-control" th:value="${shop.sNumber}" />
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label">연락처*</label>
                     <div class="col-sm-10">
-                        <input type="text" name="phone" class="form-control" />
-<!--                         <input type="text" name="phone" class="form-control" th:value="${shop.phone}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">이메일</label>
-                    <div class="col-sm-10">
-                        <input type="email" name="email" class="form-control" />
-<!--                         <input type="email" name="email" class="form-control" th:value="${shop.email}" /> -->
+                        <input type="text" name="phone" class="form-control" th:value="${shop.phone}" />
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label">가게 주소*</label>
                     <div class="col-sm-10">
-                        <input type="text" name="address1" class="form-control" />
-<!--                         <input type="text" name="address1" class="form-control" th:value="${shop.address1}" /> -->
+                        <input type="text" name="address1" class="form-control" th:value="${shop.address1}" />
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label">상세주소</label>
                     <div class="col-sm-10">
-                        <input type="text" name="address2" class="form-control" />
-<!--                         <input type="text" name="address2" class="form-control" th:value="${shop.address2}" /> -->
+                        <input type="text" name="address2" class="form-control" th:value="${shop.address2}" />
                     </div>
                 </div>
 
@@ -84,18 +70,16 @@
                 </div>
 
                 <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">한줄소개</label>
+                    <label class="col-sm-2 col-form-label">가게 정보</label>
                     <div class="col-sm-10">
-                        <input type="text" name="shop_tagline" class="form-control" />
-<!--                         <input type="text" name="shop_tagline" class="form-control" th:value="${shop.shop_tagline}" /> -->
+                        <input type="text" name="shop_tagline" class="form-control" th:value="${shop.sInfo}" />
                     </div>
                 </div>
 
                 <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">상세설명</label>
+                    <label class="col-sm-2 col-form-label">공지사항</label>
                     <div class="col-sm-10">
-                        <textarea name="shop_description" class="form-control" rows="3"></textarea>
-<!--                         <textarea name="shop_description" class="form-control" rows="3" th:text="${shop.shop_description}"></textarea> -->
+                        <textarea name="shop_description" class="form-control" rows="3" th:text="${shop.notice}"></textarea>
                     </div>
                 </div>
 

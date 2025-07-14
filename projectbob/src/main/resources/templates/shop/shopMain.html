@@ -21,6 +21,12 @@
 	            <div class="mains-icons-col">
 	                <div class="mains-icon-grid">
 	                    <div class="icon-col">
+	                        <a th:href="${hasShop} ? '/shopListMain' : '/shopInfo'" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-house-gear"></i></div>
+	                            <div class="mains-icon-label">서비스 홈</div>
+	                        </a>
+	                    </div>
+	                    <div class="icon-col">
 	                        <a href="/shopBasicSet" class="mains-icon-box">
 	                            <div class="mains-icon"><i class="bi bi-card-list"></i></div>
 	                            <div class="mains-icon-label">기본설정</div>
@@ -30,12 +36,6 @@
 	                        <a href="/menuJoinForm" class="mains-icon-box">
 	                            <div class="mains-icon"><i class="bi bi-receipt"></i></div>
 	                            <div class="mains-icon-label">메뉴등록</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-	                        <a href="/delivery-fee" class="mains-icon-box">
-	                            <div class="mains-icon"><i class="bi bi-truck"></i></div>
-	                            <div class="mains-icon-label">배달요금</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">

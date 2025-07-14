@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.*;
 
 import java.io.IOException;
 import java.util.*;
+import java.security.Principal;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -105,10 +106,32 @@ public class ShopController {
         model.addAttribute("message", "메뉴 정보가 성공적으로 등록되었습니다.");
 		return "redirect:menuJoinForm";
 	}
-	
+
+	/*
+	 * @GetMapping("/shopMain") public String shopMain() { return "shop/shopMain"; }
+	 */
 	@GetMapping("/shopMain")
-	public String shopMain() {
-		return "shop/shopMain";
+	public String shopMain(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
+	    boolean hasShop = false;
+	    if (loginId != null) {
+	        List<Shop> shops = shopService.findShopListByOwnerId(loginId);
+	        hasShop = (shops != null && !shops.isEmpty());
+	    }
+	    model.addAttribute("hasShop", hasShop);
+	    return "shop/shopMain";
+	}
+	
+	@GetMapping("/shopListMain")
+	public String shopListMain(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
+	    if (loginId == null) {
+	        return "redirect:/login";
+	    }
+	    List<Shop> shopList = shopService.findShopListByOwnerId(loginId);
+	    if (shopList == null || shopList.isEmpty()) {
+	        return "shop/shopInfo";
+	    }
+	    model.addAttribute("shopList", shopList);
+	    return "shop/shopListMain";
 	}
 	
 	@GetMapping("/menuJoinForm")
@@ -122,7 +145,15 @@ public class ShopController {
 	}
 	
 	@GetMapping("/shopBasicSet")
-	public String shopBasicSet() {
-		return "shop/shopBasicSet";
+	public String shopBasicSet(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
+	    if (loginId == null) {
+	        // 로그인 정보 없으면 로그인 페이지로 리다이렉트 등 처리
+	        return "redirect:/login";
+	    }
+	    // 현재 로그인한 사장님의 shop 정보를 조회
+	    Shop shop = shopService.findByOwnerId(loginId);
+	    model.addAttribute("shop", shop); // Thymeleaf 뷰로 전달
+
+	    return "shop/shopBasicSet";
 	}
 }

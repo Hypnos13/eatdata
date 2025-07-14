@@ -17,5 +17,11 @@ public interface ShopMapper {
 	
 	//가게리스트
 	public List<Shop> shopList();
+
+	//가게 정보
+	public Shop findByOwnerId(String ownerId);
+	
+	//가게 유무 확인후 보여주기
+	List<Shop> findShopListByOwnerId(String ownerId);
 	
 }

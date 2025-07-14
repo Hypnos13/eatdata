@@ -32,6 +32,13 @@ public class ShopService {
 		return shopMapper.shopList();
 	}
 	
+	//가게 정보 불러오기
+	public Shop findByOwnerId(String ownerId) {
+	    return shopMapper.findByOwnerId(ownerId);
+	}
 	
-	
+	//가게 유무 판단해서 보여주기
+	public List<Shop> findShopListByOwnerId(String ownerId) {
+	    return shopMapper.findShopListByOwnerId(ownerId);
+	}
 }

@@ -20,4 +20,19 @@
 		SELECT * From shop
 	</select>
 	
+	<!-- 가게정보 불러오기 -->
+	<select id="findByOwnerId" resultType="com.projectbob.domain.Shop">
+	    SELECT *
+	    FROM shop
+	    WHERE id = #{ownerId}
+	</select>
+	
+	<!-- 가게 유무 확인 후 보여주기 -->
+	<select id="findShopListByOwnerId" resultType="com.projectbob.domain.Shop">
+	    SELECT *
+	    FROM shop
+	    WHERE id = #{ownerId}
+	    ORDER BY reg_date DESC
+	</select>
+	
 </mapper>	
