@@ -2,24 +2,28 @@
 
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <div th:fragment="header" class="top-bar row border-bottom border-primary align-items-center py-1">
+
   <th:block th:if="${(session.loginDisivion == 'client' || session.loginDisivion == null && from != 'owner' )}">
-  <div class="col-5 text-start">
+  <div class="col-5 logo-area">
     <a href="main"><img src="images/Logo.png" width="180px" height="45px" /></a>
   </div>
   </th:block>
+  
   <th:block th:if="${session.loginDisivion == 'owner' || from == 'owner'}">
-  <div class="col-5 text-start">
+  <div class="col-5 logo-area">
     <a href="shopMain"><img src="images/Logo.png" width="180px" height="45px" /></a>
   </div>
   </th:block>
+  
   <th:block th:if="${session.loginDisivion == 'master'}">
-  <div class="col-5 text-start">	
+  <div class="col-5 logo-area">	
     <a href="main"><img src="images/Client.png" width="180px" height="45px"/></a>
     <a href="shopMain">
       <img src="images/Owner.png" width="180px" height="45px" />
     </a>
   </div>
   </th:block>
+  
   <div class="col-7 text-end fs-6">
     <th:block th:if="${session.isLogin}">
       <a class="me-2">[[${session.loginNickname}]] 님 어서오세요.</a>
