@@ -31,7 +31,7 @@
 			<div id="searchBox" class="mb-3 d-none">
 				<div class="input-group input-group-sm" style="width: 300px;">
 					<input type="text" class="form-control"
-						placeholder="가게명 또는 메뉴를 검색하세요" >
+						placeholder="가게명 또는 메뉴를 검색하세요">
 					<button class="btn text-white" id="searchSubmitBtn"
 						style="background-color: #43d091;">검색</button>
 				</div>
@@ -39,7 +39,6 @@
 
 			<nav class="navbar px-0">
 				<div class="d-flex align-items-center overflow-auto w-100">
-
 
 
 					<!-- 🔍 돋보기 버튼 -->
@@ -93,6 +92,13 @@
 
 				</div>
 			</nav>
+
+
+			<div id="searchBox" class="d-none w-100 px-3 my-2">
+				<input type="text" id="location-input" class="form-control"
+					placeholder="주소 또는 상호명을 입력하세요">
+			</div>
+
 
 			<th:block th:if="${not #lists.isEmpty(sList)}">
 				<div class="row g-4">
