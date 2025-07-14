@@ -223,10 +223,13 @@ public class LoginController {
 	
 	// 관리자권한 - 사용자관리
 	@GetMapping("/userList")
-	public String userList(Model model) {
+	public String userList(Model model, @RequestParam(name = "disivion", defaultValue = "") String disivion, @RequestParam(name="keyword", defaultValue = "") String keyword) {
 		
-		List<Member> userList = loginService.userList();
+		List<Member> userList = loginService.userList(disivion, keyword);
 		model.addAttribute("userList", userList);
+		if(disivion != "") {
+			model.addAttribute("disivion", disivion);
+		}
 		
 		return "admin/userList";
 	}

@@ -8,6 +8,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
+@Service
 public class FileUploadService {
 	
 	@Value("${file.upload-dir}")
