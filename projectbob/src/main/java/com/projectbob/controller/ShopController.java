@@ -126,6 +126,11 @@ public class ShopController {
 		return "shop/shopMain";
 	}
 	
+	@GetMapping("/shopJoinForm")
+	public String shopJoinForm() {
+		return "shop/shopJoinForm";
+	}
+	
 	@GetMapping("/menuJoinForm")
 	public String menuJoinForm() {
 		return "shop/menuJoinForm";
