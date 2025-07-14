@@ -2,6 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
+<!-- 리뷰 -->
+<select id="reviewList" parameterType="int" resultType="com.projectbob.domain.Review">
+	SELECT review.*, menu.name AS menuName FROM review
+	JOIN menu ON review.m_id = menu.m_id 
+	WHERE review.s_id = #{sId} ORDER BY review.r_no DESC
+</select>
+
 <!-- 가게 상세 페이지에 필요한 xml -->
 <select id="getMenuListByShopId" resultType="com.projectbob.domain.Menu">
 	SELECT
@@ -9,11 +16,13 @@
 	FROM menu
 	WHERE s_id = #{sId} ORDER BY m_id ASC
 </select>
+
+<!-- 모달창 메뉴옵션에 필요한 xml -->
 <select id="getMenuOptionsByMenuId" resultType="com.projectbob.domain.MenuOption">
 	SELECT
 	*
 	FROM menu_Option
-	WHERE m_id = #{m_id} ORDER BY price
+	WHERE m_id = #{mId} ORDER BY price
 </select>
 <select id="getMenuCategoriesByShopId" resultType="java.lang.String">
 	SELECT DISTINCT category FROM menu

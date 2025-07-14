@@ -24,6 +24,31 @@
 	WHERE id = #{id}
 </delete>
 
+<select id="searchId">
+	SELECT id 
+	FROM client
+	WHERE name = #{name}
+	<if test="receive == 'email'">
+		and email = #{email}
+	</if>
+	<if test="receive == 'phone'">
+		and phone = #{phone}
+	</if>
+</select>
+
+<select id="searchPassword">
+	SELECT pass
+	FROM client
+	WHERE  id = #{id}
+	and    name = #{name}
+	<if test="receive == 'email'">
+		and email = #{email}
+	</if>
+	<if test="receive == 'phone'">
+		and phone = #{phone}
+	</if>
+</select>
+
 </mapper>	
 
 

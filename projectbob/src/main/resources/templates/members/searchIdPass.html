@@ -3,16 +3,23 @@
 		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
 		layout:decorate="~{layouts/main_layout}">
 <th:block layout:fragment="content">
+<script th:src="@{js/login.js}"></script>
 <div class="row border mt-5">
 		<form name="searchIdPassForm" id="searchIdPassForm" method="post" action="searchIdPass" class="col-10">
-			<div class="row my-2 mt-5 justify-content-center">
-				<div class="col-7 btn-group" role="group" aria-label="Basic radio toggle button group">
-					<input type="radio" class="btn-check" name="receive" id="rEmail" autocomplete="off" checked>
+			<input type="hidden" name="search" id="search" th:value = "${searchPass}">
+			<div class="row mt-5  text-center">
+				<h5>비밀번호를 찾을 수단을 선택해주세요.</h5>
+			</div>
+			<div class="row my-2 justify-content-center">
+				<div class="col-7 btn-group" role="group">
+					<input type="radio" class="btn-check" name="receive" id="rEmail" value="email">
 					<label class="btn btn-outline-primary" for="rEmail">이메일로 찾기</label>
-					<input type="radio" class="btn-check" name="receive" id="rPhone" autocomplete="off">
+					<input type="radio" class="btn-check" name="receive" id="rPhone" value="phone">
 					<label class="btn btn-outline-primary" for="rPhone">휴대전화로 찾기</label>
 				</div>
 			</div>
+			<div class="inputForm">
+			<th:block th:if="${searchPass}">
 			<div class="row my-2">
 				<div class="col-5 text-end">
 					아이디 : 
@@ -22,6 +29,12 @@
 			  	</div>
 			</div>
 			<div class="row my-2">
+				<div class="col-10 text-end">
+					<div class="text-danger text-center" id="idInfo"></div>
+				</div>
+			</div>
+			</th:block>
+			<div class="row my-2">
 				<div class="col-5 text-end">
 					이름 : 
 				</div>
@@ -30,6 +43,11 @@
 				</div>
 			</div>
 			<div class="row my-2">
+				<div class="col-10 text-end">
+					<div class="text-danger text-center" id="nameInfo"></div>
+				</div>
+			</div>
+			<div class="row my-2 emailRow">
 				<div class="col-5 text-end">
 					이메일 : 
 				</div>
@@ -37,12 +55,22 @@
 					<input type="email" class="form-control" name="email" id="email" placeholder="이메일을 입력해주세요. (ex.name@example.com)">
 				</div>
 			</div>
-			<div class="row my-2">
+			<div class="row my-2 emailRow">
+				<div class="col-10 text-end">
+					<div class="text-danger text-center" id="emailInfo"></div>
+				</div>
+			</div>
+			<div class="row my-2 phoneRow">
 				<div class="col-5 text-end">
 					연락처 : 
 				</div>
 				<div class="col-5">
-					<input type="email" class="form-control" name="phone" id="phone" placeholder="연락처를 입력해주세요. (ex.010-1234-5678)">
+					<input type="text" class="form-control" name="phone" id="phone" placeholder="연락처를 입력해주세요. (ex.010-1234-5678)">
+				</div>
+			</div>
+			<div class="row my-2 phoneRow">
+				<div class="col-10 text-end">
+					<div class="text-danger text-center" id="phoneInfo"></div>
 				</div>
 			</div>
 			<div class="row my-2">
@@ -50,8 +78,8 @@
 					<button type="submit" class="btn btn-success">찾기</button>
 				</div>
 			</div>
-			</form>
-		</div>
-	</div>
+			</div>
+		</form>
+</div>
 </th:block>
 </html>

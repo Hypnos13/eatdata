@@ -201,6 +201,49 @@
 	</div>
 
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+	<!-- 가게 정보 -->
+	<div class="d-flex align-items-center mb-3">
+		<img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
+		<div class="ms-3">
+			<h5 class="mb-0">[[ ${shop.name} ]]</h5>
+			<small>★ [[ ${shop.rating} ]] / 최소주문금액 [[ ${shop.min_price}
+				]]원</small>
+		</div>
+	</div>
+
+	<div class="tab-content mt-3">
+		<div class="tab-pane fade show active" id="menu">
+			<div class="row">
+				<div th:block th:each="menu, status: ${menuList}">
+					<div class="col-md-6 menu-item text-center mb-3">
+						<img src="https://i.imgur.com/Sg4b61a.png" alt="메뉴" />
+						<p>[[ ${menu.m_id} ]]</p>
+						<div>
+							[[ ${menu.name} ]]<br /> <strong>[[
+								${#numbers.formatInteger(menu.price, 0, 'COMMA')} ]]원</strong>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-pane fade" id="review">
+			<p>총 10,706개의 리뷰가 있습니다.</p>
+			<p>"햄버거가 따뜻하고 맛있어요!"</p>
+		</div>
+
+		<div class="tab-pane fade" id="info">
+			<p>
+				영업시간: 10:00~23:00<br /> 위치: 서울특별시 관악구 신림로
+			</p>
+		</div>
+	</div>
+=======
+>>>>>>> 130f8f81b288a67cb501674aeff56a07357a0569
+>>>>>>> hong
 
 <script src="/js/main.js"></script>
 </body>
