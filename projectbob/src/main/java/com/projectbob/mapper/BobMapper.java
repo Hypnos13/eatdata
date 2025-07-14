@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
+import com.projectbob.domain.Review;
 import com.projectbob.domain.Shop;
 
 @Mapper
@@ -16,7 +17,13 @@ public interface BobMapper {
 		
 	// menuDetail 페이지에 사용
 	public List<Menu> getMenuListByShopId(int sId); 	
-	public List<MenuOption> getMenuOptionsByMenuId(int m_id);
+	
+	// 메뉴옵션 선택하는 모달창에서 사용
+	public List<MenuOption> getMenuOptionsByMenuId(int mId);		
 	public List<String> getMenuCategoriesByShopId(int sId);
+	
+	// 가게 번호에 해당하는 리뷰리스트에 사용
+	public List<Review> reviewList(int sId);
+	
 }
 

@@ -23,7 +23,7 @@ $(function(){
 		}
 	});
 	
-	
+	// 상시 적용
 	$("#id").on("focusout",CheckId);
 	$("#pass").on("focusout",CheckPass);
 	$("#name").on("focusout",CheckName);
@@ -33,30 +33,22 @@ $(function(){
 	$("#phone").on("focusout",CheckPhone);
 	$("#btnAdress").on("click", findAddress);
 	
+	
 	// 내정보 수정하기 유효성 검사
 	$("#updateMemberForm").on("submit",function(){
 			
-			let check = 0;
-				
+			let check = 0;	
+			
 			check += CheckId();	
-			
-			check += CheckPass();		
-
+			check += CheckPass();	
 	    	check += CheckName();		
-
-			check += CheckBirthday();	
-				
+			check += CheckBirthday();		
 			check += CheckAddress();
-			
 			check += CheckEmail();
-			
 			check += CheckPhone();
 			
-			if(check != 7){
-				return false;
-			}
+			if(check != 7){	return false; }
 		});
-	
 	
 	
 	
@@ -67,12 +59,12 @@ $(function(){
 			return false;
 		}
 		
-		
 		if($("#pass").val().length <= 0){
 			alert("비밀번호를 입력해주세요.");
 			return false;
 		}
 	});
+	
 	
 	// 회원 탈퇴 시
 	$("#deleteMemberForm").on("submit",function(){
@@ -92,7 +84,52 @@ $(function(){
 				
 	});
 	
+
+	
+	// 아이디 비밀번호 찾기 : 라디오 버튼
+	$(".inputForm").hide();
+	$(".emailRow").hide();
+	$(".phoneRow").hide();
+	
+	$("input[name='receive']").on("change",function(){
+		$(".inputForm").show();
+		
+		if($("#rEmail:checked").val()){
+			$(".emailRow").show();
+			$(".phoneRow").hide();
+		}else if($("#rPhone:checked").val()){
+			$(".emailRow").hide();
+			$(".phoneRow").show();
+		}
+	
+	});
+	
+	
+	$("#searchIdPassForm").on("submit",function(){
+		let check = 0;	
+		
+		if($("#search").val() == "false"){
+			check += 1;
+		}else{
+			check += CheckId();	
+		}			
+		
+		check += CheckName();	
+		
+		if($("#rEmail:checked").val()){			
+			check += CheckEmail();
+		}else if($("#rPhone:checked").val()){
+			check += CheckPhone();
+		}
+		
+		if(check != 3){
+			return false;
+		}
+		
+	});
 });
+
+
 // 주소 찾기 API 연동
 function findAddress() {
 	new daum.Postcode({
@@ -128,6 +165,8 @@ function findAddress() {
 	$("#address1").css("color", "black");
 }
 
+
+// 아이디 체크
 function CheckId(){
 	var idregExp = /^[A-Za-z0-9]*$/;
 	
@@ -154,6 +193,8 @@ function CheckId(){
 	}
 }
 
+
+// 비밀번호 체크
 function CheckPass(){
 	if($("#pass").val().length <= 0){
 		$("#passInfo").text("비밀번호를 입력해주세요.");	
@@ -168,6 +209,8 @@ function CheckPass(){
 	}
 }
 
+
+// 이름 체크
 function CheckName(){
 	var regExp = /^[가-힣]*$/;
 	
@@ -189,6 +232,7 @@ function CheckName(){
 	}
 }
 
+// 생일 체크
 function CheckBirthday(){
 	var regExp = /^[0-9]*$/;
 	if($("#birthday").val().length <= 0){
@@ -214,6 +258,7 @@ function CheckBirthday(){
 	}
 }
 
+// 주소 체크
 function CheckAddress(){
 	if($("#address1").val().length <= 0){
 		$("#address1Info").text("주소 찾기로 주소를 입력해주세요.");	
@@ -228,6 +273,7 @@ function CheckAddress(){
 	}
 }
 
+// 이메일 체크
 function CheckEmail(){
 	if($("#email").val().length <= 0){
 		$("#emailInfo").text("이메일을 입력해주세요.");	
@@ -242,6 +288,7 @@ function CheckEmail(){
 	}
 }
 
+// 휴대폰 체크
 function CheckPhone(){
 	var regExp = /^(01[016789]{1})-?[0-9]{3,4}-?[0-9]{4}$/;
 	

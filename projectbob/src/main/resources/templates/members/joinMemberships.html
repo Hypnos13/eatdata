@@ -3,6 +3,7 @@
 		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
 		layout:decorate="~{layouts/main_layout}">
 <th:block layout:fragment="content">
+<script th:src="@{js/login.js}"></script>
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <div class ="container">
 	<Form name="joinMemberForm" id="joinMemberForm" method="post" action="joinMember">

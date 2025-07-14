@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
+import com.projectbob.domain.Review;
 import com.projectbob.domain.Shop;
 import com.projectbob.mapper.BobMapper;
 
@@ -45,10 +46,21 @@ public class BobService implements BobServiceIf{
 		return bobMapper.getMenuListByShopId(sId);
 	}
 	
+	// 메뉴 옵션 모달창
+	@Override
+	public List<MenuOption> getMenuOptionsByMenuId(int mId){
+		return bobMapper.getMenuOptionsByMenuId(mId);
+	}
+	
 	//@Override
 //	public List<String> getMenuCategoriesByShopId(int s_id){
 //		return bobMapper.getMenuCategoriesByShopId(s_id);
 //	}
+	
+	// 가게 번호에 해당하는 리뷰리스트에 사용
+	public List<Review> reviewList(int sId){
+		return bobMapper.reviewList(sId);
+	}
 
 	
 	

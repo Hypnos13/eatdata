@@ -1,12 +1,9 @@
 package com.projectbob.domain;
 
-import java.sql.Timestamp;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.sql.*;
+
+import lombok.*;
 
 @Getter
 @Setter
@@ -23,6 +20,7 @@ public class Shop {
 	private String owner;
 	private int sNumber;
 	private String category;
+	private String sPicture;
 	private double rating;
 	private int heart;
 	private String opTime;
