@@ -6,6 +6,12 @@ $(function(){
 	});
 	
 	
+	//FAQ 질문 누를 때
+	$(".faq-question").on("click",function(){
+		$(this).next('.faq-answer').slideToggle(200);
+		$('.faq-answer').not($(this).next()).slideUp(200);
+	});
+	
 	// FAQ 작성 시 유효성 검사
 	$("#writeFAQform").on("submit",function(){
 

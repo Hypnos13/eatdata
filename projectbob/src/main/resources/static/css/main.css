@@ -11,7 +11,7 @@ body {
 .top-bar {
   background-color: #43d091;
   color: white;
-  padding: 10px 0;
+  padding: 12px 30px;
 }
 
 .top-bar a {
@@ -217,27 +217,6 @@ nav.navbar .nav-link.active {
   font-weight: bold;
 }
 
-
-/*FAQ 영역*/
-.faq-type {
-	background-color: #43d091;
-	color: white;
-	font-weight: bold;
-	padding: 10px 0;
-}
-
-.faq-accordion-head {
-	background-color:  #43d091;
-	font-weight: bold;
-	padding: 10px 10px;
-}
-
-.faq-accordion-body{
-	background-color: white;
-	border: 5px solid #43d091;
-	font-weight: bold;
-	padding: 10px 10px;
-}
 /* 주문표 항목 정렬 */
 .order-item {
   display: flex;
