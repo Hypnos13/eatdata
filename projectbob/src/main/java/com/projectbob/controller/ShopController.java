@@ -26,7 +26,7 @@ public class ShopController {
 	private FileUploadService fileUploadService;
 	
 	@PostMapping("/insertShop")
-	public String insertShop(
+	public String insertShop( @RequestParam("id") String id,
 			@RequestParam("sNumber") Integer sNumber, @RequestParam("owner") String owner, 
 			@RequestParam("phone") String phone, @RequestParam("name") String name, 
 			@RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1, 
@@ -58,6 +58,7 @@ public class ShopController {
         }
         
         Shop shop = new Shop();
+        shop.setId(id);
         shop.setSNumber(sNumber);
         shop.setOwner(owner);
         shop.setPhone(phone);
