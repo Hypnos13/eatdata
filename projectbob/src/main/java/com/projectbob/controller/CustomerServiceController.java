@@ -25,10 +25,11 @@ public class CustomerServiceController {
 	
 	// FAQ 페이지
 	@GetMapping("/faqList")
-	public String FAQList(Model model, @RequestParam(name = "type", defaultValue = "") String type) {
+	public String FAQList(Model model, @RequestParam(name = "type", defaultValue = "") String type, @RequestParam(name ="from", defaultValue = "client") String from) {
 		
 		 List<CustomerService> csList = csService.FAQList(type);
 		 model.addAttribute("csList", csList);
+		 model.addAttribute("from", from);
 		return "admin/FAQList";
 	}
 
@@ -70,7 +71,7 @@ public class CustomerServiceController {
 	
 	// 공지사항 페이지
 	@GetMapping("/noticeList")
-	public String noticeList(Model model, NoticeBoard noticeBoard  , HttpSession session) {
+	public String noticeList(Model model, NoticeBoard noticeBoard  , HttpSession session, @RequestParam(name ="from", defaultValue = "client") String from) {
 		
 		String userDv = (String) session.getAttribute("loginDisivion");
 		if(userDv == null) { userDv="client";}
@@ -78,6 +79,7 @@ public class CustomerServiceController {
 		List<NoticeBoard> notice =  csService.noticeList(userDv);
 		
 		model.addAttribute("noticeList", notice);
+		model.addAttribute("from", from);
 		
 		return "admin/noticeList";
 	}
@@ -99,10 +101,11 @@ public class CustomerServiceController {
 	
 	// 공지사항 자세히 보기
 	@GetMapping("/noticeDetail")
-	public String noticeDetail(Model model, @RequestParam("no") int no) {
+	public String noticeDetail(Model model, @RequestParam("no") int no, @RequestParam(name ="from", defaultValue = "client") String from) {
 		
 		NoticeBoard notice =  csService.getNotice(no);
 		model.addAttribute("notice", notice);
+		model.addAttribute("from", from);
 		
 		return "admin/noticeDetail";
 	}

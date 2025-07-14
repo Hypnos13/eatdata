@@ -26,7 +26,10 @@ public class LoginController {
 
 	//로그인 폼
 	@GetMapping("/login")
-	public String loginForm() {
+	public String loginForm(Model model, @RequestParam(name ="from", defaultValue = "client") String from) {
+		
+		model.addAttribute("from", from);
+		
 		return "members/login";
 	}
 	
@@ -69,7 +72,6 @@ public class LoginController {
 		session.setAttribute("loginId", id);
 		session.setAttribute("loginNickname", member.getNickname());
 		session.setAttribute("loginDisivion", member.getDisivion());
-		
 		if(member.getDisivion().equals("owner")){
 			return "redirect:/shopMain";
 		}
@@ -87,7 +89,7 @@ public class LoginController {
 		
 		loginService.joinMember(member);
 		
-		return "views/main";
+		return "views/login";
 	}
 	
 	// 아이디, 비밀번호 찾기
@@ -193,8 +195,14 @@ public class LoginController {
 	// 로그아웃
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
+		String path = "";
+		if(session.getAttribute("loginDisivion").equals("owner")) {
+			path = "redirect:/shopMain";
+		}else {
+			path = "redirect:/main";
+		}
 		session.invalidate();
-		return "members/login";
+		return path;
 	}
 	
 	// 회원 탈퇴

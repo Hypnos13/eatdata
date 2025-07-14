@@ -2,20 +2,20 @@
 
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <div th:fragment="header" class="top-bar row border-bottom border-primary align-items-center py-1">
-  <th:block th:if="${(session.loginDisivion == 'client' || session.loginDisivion == null )}">
+  <th:block th:if="${(session.loginDisivion == 'client' || session.loginDisivion == null && from != 'owner' )}">
   <div class="col-5 text-start">
     <a href="main"><img src="images/Logo.png" width="180px" height="45px" /></a>
   </div>
   </th:block>
-  <th:block th:if="${session.loginDisivion == 'owner'}">
+  <th:block th:if="${session.loginDisivion == 'owner' || from == 'owner'}">
   <div class="col-5 text-start">
-    <a href="oMain"><img src="images/Logo.png" width="180px" height="45px" /></a>
+    <a href="shopMain"><img src="images/Logo.png" width="180px" height="45px" /></a>
   </div>
   </th:block>
   <th:block th:if="${session.loginDisivion == 'master'}">
-  <div class="col-5 text-start">
+  <div class="col-5 text-start">	
     <a href="main"><img src="images/Client.png" width="180px" height="45px"/></a>
-    <a href="oMain">
+    <a href="shopMain">
       <img src="images/Owner.png" width="180px" height="45px" />
     </a>
   </div>
