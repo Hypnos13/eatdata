@@ -5,8 +5,8 @@
 
 	<!-- 메뉴 등록 -->
 	<insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
-		INSERT INTO menu(s_id, category, name, price, m_info, m_picture, reg_date) 
-		VALUES(#{sId}, #{category}, #{name}, #{price}, #{mInfo}, #{mPicture}, SYSDATE())
+		INSERT INTO menu(s_id, category, name, price, m_info, m_pictureURL, reg_date) 
+		VALUES(#{sId}, #{category}, #{name}, #{price}, #{mInfo}, #{mPictureUrl}, SYSDATE())
 	</insert>
 
 	<!-- 가게 등록 -->
