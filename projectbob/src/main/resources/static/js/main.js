@@ -3,13 +3,6 @@ console.log('orderMenuId 존재 여부:', document.getElementById('orderMenuId')
 // 메뉴 클릭 -> 모달
 // 메뉴 옵션 모달창 불러오기
 
-<<<<<<< HEAD
-// ==============================
-// 전역 변수 정의
-// ==============================
-let count = 0;
-=======
->>>>>>> 130f8f81b288a67cb501674aeff56a07357a0569
 let selectedMenuId = null;
 let selectedMenuName = '';
 let selectedMenuPrice = 0;
@@ -18,11 +11,6 @@ let addedExtras = [];
 
 const deliveryFee = 3000;
 
-<<<<<<< HEAD
-// ==============================
-// 주문표 업데이트 함수
-// ==============================
-=======
 $(document).on('click','.menu-card', function(){
 	var mId = $(this).data('id');
 	selectedMenuId = $(this).data('id');
@@ -59,7 +47,6 @@ $(document).on('click','.menu-card', function(){
 
 
 // 모달창에서 주문표로
->>>>>>> 130f8f81b288a67cb501674aeff56a07357a0569
 function updateOrder() {
 	console.log('updateOrder 실행:', selectedMenuName, count, addedExtras);	
   const itemCountEl = document.getElementById("itemCount");
@@ -67,36 +54,27 @@ function updateOrder() {
   const orderList = document.querySelector('.order-item-list');
 	console.log('updateOrder, 주문표 div:', orderList);
 
-  const plusBtn = document.getElementById('btnPlus');
-  const minusBtn = document.getElementById('btnMinus');
-
-  if (!itemCountEl || !totalPriceEl || !orderList || !plusBtn || !minusBtn) return;
+  if (!itemCountEl || !totalPriceEl || !orderList) return;
 
   if (!selectedMenuId || count <= 0) {
-    itemCountEl.innerText = "";
+    itemCountEl.innerText = 0;
     totalPriceEl.innerText = "0원";
     orderList.innerHTML = '<div class="text-muted fst-italic">주문한 메뉴가 없습니다.</div>';
-
-    // 수량 조절 버튼 숨기기
-    plusBtn.style.display = 'none';
-    minusBtn.style.display = 'none';
     return;
   }
-	
-	plusBtn.style.display = '';
-	minusBtn.style.display = '';
-
 
   itemCountEl.innerText = count;
   //const mainMenu = menuMap[selectedMenuId];
 
   orderList.innerHTML = '';
 
+  // 메인 메뉴 표시
   const mainMenuDiv = document.createElement('div');
   mainMenuDiv.classList.add('fw-bold');
   mainMenuDiv.innerText = `${selectedMenuName} × ${count} (${(selectedMenuPrice * count).toLocaleString()}원)`;
   orderList.appendChild(mainMenuDiv);
 
+  // 추가 메뉴 표시
   if (addedExtras.length === 0) {
     const noExtrasDiv = document.createElement('div');
     noExtrasDiv.innerText = '추가 메뉴 없음';
@@ -116,11 +94,6 @@ function updateOrder() {
   totalPriceEl.innerText = total.toLocaleString() + "원";
 }
 
-<<<<<<< HEAD
-// ==============================
-// 수량 조절 함수
-// ==============================
-=======
   // 추가 메뉴 선택 후 추가하기
 $(document).on('click','#btnAddExtras', function(){
 	console.log('1.추가하기 버튼 클릭됨');	
@@ -148,7 +121,6 @@ $(document).on('click','#btnAddExtras', function(){
   });
 
 
->>>>>>> 130f8f81b288a67cb501674aeff56a07357a0569
 function plus() {
   if (!selectedMenuId) {
     alert('먼저 메뉴를 선택해주세요.');
@@ -165,11 +137,8 @@ function minus() {
   }
 }
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 130f8f81b288a67cb501674aeff56a07357a0569
 // ==============================
 // Kakao 지도 (사용자 위치 검색용)
 // ==============================
@@ -180,14 +149,7 @@ function runKakaoScript() {
     if (!searchButton || !inputField) return;
 
     searchButton.addEventListener('click', () => {
-<<<<<<< HEAD
-      if (!navigator.geolocation) {
-        alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
-        return;
-      }
-=======
       if (!navigator.geolocation) return alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
->>>>>>> 130f8f81b288a67cb501674aeff56a07357a0569
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -210,14 +172,8 @@ function runKakaoScript() {
   });
 }
 
-<<<<<<< HEAD
-// ==============================
-// 가게 주소로 지도 표시 (정보 탭)
-// ==============================
-=======
 
 // 가게 지도
->>>>>>> 130f8f81b288a67cb501674aeff56a07357a0569
 function showStoreOnMap() {
   const address = document.getElementById('storeAddress')?.innerText;
   if (!address) return;
@@ -237,22 +193,14 @@ function showStoreOnMap() {
       const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
       const marker = new kakao.maps.Marker({ map: map, position: coords });
       map.setCenter(coords);
-    } else {
-      console.warn("지도 좌표 변환 실패");
     }
   });
 	
 }
 
-// ==============================
-// DOMContentLoaded 이벤트 내 실행
-// ==============================
 document.addEventListener("DOMContentLoaded", () => {
   updateOrder();
 
-<<<<<<< HEAD
-  // 메뉴 카드 클릭 시 모달 띄우기
-=======
 // 주문표 전송하기~
 document.getElementById('btnOrderNow')?.addEventListener('click', function(){
 	if (!selectedMenuId){
@@ -284,12 +232,12 @@ document.getElementById('btnOrderNow')?.addEventListener('click', function(){
 	
   // 메뉴 클릭 -> 모달
 	/*
->>>>>>> 130f8f81b288a67cb501674aeff56a07357a0569
   document.querySelectorAll('.card.text-center.p-3').forEach(card => {
     card.style.cursor = 'pointer';
+
     card.addEventListener('click', () => {
       const menuId = card.getAttribute('data-id');
-      if (!menuMap[menuId]) return alert('메뉴 정보를 찾을 수 없습니다.');
+      if (!menuMap[menuId]) return;
 
       selectedMenuId = menuId;
       count = 1;
@@ -308,28 +256,10 @@ document.getElementById('btnOrderNow')?.addEventListener('click', function(){
   });
 */
 
-<<<<<<< HEAD
-  // 추가 메뉴 선택 후 버튼 클릭
-  document.getElementById('btnAddExtras')?.addEventListener('click', () => {
-    addedExtras = [...document.querySelectorAll('#addMenuModal .form-check-input:checked')]
-      .map(chk => extrasMap[chk.id])
-      .filter(Boolean);
-
-    updateOrder();
-
-    const modalEl = document.getElementById('addMenuModal');
-    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-    if (modalInstance) modalInstance.hide();
-  });
-
-  // 주문하기 버튼 클릭
-  document.getElementById('btnOrderNow')?.addEventListener('click', () => {
-=======
 
   // 주문하기 버튼
 	
   /*document.getElementById('btnOrderNow')?.addEventListener('click', () => {
->>>>>>> 130f8f81b288a67cb501674aeff56a07357a0569
     if (!selectedMenuId) {
       alert('메뉴를 선택해주세요.');
       return;
@@ -338,7 +268,7 @@ document.getElementById('btnOrderNow')?.addEventListener('click', function(){
   });
 	*/
 
-  // 주문 취소 버튼 클릭
+  // 주문 취소 버튼
   document.getElementById('btnRemoveItem')?.addEventListener('click', () => {
     selectedMenuId = null;
     count = 0;
@@ -346,48 +276,20 @@ document.getElementById('btnOrderNow')?.addEventListener('click', function(){
     updateOrder();
   });
 
-  // 수량 조절 버튼 클릭 이벤트 연결
-  document.getElementById('btnPlus')?.addEventListener('click', plus);
-  document.getElementById('btnMinus')?.addEventListener('click', minus);
-
-  // 정보 탭 클릭 시 지도 표시 (Bootstrap 탭 이벤트)
+  // 지도 탭 들어갔을 때 표시
   const infoTab = document.querySelector('a[href="#info"]');
   infoTab?.addEventListener('shown.bs.tab', () => {
     showStoreOnMap();
   });
 
-<<<<<<< HEAD
-  // Kakao SDK 로드 확인 후 위치검색 기능 실행 및 지도 표시
-=======
 	// 메인화면 위치 불러오기
   // Kakao SDK 로딩 검사
->>>>>>> 130f8f81b288a67cb501674aeff56a07357a0569
   if (typeof kakao === 'undefined' || !kakao.maps) {
-    let retryCount = 0;
     const interval = setInterval(() => {
       if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.load) {
         clearInterval(interval);
-        runKakaoScript();
         showStoreOnMap();
-      } else if (++retryCount > 20) {
-        clearInterval(interval);
-        console.warn('Kakao SDK 로드 실패');
       }
-<<<<<<< HEAD
-    }, 500);
-  } else {
-    runKakaoScript();
-    showStoreOnMap();
-  }
-
-  // 돋보기 버튼 클릭 시 검색창 토글
-  const searchBtn = document.getElementById('searchBtn');
-  const searchBox = document.getElementById('searchBox');
-
-  searchBtn?.addEventListener('click', () => {
-    searchBox?.classList.toggle('d-none');
-  });
-=======
     }, 300);
   } else {		
 		runKakaoScript();
@@ -396,7 +298,6 @@ document.getElementById('btnOrderNow')?.addEventListener('click', function(){
 	
 	
 
->>>>>>> 130f8f81b288a67cb501674aeff56a07357a0569
 });
 
 
