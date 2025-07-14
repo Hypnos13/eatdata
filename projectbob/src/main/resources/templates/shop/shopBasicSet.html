@@ -11,14 +11,11 @@
 
 <body>
     <div layout:fragment="content">
-
-        <!-- 옵션리스트 (탭/버튼 네비) -->
-        <nav class="nav nav-tabs mb-4" style="margin-left: 8px;">
-            <a class="nav-link active" href="/shopBasicSet">기본설정</a>
-            <a class="nav-link" href="#">#####</a>
-            <a class="nav-link" href="#">#####</a>
-        </nav>
-
+		<div class="row my-3 text-center">
+			<div class="col">
+				<h2 class="fs-3 fw-bold">기본 설정</h2>
+			</div>
+		</div>
         <!-- 여기엔 본문 내용만 -->
         <div class="main-content-card card shadow-sm p-4" style="margin-left:8px; min-height:480px;">
             <form method="post" enctype="multipart/form-data" action="/shop/update">
@@ -102,37 +99,6 @@
                     </div>
                 </div>
 
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">오픈일</label>
-                    <div class="col-sm-10">
-                        <input type="date" name="open_date" class="form-control" />
-<!--                         <input type="date" name="open_date" class="form-control" th:value="${shop.open_date}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">영업시간</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="op_time" class="form-control" />
-<!--                         <input type="text" name="op_time" class="form-control" th:value="${shop.op_time}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">휴무일</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="off_day" class="form-control" />
-<!--                         <input type="text" name="off_day" class="form-control" th:value="${shop.off_day}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">공지사항</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="notice" class="form-control" />
-<!--                         <input type="text" name="notice" class="form-control" th:value="${shop.notice}" /> -->
-                    </div>
-                </div>
 
                 <button type="submit" class="btn btn-success">저장</button>
             </form>

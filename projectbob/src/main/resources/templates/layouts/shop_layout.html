@@ -11,9 +11,10 @@
     <link rel="stylesheet" href="/css/shopInfo.css">
 </head>
 <body>
+    <div class="layout-wrapper">
     <!-- 헤더 fragment include -->
-    <th:block th:replace="fragments/shopHeader :: shopHeader" />
-
+    	<th:block th:replace="~{fragments/shopHeader :: shopHeader}" />
+	
     <div class="container-fluid">
 	    <div class="d-flex flex-row">
 	      <!-- 사이드바 (한 번만 작성) -->
@@ -91,6 +92,7 @@
 	    </button>
 	    <div class="collapse" id="collapseMenu">
 	      <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
+	        <li><a href="/menuJoinForm" class="sidebar-sub-link">메뉴 등록</a></li>
 	        <li><a href="#" class="sidebar-sub-link">메뉴 관리</a></li>
 	        <li><a href="#" class="sidebar-sub-link">메뉴 품절</a></li>
 	      </ul>
@@ -188,20 +190,25 @@
        </aside>
        
 	      <!-- 본문 -->
-			<section class="col-lg-9 col-md-8 col-12 services-main p-0 m-0">
-			  <div class="card shadow-sm p-4 w-100" 
-			      style="min-width:350px; max-width:1400px; width:100%; border-radius:18px;">
-			    <main layout:fragment="content">
-			      <!-- 여기에 자식 뷰 페이지의 본문이 들어옴 -->
-			    </main>
-			  </div>
-			</section>
+	      <div class="container-fluid">
+     		<div class="d-flex flex-row">
+				<section class="col-lg-9 col-md-8 col-12 services-main p-0 m-0">
+			  		<div class="card shadow-sm p-4 w-100" 
+			      		style="min-width:350px; width:100%; border-radius:18px;">
+			    	<main layout:fragment="content">
+					      <!-- 여기에 자식 뷰 페이지의 본문이 들어옴 -->
+					    </main>
+					  </div>
+					</section>
+				</div>
+			</div>
 	    </div>
 	</div>
 
     <!-- 푸터 fragment include -->
-    <th:block th:replace="fragments/shopFooter :: shopFooter" />
+    <th:block th:replace="~{fragments/shopFooter :: shopFooter}" />
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
 </body>
 </html>

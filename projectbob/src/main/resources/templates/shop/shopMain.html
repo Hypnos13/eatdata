@@ -12,7 +12,7 @@
 </head>
 <body>
     <!-- 헤더 include -->
-    <th:block th:replace="fragments/shopHeader :: shopHeader" />
+    <th:block th:replace="~{fragments/shopHeader :: shopHeader}" />
     
 	  	<!-- 상단 메뉴 & 로그인 카드 (넓게 펼침) -->
 	    <div class="container-fluid">
@@ -21,15 +21,15 @@
 	            <div class="mains-icons-col">
 	                <div class="mains-icon-grid">
 	                    <div class="icon-col">
-	                        <a href="/store-hours" class="mains-icon-box">
-	                            <div class="mains-icon"><i class="bi bi-clock"></i></div>
-	                            <div class="mains-icon-label">영업시간</div>
+	                        <a href="/shopBasicSet" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+	                            <div class="mains-icon-label">기본설정</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/coupon" class="mains-icon-box">
-	                            <div class="mains-icon"><i class="bi bi-ticket-perforated-fill"></i></div>
-	                            <div class="mains-icon-label">쿠폰관리</div>
+	                        <a href="/menuJoinForm" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-receipt"></i></div>
+	                            <div class="mains-icon-label">메뉴등록</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
@@ -101,7 +101,7 @@
 	        <section class="hero">
 	            <h1>사장님의 가게에 날개를 달아주세요</h1>
 	            <p>간편한 입점 신청으로 더 많은 고객을 만나보세요.<br>저희가 사장님의 성공적인 비즈니스를 돕겠습니다.</p>
-	            <a href="/owner/apply" class="btn-cta">지금 바로 입점신청하기</a>
+	            <a href="/shopJoinForm" class="btn-cta">지금 바로 입점신청하기</a>
 	        </section>
 	
 	        <section id="benefits" class="section">
@@ -147,12 +147,9 @@
 	        </section>
 	    </main>
     
-<<<<<<< HEAD:projectbob/src/main/resources/templates/shop/oMain.html
     </th:block>
 </html>
-=======
     <!-- 푸터 include (shopFooter) -->
-    <th:block th:replace="fragments/shopFooter :: shopFooter" />
+    <th:block th:replace="~{fragments/shopFooter :: shopFooter}" />
 </body>
 </html>
->>>>>>> Hyeok:projectbob/src/main/resources/templates/shop/shopMain.html
