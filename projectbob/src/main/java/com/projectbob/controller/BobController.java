@@ -60,20 +60,7 @@ public class BobController {
 //		  model.addAttribute("sList",bobService.shopList()); 
 //	      return "views/shopList"; 
 
-	  // 가게 상세보기 메서드		
-	  @GetMapping("/MenuDetail") 
-	  public String getMenuDetail(Model model,		  
-	  @RequestParam("sId") int sId) {
-	  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", sId); // 가게 정보 가져오기
-	  Shop shop = bobService.getShopDetail(sId);
-	  List<Menu> menuList = bobService.getMenuListByShopId(sId);
-	  model.addAttribute("shop", shop);
-	  model.addAttribute("menuList", menuList);
-	  
-	  return "views/MenuDetail"; 
-	  }
-	  
-<<<<<<< HEAD
+
 	  	// 가게 상세보기 메서드		
 		  @GetMapping("/MenuDetail") 
 		  public String getMenuDetail(Model model,		  
@@ -121,7 +108,5 @@ public class BobController {
 			  return "views/pay";			  
 		  }
 		  
-		 
-=======
->>>>>>> develop
+
 }

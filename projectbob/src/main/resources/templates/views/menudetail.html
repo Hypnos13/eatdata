@@ -80,14 +80,22 @@
 						<div class="tab-pane fade" id="review">
 						<!-- 리뷰 탭 상단 -->
 						<div class="border rounded p-3 mb-3 bg-white">
-							<div class="d-flex align-items-center mb-2">
-								<h2 class="fw-bold me-3" th:text="${#numbers.formatDecimal(reviewAvg, 1, 1)}">4.9</h2>
-								<div>
-									<span class="fs-5">별점</span>
-									<span class="ms-2 text-warning">
+							<div class="d-flex align-items-center mb-2 justify-content-between" >
+								<div class="d-flex align-items-center">
+									<span class="fs-4 text-warning me-2">
 										<i class="bi bi-star-fill"></i>
-									</span>
-								</div>
+									</span>								
+											<span class="fs-5">별점&nbsp; </span>	
+								<h2 class="fw-bold me-3" th:text="${#numbers.formatDecimal(reviewAvg, 1, 1)}">4.9</h2>
+													
+							</div>
+							<!-- 찜버튼 -->
+							<div class="d-flex align-items-center">
+								<span class="me-1" id="heartCount" th:text="${shop.heart}">0</span>
+								<button type="button" id="btnHeart" class="btn btn-outline-danger btn-sm px-2 py-0">
+									<i class="bi bi-heart-fill"></i>
+								</button>
+							</div>
 							</div>
 							<div>
 								리뷰 <span th:text="${reviewList.size()}">0</span>개

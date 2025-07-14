@@ -1,19 +1,8 @@
 console.log('main.js 실행 시작');
-<<<<<<< HEAD
 console.log('orderMenuId 존재 여부:', document.getElementById('orderMenuId'));
-=======
-
-<<<<<<< HEAD
-// ==============================
-// 전역 변수 정의
-// ==============================
-let count = 0;
-=======
->>>>>>> develop
 // 메뉴 클릭 -> 모달
 // 메뉴 옵션 모달창 불러오기
 
->>>>>>> origin/hong
 let selectedMenuId = null;
 let selectedMenuName = '';
 let selectedMenuPrice = 0;
