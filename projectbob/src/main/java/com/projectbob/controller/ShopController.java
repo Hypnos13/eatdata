@@ -120,20 +120,6 @@ public class ShopController {
 	    model.addAttribute("hasShop", hasShop);
 	    return "shop/shopMain";
 	}
-	
-	@GetMapping("/shopListMain")
-	public String shopListMain(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
-	    if (loginId == null) {
-	        return "redirect:/login";
-	    }
-	    List<Shop> shopList = shopService.findShopListByOwnerId(loginId);
-	    if (shopList == null || shopList.isEmpty()) {
-	        return "shop/shopInfo";
-	    }
-	    model.addAttribute("shopList", shopList);
-	    return "shop/shopListMain";
-	}
-	
 	@GetMapping("/menuJoinForm")
 	public String menuJoinForm() {
 		return "shop/menuJoinForm";
@@ -156,4 +142,20 @@ public class ShopController {
 
 	    return "shop/shopBasicSet";
 	}
+	
+	@GetMapping("/shopListMain")
+	public String shopListMain(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
+		if (loginId == null) return "redirect:/login";
+		List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+		if (shopListMain == null || shopListMain.isEmpty()) {
+			return "shop/shopInfo"; // 가게 없으면 안내페이지로 이동
+		}
+		model.addAttribute("shopListMain", shopListMain); // 이 부분!
+		return "shop/shopListMain";
+	}
+	
+	
 }
+
+
+

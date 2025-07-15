@@ -20,12 +20,28 @@
 	
     <div class="container-fluid">
 	    <div class="d-flex flex-row">
-	      <!-- 사이드바 (한 번만 작성) -->
+	      <!-- 사이드바 -->
 	      <aside class="services-sidebar me-4">
-        <button class="sidebar-menu-btn d-flex justify-content-between align-items-center">
-          아직 가게가 없습니다.
-          <i class="bi bi-chevron-down"></i>
-        </button>
+	        <!-- 사이드바: 가게 드롭다운 -->
+			<div th:if="${shopListMain == null or #lists.isEmpty(shopListMain)}">
+			  <button class="sidebar-menu-btn d-flex justify-content-between align-items-center">
+			    아직 가게가 없습니다.
+			  </button>
+			</div>
+			
+			<div th:if="${shopListMain != null and !#lists.isEmpty(shopListMain)}" class="dropdown">
+			  <button class="sidebar-menu-btn d-flex justify-content-between align-items-center dropdown-toggle w-100"
+			          type="button" id="shopDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+			    <span th:text="${shopListMain[0].name}">내 첫번째 가게</span>
+			    <i class="bi bi-chevron-down"></i>
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="shopDropdownBtn">
+			    <li th:each="shop : ${shopListMain}">
+			      <a class="dropdown-item" th:href="@{|/shopBasicSet?s_id=${shop.sId}|}" th:text="${shop.name}">가게이름</a>
+			    </li>
+			  </ul>
+			</div>
+
         <!-- 아이콘 메뉴 리스트 -->
         <div class="sidebar-icon-list mb-3 mt-2">
           <div class="row g-2">

@@ -97,6 +97,16 @@ body {
 }
 
 /* ===== 사이드바 ===== */
+.dropdown .dropdown-menu {
+  min-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dropdown-toggle::after {
+  display: none !important;
+}
+
 .services-sidebar {
   background: #fff;
   border-radius: 14px;
