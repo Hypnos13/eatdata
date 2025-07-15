@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.projectbob.domain.MenuOption;
+import com.projectbob.domain.Review;
 import com.projectbob.service.BobService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -41,5 +42,21 @@ public class MenuAjaxController {
 		map.put("heartCount", heartCount);
 		return map;
 	}
+		
+	// 댓글 쓰기 메서드
+	@PostMapping("/reviewWrite.ajax")
+	public List<Review> addReview(Review review){
+		bobService.addReview(review);
+		return bobService.reviewList(review.getSId());
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 }

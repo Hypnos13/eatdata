@@ -74,6 +74,11 @@ public class BobService implements BobServiceIf{
 	}
 	
 	
+	// 댓글 등록하는 메서드
+	public void addReview(Review review) {
+		bobMapper.addReview(review);
+	}
+	
 
 	
 	

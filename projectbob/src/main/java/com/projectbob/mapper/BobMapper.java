@@ -28,6 +28,9 @@ public interface BobMapper {
 	// shop 하트 증가	
 		int plusHeart(int sId);
 		Integer getHeartCount(int sId);
+		
+	// 댓글을 DB에 등록하는 메서드
+	public void addReview(Review review);
 	
 }
 

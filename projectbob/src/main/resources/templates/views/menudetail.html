@@ -31,7 +31,7 @@
 						<img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
 						<div class="ms-3">
 							<h5 class="mb-0">[[ ${shop.name} ]] - [[ ${shop.address1} ]]</h5>
-							<small>★ [[${shop.rating}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원</small>
+							<small>★ [[${shop.rating}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원 / 가게 찜 [[${shop.heart}]]</small>
 						</div>
 					</div>
 
@@ -93,7 +93,7 @@
 							<div class="d-flex align-items-center">
 								<span class="me-1" id="heartCount" th:text="${shop.heart}">0</span>
 								<button type="button" id="btnHeart" class="btn btn-outline-danger btn-sm px-2 py-0"
-														data-sid="[[${shop.sId}]]">
+														th:data-sid="${shop.sId}">
 									<i class="bi bi-heart-fill"></i>
 								</button>
 							</div>
@@ -145,7 +145,18 @@
 								<div class="d-flex align-items-center mb-1">
 									<span class="fw-bold" th:text="${#strings.substring(review.id,0,2) + '**님'}">ad**님</span>
 									<span class="text-muted small ms-2" th:text="${#dates.format(review.regDate, 'yyyy-MM-dd')}">날짜</span>
-									<span class="ms-auto text-danger small" style="cursor:pointer">신고</span>
+									<div class="ms-auto">
+									<button class="modifyReview btn btn-outline-success btn-sm" th:data-no="${review.rNo}">
+										<i class="bi bi-journal-text">수정</i>									
+									</button>
+									<button class="deleteReview btn btn-outline-warning btn-sm" th:data-no="${review.rNo}">
+										<i class="bi bi-trash">삭제</i>
+									</button>
+									<button class="btn btn-outline-danger btn-sm" th:onclick="reportReview('${review.rNo}')">
+										<i class="bi bi-telephone-outbound">신고</i>
+									</button>
+									</div>
+									<!-- <span class="ms-auto text-danger small" style="cursor:pointer">신고</span> -->
 								</div>
 								<!-- 별점  -->
 								<div class="mb-1">
