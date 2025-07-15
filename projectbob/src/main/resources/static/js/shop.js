@@ -42,8 +42,10 @@ function shopJoinFormCheck(isShopJoinForm) {
 		alert("대표자 명을 입력해주세요.")
 		return false;
 	}
-	if($("#phone").val().length ==0 ) {
-		alert("대표자 연락처를 입력해주세요.")
+	const rawPhoneNumber = $("#phone").val();
+	if (rawPhoneNumber.length !== 13) {
+		alert("연락처는 '-'을 포함하여 13자리를 입력해주세요.");
+		$("#phone").focus();
 		return false;
 	}
 	if($("#name").val().length ==0 ) {
@@ -85,4 +87,29 @@ function findZipcode() {
     	}
 	}).open();
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneNumberInput = document.getElementById('phone');
+
+    if (phoneNumberInput) { // 요소가 존재하는지 확인
+        phoneNumberInput.addEventListener('input', function(event) {
+            let value = event.target.value.replace(/[^0-9]/g, ''); // 숫자 이외의 문자 제거
+
+            if (value.length > 11) {
+                value = value.substring(0, 11); // 11자리 초과 시 잘라냄
+            }
+
+            let formattedValue = '';
+            if (value.length < 4) {
+                formattedValue = value;
+            } else if (value.length < 8) {
+                formattedValue = value.substring(0, 3) + '-' + value.substring(3);
+            } else {
+                formattedValue = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7);
+            }
+
+            event.target.value = formattedValue;
+        });
+    }
+});
 

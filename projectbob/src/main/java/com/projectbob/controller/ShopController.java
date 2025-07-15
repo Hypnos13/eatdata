@@ -25,10 +25,6 @@ public class ShopController {
 	
 	@PostMapping("/insertShop")
 	public String insertShop( @RequestParam("id") String id,
-<<<<<<< HEAD
-=======
-
->>>>>>> d177ca0fcf3a067d8a4f8ff5b4d6dcdc31fdbeb6
 			@RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 
 			@RequestParam("phone") String phone, @RequestParam("name") String name, 
 			@RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1, 
