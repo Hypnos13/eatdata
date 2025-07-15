@@ -2,12 +2,21 @@ CREATE TABLE `shop` (
 	`s_id`	INTEGER AUTO_INCREMENT PRIMARY KEY,
 	`id`	varchar(20)	NOT NULL,
 	`name`	varchar(50)	NOT NULL,
+<<<<<<< HEAD
 	`phone`	varchar(11)	NOT NULL,
   `zipcode` varchar(10) NOT NULL,
 	`address1`	varchar(100) NOT NULL,
 	`address2`	varchar(80)	NOT NULL,
 	`owner`	varchar(20)	NOT NULL,
 	`s_number` varchar(11) NOT NULL,
+=======
+	`phone`	varchar(13)	NOT NULL,
+    `zipcode` varchar(10) NOT NULL,
+	`address1`	varchar(100) NOT NULL,
+	`address2`	varchar(80)	NOT NULL,
+	`owner`	varchar(20)	NOT NULL,
+	`s_number`	varchar(11)	NOT NULL,
+>>>>>>> d177ca0fcf3a067d8a4f8ff5b4d6dcdc31fdbeb6
 	`category`	varchar(50)	NULL,
   `s_pictureURL` varchar(500)	NULL,
 	`rating`	decimal(2,1) NULL DEFAULT 0.0,

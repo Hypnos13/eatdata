@@ -94,6 +94,33 @@ $(function(){
 		}				
 	});
 	
+	
+	//가게 관리 저장 버튼 누를 때
+	$(".btn-save").on("click",function(){
+		let sId = $(this).parent().parent().find('#sId').val();
+		let category = $(this).parent().parent().find('#category').val();
+		let status = $(this).parent().parent().find('#status').val();
+				
+		window.location.href="updateShopManage?sId="+sId+"&category="+category+"&status="+status;
+	});
+	
+	// 관리자 페이지 - 사용자관리 - 검색어 검색
+	$("#btn_search").on("click",function(){
+		let searchShop = $("#searchShop").val();
+		let keyword = $("#keyword").val();
+		
+		window.location.href="shopManage?searchShop="+searchShop+"&keyword="+keyword;		
+	});
+		
+	// 관리자 페이지 - 사용자관리 - 검색어 검색시
+	$("#keyword").on("keydown",function(e){
+		if(e.key == 'Enter'){
+			let searchShop = $("#searchShop").val();
+			let keyword = $("#keyword").val();
+					
+			window.location.href="shopManage?searchShop="+searchShop+"&keyword="+keyword;	
+		}
+	});
 });
 
 

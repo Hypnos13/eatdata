@@ -244,7 +244,8 @@ public class LoginController {
 	
 	// 관리자권한 - 사용자사용권한변경
 	@GetMapping("/updateIsuse")
-	public String updateIsuse(Model model, @RequestParam("id") String id, @RequestParam("isuse") String isuse, HttpSession session) {
+	public String updateIsuse(Model model, @RequestParam("id") String id, @RequestParam("isuse") String isuse, HttpSession session, HttpServletResponse response)
+			throws ServletException, IOException{
 		
 		String loginDisivion = (String) session.getAttribute("loginDisivion");
 		
@@ -252,7 +253,14 @@ public class LoginController {
 			loginService.updateIsuse(id, isuse);
 		}
 		
-		return "redirect:/userList";
+		response.setContentType("text/html; charset=utf-8");
+		PrintWriter out = response.getWriter();
+		out.println("<script>");
+		out.println("	alert('저장이 완료되었습니다.');");
+		out.println("	location.href='/userList';");
+		out.println("</script>");
+		
+		return null;
 	}
 	
 	
