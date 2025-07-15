@@ -24,5 +24,7 @@ public class Review {
 	private int liked;
 	private Timestamp regDate;
 	private Timestamp modiDate;
-
+	private String status;
+	
+	private String menuName;
 }

@@ -9,6 +9,9 @@ import com.projectbob.domain.*;
 @Mapper
 public interface ShopMapper {
 	
+	//메뉴 옵션 등록
+	public void insertMenuOption(MenuOption menuOption);
+	
 	//메뉴 등록
 	public void insertMenu(Menu menu);
 	

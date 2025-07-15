@@ -78,12 +78,70 @@
 
 						<!-- 리뷰 탭 -->
 						<div class="tab-pane fade" id="review">
-							<p>총 10,706개의 리뷰가 있습니다.</p>
+						<!-- 리뷰 탭 상단 -->
+						<div class="border rounded p-3 mb-3 bg-white">
+							<div class="d-flex align-items-center mb-2 justify-content-between" >
+								<div class="d-flex align-items-center">
+									<span class="fs-4 text-warning me-2">
+										<i class="bi bi-star-fill"></i>
+									</span>								
+											<span class="fs-5">별점&nbsp; </span>	
+								<h2 class="fw-bold me-3" th:text="${#numbers.formatDecimal(reviewAvg, 1, 1)}">4.9</h2>
+													
+							</div>
+							<!-- 찜버튼 -->
+							<div class="d-flex align-items-center">
+								<span class="me-1" id="heartCount" th:text="${shop.heart}">0</span>
+								<button type="button" id="btnHeart" class="btn btn-outline-danger btn-sm px-2 py-0">
+									<i class="bi bi-heart-fill"></i>
+								</button>
+							</div>
+							</div>
+							<div>
+								리뷰 <span th:text="${reviewList.size()}">0</span>개
+							</div>
+						</div>
+						----------
+						<!-- 리뷰 리스트 -->
+						<div th:if="${not #lists.isEmpty(reviewList)}">
+							<div th:each="review : ${reviewList}" class="border-bottom pb-3 mb-3">
+								<div class="d-flex align-items-center mb-1">
+									<span class="fw-bold" th:text="${#strings.substring(review.id,0,2) + '**님'}">ad**님</span>
+									<span class="text-muted small ms-2" th:text="${#dates.format(review.regDate, 'yyyy-MM-dd')}">날짜</span>
+									<span class="ms-auto text-danger small" style="cursor:pointer">신고</span>
+								</div>
+								<!-- 별점  -->
+								<div class="mb-1">
+									<span class="me-2 text-warning">
+										<i class="bi bi-star-fill"></i>										
+									</span>
+									<span th:text=" ' ' + ${review.rating} +'점'" class="fw-bold ms-1"></span>
+								</div>
+								<!-- 리뷰 사진  -->
+								<div th:if="${review.rPicture != null}">
+									<img th:src="@{'/images/review/' + ${review.rPicture}}" alt="리뷰사진" 
+													style="max-width:200px;" class="rounded shadow-sm mb-2" />
+								</div>
+								<!-- 메뉴 설명 -->
+								<div class="text-secondary small mb-1">
+									<span th:text="${review.menuName}">싹싹김치</span>
+								</div>
+								<!-- 리뷰 내용 -->
+								<div th:text="${review.content}">good day commando</div>
+							</div>
+						</div>
+						<!-- 리뷰 없을때 -->
+						<div th:unless="${not #lists.isEmpty(reviewList)}" class="text-center text-muted p-5">
+							no 리뷰~
+						</div>
+					
+						
+							<!-- <p>총 10,706개의 리뷰가 있습니다.</p>
 							<ul>
 								<li>"햄버거가 따뜻하고 맛있어요!"</li>
 								<li>"포장이 깔끔하고 배달이 빨라요."</li>
 								<li>"소스가 넉넉하게 들어있어요."</li>
-							</ul>
+							</ul> -->
 						</div>
 
 						<!-- 정보 탭 -->
@@ -141,7 +199,18 @@
 			</div>
 		</div>
 
+<form id="orderForm" method="post" action="/pay" style="display:none">
+	<input type="hidden" name="menuId" id="orderMenuId">
+	<input type="hidden" name="count" id="orderCount">
+	<input type="hidden" name="optionIds" id="orderOptionIds">
+	<input type="hidden" name="totalPrice" id="orderTotalPrice">
+</form>
+
 	</div>
 
+
+
+
+<script src="/js/main.js"></script>
 </body>
 </html>
