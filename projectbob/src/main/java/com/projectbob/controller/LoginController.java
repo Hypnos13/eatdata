@@ -2,9 +2,13 @@ package com.projectbob.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.projectbob.domain.Member;
 import com.projectbob.service.LoginService;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -22,8 +28,12 @@ import jakarta.servlet.http.HttpSession;
 public class LoginController {
 	
 	@Autowired
-	LoginService loginService;
-
+	LoginService loginService;	
+	@Autowired
+	private JavaMailSender javaMailSender;
+	@Value("${spring.mail.username}")
+	String NAVER_EMAIL;
+	
 	//로그인 폼
 	@GetMapping("/login")
 	public String loginForm(Model model, @RequestParam(name ="from", defaultValue = "client") String from) {
@@ -113,7 +123,18 @@ public class LoginController {
 			}else if(pass.equals("")){
 				out.println("	alert('입력한 정보가 잘못되었습니다.');");
 			}else {
-				out.println("	alert('비밀번호는 "+pass+" 입니다.');");
+				try {
+					MimeMessage m = javaMailSender.createMimeMessage();
+					MimeMessageHelper h = new MimeMessageHelper(m, "UTF-8");
+					h.setFrom(NAVER_EMAIL);
+					h.setTo(email);
+					h.setSubject("ProjectBOB 비밀번호 찾기 답변 메일입니다.");
+					h.setText(id + "의 비밀번호는 "+pass+" 입니다.");
+					javaMailSender.send(m);
+				} catch (MessagingException e) {
+					e.printStackTrace();
+				}
+				out.println("	alert('이메일이 보내졌습니다.');");
 			}
 			out.println("	history.back();");
 			out.println("</script>");
@@ -128,11 +149,27 @@ public class LoginController {
 			if(userIds.isEmpty() || userIds == null) {
 				out.println("	alert('아이디가 존재하지 않습니다.');");
 			}else {
-				out.print(" alert('아이디 : ");
-				for(String ids : userIds) {
-					out.print(ids + " ");
+				try {
+					String ids="";
+					for(int i = 0 ; i < userIds.size(); i++) {
+						if( i + 1 < userIds.size()) {
+							ids += userIds.get(i) + " , ";	
+						}else {
+							ids += userIds.get(i);					
+						}		
+					}
+					
+					MimeMessage m = javaMailSender.createMimeMessage();
+					MimeMessageHelper h = new MimeMessageHelper(m, "UTF-8");
+					h.setFrom(NAVER_EMAIL);
+					h.setTo(email);
+					h.setSubject("ProjectBOB 아이디 찾기 답변 메일입니다.");
+					h.setText( "아이디는 "+ids+" 입니다.");
+					javaMailSender.send(m);
+					out.println("	alert('이메일이 보내졌습니다.');");
+				} catch (MessagingException e) {
+					e.printStackTrace();
 				}
-				out.print("'); ");
 			}
 			out.println("	history.back();");
 			out.println("</script>");
