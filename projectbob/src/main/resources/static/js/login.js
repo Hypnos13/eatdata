@@ -1,10 +1,12 @@
 $(function(){
 	// 회원가입시 유효성 검사
-	$("#joinMemberForm").on("submit",function(){
+	$("#joinMemberForm").on("submit",async function(e){
+		
+		e.preventDefault();
 		
 		let check = 0;
-			
-		check += CheckId();	
+		
+		check += await CheckId();	
 		
 		check += CheckPass();		
 
@@ -21,11 +23,13 @@ $(function(){
 		if(check != 7){
 			return false;
 		}
+		
+		this.submit();
 	});
 	
 	// 상시 적용
-	$("#id").on("focusout",CheckId);
-	$("#pass").on("focusout",CheckPass);
+	$("#userid").on("focusout",CheckId);
+	$("#password").on("focusout",CheckPass);
 	$("#name").on("focusout",CheckName);
 	$("#birthday").on("focusout",CheckBirthday);
 	$("#address1").on("focusout",CheckAddress);
@@ -39,15 +43,12 @@ $(function(){
 			
 			let check = 0;	
 			
-			check += CheckId();	
-			check += CheckPass();	
-	    	check += CheckName();		
-			check += CheckBirthday();		
+			check += CheckPass();			
 			check += CheckAddress();
 			check += CheckEmail();
 			check += CheckPhone();
 			
-			if(check != 7){	return false; }
+			if(check != 4){	return false; }
 		});
 	
 	
@@ -79,7 +80,7 @@ $(function(){
 			if (!confirm("정말로 탈퇴 하시겠습니까? (복원이 불가능합니다.)")) {
 			      return false;
 			} else {
-			    $("#userPass").val($("#pass").val());
+			    $("#userPass").val($("#password").val());
 			}
 				
 	});
@@ -195,44 +196,73 @@ function findAddress() {
 
 
 // 아이디 체크
-function CheckId(){
+async function CheckId(update){
 	var idregExp = /^[A-Za-z0-9]*$/;
 	
-	if($("#id").val().length <= 0){
+	if($("#userid").val().length <= 0){
 		$("#idInfo").text("아이디를 입력해주세요.");
-		$("#id").css("border-color", "#F76159");
-		$("#id").css("color", "#F76159");
+		$("#userid").css("border-color", "#F76159");
+		$("#userid").css("color", "#F76159");
 		return 0;
-	}else if($("#id").val().length < 5 || $("#id").val().length > 20){
+	}else if($("#userid").val().length < 5 || $("#userid").val().length > 20){
 		$("#idInfo").text("아이디를 5~20자 내로 입력주세요.");
-		$("#id").css("border-color", "#F76159");
-		$("#id").css("color", "#F76159");
+		$("#userid").css("border-color", "#F76159");
+		$("#userid").css("color", "#F76159");
 		return 0;
-	}else if(!idregExp.test($("#id").val())){
+	}else if(!idregExp.test($("#userid").val())){
 		$("#idInfo").text("영문, 숫자만 사용 가능합니다.");
-		$("#id").css("border-color", "#F76159");
-		$("#id").css("color", "#F76159");
+		$("#userid").css("border-color", "#F76159");
+		$("#userid").css("color", "#F76159");
 		return 0;
 	}else{
 		$("#idInfo").text("");
-		$("#id").css("border-color", "#DEE2E6");
-		$("#id").css("color", "black");
-		return 1;
+		$("#userid").css("border-color", "#DEE2E6");
+		$("#userid").css("color", "black");
 	}
+	
+	
+	const checkOverlap = await new Promise((resolve) =>{
+		$.ajax({
+				url : "overlapId.ajax",
+				type : "GET",
+				data : { userId : $("#userid").val() },
+				dataType: "json",
+				success: function(resData){
+					if(!resData.result){
+						$("#idInfo").text("이미 존재하는 아이디 입니다.");
+						$("#userid").css("border-color", "#F76159");
+						$("#userid").css("color", "#F76159");	
+						resolve(0);	
+					}else{
+						$("#idInfo").text("");
+						$("#userid").css("border-color", "#DEE2E6");
+						$("#userid").css("color", "black");
+						resolve(1);	
+					}
+				},
+				error : function(xhr, status, error){
+					alert("error : " + xhr.statusText + ", " + status + ", " + error);
+					resolve(0);	
+				}
+			});
+	});
+	
+	
+	return checkOverlap;
 }
 
 
 // 비밀번호 체크
 function CheckPass(){
-	if($("#pass").val().length <= 0){
+	if($("#password").val().length <= 0){
 		$("#passInfo").text("비밀번호를 입력해주세요.");	
-		$("#pass").css("border-color", "#F76159");
-		$("#pass").css("color", "#F76159");
+		$("#password").css("border-color", "#F76159");
+		$("#password").css("color", "#F76159");
 		return 0;	
 	}else{
 		$("#passInfo").text("");
-		$("#pass").css("border-color", "#DEE2E6");
-		$("#pass").css("color", "black");
+		$("#password").css("border-color", "#DEE2E6");
+		$("#password").css("color", "black");
 		return 1;
 	}
 }
