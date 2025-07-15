@@ -46,4 +46,9 @@ public class ShopService {
 	public List<Shop> findShopListByOwnerId(String ownerId) {
 	    return shopMapper.findShopListByOwnerId(ownerId);
 	}
+	
+	//다수 가게에서 현재 선택한 가게고정
+	public Shop findByShopIdAndOwnerId(Integer sId, String ownerId) {
+	    return shopMapper.findByShopIdAndOwnerId(sId, ownerId);
+	}
 }

@@ -27,11 +27,19 @@
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/shopBasicSet" class="mains-icon-box">
-	                            <div class="mains-icon"><i class="bi bi-card-list"></i></div>
-	                            <div class="mains-icon-label">기본설정</div>
-	                        </a>
-	                    </div>
+						    <a th:if="${currentShop != null}"
+						       th:href="@{|/shopBasicSet?s_id=${currentShop.sId}|}"
+						       class="mains-icon-box">
+						        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+						        <div class="mains-icon-label">기본설정</div>
+						    </a>
+						    <a th:if="${currentShop == null}"
+						       href="/shopInfo"
+						       class="mains-icon-box">
+						        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+						        <div class="mains-icon-label">기본설정</div>
+						    </a>
+						</div>
 	                    <div class="icon-col">
 	                        <a href="/menuJoinForm" class="mains-icon-box">
 	                            <div class="mains-icon"><i class="bi bi-receipt"></i></div>

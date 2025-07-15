@@ -31,15 +31,17 @@
 			
 			<div th:if="${shopListMain != null and !#lists.isEmpty(shopListMain)}" class="dropdown">
 			  <button class="sidebar-menu-btn d-flex justify-content-between align-items-center dropdown-toggle w-100"
-			          type="button" id="shopDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-			    <span th:text="${shopListMain[0].name}">내 첫번째 가게</span>
-			    <i class="bi bi-chevron-down"></i>
-			  </button>
-			  <ul class="dropdown-menu" aria-labelledby="shopDropdownBtn">
-			    <li th:each="shop : ${shopListMain}">
-			      <a class="dropdown-item" th:href="@{|/shopBasicSet?s_id=${shop.sId}|}" th:text="${shop.name}">가게이름</a>
-			    </li>
-			  </ul>
+				        type="button" id="shopDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+				  <span th:text="${currentShop != null ? currentShop.name : shopListMain[0].name}">선택된 가게명</span>
+				  <i class="bi bi-chevron-down"></i>
+				</button>
+				<ul class="dropdown-menu" aria-labelledby="shopDropdownBtn">
+				  <li th:each="shop : ${shopListMain}">
+				    <a class="dropdown-item"
+				       th:href="@{|/shopListMain?s_id=${shop.sId}|}"
+				       th:text="${shop.name}">가게이름</a>
+				  </li>
+				</ul>
 			</div>
 
         <!-- 아이콘 메뉴 리스트 -->
@@ -78,7 +80,11 @@
 	    </button>
 	    <div class="collapse" id="collapseStore">
 	      <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
-	        <li><a href="/shopBasicSet" class="sidebar-sub-link">기본설정</a></li>
+	        <li th:if="${shopListMain != null and !#lists.isEmpty(shopListMain)}">
+			  <a class="sidebar-sub-link" th:href="@{|/shopBasicSet?s_id=${shopListMain[0].sId}|}">
+			    기본설정
+			  </a>
+			</li>
 	        <li><a href="#" class="sidebar-sub-link">사장님 공지</a></li>
 	        <li><a href="#" class="sidebar-sub-link">PC 주문접수 관리</a></li>
 	        <li><a href="#" class="sidebar-sub-link">사장님 포인트</a></li>

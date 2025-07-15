@@ -3,12 +3,9 @@ package com.projectbob.controller;
 import org.springframework.beans.factory.annotation.*;
 
 import java.io.IOException;
-<<<<<<< HEAD
 import java.util.*;
 import java.security.Principal;
 
-=======
->>>>>>> develop
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -108,12 +105,6 @@ public class ShopController {
         model.addAttribute("message", "메뉴 정보가 성공적으로 등록되었습니다.");
 		return "redirect:menuJoinForm";
 	}
-<<<<<<< HEAD
-
-	/*
-	 * @GetMapping("/shopMain") public String shopMain() { return "shop/shopMain"; }
-	 */
-=======
 	
 	@PostMapping("/insertMenuOption")
 	public String insertMenuOption( @RequestParam("mId") int mId,
@@ -132,7 +123,6 @@ public class ShopController {
 		return "redirect:optionJoinForm";
 	}
 	
->>>>>>> develop
 	@GetMapping("/shopMain")
 	public String shopMain(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
 	    boolean hasShop = false;
@@ -143,15 +133,12 @@ public class ShopController {
 	    model.addAttribute("hasShop", hasShop);
 	    return "shop/shopMain";
 	}
-<<<<<<< HEAD
-=======
 	
 	@GetMapping("/shopJoinForm")
 	public String shopJoinForm() {
 		return "shop/shopJoinForm";
 	}
 	
->>>>>>> develop
 	@GetMapping("/menuJoinForm")
 	public String menuJoinForm() {
 		return "shop/menuJoinForm";
@@ -168,15 +155,15 @@ public class ShopController {
 	}
 	
 	@GetMapping("/shopBasicSet")
-	public String shopBasicSet(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
-	    if (loginId == null) {
-	        // 로그인 정보 없으면 로그인 페이지로 리다이렉트 등 처리
-	        return "redirect:/login";
-	    }
-	    // 현재 로그인한 사장님의 shop 정보를 조회
-	    Shop shop = shopService.findByOwnerId(loginId);
-	    model.addAttribute("shop", shop); // Thymeleaf 뷰로 전달
-
+	public String shopBasicSet(
+	    @RequestParam("s_id") Integer sId,
+	    @SessionAttribute(name = "loginId", required = false) String loginId,
+	    Model model
+	) {
+	    if (loginId == null) return "redirect:/login";
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    model.addAttribute("shop", currentShop);          // 본문에서 사용
+	    model.addAttribute("currentShop", currentShop);   // 드롭박스 표시용
 	    return "shop/shopBasicSet";
 	}
 	

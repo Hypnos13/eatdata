@@ -40,4 +40,11 @@
 	    ORDER BY reg_date DESC
 	</select>
 	
+	<!-- 다수 가게에서 현재 선택한 가게고정 -->
+	<select id="findByShopIdAndOwnerId" resultType="com.projectbob.domain.Shop">
+	    SELECT * FROM shop WHERE s_id = #{sId} AND id = #{ownerId}
+	</select>
+
+	
+	
 </mapper>	

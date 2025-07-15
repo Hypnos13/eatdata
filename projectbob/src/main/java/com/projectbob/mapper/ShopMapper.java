@@ -25,6 +25,10 @@ public interface ShopMapper {
 	public Shop findByOwnerId(String ownerId);
 	
 	//가게 유무 확인후 보여주기
-	List<Shop> findShopListByOwnerId(String ownerId);
+	public List<Shop> findShopListByOwnerId(String ownerId);
+	
+	//다수가게에서 선택가게 고정
+	public Shop findByShopIdAndOwnerId(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
+
 	
 }
