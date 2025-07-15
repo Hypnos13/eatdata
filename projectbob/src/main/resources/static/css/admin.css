@@ -25,14 +25,13 @@
   cursor: pointer;
 }
 
-/* 검색 행 wrapper (row 전체) */
 .row.text-center {
   justify-content: center;
   gap: 10px;
 }
 
 
-#searchDisivion, #keyword {
+#searchDisivion, #keyword, #searchShop {
   width: 100%;
   max-width : 500px;
   padding: 8px 12px;

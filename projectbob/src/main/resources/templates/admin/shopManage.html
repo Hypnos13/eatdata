@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{js/faq.js}"></script>
+<link th:href="@{css/admin.css}" rel="stylesheet" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<div class ="container">
+	<th:block th:if="${session.loginDisivion == 'master'}">
+
+	
+	<div class="row text-center mt-5">
+		<div class="col-2 text-end">
+			<select id="searchShop" name="searchShop">
+				<option value="sNumber" th:selected="${searchShop == 'sNumber'}">사업자등록번호</option>
+				<option value="owner" th:selected="${searchShop == 'owner'}">대표자</option>
+				<option value="name" th:selected="${searchShop == 'name'}">가게이름</option>
+			</select>
+		</div>
+		<div class="col-5 text-start">
+			<input type="text" id="keyword" name="keyword">
+		</div>
+		<div class="col-2 text-start">
+			<input type="button" class="btn btn-primary" id="btn_search" name="btn_search" value="검색">
+		</div>
+	</div>
+
+	<div class="row text-center mt-5">
+		<div class="col-10 mx-auto">
+			<th:block th:unless="${#lists.isEmpty(shopList)}">
+				<table class = "table-custom">
+					<thead>
+					<tr><th>사업자등록번호</th><th>대표자</th><th>가게이름</th><th>연락처</th><th>분류</th><th colspan="2">허가여부</th></tr>
+					</thead>
+					<th:block th:each="shop, status: ${shopList}">
+					<tr>
+						<td><span id="sNumber" th:text="${shop.sNumber}"></span></td>
+						<td><span id="owner" th:text="${shop.owner}"></span></td>
+						<td><span id="name" th:text="${shop.name}"></span></td>
+						<td><span id="phone" th:text="${shop.phone}"></span></td>
+						<td><select id="category" name="category">
+							<option value="1인분주문" th:selected="${shop.category=='1인분주문'}">1인분주문</option>
+							<option value="프랜차이즈" th:selected="${shop.category=='프랜차이즈'}">프랜차이즈</option>
+							<option value="치킨" th:selected="${shop.category=='치킨'}">치킨</option>
+							<option value="피자/양식" th:selected="${shop.category=='피자/양식'}">피자/양식</option>
+							<option value="중국집" th:selected="${shop.category=='중국집'}">중국집</option>
+							<option value="한식" th:selected="${shop.category=='한식'}">한식</option>
+							<option value="일식/돈까스" th:selected="${shop.category=='일식/돈까스'}">일식/돈까스</option>
+							<option value="족발/보쌈" th:selected="${shop.category=='족발/보쌈'}">족발/보쌈</option>
+							<option value="야식" th:selected="${shop.category=='야식'}">야식</option>
+							<option value="분식" th:selected="${shop.category=='분식'}">분식</option>
+							<option value="카페/디저트" th:selected="${shop.category=='카페/디저트'}">카페/디저트</option>
+							<option value="편의점/마트" th:selected="${shop.category=='편의점/마트'}">편의점/마트</option>
+							</select>	
+						</td>
+						<td>
+							<select id="status" name="status">
+							<option value="Y" th:selected="${shop.status=='Y'}">Y</option>
+							<option value="N" th:selected="${shop.status=='N'}">N</option>
+							</select>
+						</td>
+						<td>
+							<input type="hidden" name="sId" id="sId" th:value="${shop.sId}" readonly>
+							<button class="btn btn-success ml-5 btn-save">저장</button>
+						</td>
+					</tr>
+					</th:block>
+				</table>
+			</th:block>	
+			<th:block th:if="${#lists.isEmpty(shopList)}">
+				<table class = "table-custom">
+					<thead>
+					<tr><th>사업자등록번호</th><th>대표자</th><th>가게이름</th><th>연락처</th><th>분류</th><th colspan="2">허가여부</th></tr>
+					</thead>
+					<tr>
+						<td class="text-center" colspan="6">검색 결과가 없습니다.</td>
+					</tr>
+				</table>
+			</th:block>		
+		</div>
+	</div>	
+	
+	</th:block>
+</div>
+ 
+</th:block>
+</html>

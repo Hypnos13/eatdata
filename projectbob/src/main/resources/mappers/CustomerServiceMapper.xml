@@ -91,6 +91,27 @@
 	WHERE no = #{no}
 </delete>
 
+<select id="shopManageList" resultType="shop">
+	SELECT *
+	FROM shop
+	<where>
+		<if test = "searchShop == 'sNumber' and keyword != ''">
+			s_number like CONCAT('%',#{keyword},'%')
+		</if>
+		<if test = "searchShop == 'owner' and keyword != ''">
+			owner like CONCAT('%',#{keyword},'%')
+		</if>
+		<if test = "searchShop == 'name' and keyword != ''">
+			name like CONCAT('%',#{keyword},'%')
+		</if>
+	</where>
+</select>
+
+<update id="updateShopManage">
+	UPDATE  shop
+	SET category = #{category} , status = #{status} , modi_date = SYSDATE()
+	WHERE s_id = #{sId}
+</update>
 </mapper>	
 
 

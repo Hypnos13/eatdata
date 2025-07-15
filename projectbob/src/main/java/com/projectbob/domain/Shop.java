@@ -19,7 +19,7 @@ public class Shop {
 	private String address1;
 	private String address2;
 	private String owner;
-	private int sNumber;
+	private String sNumber;
 	private String category;
 	private String sPictureURL;
 	private double rating;
