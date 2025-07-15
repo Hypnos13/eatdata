@@ -15,5 +15,7 @@ public interface BobServiceIf {
 //	List<Menu> getMenuListOption(int sId);
 //	List<String> getMenuCategoriesByShopId(int sId);
 	List<Review> reviewList(int sId);
+	int plusHeart(int sId);
+	Integer getHeartCount(int sId);
 
 }

@@ -33,10 +33,9 @@ public class BobController {
 	public String menu() {
 		return "views/menudetail";
 	}
-	@GetMapping("/pay")
-	public String pay() {
-		return "views/pay";
-	}
+	/*
+	 * @GetMapping("/pay") public String pay() { return "views/pay"; }
+	 */
 	
 	@GetMapping("/end")
 	public String completed() {
@@ -73,6 +72,8 @@ public class BobController {
 		  
 		  List<Review> reviewList = bobService.reviewList(sId);
 		  model.addAttribute("reviewList", reviewList);
+		  
+		 //model.addAttribute("member", member);
 		  
 		  double reviewAvg = 0.0;
 		  if (!reviewList.isEmpty()) {

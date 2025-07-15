@@ -92,7 +92,8 @@
 							<!-- 찜버튼 -->
 							<div class="d-flex align-items-center">
 								<span class="me-1" id="heartCount" th:text="${shop.heart}">0</span>
-								<button type="button" id="btnHeart" class="btn btn-outline-danger btn-sm px-2 py-0">
+								<button type="button" id="btnHeart" class="btn btn-outline-danger btn-sm px-2 py-0"
+														data-sid="[[${shop.sId}]]">
 									<i class="bi bi-heart-fill"></i>
 								</button>
 							</div>
@@ -101,7 +102,43 @@
 								리뷰 <span th:text="${reviewList.size()}">0</span>개
 							</div>
 						</div>
-						----------
+						<!-- 댓글쓰기 -->
+						<div class="row my-3">
+						<div class="col border p-1 text-center">
+						<span id="reviewWrite" class="text-success" style="cursor: pointer;">
+							<i class="bi bi-file-earmark-text-fill" style="color: cornflowerblue;"></i>댓글쓰기
+						</span>
+						</div>
+						</div>
+						<!-- 댓글 헤더 영역 -->						
+						<!-- 댓글 쓰기 폼 -->
+					<div class="row my-3" id="reviewForm">
+						<div class="col">
+							<form name="reviewWriteForm" id="reviewWriteForm">
+								<input type="hidden" name="sId" th:value="${shop.sId}">
+						<!-- 	<input type="hidden" name="id" th:value="${member.id}"> -->
+								<div class="row bg-light my-3 p-3 border">
+									<div class="col">
+										<div class="row">
+											<div class="col text-center">
+												<span>맛밥
+												</span>
+											</div>
+										</div>
+										<div class="row my-3">
+											<div class="col-md-10">
+												<textarea name="reviewContent" id="reviewContent" class="form-control" rows="4"></textarea>												
+											</div>
+											<div class="col-md">
+												<input type="submit" value="댓글쓰기" class="btn btn-success h-100 w-100" id="reviewWriteButton">
+											</div>
+										</div>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+						
 						<!-- 리뷰 리스트 -->
 						<div th:if="${not #lists.isEmpty(reviewList)}">
 							<div th:each="review : ${reviewList}" class="border-bottom pb-3 mb-3">
@@ -127,21 +164,14 @@
 									<span th:text="${review.menuName}">싹싹김치</span>
 								</div>
 								<!-- 리뷰 내용 -->
-								<div th:text="${review.content}">good day commando</div>
+								<div th:text="${review.content}">good day</div>
 							</div>
 						</div>
 						<!-- 리뷰 없을때 -->
 						<div th:unless="${not #lists.isEmpty(reviewList)}" class="text-center text-muted p-5">
 							no 리뷰~
-						</div>
+						</div>									
 					
-						
-							<!-- <p>총 10,706개의 리뷰가 있습니다.</p>
-							<ul>
-								<li>"햄버거가 따뜻하고 맛있어요!"</li>
-								<li>"포장이 깔끔하고 배달이 빨라요."</li>
-								<li>"소스가 넉넉하게 들어있어요."</li>
-							</ul> -->
 						</div>
 
 						<!-- 정보 탭 -->

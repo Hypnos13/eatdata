@@ -27,7 +27,7 @@ public class ShopController {
 	
 	@PostMapping("/insertShop")
 	public String insertShop( @RequestParam("id") String id,
-			@RequestParam("sNumber") Integer sNumber, @RequestParam("owner") String owner, 
+			@RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 
 			@RequestParam("phone") String phone, @RequestParam("name") String name, 
 			@RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1, 
 			@RequestParam("address2") String address2, @RequestParam("sLicense") MultipartFile sLicenseFile, 

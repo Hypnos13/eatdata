@@ -230,3 +230,57 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+
+
+
+
+
+
+
+// 찜하기 하트
+$(function(){
+	
+	$("#btnHeart").click(function(){
+		let sId = $(this).data("sid") || $("input[name='sId']").val();
+		if (!sId){
+			alert('가게 정보를 찾을 수 없습니다.');
+			return;
+		}
+		
+		$.ajax({
+			url: "/heart.ajax",
+			type: "post",
+			data : { sId : sId },
+			dataType: "json",
+			success: function(data){
+			$("#heartCount").text(data.heartCount);
+				alert("찜하기가 반영되었습니다.");
+			},
+			error: function(xhr, status, error){
+				alert("error : " + xhr.statusText + "," + status + "," + error);
+			}
+		});
+	});
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

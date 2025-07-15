@@ -2,6 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
+<!-- 하트 버튼 증가시키는 쿼리 -->
+<update id="plusHeart" parameterType="int">
+	UPDATE shop SET heart = heart + 1 WHERE s_id = #{sId}
+</update>
+<select id="getHeartCount" parameterType="int" resultType="int">
+	SELECT heart FROM shop WHERE s_id = #{sId}
+</select>
+
 <!-- 리뷰 -->
 <select id="reviewList" parameterType="int" resultType="com.projectbob.domain.Review">
 	SELECT review.*, menu.name AS menuName FROM review

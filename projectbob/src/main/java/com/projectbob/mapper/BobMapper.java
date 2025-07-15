@@ -25,5 +25,9 @@ public interface BobMapper {
 	// 가게 번호에 해당하는 리뷰리스트에 사용
 	public List<Review> reviewList(int sId);
 	
+	// shop 하트 증가	
+		int plusHeart(int sId);
+		Integer getHeartCount(int sId);
+	
 }
 

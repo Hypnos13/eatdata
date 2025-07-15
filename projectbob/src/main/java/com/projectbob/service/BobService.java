@@ -58,9 +58,22 @@ public class BobService implements BobServiceIf{
 //	}
 	
 	// 가게 번호에 해당하는 리뷰리스트에 사용
+	@Override
 	public List<Review> reviewList(int sId){
 		return bobMapper.reviewList(sId);
 	}
+	
+	// 가게 찜 (하트) 증가
+	@Override
+	public int plusHeart(int sId) {
+		return bobMapper.plusHeart(sId);
+	}
+	@Override
+	public Integer getHeartCount(int sId) {
+		return bobMapper.getHeartCount(sId);
+	}
+	
+	
 
 	
 	
