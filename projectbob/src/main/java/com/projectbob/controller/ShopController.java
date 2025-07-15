@@ -25,7 +25,8 @@ public class ShopController {
 	
 	@PostMapping("/insertShop")
 	public String insertShop( @RequestParam("id") String id,
-			@RequestParam("sNumber") int sNumber, @RequestParam("owner") String owner, 
+
+			@RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 
 			@RequestParam("phone") String phone, @RequestParam("name") String name, 
 			@RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1, 
 			@RequestParam("address2") String address2, Model model ) { //@RequestParam("sLicense") MultipartFile sLicenseFile
@@ -52,8 +53,8 @@ public class ShopController {
             e.printStackTrace();
             model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
             return "/shopJoinForm";
-        }*/
-        
+        */
+		
         Shop shop = new Shop();
         shop.setId(id);
         shop.setSNumber(sNumber);

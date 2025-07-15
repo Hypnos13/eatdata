@@ -1,5 +1,7 @@
 package com.projectbob.controller;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
@@ -13,8 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.NoticeBoard;
+import com.projectbob.domain.Shop;
 import com.projectbob.service.CustomerServiceService;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -142,5 +147,33 @@ public class CustomerServiceController {
 		csService.deleteNotice(no);
 		
 		return "redirect:/noticeList";
+	}
+	
+	//가게 관리(관리자)
+	@GetMapping("/shopManage")
+	public String shopManage(Model model, @RequestParam(name="searchShop", defaultValue = "") String searchShop, @RequestParam(name= "keyword", defaultValue = "") String keyword) {
+		
+		List<Shop> shopList = csService.shopManageList(searchShop, keyword);
+		model.addAttribute("shopList", shopList);
+		
+		return "admin/shopManage";
+	}
+	
+	
+	//가게 관리 수정(관리자)
+	@GetMapping("/updateShopManage")
+	public String updateShopManage(@RequestParam("sId") String sId , @RequestParam("category") String category, @RequestParam("status") String status , 
+			HttpServletResponse response)throws ServletException, IOException{
+	
+		csService.updateShopManage(sId, category, status);
+		
+		response.setContentType("text/html; charset=utf-8");
+		PrintWriter out = response.getWriter();
+		out.println("<script>");
+		out.println("	alert('저장이 완료되었습니다.');");
+		out.println("	location.href='/shopManage';");
+		out.println("</script>");
+		
+		return null;
 	}
 }
