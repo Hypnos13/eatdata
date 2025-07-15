@@ -33,10 +33,9 @@ public class BobController {
 	public String menu() {
 		return "views/menudetail";
 	}
-	@GetMapping("/pay")
-	public String pay() {
-		return "views/pay";
-	}
+	/*
+	 * @GetMapping("/pay") public String pay() { return "views/pay"; }
+	 */
 	
 	@GetMapping("/end")
 	public String completed() {
