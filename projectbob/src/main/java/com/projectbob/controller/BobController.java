@@ -100,6 +100,7 @@ public class BobController {
 				  @RequestParam("optionIds") String optionIds,
 				  @RequestParam("totalPrice") int totalPrice,
 				  Model model) {
+			  System.out.println("menuId=" + menuId + " count=" + count + " optionIds=" + optionIds + " totalPrice=" + totalPrice);
 			  model.addAttribute("menuId", menuId);
 			  model.addAttribute("count", count);
 			  model.addAttribute("optionIds", optionIds);
