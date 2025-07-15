@@ -47,11 +47,11 @@ public class ShopController {
 
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage()); // 파일이 비어있는 경우
-            return "/shopJoinForm";
+            return "/shop/shopJoinForm";
         } catch (IOException e) {
             e.printStackTrace();
             model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-            return "/shopJoinForm";
+            return "/shop/shopJoinForm";
         */
 		
         Shop shop = new Shop();
@@ -83,11 +83,11 @@ public class ShopController {
             System.out.println("메뉴사진 업로드 성공. URL: " + mPictureUrl);
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage()); // 파일이 비어있는 경우
-            return "/menuJoinForm";
+            return "/shop/menuJoinForm";
         } catch (IOException e) {
             e.printStackTrace();
             model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-            return "/menuJoinForm";
+            return "/shop/menuJoinForm";
         }
         Menu menu = new Menu();
         menu.setSId(sId);
@@ -133,6 +133,11 @@ public class ShopController {
 	@GetMapping("/menuJoinForm")
 	public String menuJoinForm() {
 		return "shop/menuJoinForm";
+	}
+	
+	@GetMapping("/menuUpdateForm")
+	public String menuUpdateForm() {
+		return "shop/menuUpdateForm";
 	}
 	
 	@GetMapping("/optionJoinForm")
