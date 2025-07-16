@@ -126,11 +126,15 @@ public class ShopController {
 	@GetMapping("/shopMain")
 	public String shopMain(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
 	    boolean hasShop = false;
-	    if (loginId != null) {
-	        List<Shop> shops = shopService.findShopListByOwnerId(loginId);
-	        hasShop = (shops != null && !shops.isEmpty());
+	    boolean isLogin = (loginId != null);
+	    List<Shop> shopListMain = new ArrayList<>();
+	    if (isLogin) {
+	        shopListMain = shopService.findShopListByOwnerId(loginId);
+	        hasShop = (shopListMain != null && !shopListMain.isEmpty());
 	    }
 	    model.addAttribute("hasShop", hasShop);
+	    model.addAttribute("isLogin", isLogin);
+	    model.addAttribute("shopListMain", shopListMain); // 추가
 	    return "shop/shopMain";
 	}
 	
@@ -158,8 +162,8 @@ public class ShopController {
 	public String shopBasicSet(
 	    @RequestParam("s_id") Integer sId,
 	    @SessionAttribute(name = "loginId", required = false) String loginId,
-	    Model model
-	) {
+	    Model model) 
+	{
 	    if (loginId == null) return "redirect:/login";
 	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
 	    model.addAttribute("shop", currentShop);          // 본문에서 사용

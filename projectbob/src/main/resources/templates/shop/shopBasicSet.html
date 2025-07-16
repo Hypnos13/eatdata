@@ -18,50 +18,66 @@
 		</div>
         <!-- 여기엔 본문 내용만 -->
         <div class="main-content-card card shadow-sm p-4" style="margin-left:8px; min-height:480px;">
-            <form method="post" enctype="multipart/form-data" action="/shop/update">
+            <form method="post" enctype="multipart/form-data" action="/shop/update" >
 			<input type="hidden" name="s_id" th:value="${shop.sId}" />
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label">가게명*</label>
                     <div class="col-sm-10">
-                        <input type="text" name="name" class="form-control" th:value="${shop.name}" />
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">대표자명*</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="owner" class="form-control" th:value="${shop.owner}" />
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">사업자등록번호*</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="s_number" class="form-control" th:value="${shop.sNumber}" />
+                        <input type="text" name="name" class="form-control"
+       							th:value="${shop.name}" required maxlength="50" />
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label">연락처*</label>
                     <div class="col-sm-10">
-                        <input type="text" name="phone" class="form-control" th:value="${shop.phone}" />
+                        <input type="text" name="phone" class="form-control"
+						       th:value="${shop.phone}" required maxlength="13"
+						       pattern="^01[016789]-\d{3,4}-\d{4}$" />
                     </div>
                 </div>
 
                 <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">가게 주소*</label>
+                    <label class="col-sm-2 col-form-label">우편번호*</label>
                     <div class="col-sm-10">
-                        <input type="text" name="address1" class="form-control" th:value="${shop.address1}" />
+                        <input type="text" name="zipcode" class="form-control"
+      							th:value="${shop.zipcode}" required maxlength="5" />
                     </div>
                 </div>
 
                 <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">상세주소</label>
+                    <label class="col-sm-2 col-form-label">가게주소*</label>
                     <div class="col-sm-10">
-                        <input type="text" name="address2" class="form-control" th:value="${shop.address2}" />
+                        <input type="text" name="address1" class="form-control"
+       							th:value="${shop.address1}" required maxlength="100" />
                     </div>
                 </div>
 
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">상세주소*</label>
+                    <div class="col-sm-10">
+                        <input type="text" name="address2" class="form-control"
+       							th:value="${shop.address2}" required maxlength="80" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">대표자명*</label>
+                    <div class="col-sm-10">
+                        <input type="text" name="owner" class="form-control"
+       							th:value="${shop.owner}" required maxlength="20" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">사업자등록번호*</label>
+                    <div class="col-sm-10">
+                        <input type="text" name="s_number" class="form-control"
+						       th:value="${shop.sNumber}" required maxlength="10"
+						       pattern="\d{10}" />
+                    </div>
+                </div>
+                
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label">가게사진</label>
                     <div class="col-sm-10">

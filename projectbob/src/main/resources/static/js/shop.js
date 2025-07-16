@@ -6,6 +6,8 @@ $(function() {
 	//우편번호찾기
 	$("#btnZipcode").click(findZipcode);
 	
+	//로그인 필요한 메뉴 클릭 이벤트
+	$(".login-required").on("click", requireLogin);
 });
 
 function menuJoinFormCheck() {
@@ -87,6 +89,33 @@ function findZipcode() {
     	}
 	}).open();
 }
+
+//로그인 여부 읽기
+var isLogin = document.body.dataset.login === "true";
+
+//로그인상태 확인
+function requireLogin(event) {
+    if (!isLogin) {
+        event.preventDefault();
+        window.location.href = '/login';
+        return false;
+    }
+    return true;
+}
+
+
+// name 기준으로 에러메시지 출력하는 함수 (필드 아래에 동적으로 만듦)
+function setError(fieldName, msg) {
+    let input = document.querySelector(`[name="${fieldName}"]`);
+    let errorSpan = input.parentNode.querySelector('.js-err-msg');
+    if (!errorSpan) {
+        errorSpan = document.createElement('span');
+        errorSpan.className = 'js-err-msg text-danger small';
+        input.parentNode.appendChild(errorSpan);
+    }
+    errorSpan.innerText = msg;
+}
+
 
 document.addEventListener('DOMContentLoaded', function() {
     const phoneNumberInput = document.getElementById('phone');
