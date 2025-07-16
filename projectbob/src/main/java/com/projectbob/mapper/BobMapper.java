@@ -25,7 +25,7 @@ public interface BobMapper {
 	
 	// 가게 번호에 해당하는 리뷰리스트에 사용
 	public List<Review> reviewList(int sId);
-<<<<<<< HEAD
+
 	
 	// shop 하트 증가	
 		int plusHeart(int sId);
@@ -34,8 +34,6 @@ public interface BobMapper {
 	// 댓글을 DB에 등록하는 메서드
 	public void addReview(Review review);
 	
-=======
 
->>>>>>> seon
 }
 
