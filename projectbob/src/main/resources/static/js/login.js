@@ -112,7 +112,7 @@ $(function(){
 		if($("#search").val() == "false"){
 			check += 1;
 		}else{
-			check += CheckId();	
+			check += SearchCheckId();	
 		}			
 		
 		check += CheckName();	
@@ -196,7 +196,7 @@ function findAddress() {
 
 
 // 아이디 체크
-async function CheckId(update){
+async function CheckId(){
 	var idregExp = /^[A-Za-z0-9]*$/;
 	
 	if($("#userid").val().length <= 0){
@@ -249,6 +249,33 @@ async function CheckId(update){
 	
 	
 	return checkOverlap;
+}
+
+// 아이디 체크2
+function SearchCheckId(){
+	var idregExp = /^[A-Za-z0-9]*$/;
+	
+	if($("#id").val().length <= 0){
+		$("#idInfo").text("아이디를 입력해주세요.");
+		$("#id").css("border-color", "#F76159");
+		$("#id").css("color", "#F76159");
+		return 0;
+	}else if($("#id").val().length < 5 || $("#id").val().length > 20){
+		$("#idInfo").text("아이디를 5~20자 내로 입력주세요.");
+		$("#id").css("border-color", "#F76159");
+		$("#id").css("color", "#F76159");
+		return 0;
+	}else if(!idregExp.test($("#id").val())){
+		$("#idInfo").text("영문, 숫자만 사용 가능합니다.");
+		$("#id").css("border-color", "#F76159");
+		$("#id").css("color", "#F76159");
+		return 0;
+	}else{
+		$("#idInfo").text("");
+		$("#id").css("border-color", "#DEE2E6");
+		$("#id").css("color", "black");
+		return 1;
+	}
 }
 
 
