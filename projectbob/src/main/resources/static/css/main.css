@@ -301,3 +301,45 @@ nav.navbar .nav-link.active {
   margin-bottom: 0.25rem;
 }
 
+/* 리뷰 별점 */
+.star-rating{
+	direction: rtl;
+	unicode-bidi: bidi-override;
+	font-size: 2rem;
+}
+.star-rating input { display: none; }
+.star-rating label {
+	color: #ddd;
+	cursor: pointer;
+	transition: color 0.2s;
+}
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label{
+	color: #ffc700;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

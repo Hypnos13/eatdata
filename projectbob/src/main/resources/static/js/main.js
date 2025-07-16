@@ -264,6 +264,7 @@ $(function(){
 	});
 });
 
+// 댓글쓰기 버튼 클릭 이벤트
 $("#reviewWrite").on("click", function(){
 		$("#reviewForm").toggleClass("d-none");
 	});
@@ -274,13 +275,21 @@ $("#reviewWrite").on("click", function(){
 			alert("댓글은 5자 이상 입력하세요~");
 			return false;
 		}
+		if (!$('input[name="rating"]:checked').val()){
+			alert("별점을 선택하세요~!");
+			return false;
+		}
+		let formData = new FormData(this);
+		
 		let params = $(this).serialize();
 		console.log(params);
 		
 		$.ajax({
 			"url": "reviewWrite.ajax",
-			"data": params,
+			"data": formData,
 			"type": "post",
+			"processData": false,
+			"contentType": false,
 			"dataType": "json",
 			"success": function(resData){
 				console.log(resData);
@@ -348,7 +357,25 @@ $("#reviewWrite").on("click", function(){
 	});
 
 
+//댓글 사진 미리보기
+let previewUrl = null;
 
+$("#rPicture").on('change', function(e){
+	const [file] = e.target.files;
+	if(file){
+		if(previewUrl){
+			URL.revokeObjectURL(previewUrl);
+		}
+		previewUrl = URL.createObjectURL(file);
+		$("#imgPreview").attr('src', previewUrl).show();
+	} else {
+		if(previewUrl){
+			URL.revokeObjectURL(previewUrl);
+			previewUrl = null;
+		}
+		$("#imgPreview").hide();
+	}
+});
 
 
 

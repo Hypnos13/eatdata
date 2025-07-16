@@ -90,10 +90,11 @@
 													
 							</div>
 							<!-- 찜버튼 -->
-							<div class="d-flex align-items-center">
-								<span class="me-1" id="heartCount" th:text="${shop.heart}">0</span>
+							<div class="d-flex align-items-center">						
+							<span>가게 찜하기</span>		
 								<button type="button" id="btnHeart" class="btn btn-outline-danger btn-sm px-2 py-0"
 														th:data-sid="${shop.sId}">
+								<span class="me-1" id="heartCount" th:text="${shop.heart}">0</span>
 									<i class="bi bi-heart-fill"></i>
 								</button>
 							</div>
@@ -106,23 +107,41 @@
 						<div class="row my-3">
 						<div class="col border p-1 text-center">
 						<span id="reviewWrite" class="text-success" style="cursor: pointer;">
-							<i class="bi bi-file-earmark-text-fill" style="color: cornflowerblue;"></i>댓글쓰기
+							<i class="bi bi-file-earmark-text-fill" style="color: cornflowerblue;"></i>리뷰쓰기
 						</span>
 						</div>
 						</div>
 						<!-- 댓글 헤더 영역 -->						
 						<!-- 댓글 쓰기 폼 -->
-					<div class="row my-3" id="reviewForm">
+					<div class="row my-3 d-none" id="reviewForm">
 						<div class="col">
-							<form name="reviewWriteForm" id="reviewWriteForm">
+							<form name="reviewWriteForm" id="reviewWriteForm" enctype="multipart/form-data">
 								<input type="hidden" name="sId" th:value="${shop.sId}">
-						<!-- 	<input type="hidden" name="id" th:value="${member.id}"> -->
+						<!-- 	<input type="hidden" name="id" th:value="${member.id}"> -->						
 								<div class="row bg-light my-3 p-3 border">
 									<div class="col">
 										<div class="row">
 											<div class="col text-center">
-												<span>맛밥
-												</span>
+											
+											<!-- 별점 영역 -->
+						<div class="mb-2">
+							<label class="form-label">별점</label>
+							<div id="starRating" class="star-rating">
+								<input type="radio" name="rating" id="star5" value="5"><label for="star5">&#9733;</label>
+								<input type="radio" name="rating" id="star4" value="4"><label for="star4">&#9733;</label>
+								<input type="radio" name="rating" id="star3" value="3"><label for="star3">&#9733;</label>
+								<input type="radio" name="rating" id="star2" value="2"><label for="star2">&#9733;</label>
+								<input type="radio" name="rating" id="star1" value="1"><label for="star1">&#9733;</label>
+							</div>
+						</div>
+						<!-- 사진 -->
+						<div class="mb-2">
+							<label for="rPicture" class="form-label">사진 첨부</label>
+							<input type="file" name="rPicture" id="rPicture" accept="image/*" class="form-control">
+							<!-- 썸네일 -->
+							<img id="imgPreview" style="disply:none; max-width:100px; margin-top:8px;">
+						</div>
+												
 											</div>
 										</div>
 										<div class="row my-3">
