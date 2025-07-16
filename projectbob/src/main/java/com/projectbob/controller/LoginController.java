@@ -2,7 +2,6 @@ package com.projectbob.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,11 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import net.nurigo.sdk.NurigoApp;
+import net.nurigo.sdk.message.model.Message;
+import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
+import net.nurigo.sdk.message.response.SingleMessageSentResponse;
+import net.nurigo.sdk.message.service.DefaultMessageService;
 
 @Controller
 public class LoginController {
@@ -33,6 +37,7 @@ public class LoginController {
 	private JavaMailSender javaMailSender;
 	@Value("${spring.mail.username}")
 	String NAVER_EMAIL;
+	final DefaultMessageService MESSAGE_SERVICE = NurigoApp.INSTANCE.initialize("NCSAPQWVSQ1DX1ZB", "RQSJXZYQH0YRPL75MUVMM999RLC5L7IP", "https://api.coolsms.co.kr");
 	
 	//로그인 폼
 	@GetMapping("/login")
@@ -123,18 +128,28 @@ public class LoginController {
 			}else if(pass.equals("")){
 				out.println("	alert('입력한 정보가 잘못되었습니다.');");
 			}else {
-				try {
-					MimeMessage m = javaMailSender.createMimeMessage();
-					MimeMessageHelper h = new MimeMessageHelper(m, "UTF-8");
-					h.setFrom(NAVER_EMAIL);
-					h.setTo(email);
-					h.setSubject("ProjectBOB 비밀번호 찾기 답변 메일입니다.");
-					h.setText(id + "의 비밀번호는 "+pass+" 입니다.");
-					javaMailSender.send(m);
-				} catch (MessagingException e) {
-					e.printStackTrace();
-				}
-				out.println("	alert('이메일이 보내졌습니다.');");
+				if(receive.equals("email")) {
+					try {
+						MimeMessage m = javaMailSender.createMimeMessage();
+						MimeMessageHelper h = new MimeMessageHelper(m, "UTF-8");
+						h.setFrom(NAVER_EMAIL);
+						h.setTo(email);
+						h.setSubject("ProjectBOB 비밀번호 찾기 답변 메일입니다.");
+						h.setText(id + "의 비밀번호는 "+pass+" 입니다.");
+						javaMailSender.send(m);
+					} catch (MessagingException e) {
+						e.printStackTrace();
+					}
+					out.println("	alert('이메일이 보내졌습니다.');");
+				}else if(receive.equals("phone")) {
+					Message m = new Message();
+					m.setFrom("01042273840");
+					m.setTo(phone.replace("-", ""));
+					m.setText(id + "의 비밀번호는 "+pass+" 입니다.");
+					
+					SingleMessageSentResponse  res =  MESSAGE_SERVICE.sendOne(new SingleMessageSendingRequest(m));
+					out.println("	alert('문자가 전송되었습니다.');");
+				}	
 			}
 			out.println("	history.back();");
 			out.println("</script>");
@@ -158,15 +173,25 @@ public class LoginController {
 							ids += userIds.get(i);					
 						}		
 					}
+					if(receive.equals("email")) {
+						MimeMessage m = javaMailSender.createMimeMessage();
+						MimeMessageHelper h = new MimeMessageHelper(m, "UTF-8");
+						h.setFrom(NAVER_EMAIL);
+						h.setTo(email);
+						h.setSubject("ProjectBOB 아이디 찾기 답변 메일입니다.");
+						h.setText( "아이디는 "+ids+" 입니다.");
+						javaMailSender.send(m);
+						out.println("	alert('이메일이 보내졌습니다.');");
+					}else if(receive.equals("phone")) {
+						Message m = new Message();
+						m.setFrom("01042273840");
+						m.setTo(phone.replace("-", ""));
+						m.setText("아이디는 "+ids+" 입니다.");
+						
+						SingleMessageSentResponse  res =  MESSAGE_SERVICE.sendOne(new SingleMessageSendingRequest(m));
+						out.println("	alert('문자가 전송되었습니다.');");
+					}	
 					
-					MimeMessage m = javaMailSender.createMimeMessage();
-					MimeMessageHelper h = new MimeMessageHelper(m, "UTF-8");
-					h.setFrom(NAVER_EMAIL);
-					h.setTo(email);
-					h.setSubject("ProjectBOB 아이디 찾기 답변 메일입니다.");
-					h.setText( "아이디는 "+ids+" 입니다.");
-					javaMailSender.send(m);
-					out.println("	alert('이메일이 보내졌습니다.');");
 				} catch (MessagingException e) {
 					e.printStackTrace();
 				}
