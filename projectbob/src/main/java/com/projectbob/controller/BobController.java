@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
@@ -18,7 +19,11 @@ public class BobController {
 
     private final LoginController loginController;
 	
-	@Autowired private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
+	@Autowired 
+	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
+	@Autowired
+	private LoginService loginService;
+	
 	
     BobController(LoginController loginController) {
         this.loginController = loginController;
@@ -68,8 +73,10 @@ public class BobController {
 	  	// 가게 상세보기 메서드		
 		  @GetMapping("/MenuDetail") 
 		  public String getMenuDetail(Model model,		  
-		  @RequestParam("sId") int sId) {
+		  @RequestParam("sId") int sId,
+		  HttpSession session) {
 		  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", sId); // 가게 정보 가져오기
+		  
 		  Shop shop = bobService.getShopDetail(sId);
 		  List<Menu> menuList = bobService.getMenuListByShopId(sId);
 		  model.addAttribute("shop", shop);
@@ -78,7 +85,12 @@ public class BobController {
 		  List<Review> reviewList = bobService.reviewList(sId);
 		  model.addAttribute("reviewList", reviewList);
 		  
-		 //model.addAttribute("member", member);
+		  String loginId = (String) session.getAttribute("loginId");
+		  Member member = null;
+		  if(loginId != null) {
+			  member = loginService.getMember(loginId);
+		  }
+		 model.addAttribute("member", member);
 		  
 		  double reviewAvg = 0.0;
 		  if (!reviewList.isEmpty()) {

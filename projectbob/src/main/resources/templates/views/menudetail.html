@@ -113,16 +113,25 @@
 						</div>
 						<!-- 댓글 헤더 영역 -->						
 						<!-- 댓글 쓰기 폼 -->
-					<div class="row my-3 d-none" id="reviewForm">
+					<div class="row my-3 d-none" id="reviewForm" th:if="${member != null}">
 						<div class="col">
 							<form name="reviewWriteForm" id="reviewWriteForm" enctype="multipart/form-data">
 								<input type="hidden" name="sId" th:value="${shop.sId}">
-						<!-- 	<input type="hidden" name="id" th:value="${member.id}"> -->						
+						  	<input type="hidden" name="id" th:value="${member?.id}">
+						  	<!-- <input type="hidden" name="mId" th:value="${menu.mId}"> -->			
 								<div class="row bg-light my-3 p-3 border">
 									<div class="col">
 										<div class="row">
 											<div class="col text-center">
 											
+											<!-- 메뉴 선택 -->
+						<div class="mb-2">
+							<label class="form-label">메뉴 선택</label>
+							<select name="mId" class="form-select" required>
+								<option value="">메뉴를 선택하세요</option>
+								<option th:each="menu : ${menuList}" th:value="${menu.mId}" th:text="${menu.name}"></option>
+							</select>
+						</div>
 											<!-- 별점 영역 -->
 						<div class="mb-2">
 							<label class="form-label">별점</label>
@@ -137,16 +146,16 @@
 						<!-- 사진 -->
 						<div class="mb-2">
 							<label for="rPicture" class="form-label">사진 첨부</label>
-							<input type="file" name="rPicture" id="rPicture" accept="image/*" class="form-control">
+							<input type="file" name="reviewUploadFile" id="rPicture" accept="image*" class="form-control">
 							<!-- 썸네일 -->
-							<img id="imgPreview" style="disply:none; max-width:100px; margin-top:8px;">
+							<img id="imgPreview" style="display:none; max-width:100px; margin-top:8px;">
 						</div>
 												
 											</div>
 										</div>
 										<div class="row my-3">
 											<div class="col-md-10">
-												<textarea name="reviewContent" id="reviewContent" class="form-control" rows="4"></textarea>												
+												<textarea name="content" id="reviewContent" class="form-control" rows="4"></textarea>												
 											</div>
 											<div class="col-md">
 												<input type="submit" value="댓글쓰기" class="btn btn-success h-100 w-100" id="reviewWriteButton">
@@ -159,7 +168,7 @@
 					</div>
 						
 						<!-- 리뷰 리스트 -->
-						<div th:if="${not #lists.isEmpty(reviewList)}">
+						<div id="reviewList" th:if="${not #lists.isEmpty(reviewList)}">
 							<div th:each="review : ${reviewList}" class="border-bottom pb-3 mb-3">
 								<div class="d-flex align-items-center mb-1">
 									<span class="fw-bold" th:text="${#strings.substring(review.id,0,2) + '**님'}">ad**님</span>

@@ -1,15 +1,22 @@
 package com.projectbob.ajax;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Review;
@@ -45,7 +52,28 @@ public class MenuAjaxController {
 		
 	// 댓글 쓰기 메서드
 	@PostMapping("/reviewWrite.ajax")
-	public List<Review> addReview(Review review){
+	@ResponseBody
+	public List<Review> addReview(@ModelAttribute Review review,
+			@RequestParam(value="reviewUploadFile", required=false) MultipartFile rPicture){
+		
+		String uploadDir = "C:/projectbob/images/review/";
+		File dir = new File(uploadDir);
+		if (!dir.exists()) dir.mkdirs();		
+		
+		if(rPicture != null && !rPicture.isEmpty()) {
+			String fileName = UUID.randomUUID() + "_" + rPicture.getOriginalFilename();
+			Path savePath = Paths.get(uploadDir, fileName);
+			try {
+			rPicture.transferTo(savePath.toFile());
+			review.setRPicture(fileName);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		review.setStatus("일반");
+	
+		
 		bobService.addReview(review);
 		return bobService.reviewList(review.getSId());
 	}
