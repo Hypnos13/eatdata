@@ -73,17 +73,42 @@ public class ShopController {
 		return "redirect:shopMain";
 	}
 	
+	@PostMapping("/insertMenu")
+	public String insertMenu( @RequestParam("sId") Integer sId,
+			@RequestParam("category") String category, @RequestParam("name") String name, 
+			@RequestParam("price") Integer price, @RequestParam("mInfo") String mInfo, 
+			@RequestParam("mPicture") MultipartFile mPictureFile, Model model ) {
+		
+		String mPictureUrl = null;
+
+        try {
+        	mPictureUrl = fileUploadService.uploadFile(mPictureFile, "business-licenses/");
+            System.out.println("메뉴사진 업로드 성공. URL: " + mPictureUrl);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage()); // 파일이 비어있는 경우
+            return "/menuJoinForm";
+        } catch (IOException e) {
+            e.printStackTrace();
+            model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            return "/menuJoinForm";
+        }
+        Menu menu = new Menu();
+        menu.setSId(sId);
+        menu.setCategory(category);
+        menu.setName(name);
+        menu.setPrice(price);
+        menu.setMInfo(mInfo);
+        menu.setMPictureUrl(mPictureUrl);
+        
+        shopService.insertMenu(menu);
+
+        model.addAttribute("message", "메뉴 정보가 성공적으로 등록되었습니다.");
+		return "redirect:menuJoinForm";
+	}
 	
 	@GetMapping("/shopMain")
 	public String shopMain() {
 		return "shop/shopMain";
-	}
-	
-	@PostMapping("/insertMenu")
-	public String insertMenu(Menu menu) {
-		System.out.println("id test"+menu.getSId());
-		shopService.insertMenu(menu);
-		return "redirect:shopMain";
 	}
 	
 	@GetMapping("/menuJoinForm")

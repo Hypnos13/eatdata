@@ -53,14 +53,19 @@
 </select>
 
 <!-- 메인에서 버튼 누를때 -->
-<select id="shopList" resultType="com.projectbob.domain.Shop">
+<select id="shopList" resultType="com.projectbob.domain.Shop" parameterType="map">
 	SELECT	*	FROM shop
-	<where>
+		where 1=1
 		<if test="category != null and category != '전체보기'">
-			category = #{category}
+			AND category = #{category}
 		</if>
-	</where>
+		<if test="keyword != null and keyword != ''">
+			AND name like concat('%', #{keyword} ,'%')
+		</if>
+	
 	ORDER BY s_id DESC
 </select>
+
+
 
 </mapper>

@@ -16,7 +16,7 @@ public class Menu {
 	private String name;
 	private int price;
 	private String mInfo;
-	private String mPicture;
+	private String mPictureUrl;
 	private int liked;
 	private Timestamp regDate;
 	private Timestamp modiDate;

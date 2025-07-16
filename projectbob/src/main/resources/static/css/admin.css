@@ -42,3 +42,34 @@
   background-color: white;
   color: #333;
 }
+
+.faq-box {
+  margin: 0px auto;
+  padding: 10px;
+}
+
+.faq-question {
+  background-color: #d0f0e8;
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.faq-answer {
+  display: none;
+  background-color: #f9fdfc;
+  padding: 15px 25px;
+  border-left: 4px solid #2ecc71;
+  border-radius: 0 0 8px 8px;
+  line-height: 1.6;
+}
+
+.faq-type {
+	background-color: #43d091;
+	color: white;
+	border-radius: 8px 8px 8px 8px;
+	font-weight: bold;
+	padding: 10px 0;
+}
+
