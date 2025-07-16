@@ -137,7 +137,12 @@ function runKakaoScript() {
 
           geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
             if (status === kakao.maps.services.Status.OK) {
-              inputField.value = result[0].address.address_name;
+              const address = result[0].address.address_name;
+              inputField.value = address;
+
+              // ✅ shopList로 이동하면서 category=전체보기, address 값도 함께 전달
+              const url = `/shopList?category=전체보기&address=${encodeURIComponent(address)}`;
+              window.location.href = url;
             } else {
               alert('주소 변환 실패');
             }
@@ -149,6 +154,7 @@ function runKakaoScript() {
     });
   });
 }
+
 
 // ==============================
 // Kakao 지도: 가게 위치 표시
@@ -229,4 +235,19 @@ document.addEventListener("DOMContentLoaded", () => {
       searchBox.classList.toggle("d-none");
     });
   }
+	
+	//검색버튼
+	document.getElementById('searchSubmitBtn').addEventListener('click', function () {
+	    const keyword = document.querySelector('#searchBox input[type="text"]').value.trim();
+
+	    // 현재 선택된 카테고리도 함께 보내고 싶다면 추가로 처리 가능
+	    // 예: const category = '치킨'; 또는 URL에서 파싱 가능
+
+	    // URL 구성
+	    const searchUrl = `/shopList?keyword=${encodeURIComponent(keyword)}`;
+
+	    // 페이지 이동
+	    window.location.href = searchUrl;
+	});
+	
 });

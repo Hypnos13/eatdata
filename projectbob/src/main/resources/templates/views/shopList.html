@@ -10,6 +10,9 @@
 
 		<!-- 배경 + 검색 -->
 		<div class="search-box">
+			<div class="text-center mb-2">
+				<h5 class="mb-1 fw-semibold text-black">배달받으실 주소를 입력해주세요</h5>
+			</div>
 			<div class="d-flex justify-content-center mt-2">
 				<button id="btn-search-toggle"
 					class="btn text-white me-2 d-flex align-items-center"
@@ -18,7 +21,8 @@
 						alt="위치" class="me-1" />
 				</button>
 				<input id="location-input" type="text"
-					class="form-control w-25 me-2" placeholder="서울특별시 관악구..." />
+					class="form-control w-25 me-2" th:value="${userAddress}"
+					placeholder="서울특별시 관악구..." />
 				<button class="btn text-dark fw-semibold"
 					style="background-color: #43d091">검색</button>
 			</div>
@@ -27,18 +31,18 @@
 		<!-- 네비게이션 (한줄, 버튼 없음, 스크롤 가능) -->
 		<div class="container my-4">
 
-
+	
 			<div id="searchBox" class="mb-3 d-none">
 				<div class="input-group input-group-sm" style="width: 300px;">
 					<input type="text" class="form-control"
 						placeholder="가게명 또는 메뉴를 검색하세요" >
 
-					
-
 					<button class="btn text-white" id="searchSubmitBtn"
 						style="background-color: #43d091;">검색</button>
 				</div>
 			</div>
+	
+		
 
 			<nav class="navbar px-0">
 				<div class="d-flex align-items-center overflow-auto w-100">

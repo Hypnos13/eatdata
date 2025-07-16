@@ -3,6 +3,7 @@ package com.projectbob.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
@@ -11,7 +12,7 @@ import com.projectbob.domain.Shop;
 
 @Mapper
 public interface BobMapper {
-	public List<Shop> shopList(String category); //shopList 페이지
+	public List<Shop> shopList(@Param("category") String category,@Param("keyword") String keyword); //shopList 페이지
 	
 	public Shop getShopDetail(int sId); // s_id를 받아 Shop 객체 반환
 		
@@ -24,6 +25,6 @@ public interface BobMapper {
 	
 	// 가게 번호에 해당하는 리뷰리스트에 사용
 	public List<Review> reviewList(int sId);
-	
+
 }
 
