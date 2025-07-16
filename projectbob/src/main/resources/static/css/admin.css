@@ -25,14 +25,13 @@
   cursor: pointer;
 }
 
-/* 검색 행 wrapper (row 전체) */
 .row.text-center {
   justify-content: center;
   gap: 10px;
 }
 
 
-#searchDisivion, #keyword {
+#searchDisivion, #keyword, #searchShop {
   width: 100%;
   max-width : 500px;
   padding: 8px 12px;
@@ -65,11 +64,67 @@
   line-height: 1.6;
 }
 
-.faq-type {
-	background-color: #43d091;
-	color: white;
-	border-radius: 8px 8px 8px 8px;
+.q-order{
+	text-decoration : none;
+	padding: 2px 8px;
+	border-radius: 5px;
+	margin-right: 6px;
 	font-weight: bold;
-	padding: 10px 0;
+	color : white;
+  	background-color: #2ecc71;
 }
 
+.q-service{
+	text-decoration : none;
+	padding: 2px 8px;
+	border-radius: 5px;
+	margin-right: 6px;
+	font-weight: bold;
+	color : white;
+  	background-color: #3498db;
+}
+
+.q-client{
+	text-decoration : none;
+	padding: 2px 8px;
+	border-radius: 5px;
+	margin-right: 6px;
+	font-weight: bold;
+	color : white;
+  	background-color: #9b59b6;
+}
+
+.q-payment{
+	text-decoration : none;
+	padding: 2px 8px;
+	border-radius: 5px;
+	margin-right: 6px;
+	font-weight: bold;
+	color : white;
+  	background-color: #f39c12;
+}
+
+.q-review{
+	text-decoration : none;
+	padding: 2px 8px;
+	border-radius: 5px;
+	margin-right: 6px;
+	font-weight: bold;
+	color : white;
+  	background-color: #e67e22;
+}
+
+.q-etc{
+	text-decoration : none;
+	padding: 2px 8px;
+	border-radius: 5px;
+	margin-right: 6px;
+	font-weight: bold;
+	color : white;
+  	background-color: #95a5a6;
+}
+
+.faq-type{
+	padding-top : 10px;
+	padding-bottom : 10px;
+}

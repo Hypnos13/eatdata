@@ -2,11 +2,13 @@ package com.projectbob.service;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.NoticeBoard;
+import com.projectbob.domain.Shop;
 import com.projectbob.mapper.CustomerServiceMapper;
 
 @Service
@@ -69,7 +71,19 @@ public class CustomerServiceService {
 		csMapper.updateNotice(noticeBoard);
 	}
 	
+	
 	public void deleteNotice(int no){
 		csMapper.deleteNotice(no);
+	}
+	
+	
+	public List<Shop> shopManageList(String searchShop , String keyword){
+		List<Shop> shopList = csMapper.shopManageList(searchShop, keyword);
+		return shopList;
+	}
+	
+	
+	public void updateShopManage(String sId, String category, String status) {
+		csMapper.updateShopManage(sId, category, status);
 	}
 }

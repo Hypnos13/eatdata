@@ -39,7 +39,10 @@ dependencies {
 // --- 파일 업로드를 위한 Commons FileUpload 및 Commons IO 추가 ---
 	implementation 'commons-fileupload:commons-fileupload:1.5'
 	implementation 'commons-io:commons-io:2.16.1'
-
+// --- 메일 연동 ---	
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+// --- 문자 연동 ---
+	implementation 'net.nurigo:sdk:4.3.2'
 }
 
 tasks.named('test') {

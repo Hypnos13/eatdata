@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/shop_layout}">
+	<th:block layout:fragment="content">   
+	
+		<div class="row my-5" id="global-content">
+			<div class="col">
+				<div class="row my-3 text-center">
+					<div class="col">
+						<h2 class="fs-3 fw-bold">메뉴 옵션 등록</h2>
+					</div>
+				</div>
+				<form action="insertMenuOption" name="optionJoinForm" method="post" id="optionJoinForm" enctype="multipart/form-data" >
+					<!--  <input type="hidden" name="mId" id="mId" th:value="${session.mId}"/> -->
+					<div class="row my-3">
+						<div class="col-8 offset-2">
+							<label for="mId" class="form-label">* 메뉴ID(임시) : </label>
+							<input type="text" class="form-control" name="mId" id="mId" >
+						</div>
+					</div>
+					<div class="row my-3">
+						<div class="col-8 offset-2">
+							<label for="mOption" class="form-label">* 옵션 이름 : </label>
+							<input type="text" class="form-control" name="mOption" id="mOption" >
+						</div>
+					</div>
+					<div class="row my-3">
+						<div class="col-8 offset-2">
+							<label for="content" class="form-label">* 옵션 설명 : </label>
+							<input type="text" class="form-control" name="content" id="content" >
+						</div>
+					</div>
+					<div class="row my-3">
+						<div class="col-8 offset-2">
+							<label for="price" class="form-label">* 옵션 가격 : </label>
+							<input type="text" class="form-control" name="price" id="price" >
+						</div>
+					</div>
+					
+					<div class="row mb-3 mt-5">				
+						<div class="col-8 offset-2">
+							<input type="submit" value="메뉴옵션 등록하기" class="btn btn-primary">
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</th:block>		
+</html>

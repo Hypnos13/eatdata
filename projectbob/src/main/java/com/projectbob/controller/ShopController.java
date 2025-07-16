@@ -3,8 +3,6 @@ package com.projectbob.controller;
 import org.springframework.beans.factory.annotation.*;
 
 import java.io.IOException;
-import java.util.*;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -30,10 +28,9 @@ public class ShopController {
 			@RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 
 			@RequestParam("phone") String phone, @RequestParam("name") String name, 
 			@RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1, 
-			@RequestParam("address2") String address2, @RequestParam("sLicense") MultipartFile sLicenseFile, 
-			Model model ) {
+			@RequestParam("address2") String address2, Model model ) { //@RequestParam("sLicense") MultipartFile sLicenseFile
 		
-		String sLicenseUrl = null; // DB에 저장할 사업자등록증 URL
+		/*String sLicenseUrl = null; // DB에 저장할 사업자등록증 URL
 
         try {
             // 1. 사업자등록증 파일을 FileUploadService를 통해 업로드
@@ -50,13 +47,13 @@ public class ShopController {
 
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage()); // 파일이 비어있는 경우
-            return "/shopJoinForm";
+            return "/shop/shopJoinForm";
         } catch (IOException e) {
             e.printStackTrace();
             model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-            return "/shopJoinForm";
-        }
-        
+            return "/shop/shopJoinForm";
+        */
+		
         Shop shop = new Shop();
         shop.setId(id);
         shop.setSNumber(sNumber);
@@ -66,7 +63,7 @@ public class ShopController {
         shop.setZipcode(zipcode);
         shop.setAddress1(address1);
         shop.setAddress2(address2);
-        shop.setSLicenseURL(sLicenseUrl);
+        //shop.setSLicenseURL(sLicenseUrl);
         shopService.insertShop(shop);
 
         model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
@@ -74,9 +71,9 @@ public class ShopController {
 	}
 	
 	@PostMapping("/insertMenu")
-	public String insertMenu( @RequestParam("sId") Integer sId,
+	public String insertMenu( @RequestParam("sId") int sId,
 			@RequestParam("category") String category, @RequestParam("name") String name, 
-			@RequestParam("price") Integer price, @RequestParam("mInfo") String mInfo, 
+			@RequestParam("price") int price, @RequestParam("mInfo") String mInfo, 
 			@RequestParam("mPicture") MultipartFile mPictureFile, Model model ) {
 		
 		String mPictureUrl = null;
@@ -86,11 +83,11 @@ public class ShopController {
             System.out.println("메뉴사진 업로드 성공. URL: " + mPictureUrl);
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage()); // 파일이 비어있는 경우
-            return "/menuJoinForm";
+            return "/shop/menuJoinForm";
         } catch (IOException e) {
             e.printStackTrace();
             model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-            return "/menuJoinForm";
+            return "/shop/menuJoinForm";
         }
         Menu menu = new Menu();
         menu.setSId(sId);
@@ -106,14 +103,46 @@ public class ShopController {
 		return "redirect:menuJoinForm";
 	}
 	
+	@PostMapping("/insertMenuOption")
+	public String insertMenuOption( @RequestParam("mId") int mId,
+			@RequestParam("mOption") String mOption, @RequestParam("content") String content, 
+			@RequestParam("price") int price, Model model ) {
+		
+        MenuOption menuOption = new MenuOption();
+        menuOption.setMId(mId);
+        menuOption.setMOption(mOption);
+        menuOption.setContent(content);
+        menuOption.setPrice(price);
+        
+        shopService.insertMenuOption(menuOption);
+
+        model.addAttribute("message", "메뉴옵션 정보가 성공적으로 등록되었습니다.");
+		return "redirect:optionJoinForm";
+	}
+	
 	@GetMapping("/shopMain")
 	public String shopMain() {
 		return "shop/shopMain";
 	}
 	
+	@GetMapping("/shopJoinForm")
+	public String shopJoinForm() {
+		return "shop/shopJoinForm";
+	}
+	
 	@GetMapping("/menuJoinForm")
 	public String menuJoinForm() {
 		return "shop/menuJoinForm";
+	}
+	
+	@GetMapping("/menuUpdateForm")
+	public String menuUpdateForm() {
+		return "shop/menuUpdateForm";
+	}
+	
+	@GetMapping("/optionJoinForm")
+	public String optionJoinForm() {
+		return "shop/optionJoinForm";
 	}
 	
 	@GetMapping("/shopInfo")
