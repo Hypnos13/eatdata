@@ -26,29 +26,32 @@ CREATE TABLE `shop` (
 );
 select * from shop;
 
-CREATE TABLE `menu` (
-	`m_id`	INTEGER AUTO_INCREMENT PRIMARY KEY,
-	`s_id`	int NOT NULL,
-	`category` varchar(50) NOT NULL,
-	`name` varchar(20) NOT NULL,
-	`price`	int(10) NOT NULL,
-	`m_info` varchar(200) NULL,
-	`m_pictureURL` varchar(500) NULL,
-	`liked`	int(20) NULL DEFAULT 0,
-	`reg_date` timestamp NOT NULL,
-	`modi_date`	timestamp NULL
+drop table menu;
+CREATE TABLE menu (
+    m_id INT AUTO_INCREMENT PRIMARY KEY,
+    s_id INT NOT NULL,               -- 가게 ID (어떤 가게의 메뉴인지)
+    category VARCHAR(50) NOT NULL,   -- 메뉴 카테고리 (예: 커피, 티, 푸드)
+    name VARCHAR(100) NOT NULL,      -- 메뉴 이름
+    price INT NOT NULL,              -- 메뉴 가격
+    m_info TEXT,                     -- 메뉴 설명
+    m_picture_url VARCHAR(500),      -- 메뉴 사진 URL
+    liked INT DEFAULT 0,             -- 좋아요 수
+    reg_date DATETIME DEFAULT CURRENT_TIMESTAMP, -- 등록일
+    modi_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 수정일
+    FOREIGN KEY (s_id) REFERENCES shop(s_id) -- 만약 shop 테이블이 있다면 외래키 설정
 );
 select * from menu;
 
-CREATE TABLE `menu_option` (
-	`mo_id` INTEGER AUTO_INCREMENT PRIMARY KEY,
-	`m_id`	int NOT NULL,
-	`m_option` varchar(50) NOT NULL,
-	`content` varchar(250) NOT NULL,
-	`price`	int(11) NOT NULL,
-	`reg_date` timestamp NOT NULL,
-	`modi_date` timestamp NOT NULL,
-	`status` varchar(50) NOT NULL DEFAULT '일반'
+drop table menu_option;
+CREATE TABLE menu_option (
+    mo_id INT AUTO_INCREMENT PRIMARY KEY,
+    m_id INT NOT NULL,               -- 메뉴 ID (어떤 메뉴의 옵션인지)
+    m_option VARCHAR(100) NOT NULL,  -- 옵션 분류 (예: 사이즈, 샷 추가)
+    content VARCHAR(100) NOT NULL,   -- 옵션 내용 (예: Tall, Grande, 에스프레소 샷)
+    price INT DEFAULT 0,             -- 옵션 추가 가격
+    reg_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modi_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'active', -- 옵션 상태 (active/deleted)
+    FOREIGN KEY (m_id) REFERENCES menu(m_id) ON DELETE CASCADE -- 메뉴 삭제 시 옵션도 함께 삭제
 );
 select * from menu_option;
-drop table menu_option;

@@ -1,9 +1,13 @@
 package com.projectbob.service;
 
+import java.io.*;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.StringUtils;
 
 import com.projectbob.domain.*;
 import com.projectbob.mapper.*;
@@ -17,15 +21,8 @@ public class ShopService {
 	@Autowired
 	private ShopMapper shopMapper;
 	
-	//메뉴 옵션 등록
-	public void insertMenuOption(MenuOption menuOption) {
-		shopMapper.insertMenuOption(menuOption);
-	}
-	
-	//메뉴 등록
-	public void insertMenu(Menu menu) {
-		shopMapper.insertMenu(menu);
-	}
+	@Autowired
+	private FileUploadService fileUploadService;
 	
 	//가게 등록
 	public void insertShop(Shop shop) {
@@ -37,6 +34,130 @@ public class ShopService {
 		return shopMapper.shopList();
 	}
 	
+	// 메뉴 등록
+	@Transactional
+	public void insertMenu(Menu menu, MultipartFile mPicture) throws IOException {
+		//이미지 파일 처리
+		if (mPicture != null && !mPicture.isEmpty()) {
+			try {
+				String fileUrl = fileUploadService.uploadFile(mPicture, "menu");
+				menu.setMPictureUrl(fileUrl);
+			} catch (IllegalArgumentException e) {
+				log.warn("메뉴 등록: 파일 업로드 오류 - "+ e.getMessage());
+				menu.setMPictureUrl(null);
+			}
+		} else {
+			menu.setMPictureUrl(null); //파일이 없을 시 null 로
+		}
+		shopMapper.insertMenu(menu);
+		// 메뉴 옵션 등록
+		if(menu.getOptions() != null && !menu.getOptions().isEmpty()) {
+			for(MenuOption option : menu.getOptions()) {
+				if(option != null && StringUtils.hasText(option.getMOption()) && StringUtils.hasText(option.getContent())) {
+					option.setMId(menu.getMId());
+					option.setStatus("active");
+					shopMapper.insertMenuOption(option);
+				}
+			}
+		}
+	}
+	//모든 메뉴 목록 조회
+	public List<Menu> getAllMenus() {
+		return shopMapper.getAllMenus();
+	}
+	// 특정 메뉴 상세 조회(옵션 포함)
+	public Menu getMenuDetail(int mId) {
+		Menu menu = shopMapper.getMenuById(mId);
+		if (menu != null) {
+			List<MenuOption> options = shopMapper.getMenuOptionsByMenuId(mId);
+			menu.setOptions(options);
+		}
+		return menu;
+	}
+	// 메뉴 정보 수정
+	@Transactional
+	public void updateMenu(Menu menu, MultipartFile newMPicture) throws IOException {
+		String newPictureUrl = menu.getMPictureUrl(); // 기존 URL
+		if (newMPicture != null && !newMPicture.isEmpty()) {
+			// 새 파일이 업로드 된 경우 - 기존 파일 삭제 후 새 파일 저장
+			Menu existingMenu = shopMapper.getMenuById(menu.getMId());
+			if (existingMenu != null && StringUtils.hasText(existingMenu.getMPictureUrl())) {
+				// 기존 URL에서 파일 경로 추출
+				String oldFilePath = convertWebPathToSystemPath(existingMenu.getMPictureUrl());
+				File oldFile = new File(oldFilePath);
+				if (oldFile.exists()) {
+					if (oldFile.delete()) {
+						log.info("기존 메뉴 이미지 삭제: " + oldFile.getAbsolutePath());
+					} else {
+						log.warn("기존 메뉴 이미지 삭제 실패: "+ oldFile.getAbsolutePath());
+					}
+				}
+			}
+			try { // 새 파일 업로드
+				newPictureUrl = fileUploadService.uploadFile(newMPicture, "menu");
+			} catch (IllegalArgumentException e) {
+				log.warn("메뉴 수정: 새 파일 업로드 오류 - " + e.getMessage());
+			}
+		} else { // 새 파일이 업로드 되지 않은 경우: 기존 파일 URL을 유지
+			Menu existingMenu = shopMapper.getMenuById(menu.getMId());
+			if(existingMenu != null) {
+				newPictureUrl = existingMenu.getMPictureUrl();
+			}
+		}
+		menu.setMPictureUrl(newPictureUrl);
+		
+		shopMapper.updateMenu(menu);
+		// 기존 옵션 삭제
+		shopMapper.deleteMenuOptionsByMenuId(menu.getMId());
+		if (menu.getOptions() != null && !menu.getOptions().isEmpty()) {
+			for(MenuOption option : menu.getOptions()) {
+				// 옵션의 이름과 내용이 비어있지 않고, 유효한 옵션만 저장
+				StringUtils.has
+			}
+		}
+		
+	}
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	// 웹 경로를 시스템 파일 경로로 변환하는 헬퍼 메서드
+	private String convertWebPathToSystemPath(String webPath) {
+		if (webPath == null || !webPath.startsWith("/images/")) {
+			return null; // 유효하지 않은 웹 경로
+		}
+		String relativePath = webPath.substring("/images/".length());
+		return fileUploadService.getUploadBaseDir() + File.separator + relativePath.replace("/", File.separator);
+	}
 	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

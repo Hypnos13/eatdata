@@ -2,18 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.ShopMapper" >
-	<!-- 메뉴 옵션 등록 -->
-	<insert id="insertMenuOption" parameterType="MenuOption" useGeneratedKeys="true" keyProperty="moId">
-		INSERT INTO menu_option(m_id, m_option, content, price, reg_date) 
-		VALUES(#{mId}, #{mOption}, #{content}, #{price}, SYSDATE())
-	</insert>
-
-	<!-- 메뉴 등록 -->
-	<insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
-		INSERT INTO menu(s_id, category, name, price, m_info, m_pictureURL, reg_date) 
-		VALUES(#{sId}, #{category}, #{name}, #{price}, #{mInfo}, #{mPictureUrl}, SYSDATE())
-	</insert>
-
+	
 	<!-- 가게 등록 -->
 	<insert id="insertShop" parameterType="Shop" useGeneratedKeys="true" keyProperty="sId">
 		INSERT INTO shop(id, name, phone, zipcode, address1, address2, owner, s_number, <!-- s_licenseURL, --> reg_date) 
@@ -24,5 +13,70 @@
 	<select id="shopList" resultType="Shop">
 		SELECT * From shop
 	</select>
+	
+	<!-- 메뉴등록 -->
+  <insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
+       INSERT INTO menu(s_id, category, name, price, m_info, m_picture_url, reg_date, modi_date)
+       VALUES(#{sId}, #{category}, #{name}, #{price}, #{mInfo}, #{mPictureUrl}, SYSDATE(), SYSDATE())
+  </insert>
+  
+	<!-- 모든 메뉴 읽기 -->
+  <select id="getAllMenus" resultType="Menu">
+      SELECT m_id AS mId, name FROM menu ORDER BY m_id DESC
+  </select>
+	
+	<!-- id에 맞는 메뉴 읽기 -->
+  <select id="getMenuById" parameterType="int" resultType="Menu">
+      SELECT m_id AS mId, s_id AS sId, category, name, price, m_info AS mInfo,
+             m_picture_url AS mPictureUrl, liked, reg_date AS regDate, modi_date AS modiDate
+      FROM menu WHERE m_id = #{mId}
+  </select>
+	
+	<!-- 메뉴 수정 -->
+  <update id="updateMenu" parameterType="Menu">
+      UPDATE menu
+      SET category = #{category}, name = #{name}, price = #{price}, m_info = #{mInfo},
+          m_picture_url = #{mPictureUrl}, modi_date = SYSDATE()
+      WHERE m_id = #{mId}
+  </update>
+
+	<!-- 메뉴 삭제 -->
+  <delete id="deleteMenu" parameterType="int">
+      DELETE FROM menu WHERE m_id = #{mId}
+  </delete>
+	
+	<!-- 메뉴 옵션 등록 -->
+  <insert id="insertMenuOption" parameterType="MenuOption">
+      INSERT INTO menu_option(m_id, m_option, content, price, reg_date, status)
+      VALUES(#{mId}, #{mOption}, #{content}, #{price}, SYSDATE(), #{status})
+  </insert>
+
+	<!-- Id에 맞는 메뉴 읽기 -->
+  <select id="getMenuOptionsByMenuId" parameterType="int" resultType="MenuOption">
+      SELECT mo_id AS moId, m_id AS mId, m_option AS mOption, content, price,
+             reg_date AS regDate, modi_date AS modiDate, status
+      FROM menu_option
+      WHERE m_id = #{mId} AND status = 'active'
+      ORDER BY mo_id
+  </select>
+
+	<!-- 메뉴 옵션 수정 -->
+  <update id="updateMenuOption" parameterType="MenuOption">
+      UPDATE menu_option
+      SET m_option = #{mOption}, content = #{content}, price = #{price},
+          modi_date = SYSDATE(), status = #{status}
+      WHERE mo_id = #{moId}
+  </update>
+	
+	<!-- 메뉴옵션 삭제 -->
+  <update id="deleteMenuOption" parameterType="int">
+      UPDATE menu_option SET status = 'deleted', modi_date = SYSDATE() WHERE mo_id = #{moId}
+  </update>
+
+	<!-- Id에 맞는 메뉴의 옵션 전체 삭제 -->
+  <delete id="deleteMenuOptionsByMenuId" parameterType="int">
+      DELETE FROM menu_option WHERE m_id = #{mId}
+  </delete>
+	
 	
 </mapper>	
