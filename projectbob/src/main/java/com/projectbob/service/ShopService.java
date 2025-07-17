@@ -112,29 +112,34 @@ public class ShopService {
 		if (menu.getOptions() != null && !menu.getOptions().isEmpty()) {
 			for(MenuOption option : menu.getOptions()) {
 				// 옵션의 이름과 내용이 비어있지 않고, 유효한 옵션만 저장
-				StringUtils.has
+				if(option != null && StringUtils.hasText(option.getMOption()) && StringUtils.hasText(option.getContent()) 
+							&& !"deleted".equals(option.getStatus())) {
+					option.setMId(menu.getMId());
+					option.setStatus("active");
+					shopMapper.insertMenuOption(option);
+				}
 			}
 		}
-		
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	// 메뉴 삭제(관련 옵션 및 이미지파일 모두 삭제)
+	@Transactional
+	public void deleteMenu(int mId) {
+		Menu menuToDelete = shopMapper.getMenuById(mId);
+		shopMapper.deleteMenuOptionsByMenuId(mId);
+		shopMapper.deleteMenu(mId);
+		
+		if(menuToDelete != null && StringUtils.hasText(menuToDelete.getMPictureUrl())) {
+			String imageFilePath = convertWebPathToSystemPath(menuToDelete.getMPictureUrl());
+			File imageFile = new File(imageFilePath);
+			if(imageFile.exists()) {
+				if(imageFile.delete()) {
+					log.info("메뉴에 따른 이미지 파일 삭제: " + imageFile.getAbsolutePath());
+				} else {
+					log.warn("메뉴에 따른 이미지 파일 삭제 실패: " + imageFile.getAbsolutePath());
+				}
+			}
+		}
+	}
 	// 웹 경로를 시스템 파일 경로로 변환하는 헬퍼 메서드
 	private String convertWebPathToSystemPath(String webPath) {
 		if (webPath == null || !webPath.startsWith("/images/")) {
@@ -145,19 +150,3 @@ public class ShopService {
 	}
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
