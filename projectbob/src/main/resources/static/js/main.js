@@ -1,16 +1,22 @@
-console.log('main.js 실행 시작');
-console.log('orderMenuId 존재 여부:', document.getElementById('orderMenuId'));
 
+// ==============================
+// 전역 변수 및 기본 세팅
+// ==============================
+
+let orderList = []; // 여러 주문 메뉴 저장
 let selectedMenuId = null;
 let selectedMenuName = '';
 let selectedMenuPrice = 0;
 let count = 1;
 let addedExtras = [];
 const deliveryFee = 3000;
+let previewUrl = null; // 댓글 사진 미리보기용
 
 // ==============================
-// 메뉴 클릭 -> 모달 열기
+// 주문 관련 함수 및 이벤트
 // ==============================
+
+// 메뉴 클릭 -> 옵션 모달 열기 및 옵션 불러오기
 $(document).on('click', '.menu-card', function () {
   selectedMenuId = $(this).data('id');
   selectedMenuName = $(this).data('name');
@@ -36,59 +42,17 @@ $(document).on('click', '.menu-card', function () {
 
       const modal = new bootstrap.Modal(document.getElementById("addMenuModal"));
       modal.show();
+    },
+    error: function () {
+      alert('옵션을 불러오는데 실패했습니다.');
     }
   });
 });
 
-// ==============================
-// 주문표 업데이트
-// ==============================
-function updateOrder() {
-  const itemCountEl = document.getElementById("itemCount");
-  const totalPriceEl = document.getElementById("totalPrice");
-  const orderList = document.querySelector('.order-item-list');
-
-  if (!itemCountEl || !totalPriceEl || !orderList) return;
-
-  if (!selectedMenuId || count <= 0) {
-    itemCountEl.innerText = 0;
-    totalPriceEl.innerText = "0원";
-    orderList.innerHTML = '<div class="text-muted fst-italic">주문한 메뉴가 없습니다.</div>';
-    return;
-  }
-
-  itemCountEl.innerText = count;
-  orderList.innerHTML = '';
-
-  const mainMenuDiv = document.createElement('div');
-  mainMenuDiv.classList.add('fw-bold');
-  mainMenuDiv.innerText = `${selectedMenuName} × ${count} (${(selectedMenuPrice * count).toLocaleString()}원)`;
-  orderList.appendChild(mainMenuDiv);
-
-  if (addedExtras.length === 0) {
-    const noExtrasDiv = document.createElement('div');
-    noExtrasDiv.classList.add('text-muted', 'fst-italic', 'ms-3');
-    noExtrasDiv.innerText = '추가 메뉴 없음';
-    orderList.appendChild(noExtrasDiv);
-  } else {
-    addedExtras.forEach(extra => {
-      const extraDiv = document.createElement('div');
-      extraDiv.classList.add('text-muted', 'ms-3');
-      extraDiv.innerText = `- ${extra.content} (+${extra.price.toLocaleString()}원)`;
-      orderList.appendChild(extraDiv);
-    });
-  }
-
-  const extrasTotal = addedExtras.reduce((sum, item) => sum + item.price, 0);
-  const total = selectedMenuPrice * count + extrasTotal + deliveryFee;
-  totalPriceEl.innerText = total.toLocaleString() + "원";
-}
-
-// ==============================
-// 추가 옵션 → 주문표 반영
-// ==============================
+// 추가 옵션 선택 후 주문표에 메뉴 추가
 $(document).on('click', '#btnAddExtras', function () {
   addedExtras = [];
+
   $('#addMenuModal .form-check-input:checked').each(function () {
     const moId = $(this).val();
     const label = $(this).next('label').text();
@@ -99,26 +63,215 @@ $(document).on('click', '#btnAddExtras', function () {
     addedExtras.push({ moId, content, price });
   });
 
+  // 이미 같은 메뉴 + 옵션이 주문 리스트에 있는지 검사
+  const existingIndex = orderList.findIndex(item => {
+    if (item.menuId !== selectedMenuId) return false;
+    if (item.extras.length !== addedExtras.length) return false;
+    const itemExtrasIds = item.extras.map(e => e.moId).sort().join(',');
+    const newExtrasIds = addedExtras.map(e => e.moId).sort().join(',');
+    return itemExtrasIds === newExtrasIds;
+  });
+
+  if (existingIndex !== -1) {
+    // 기존 주문 수량 증가
+    orderList[existingIndex].count += count;
+  } else {
+    // 새 주문 항목 추가
+    orderList.push({
+      menuId: selectedMenuId,
+      menuName: selectedMenuName,
+      menuPrice: selectedMenuPrice,
+      count: count,
+      extras: addedExtras
+    });
+  }
+
   updateOrder();
   bootstrap.Modal.getOrCreateInstance(document.getElementById('addMenuModal')).hide();
 });
 
-// 수량 조절
-function plus() {
-  if (!selectedMenuId) return alert('먼저 메뉴를 선택해주세요.');
-  count++;
-  updateOrder();
-}
-function minus() {
-  if (count > 1) {
-    count--;
-    updateOrder();
+
+
+// 주문표 업데이트 함수 (주문 리스트 전체를 화면에 렌더링)
+function updateOrder() {
+  const orderListEl = document.querySelector('.order-item-list');
+  const itemCountEl = document.getElementById("itemCount");
+  const totalPriceEl = document.getElementById("totalPrice");
+  const deliveryInfoEl = document.getElementById("deliveryInfo");
+
+  if (!orderListEl || !itemCountEl || !totalPriceEl) return;
+
+  if (orderList.length === 0) {
+    orderListEl.innerHTML = '<div class="text-muted fst-italic">주문한 메뉴가 없습니다.</div>';
+    itemCountEl.innerText = 0;
+    totalPriceEl.innerText = '0원';
+    if (deliveryInfoEl) deliveryInfoEl.style.display = 'none';
+    return;
   }
+
+  orderListEl.innerHTML = '';
+
+  let totalCount = 0;
+  let totalPrice = deliveryFee;
+
+  orderList.forEach((item, index) => {
+    totalCount += item.count;
+    const extrasTotal = item.extras.reduce((sum, e) => sum + e.price, 0);
+    const itemTotalPrice = (item.menuPrice + extrasTotal) * item.count;
+    totalPrice += itemTotalPrice;
+
+    // 주문 아이템 div 생성
+    const itemDiv = document.createElement('div');
+    itemDiv.classList.add('mb-3', 'border', 'p-2', 'rounded');
+
+    // 메뉴명, 수량, 가격
+    const title = document.createElement('div');
+    title.classList.add('fw-bold');
+    title.innerText = `${item.menuName} × ${item.count} (${itemTotalPrice.toLocaleString()}원)`;
+    itemDiv.appendChild(title);
+
+    // 추가 옵션 표시
+    if (item.extras.length === 0) {
+      const noExtras = document.createElement('div');
+      noExtras.classList.add('text-muted', 'fst-italic', 'ms-3');
+      noExtras.innerText = '추가 메뉴 없음';
+      itemDiv.appendChild(noExtras);
+    } else {
+      item.extras.forEach(extra => {
+        const extraDiv = document.createElement('div');
+        extraDiv.classList.add('text-muted', 'ms-3');
+        extraDiv.innerText = `- ${extra.content} (+${extra.price.toLocaleString()}원)`;
+        itemDiv.appendChild(extraDiv);
+      });
+    }
+
+    // 수량 조절 버튼 영역
+    const qtyControls = document.createElement('div');
+    qtyControls.classList.add('d-flex', 'align-items-center', 'mt-2', 'gap-2');
+
+    const btnMinus = document.createElement('button');
+    btnMinus.classList.add('btn', 'btn-outline-secondary', 'btn-sm');
+    btnMinus.innerText = '-';
+    btnMinus.onclick = () => {
+      if (orderList[index].count > 1) {
+        orderList[index].count--;
+      } else {
+        orderList.splice(index, 1);
+      }
+      updateOrder();
+    };
+
+    const qtySpan = document.createElement('span');
+    qtySpan.innerText = item.count;
+
+    const btnPlus = document.createElement('button');
+    btnPlus.classList.add('btn', 'btn-outline-secondary', 'btn-sm');
+    btnPlus.innerText = '+';
+    btnPlus.onclick = () => {
+      orderList[index].count++;
+      updateOrder();
+    };
+
+    const btnRemove = document.createElement('button');
+    btnRemove.classList.add('btn', 'btn-outline-danger', 'btn-sm', 'ms-auto');
+    btnRemove.innerText = '삭제';
+    btnRemove.onclick = () => {
+      orderList.splice(index, 1);
+      updateOrder();
+    };
+
+    qtyControls.appendChild(btnMinus);
+    qtyControls.appendChild(qtySpan);
+    qtyControls.appendChild(btnPlus);
+    qtyControls.appendChild(btnRemove);
+
+    itemDiv.appendChild(qtyControls);
+
+    orderListEl.appendChild(itemDiv);
+  });
+
+  itemCountEl.innerText = totalCount;
+  totalPriceEl.innerText = totalPrice.toLocaleString() + '원';
+  if (deliveryInfoEl) deliveryInfoEl.style.display = 'inline';
 }
 
+// 주문 초기화 함수 (전체 삭제)
+function clearOrder() {
+  orderList = [];
+  selectedMenuId = null;
+  selectedMenuName = '';
+  selectedMenuPrice = 0;
+  count = 1;
+  addedExtras = [];
+  updateOrder();
+}
+
+// 주문 전송 처리
+document.addEventListener('DOMContentLoaded', () => {
+  updateOrder();
+
+  document.getElementById('btnOrderNow')?.addEventListener('click', () => {
+    if (orderList.length === 0) {
+      alert('먼저 메뉴를 선택해주세요.');
+      return;
+    }
+
+    // 여러 주문 데이터를 쉼표, 파이프로 구분해서 전송 (서버 요구사항에 맞게 수정)
+    const menuIds = orderList.map(item => item.menuId).join(',');
+    const counts = orderList.map(item => item.count).join(',');
+    const optionIds = orderList.map(item => item.extras.map(e => e.moId).join('|')).join(',');
+    const totalPrice = orderList.reduce((sum, item) => {
+      const extrasTotal = item.extras.reduce((s, e) => s + e.price, 0);
+      return sum + (item.menuPrice + extrasTotal) * item.count;
+    }, 0) + deliveryFee;
+
+    document.getElementById('orderMenuId').value = menuIds;
+    document.getElementById('orderCount').value = counts;
+    document.getElementById('orderOptionIds').value = optionIds;
+    document.getElementById('orderTotalPrice').value = totalPrice;
+
+    document.getElementById('orderForm').submit();
+  });
+
+  document.getElementById('btnRemoveItem')?.addEventListener('click', () => {
+    clearOrder();
+  });
+});
+
+//주문하기버튼 클릭시 pay페이지로 넘어감
+$('#btnOrderNow').on('click', function() {
+  if (!selectedMenuId || count <= 0) {
+    alert('먼저 메뉴를 선택해주세요.');
+    return;
+  }
+
+  const optionIds = addedExtras.map(e => e.moId || e.id || e.content).join(',');
+  const totalPrice = selectedMenuPrice * count + addedExtras.reduce((sum, item) => sum + item.price, 0) + deliveryFee;
+
+  $.ajax({
+    url: '/pay',
+    method: 'POST',
+    data: {
+      menuId: selectedMenuId,
+      count: count,
+      optionIds: optionIds,
+      totalPrice: totalPrice
+    },
+    success: function() {
+      // 결제 페이지로 이동 (AJAX 성공 후)
+      window.location.href = '/pay';
+    },
+    error: function() {
+      alert('주문 처리 중 오류가 발생했습니다.');
+    }
+  });
+});
+
 // ==============================
-// Kakao 지도: 사용자 위치 검색
+// Kakao 지도 관련 함수
 // ==============================
+
+// 사용자 위치 검색 후 주소를 input에 넣고 shopList 페이지로 이동
 function runKakaoScript() {
   kakao.maps.load(() => {
     const searchButton = document.getElementById('btn-search-toggle');
@@ -126,7 +279,10 @@ function runKakaoScript() {
     if (!searchButton || !inputField) return;
 
     searchButton.addEventListener('click', () => {
-      if (!navigator.geolocation) return alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+      if (!navigator.geolocation) {
+        alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+        return;
+      }
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -140,7 +296,7 @@ function runKakaoScript() {
               const address = result[0].address.address_name;
               inputField.value = address;
 
-              // ✅ shopList로 이동하면서 category=전체보기, address 값도 함께 전달
+              // shopList 페이지로 category=전체보기, address 전달
               const url = `/shopList?category=전체보기&address=${encodeURIComponent(address)}`;
               window.location.href = url;
             } else {
@@ -155,10 +311,7 @@ function runKakaoScript() {
   });
 }
 
-
-// ==============================
-// Kakao 지도: 가게 위치 표시
-// ==============================
+// 가게 주소로 지도 표시
 function showStoreOnMap() {
   const address = document.getElementById('storeAddress')?.innerText;
   const mapContainer = document.getElementById('map');
@@ -179,41 +332,16 @@ function showStoreOnMap() {
   });
 }
 
-// ==============================
-// DOM 로드 후 이벤트 설정
-// ==============================
+// DOMContentLoaded에서 Kakao 관련 함수 실행 및 이벤트 등록
 document.addEventListener("DOMContentLoaded", () => {
-  updateOrder();
+  // 기존 주문표 업데이트는 위에 이미 호출됨
 
-  // 주문 전송
-  document.getElementById('btnOrderNow')?.addEventListener('click', () => {
-    if (!selectedMenuId) return alert('메뉴를 선택해주세요.');
-
-    document.getElementById('orderMenuId').value = selectedMenuId;
-    document.getElementById('orderCount').value = count;
-    document.getElementById('orderOptionIds').value = addedExtras.map(e => e.moId || e.id || e.content).join(',');
-    document.getElementById('orderTotalPrice').value =
-      selectedMenuPrice * count +
-      addedExtras.reduce((sum, item) => sum + item.price, 0) +
-      deliveryFee;
-
-    document.getElementById('orderForm').submit();
-  });
-
-  // 주문 초기화
-  document.getElementById('btnRemoveItem')?.addEventListener('click', () => {
-    selectedMenuId = null;
-    count = 0;
-    addedExtras = [];
-    updateOrder();
-  });
-
-  // 지도 탭 클릭 시 지도 표시
+  // 탭 클릭 시 지도 보이기
   document.querySelector('a[href="#info"]')?.addEventListener('shown.bs.tab', () => {
     showStoreOnMap();
   });
 
-  // Kakao SDK 로딩 상태 확인
+  // Kakao SDK가 아직 로딩 안됐으면 반복 체크 후 실행
   if (typeof kakao === 'undefined' || !kakao.maps) {
     const interval = setInterval(() => {
       if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.load) {
@@ -235,183 +363,149 @@ document.addEventListener("DOMContentLoaded", () => {
       searchBox.classList.toggle("d-none");
     });
   }
-	
-	//검색버튼
-	document.getElementById('searchSubmitBtn').addEventListener('click', function () {
-	    const keyword = document.querySelector('#searchBox input[type="text"]').value.trim();
 
-	    // 현재 선택된 카테고리도 함께 보내고 싶다면 추가로 처리 가능
-	    // 예: const category = '치킨'; 또는 URL에서 파싱 가능
-
-	    // URL 구성
-	    const searchUrl = `/shopList?keyword=${encodeURIComponent(keyword)}`;
-
-	    // 페이지 이동
-	    window.location.href = searchUrl;
-	});
-	
+  // 검색 제출 버튼
+  const searchSubmitBtn = document.getElementById('searchSubmitBtn');
+  if (searchSubmitBtn) {
+    searchSubmitBtn.addEventListener('click', () => {
+      const inputEl = document.querySelector('#searchBox input[type="text"]');
+      const keyword = inputEl ? inputEl.value.trim() : '';
+      const searchUrl = `/shopList?keyword=${encodeURIComponent(keyword)}`;
+      window.location.href = searchUrl;
+    });
+  }
 });
 
+// ==============================
+// 찜하기 하트 기능
+// ==============================
+$(function () {
+  $("#btnHeart").click(function () {
+    let sId = $(this).data("sid") || $("input[name='sId']").val();
+    if (!sId) {
+      alert('가게 정보를 찾을 수 없습니다.');
+      return;
+    }
 
-
-
-
-
-
-
-// 찜하기 하트
-$(function(){
-	
-	$("#btnHeart").click(function(){
-		let sId = $(this).data("sid") || $("input[name='sId']").val();
-		if (!sId){
-			alert('가게 정보를 찾을 수 없습니다.');
-			return;
-		}
-		
-		$.ajax({
-			url: "/heart.ajax",
-			type: "post",
-			data : { sId : sId },
-			dataType: "json",
-			success: function(data){
-			$("#heartCount").text(data.heartCount);
-				alert("찜하기가 반영되었습니다.");
-			},
-			error: function(xhr, status, error){
-				alert("error : " + xhr.statusText + "," + status + "," + error);
-			}
-		});
-	});
+    $.ajax({
+      url: "/heart.ajax",
+      type: "post",
+      data: { sId: sId },
+      dataType: "json",
+      success: function (data) {
+        $("#heartCount").text(data.heartCount);
+        alert("찜하기가 반영되었습니다.");
+      },
+      error: function (xhr, status, error) {
+        alert("error : " + xhr.statusText + "," + status + "," + error);
+      }
+    });
+  });
 });
 
-// 댓글쓰기 버튼 클릭 이벤트
-$("#reviewWrite").on("click", function(){
-		$("#reviewForm").toggleClass("d-none");
-	});
-	
-	$(document).on("submit", "#reviewWriteForm", function(e){
-		e.preventDefault();
-		if($("#reviewContent").val().length < 5){
-			alert("댓글은 5자 이상 입력하세요~");
-			return false;
-		}
-		if (!$('input[name="rating"]:checked').val()){
-			alert("별점을 선택하세요~!");
-			return false;
-		}
-		let formData = new FormData(this);
-		
-		let params = $(this).serialize();
-		console.log(params);
-		
-		$.ajax({
-			"url": "reviewWrite.ajax",
-			"data": formData,
-			"type": "post",
-			"processData": false,
-			"contentType": false,
-			"dataType": "json",
-			"success": function(resData){
-				console.log(resData);
-				
-				$("#reviewList").empty();
-				$.each(resData,function(i, r){
-					
-					let date = new Date(r.regDate);
-					let strDate = date.getFullYear() + "-" + ((date.getMonth() + 1 < 10)
-													? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
-													+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
-													+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
-													+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
-													+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
-													
-				let result = `
-				<div class="border-bottom pb-3 mb-3">
-												<div class="d-flex align-items-center mb-1">
-													<span class="fw-bold">${r.id.substr(0,2)}**님</span>
-													<span class="text-muted small ms-2">${strDate}</span>
-													<div class="ms-auto">
-													<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rNo}">
-														<i class="bi bi-journal-text">수정</i>									
-													</button>
-													<button class="deleteReview btn btn-outline-warning btn-sm" data-no="${r.rNo}">
-														<i class="bi bi-trash">삭제</i>
-													</button>
-													<button class="btn btn-outline-danger btn-sm" onclick="reportReview('${r.rNo}')">
-														<i class="bi bi-telephone-outbound">신고</i>
-													</button>
-													</div>												
-												</div>
-											
-												<div class="mb-1">
-													<span class="me-2 text-warning">
-														<i class="bi bi-star-fill"></i>										
-													</span>
-													<span class="fw-bold ms-1">${r.rating}점</span>
-												</div>
-												
-												${r.rPicture ? `<div>
-													<img src="/images/review/${r.rPicture}" alt="리뷰사진" 
-																	style="max-width:200px;" class="rounded shadow-sm mb-2" />
-												</div>` : ' '}
-											
-												<div class="text-secondary small mb-1">
-													<span>${r.menuName}</span>
-												</div>
-												
-												<div>${r.content}</div>
-											</div>`;
-					
-											$("#reviewList").append(result);
-								
-				});
-				$("#reviewList").removeClass("text-center p-5");
-				$("#reviewWriteForm")[0].reset();
-				$("#reviewForm").addClass("d-none");
-			},
-			"error": function(xhr, status){
-				console.log("error : " + status);
-			}
-		});
-		return false;
-	});
+// ==============================
+// 댓글 기능 (쓰기, 사진 미리보기 등)
+// ==============================
 
-
-//댓글 사진 미리보기
-let previewUrl = null;
-
-$("#rPicture").on('change', function(e){
-	const [file] = e.target.files;
-	if(file){
-		if(previewUrl){
-			URL.revokeObjectURL(previewUrl);
-		}
-		previewUrl = URL.createObjectURL(file);
-		$("#imgPreview").attr('src', previewUrl).show();
-	} else {
-		if(previewUrl){
-			URL.revokeObjectURL(previewUrl);
-			previewUrl = null;
-		}
-		$("#imgPreview").hide();
-	}
+// 댓글쓰기 폼 토글
+$("#reviewWrite").on("click", function () {
+  $("#reviewForm").toggleClass("d-none");
 });
 
+// 댓글 쓰기 폼 제출 이벤트
+$(document).on("submit", "#reviewWriteForm", function (e) {
+  e.preventDefault();
 
+  if ($("#reviewContent").val().length < 5) {
+    alert("댓글은 5자 이상 입력하세요~");
+    return false;
+  }
+  if (!$('input[name="rating"]:checked').val()) {
+    alert("별점을 선택하세요~!");
+    return false;
+  }
 
+  let formData = new FormData(this);
 
+  $.ajax({
+    url: "reviewWrite.ajax",
+    data: formData,
+    type: "post",
+    processData: false,
+    contentType: false,
+    dataType: "json",
+    success: function (resData) {
+      $("#reviewList").empty();
+      $.each(resData, function (i, r) {
+        let date = new Date(r.regDate);
+        let strDate = date.getFullYear() + "-" + ((date.getMonth() + 1 < 10)
+          ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
+          + (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
+          + (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
+          + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
+          + (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
 
+        let result = `
+          <div class="border-bottom pb-3 mb-3">
+            <div class="d-flex align-items-center mb-1">
+              <span class="fw-bold">${r.id.substr(0, 2)}**님</span>
+              <span class="text-muted small ms-2">${strDate}</span>
+              <div class="ms-auto">
+                <button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rNo}">
+                  <i class="bi bi-journal-text">수정</i>
+                </button>
+                <button class="deleteReview btn btn-outline-warning btn-sm" data-no="${r.rNo}">
+                  <i class="bi bi-trash">삭제</i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="reportReview('${r.rNo}')">
+                  <i class="bi bi-telephone-outbound">신고</i>
+                </button>
+              </div>
+            </div>
 
+            <div class="mb-1">
+              <span class="me-2 text-warning">
+                <i class="bi bi-star-fill"></i>
+              </span>
+              <span class="fw-bold ms-1">${r.rating}점</span>
+            </div>
 
+            ${r.rPicture ? `<div>
+              <img src="/images/review/${r.rPicture}" alt="리뷰사진" style="max-width:200px;" class="rounded shadow-sm mb-2" />
+            </div>` : ''}
 
+            <div class="text-secondary small mb-1">
+              <span>${r.menuName}</span>
+            </div>
 
+            <div>${r.content}</div>
+          </div>`;
+        $("#reviewList").append(result);
+      });
 
+      $("#reviewList").removeClass("text-center p-5");
+      $("#reviewWriteForm")[0].reset();
+      $("#reviewForm").addClass("d-none");
+    },
+    error: function (xhr, status) {
+      console.log("error : " + status);
+    }
+  });
+  return false;
+});
 
-
-
-
-
-
-
-
+// 댓글 사진 미리보기
+$("#rPicture").on('change', function (e) {
+  const [file] = e.target.files;
+  if (file) {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+    $("#imgPreview").attr('src', previewUrl).show();
+  } else {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+    }
+    $("#imgPreview").hide();
+  }
+});

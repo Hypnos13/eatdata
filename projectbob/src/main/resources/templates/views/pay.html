@@ -54,65 +54,52 @@
 						</div>
 					</div>
 				</div>
-
-				<!-- 주문표 -->
+				
+				<!-- 주문표 영역 -->
 				<div class="col-md-4">
 					<div class="card order-summary p-3">
 						<h5 class="card-title">🛒 주문표</h5>
-<form id="orderForm" method="post" action="/pay">
-	<!-- <div>
-		<div>메뉴ID: <span th:text="${menuId}"></span></div>
-		<div>수량: <span th:text="${count}"></span></div>
-		<div>옵션ID: <span th:text="${optionIds}"></span></div>		
-		<div>총가격: <span th:text="${totalPrice}"></span></div>
-	</div> -->
-	<input type="hidden" name="menuId" th:value="${menuId}">
-	<input type="hidden" name="count" th:value="${count}">
-	<input type="hidden" name="optionIds" th:value="${optionIds}">
-	<input type="hidden" name="totalPrice" th:value="${totalPrice}">
+						<form id="orderForm" method="post" action="/pay">
 
-						<div class="order-item-list mb-3">
-							<!-- 주문 메뉴 및 추가 메뉴가 여기 동적으로 들어갑니다 -->
-						
-						
-						<div class="fw-bold">
-						<span th:text="'메뉴ID: ' + ${menuId}"></span>
-						x <span th:text="${count}"></span>
-						(<span th:text="${totalPrice}"></span>원)
-						</div>
-						<div th:if="${optionIds != null && optionIds != ''}">
-							옵션 ID: <span th:text="${optionIds}"></span>
-						</div>
-						<div th:if="${optionIds == null || optionIds == ''}" class="text-muted fst-italic ms-3">
-							추가 메뉴 없음
-						</div>
-						</div>
-						<p>
-							총 가격: <strong id="totalPrice">[[${totalPrice}]]원</strong><br /> 
-							
-							<small class="text-muted">(배달비 포함)</small>
-						</p>
+							<input type="hidden" name="menuId" th:value="${menuId}">
+							<input type="hidden" name="count" th:value="${count}"> <input
+								type="hidden" name="optionIds" th:value="${optionIds}">
+							<input type="hidden" name="totalPrice" th:value="${totalPrice}">
 
-						<!-- 수량 조절 영역 -->
-						<div class="qty-control d-flex flex-row align-items-center mb-3">
-							<button class="btn btn-outline-secondary btn-qty"
-								onclick="minus()">−</button>
-							<span id="itemCount" class="mx-3">0</span>
-							<button class="btn btn-outline-secondary btn-qty"
-								onclick="plus()">＋</button>
-						</div>
+							<div class="order-item-list mb-3">
+								<div class="fw-bold">
+									메뉴 ID: <span th:text="${menuId}">메뉴ID</span> × <span
+										th:text="${count}">수량</span>개
+								</div>
+								<div th:if="${optionIds != null && optionIds != ''}">
+									옵션 ID: <span th:text="${optionIds}">옵션ID</span>
+								</div>
+								<div th:if="${optionIds == null || optionIds == ''}"
+									class="text-muted fst-italic ms-3">추가 메뉴 없음</div>
+							</div>
 
-						<!-- 주문 초기화(삭제) 버튼 -->
-						<button class="btn btn-danger w-100 mb-2" id="btnRemoveItem">주문
-							취소</button>
+							<p>
+								총 가격: <strong th:text="${totalPrice} + '원'">0원</strong><br /> <small
+									class="text-muted">(배달비 포함)</small>
+							</p>
 
-						<button type="submit" class="btn text-white w-100" 
-							style="background-color: #43d091;" id="btnOrderNow">
-							주문하기
-							</button>
-</form>
+							<!-- 수량 조절 영역 -->
+							<div class="qty-control d-flex flex-row align-items-center mb-3">
+								<button class="btn btn-outline-secondary btn-qty"
+									onclick="minus()" type="button">−</button>
+								<span id="itemCount" class="mx-3" th:text="${count}">0</span>
+								<button class="btn btn-outline-secondary btn-qty"
+									onclick="plus()" type="button">＋</button>
+							</div>
+
+							<!-- 주문하기 버튼 -->
+							<button type="submit" class="btn text-white w-100"
+								style="background-color: #43d091;" id="btnOrderNow">
+								결제하기</button>
+						</form>
 					</div>
 				</div>
+
 
 			</div>
 		</div>

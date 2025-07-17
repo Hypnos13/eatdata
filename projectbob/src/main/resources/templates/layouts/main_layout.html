@@ -20,14 +20,9 @@
 	<script
 		src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=30a0d7b80b66b1135d1195c80899795d&libraries=services"></script>
 
-	<script>
-  console.log('layout 하단에서 main.js 로드됨');
-</script>
-
-	<!-- main.js는 반드시 body 끝에 위치시키고, DOMContentLoaded 안에서 실행하게 작성 -->
 	<script th:src="@{js/main.js}"></script>
 
-	<!-- 추가메뉴 모달 -->
+<!-- 추가 메뉴 선택 모달 -->
 <div class="modal fade" id="addMenuModal" tabindex="-1" aria-labelledby="addMenuModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -36,22 +31,18 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
       </div>
       <div class="modal-body">
-        <!-- 체크박스 목록 -->
-        
-      
-        <div id="optionArea"></div>                   
-        
-    
-        
-        
+        <div id="optionArea">
+          <!-- 옵션 체크박스들이 AJAX로 동적 생성됨 -->
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" id="btnAddExtras" class="btn btn-primary">추가하기</button>
-        <button type="button" class="btn btn-success" id="btnOrderNow">주문하기</button>
+   
       </div>
     </div>
   </div>
 </div>
+
 
 
 </body>

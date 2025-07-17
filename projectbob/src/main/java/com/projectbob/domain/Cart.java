@@ -14,16 +14,15 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class Cart {
-	private int caId;
-	private int mId;
-	private int moId;
-	private String id;
-	private int sId;
-	private int quantity;
-	private Timestamp regDate;
-	private Timestamp modiDate;
-	private String status;
-	private int oNo;
-	private int totalPrice;
+	private int caId;//카트아이디
+	private int mId;//메뉴아이디
+	private int moId;//메뉴옵션 아이디
+	private String id; // 회원아이디
+	private int sId;//가게 아이디
+	private int quantity; //수량
+	private Timestamp regDate; //생성일
+	private Timestamp modiDate; //수정일
+	private String status;//상태
+	private int totalPrice;//총 가격
 
 }
