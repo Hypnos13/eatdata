@@ -46,17 +46,17 @@ public class MenuController {
 			reAttrs.addFlashAttribute("errorMessage", "메뉴 등록에 실패했습니다.");
 			return "redirect:/shop/menuRegisterFrom";
 		}
-		return "redirect:/shopMain";
+		return "redirect:/menuList";
 	}
 	// 메뉴 목록 페이지(전체 메뉴)
-	@GetMapping("/list")
+	@GetMapping("/menuList")
 	public String getMenuList(Model model) {
 		List<Menu> menuList = shopService.getAllMenus();// 간단한 목록
 		model.addAttribute("menuList", menuList);
 		return "/shop/menuList";
 	}
 	// 메뉴 수정 폼 이동
-	@GetMapping("/updateForm")
+	@GetMapping("/menuUpdateForm")
 	public String showUpdateForm(@RequestParam(value = "mId", required = false) Integer mId, Model model) {
 		List<Menu> menuList = shopService.getAllMenus();// 드롭다운에 전체 메뉴 출력
 		model.addAttribute("menuList", menuList);
