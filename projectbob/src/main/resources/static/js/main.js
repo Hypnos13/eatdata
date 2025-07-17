@@ -287,7 +287,15 @@ $(function(){
 
 // 댓글쓰기 버튼 클릭 이벤트
 $("#reviewWrite").on("click", function(){
-		$("#reviewForm").toggleClass("d-none");
+	console.log("리뷰쓰기 버튼 클릭");
+		$("#reviewFormOriginalContainer").$("#reviewForm").removeClass("d-none");
+		$("#reviewForm form").attr("id", "reviewWriteForm").removeAttr("data-no");
+		$("#reviewWriteButton").val("댓글쓰기");
+		$("#reviewContent").val("");
+		$('input[name="rating"]').prop('checked', false);
+		$("#imgPreview").hide().attr('src', '');
+		if(previewUrl){URL.revokeObjectURL(previewUrl); previewUrl = null;}
+		lastEditRno = null;
 	});
 	
 	$(document).on("submit", "#reviewWriteForm", function(e){
@@ -368,7 +376,9 @@ $("#reviewWrite").on("click", function(){
 				});
 				$("#reviewList").removeClass("text-center p-5");
 				$("#reviewWriteForm")[0].reset();
-				$("#reviewForm").addClass("d-none");
+				$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
+				$("#reviewForm form").attr("id", "reviewWriteForm").removeAttr("data-no");
+				$("#reviewSubmitButton").val("댓글쓰기");
 			},
 			"error": function(xhr, status){
 				console.log("error : " + status);
@@ -401,21 +411,26 @@ $("#rPicture").on('change', function(e){
 
 
 //댓글 수정하기 버튼클릭
+lastEditRno = null;
 $(document).on("click", ".modifyReview", function(){
+	console.log("수정 버튼 클릭");
 	console.log($("#reviewForm").css("display"));
 	console.log($("#reviewForm").is(":visible"));
 	
 	console.log($(this).parents(".reviewRow"));
 	let $reviewRow = $(this).closest(".reviewRow");
+	let rno = $(this).attr("data-no");
+	lastEditRno = rno;
+	console.log("폼을 해당리뷰 아래로 이동:", $reviewRow, "rno", rno);
 	
 	$reviewRow.after($("#reviewForm").removeClass("d-none"));
+	console.log("폼 실제 위치:", $("#reviewForm").parent()[0]);
 	
-	let review = $reviewRow.find(".review-content").text();
-		$("#reviewContent").val($.trim(review));
+	let reviewContent = $reviewRow.find(".review-content").text();
+		$("#reviewContent").val($.trim(reviewContent));
 			
-	$("#reviewForm").find("form")
-		.attr({"id": "reviewUpdateForm", "data-no": $(this).attr("data-no")});
-	$("#reviewUpdateButton").val("댓글수정");
+	$("#reviewForm form").attr("id", "reviewUpdateForm").attr("data-no", rno);		
+	$("#reviewWriteButton").val("댓글수정");
 		
 });
 
@@ -442,7 +457,7 @@ $(document).on("submit", "#reviewUpdateForm", function(e){
 			"contentType": false,
 			"dataType": "json",
 			"success": function(resData){
-				console.log(resData);
+				console.log("수정 ajax",resData);
 				
 				$("#reviewList").empty();
 				$.each(resData,function(i, r){
@@ -457,7 +472,7 @@ $(document).on("submit", "#reviewUpdateForm", function(e){
 													+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
 													
 				let result = `
-				<div class="border-bottom pb-3 mb-3">
+				<div class="reviewRow border-bottom pb-3 mb-3" data-rno="${r.rno}">				
 												<div class="d-flex align-items-center mb-1">
 													<span class="fw-bold">${r.id.substr(0,2)}**님</span>
 													<span class="text-muted small ms-2">${strDate}</span>
@@ -494,12 +509,16 @@ $(document).on("submit", "#reviewUpdateForm", function(e){
 											</div>`;
 					
 											$("#reviewList").append(result);
-								
-				});
-				$("#reviewForm").addClass("d-none");
-				//$("#reviewWriteButton").val("댓글쓰기");
+											
+																		
+				});											
+				console.log("리뷰 다시 그림. 폼 숨기기");				
+				$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
 				$("#reviewForm form").attr("id", "reviewWriteForm").removeAttr("data-no");
+				console.log("수정 후 폼 위치:", $("#reviewForm").parent()[0]);				
+				$("#reviewWriteButton").val("댓글쓰기");						
 				$("#reviewContent").val("");
+				
 			},
 			"error": function(xhr, status){
 				console.log("error : " + status);
@@ -512,8 +531,9 @@ $(document).on("submit", "#reviewUpdateForm", function(e){
 // 댓글 삭제하기
 $(document).on("click", ".deleteReview", function(){
 	
-	$("#global-content > div").append($("#reviewForm"));
+//	$("#global-content > div").append($("#reviewForm"));
 	$("#reviewContent").val("");
+	$("#reviewForm").addClass("d-none");
 	
 	let rNo = $(this).attr("data-no");
 	console.log('삭제할 rNo:' , rNo);
