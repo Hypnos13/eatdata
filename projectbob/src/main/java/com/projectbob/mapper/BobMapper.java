@@ -34,6 +34,12 @@ public interface BobMapper {
 	// 댓글을 DB에 등록하는 메서드
 	public void addReview(Review review);
 	
+	//댓글 수정하는 메서드
+	public void updateReview(Review review);
+	
+	//댓글 삭제하는 메서드
+	public void deleteReview(int rNo);
+	
 
 }
 

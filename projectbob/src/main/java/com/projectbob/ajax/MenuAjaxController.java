@@ -10,8 +10,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -78,9 +80,39 @@ public class MenuAjaxController {
 		return bobService.reviewList(review.getSId());
 	}
 	
+	//댓글 수정 메서드
+	@PatchMapping("/reviewUpdate.ajax")
+	@ResponseBody
+	public List<Review> updateReview(@ModelAttribute Review review,
+			@RequestParam(value="reviewUploadFile", required=false) MultipartFile rPicture){
+		
+		if(rPicture != null && !rPicture.isEmpty()) {
+			String uploadDir = "C:/projectbob/images/review/";
+			File dir = new File(uploadDir);
+			if (!dir.exists()) dir.mkdirs();
+			
+			String fileName = UUID.randomUUID() + "_" + rPicture.getOriginalFilename();
+			Path savePath = Paths.get(uploadDir, fileName);
+			try {
+				rPicture.transferTo(savePath.toFile());
+				review.setRPicture(fileName);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		bobService.updateReview(review);
+		return bobService.reviewList(review.getSId());
+		
+	}
 	
-	
-	
+	// 댓글 삭제 메서드
+	@DeleteMapping("/reviewDelete.ajax")
+	public List<Review> deleteReview(@RequestParam("rNo") int rNo,
+			@RequestParam("sId")int sId){
+		bobService.deleteReview(rNo);
+		return bobService.reviewList(sId);
+	}
 	
 	
 	

@@ -23,7 +23,7 @@
 	<div layout:fragment="content">
 
 		<div class="container mt-4">
-			<div class="row">
+			<div class="row" id="global-content">
 				<!-- 왼쪽: 메뉴 영역 -->
 				<div class="col-md-8">
 				
@@ -169,18 +169,18 @@
 						
 						<!-- 리뷰 리스트 -->
 						<div id="reviewList" th:if="${not #lists.isEmpty(reviewList)}">
-							<div th:each="review : ${reviewList}" class="border-bottom pb-3 mb-3">
+							<div th:each="review : ${reviewList}" class="reviewRow border-bottom pb-3 mb-3">
 								<div class="d-flex align-items-center mb-1">
 									<span class="fw-bold" th:text="${#strings.substring(review.id,0,2) + '**님'}">ad**님</span>
 									<span class="text-muted small ms-2" th:text="${#dates.format(review.regDate, 'yyyy-MM-dd')}">날짜</span>
 									<div class="ms-auto">
-									<button class="modifyReview btn btn-outline-success btn-sm" th:data-no="${review.rNo}">
+									<button th:if="${review.id == member.id}" class="modifyReview btn btn-outline-success btn-sm" th:data-no="${review.rNo}">
 										<i class="bi bi-journal-text">수정</i>									
 									</button>
-									<button class="deleteReview btn btn-outline-warning btn-sm" th:data-no="${review.rNo}">
+									<button th:if="${review.id == member.id}" class="deleteReview btn btn-outline-dark btn-sm" th:data-no="${review.rNo}">
 										<i class="bi bi-trash">삭제</i>
 									</button>
-									<button class="btn btn-outline-danger btn-sm" th:onclick="reportReview('${review.rNo}')">
+									<button th:unless="${review.id == member.id}" class="btn btn-outline-danger btn-sm" th:onclick="reportReview('${review.rNo}')">
 										<i class="bi bi-telephone-outbound">신고</i>
 									</button>
 									</div>
@@ -195,7 +195,7 @@
 								</div>
 								<!-- 리뷰 사진  -->
 								<div th:if="${review.rPicture != null}">
-									<img th:src="@{'/images/review/' + ${review.rPicture}}" alt="리뷰사진" 
+									<img th:src="@{'/images/review/' + ${review.rPicture} + '?t=' + ${now}}" alt="리뷰사진" 
 													style="max-width:200px;" class="rounded shadow-sm mb-2" />
 								</div>
 								<!-- 메뉴 설명 -->
@@ -203,7 +203,7 @@
 									<span th:text="${review.menuName}">싹싹김치</span>
 								</div>
 								<!-- 리뷰 내용 -->
-								<div th:text="${review.content}">good day</div>
+								<div class = "review-content" th:text="${review.content}">good day</div>
 							</div>
 						</div>
 						<!-- 리뷰 없을때 -->

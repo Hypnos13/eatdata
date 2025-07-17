@@ -332,13 +332,13 @@ $("#reviewWrite").on("click", function(){
 													<span class="fw-bold">${r.id.substr(0,2)}**님</span>
 													<span class="text-muted small ms-2">${strDate}</span>
 													<div class="ms-auto">
-													<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rNo}">
+													<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rno}">
 														<i class="bi bi-journal-text">수정</i>									
 													</button>
-													<button class="deleteReview btn btn-outline-warning btn-sm" data-no="${r.rNo}">
+													<button class="deleteReview btn btn-outline-warning btn-sm" data-no="${r.rno}">
 														<i class="bi bi-trash">삭제</i>
 													</button>
-													<button class="btn btn-outline-danger btn-sm" onclick="reportReview('${r.rNo}')">
+													<button class="btn btn-outline-danger btn-sm" onclick="reportReview('${r.rno}')">
 														<i class="bi bi-telephone-outbound">신고</i>
 													</button>
 													</div>												
@@ -351,8 +351,8 @@ $("#reviewWrite").on("click", function(){
 													<span class="fw-bold ms-1">${r.rating}점</span>
 												</div>
 												
-												${r.rPicture ? `<div>
-													<img src="/images/review/${r.rPicture}" alt="리뷰사진" 
+												${r.rpicture ? `<div>
+													<img src="/images/review/${r.rpicture}?t=${Date.now()}" alt="리뷰사진" 
 																	style="max-width:200px;" class="rounded shadow-sm mb-2" />
 												</div>` : ' '}
 											
@@ -400,8 +400,209 @@ $("#rPicture").on('change', function(e){
 
 
 
+//댓글 수정하기 버튼클릭
+$(document).on("click", ".modifyReview", function(){
+	console.log($("#reviewForm").css("display"));
+	console.log($("#reviewForm").is(":visible"));
+	
+	console.log($(this).parents(".reviewRow"));
+	let $reviewRow = $(this).closest(".reviewRow");
+	
+	$reviewRow.after($("#reviewForm").removeClass("d-none"));
+	
+	let review = $reviewRow.find(".review-content").text();
+		$("#reviewContent").val($.trim(review));
+			
+	$("#reviewForm").find("form")
+		.attr({"id": "reviewUpdateForm", "data-no": $(this).attr("data-no")});
+	$("#reviewUpdateButton").val("댓글수정");
+		
+});
+
+// 댓글 수정 폼 submit
+$(document).on("submit", "#reviewUpdateForm", function(e){
+	e.preventDefault();
+	
+	if($("#reviewContent").val().length <= 5){
+		alert("댓글은 5자 이상 입력해야 합니다.");
+		return false;
+	}
+	//$("#global-content > div").append($("#reviewForm"));
+	
+	let form = this;
+	let formData = new FormData(form);
+	formData.append("rNo", $(form).attr("data-no"));
+	
+	
+	$.ajax({
+			"url": "reviewUpdate.ajax",
+			"data": formData,
+			"type": "patch",
+			"processData": false,
+			"contentType": false,
+			"dataType": "json",
+			"success": function(resData){
+				console.log(resData);
+				
+				$("#reviewList").empty();
+				$.each(resData,function(i, r){
+					console.log('리뷰사진 파일명:' , r.rpicture);
+					
+					let date = new Date(r.regDate);
+					let strDate = date.getFullYear() + "-" + ((date.getMonth() + 1 < 10)
+													? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
+													+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
+													+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
+													+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
+													+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
+													
+				let result = `
+				<div class="border-bottom pb-3 mb-3">
+												<div class="d-flex align-items-center mb-1">
+													<span class="fw-bold">${r.id.substr(0,2)}**님</span>
+													<span class="text-muted small ms-2">${strDate}</span>
+													<div class="ms-auto">
+													<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rno}">
+														<i class="bi bi-journal-text">수정</i>									
+													</button>
+													<button class="deleteReview btn btn-outline-warning btn-sm" data-no="${r.rno}">
+														<i class="bi bi-trash">삭제</i>
+													</button>
+													<button class="btn btn-outline-danger btn-sm" onclick="reportReview('${r.rno}')">
+														<i class="bi bi-telephone-outbound">신고</i>
+													</button>
+													</div>												
+												</div>
+											
+												<div class="mb-1">
+													<span class="me-2 text-warning">
+														<i class="bi bi-star-fill"></i>										
+													</span>
+													<span class="fw-bold ms-1">${r.rating}점</span>
+												</div>
+												
+												${r.rpicture ? `<div>
+													<img src="/images/review/${r.rpicture}?t=${Date.now()}" alt="리뷰사진" 
+																	style="max-width:200px;" class="rounded shadow-sm mb-2" />
+												</div>` : ' '}
+											
+												<div class="text-secondary small mb-1">
+													<span>${r.menuName}</span>
+												</div>
+												
+												<div>${r.content}</div>
+											</div>`;
+					
+											$("#reviewList").append(result);
+								
+				});
+				$("#reviewForm").addClass("d-none");
+				//$("#reviewWriteButton").val("댓글쓰기");
+				$("#reviewForm form").attr("id", "reviewWriteForm").removeAttr("data-no");
+				$("#reviewContent").val("");
+			},
+			"error": function(xhr, status){
+				console.log("error : " + status);
+			}
+		});
+		return false;
+});
 
 
+// 댓글 삭제하기
+$(document).on("click", ".deleteReview", function(){
+	
+	$("#global-content > div").append($("#reviewForm"));
+	$("#reviewContent").val("");
+	
+	let rNo = $(this).attr("data-no");
+	console.log('삭제할 rNo:' , rNo);
+	let id = $(this).closest(".border-bottom").find(".fw-bold").text();
+	let sId = $("#reviewForm input[name=sId]").val();
+	
+	let params = {rNo: rNo, sId: sId};
+	console.log(params);
+	
+	let result = confirm(id + "님이 작성한 " + rNo + "번 댓글을 삭제하시봉?");
+	
+	if(result){
+	$.ajax({
+				"url": "reviewDelete.ajax?rNo=" + rNo + "&sId=" + sId,
+				"data": params,
+				"type": "delete",				
+				"dataType": "json",
+				"success": function(resData, status, xhr){
+					console.log(resData);
+					
+					$("#reviewList").empty();
+					$.each(resData,function(i, r){						
+						
+						let date = new Date(r.regDate);
+						let strDate = date.getFullYear() + "-" + ((date.getMonth() + 1 < 10)
+														? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
+														+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
+														+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
+														+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
+														+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
+														
+					let result = `
+					<div class="border-bottom pb-3 mb-3">
+													<div class="d-flex align-items-center mb-1">
+														<span class="fw-bold">${r.id.substr(0,2)}**님</span>
+														<span class="text-muted small ms-2">${strDate}</span>
+														<div class="ms-auto">
+														<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rno}">
+															<i class="bi bi-journal-text">수정</i>									
+														</button>
+														<button class="deleteReview btn btn-outline-warning btn-sm" data-no="${r.rno}">
+															<i class="bi bi-trash">삭제</i>
+														</button>
+														<button class="btn btn-outline-danger btn-sm" onclick="reportReview('${r.rno}')">
+															<i class="bi bi-telephone-outbound">신고</i>
+														</button>
+														</div>												
+													</div>
+												
+													<div class="mb-1">
+														<span class="me-2 text-warning">
+															<i class="bi bi-star-fill"></i>										
+														</span>
+														<span class="fw-bold ms-1">${r.rating}점</span>
+													</div>
+													
+													${r.rpicture ? `<div>
+														<img src="/images/review/${r.rpicture}?t=${Date.now()}" alt="리뷰사진" 
+																		style="max-width:200px;" class="rounded shadow-sm mb-2" />
+													</div>` : ' '}
+												
+													<div class="text-secondary small mb-1">
+														<span>${r.menuName}</span>
+													</div>
+													
+													<div>${r.content}</div>
+												</div>`;
+						
+												$("#reviewList").append(result);
+									
+					});				
+				},
+				"error": function(xhr, status){
+					console.log("error : " + status);
+				}
+			});
+			}
+			return false;
+	
+});
+
+
+// 신고하기 버튼
+function reportReview(ememId){
+	let result = confirm("이 댓글을 신고하시봉?");
+	if(result == true){
+		alert("report - " + result);
+	}
+}
 
 
 

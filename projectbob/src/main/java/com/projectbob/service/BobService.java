@@ -85,6 +85,16 @@ public class BobService{
 		bobMapper.addReview(review);
 	}
 	
+	//댓글 수정하는 메서드
+	public void updateReview(Review review) {
+		bobMapper.updateReview(review);
+	}
+	
+	//댓글 삭제하는 메서드
+	public void deleteReview(int rNo) {
+		bobMapper.deleteReview(rNo);
+	}
+	
 
 	
 	

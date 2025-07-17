@@ -34,13 +34,7 @@ public class BobController {
 		return "views/main";
 	}
 	 
-	@GetMapping("/menu")
-	public String menu() {
-		return "views/menudetail";
-	}
-	/*
-	 * @GetMapping("/pay") public String pay() { return "views/pay"; }
-	 */
+
 	
 	@GetMapping("/end")
 	public String completed() {
@@ -61,13 +55,6 @@ public class BobController {
 	  model.addAttribute("userAddress", address);
 	  	return "views/shopList"; 
 	  }
-
-//	  @GetMapping("/shopList")
-//	  public String shopList(@RequestParam(name="category", defaultValue="전체보기") String category, Model model) {
-//	      model.addAttribute("selectedCategory", category);
-//		  log.info("BobController: shopList() called"); 
-//		  model.addAttribute("sList",bobService.shopList()); 
-//	      return "views/shopList"; 
 
 
 	  	// 가게 상세보기 메서드		
@@ -97,6 +84,8 @@ public class BobController {
 			  reviewAvg = reviewList.stream().mapToInt(Review::getRating).average().orElse(0.0);			  
 		  }
 		  model.addAttribute("reviewAvg", reviewAvg);
+		  
+		  model.addAttribute("now", System.currentTimeMillis());
 		  
 		  return "views/MenuDetail"; 
 		  }
