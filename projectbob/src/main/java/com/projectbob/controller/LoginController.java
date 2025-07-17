@@ -3,16 +3,25 @@ package com.projectbob.controller;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
 
 import com.projectbob.domain.Member;
 import com.projectbob.service.LoginService;
@@ -414,4 +423,76 @@ public class LoginController {
 			
 		return "members/login";
 	}
+	
+	// 카카오 아이디 연동
+	@GetMapping("/kakao")
+	public String kakaoLogin(Model model, @RequestParam("code") String code, HttpSession session) {
+		
+		RestTemplate rt = new RestTemplate();
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		
+		 MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		 params.add("grant_type", "authorization_code");
+		 params.add("client_id", "a6ce69b235d3336723f4b86140c8a301");
+		 params.add("redirect_uri", "http://localhost:8080/kakao");
+		 params.add("code", code);
+		
+		 HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(params, headers);
+		 ResponseEntity<Map> tokenResponse = rt.postForEntity("https://kauth.kakao.com/oauth/token", tokenRequest, Map.class);
+		 
+		 String accessToken = (String) tokenResponse.getBody().get("access_token");
+		 
+		 HttpHeaders profileHeaders = new HttpHeaders();
+		 profileHeaders.setBearerAuth(accessToken);
+		 HttpEntity<?> profileRequest = new HttpEntity<>(profileHeaders);
+		 
+		 ResponseEntity<Map> profileResponse = rt.exchange("https://kapi.kakao.com/v2/user/me", HttpMethod.GET, profileRequest, Map.class);
+		 
+		 Map<String, Object> kakaoAccount = (Map<String, Object>) profileResponse.getBody().get("kakao_account");
+		 String email = (String) kakaoAccount.get("email");
+		 
+		 Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+		 String nickname = (String) profile.get("nickname");
+		 
+		 System.out.println("이메일: " + email);
+		 System.out.println("별명: " + nickname);
+		 
+		 String id  = "K_"+email.substring(0, email.indexOf("@"));
+			
+			// DB에 가입되어있는지 확인
+			int login = loginService.login(id, "");
+			
+			if(login == -1) {  // 없으면 추가 
+				
+				Member member = new Member();
+				member.setId(id);
+				member.setPass("Kakao0000");
+				member.setName(nickname);
+				member.setNickname(nickname);
+				member.setEmail(email);
+				member.setBirthday("");
+				member.setAddress1("");
+				member.setAddress2("");
+				member.setPhone("");
+				member.setDisivion("client");
+				
+				model.addAttribute("Member", member);
+				
+				return "members/joinNaverMembership";
+				
+			}
+				
+				Member member = loginService.getMember(id);
+				
+				session.setAttribute("isLogin", true);
+				session.setAttribute("loginId", id);
+				session.setAttribute("loginNickname", member.getNickname());
+				session.setAttribute("loginDisivion", member.getDisivion());
+			
+			
+		  return "redirect:/main";
+	}
+	
 }
