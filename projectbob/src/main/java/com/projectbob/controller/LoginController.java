@@ -224,6 +224,11 @@ public class LoginController {
 		
 		model.addAttribute("Member", loginService.getMember(id));
 		
+		if(id.substring(1, 2).equals("N_")) {
+			return "members/updateNaverMemberships";
+		}
+		
+		
 		return "members/updateMemberships";
 	}
 	
@@ -325,5 +330,88 @@ public class LoginController {
 		return null;
 	}
 	
+	// 네이버 로그인 시
+	@GetMapping("/naverLogin")
+	public String naverLogin(Model model,@RequestParam("name") String name, @RequestParam("nickname")String nickname, @RequestParam("email") String email, HttpSession session){
+		
+		String id  = "N_"+email.substring(0, email.indexOf("@"));
+		
+		// DB에 가입되어있는지 확인
+		int login = loginService.login(id, "");
+		
+		if(login == -1) {  // 없으면 추가 
+			
+			Member member = new Member();
+			member.setId(id);
+			member.setPass("naver0000");
+			member.setName(name);
+			member.setNickname(nickname);
+			member.setEmail(email);
+			member.setBirthday("");
+			member.setAddress1("");
+			member.setAddress2("");
+			member.setPhone("");
+			member.setDisivion("client");
+			
+			model.addAttribute("Member", member);
+			
+			return "members/joinNaverMembership";
+			
+		}
+			
+			Member member = loginService.getMember(id);
+			
+			session.setAttribute("isLogin", true);
+			session.setAttribute("loginId", id);
+			session.setAttribute("loginNickname", member.getNickname());
+			session.setAttribute("loginDisivion", member.getDisivion());
+		
+		
+		return "redirect:/main";
+	}
 	
+	
+	//처음 네이버 로그인시
+	@PostMapping("/naverJoin")
+	public String naverLogin(Model model, Member member, HttpSession session){
+		
+		member.setDisivion("client");
+		
+		loginService.joinMember(member);
+		
+		member = loginService.getMember(member.getId());
+		
+		session.setAttribute("isLogin", true);
+		session.setAttribute("loginId", member.getId());
+		session.setAttribute("loginNickname", member.getNickname());
+		session.setAttribute("loginDisivion", member.getDisivion());
+		
+		return "redirect:/main";
+	}
+	
+	//네이버 로그인 시 수정
+	@PostMapping("/updateNaverMember")
+	public String updateNaverMember(Model model, Member member, HttpSession session){
+		
+		member.setPass("0");
+		
+		loginService.updateMember(member);
+		session.setAttribute("loginNickname", member.getNickname());
+		
+		return "redirect:/main";
+	}
+	
+	
+	// 네이버 아이디 회원 탈퇴
+	@PostMapping("/deleteNaverMember")
+	public String deleteNaverMember( @RequestParam("userId") String id, HttpSession session) {
+		
+		String pass = "0";
+		
+		loginService.deleteMember(id, pass);
+		
+		session.invalidate();
+			
+		return "members/login";
+	}
 }

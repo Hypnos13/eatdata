@@ -3,6 +3,8 @@
 		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
 		layout:decorate="~{layouts/main_layout}">
 <th:block layout:fragment="content">
+<script type="text/javascript" src="https://static.nid.naver.com/js/naverLogin_implicit-1.0.3.js" charset="utf-8"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 <script th:src="@{js/login.js}"></script>
 <div class ="container">
 	<div class="row border mt-5">
@@ -30,7 +32,15 @@
 			</div>
 			<div class="row my-2">
 				<div class="col text-center">
-					네이버 로그인 연동
+					 <div id="naver_id_login"></div>
+					  <script type="text/javascript">
+						  	var naver_id_login = new naver_id_login("geNaa92ft6eNyAmK2TxC", "http://localhost:8080/login/naver/callback");
+						  	var state = naver_id_login.getUniqState();
+						  	naver_id_login.setButton("white", 2,40);
+						  	naver_id_login.setDomain("http://localhost:8080");
+						  	naver_id_login.setState(state);
+						  	naver_id_login.init_naver_id_login();
+  					  </script>
 			  	</div>
 			</div>
 			<div class="row my-2">
