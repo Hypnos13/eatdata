@@ -8,6 +8,30 @@ $(function() {
 	
 	//로그인 필요한 메뉴 클릭 이벤트
 	$(".login-required").on("click", requireLogin);
+	
+	// 폰 자동 하이픈 입력
+    const phoneNumberInput = document.getElementById('phone');
+    if (phoneNumberInput) {
+        phoneNumberInput.addEventListener('input', function(event) {
+            let value = event.target.value.replace(/[^0-9]/g, '');
+            if (value.length > 11) value = value.substring(0, 11);
+            let formattedValue = '';
+            if (value.length < 4) {
+                formattedValue = value;
+            } else if (value.length < 8) {
+                formattedValue = value.substring(0, 3) + '-' + value.substring(3);
+            } else {
+                formattedValue = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7);
+            }
+            event.target.value = formattedValue;
+        });
+    }
+	
+	// 페이지 로드시 기존 주소로 지도 띄우기 (kakao 준비 되었을 때만)
+    setTimeout(function() {
+        var addr = $("#address1").val();
+        if (addr && window.kakao && kakao.maps) showMap(addr);
+    }, 300);
 });
 
 function menuJoinFormCheck() {
@@ -86,15 +110,52 @@ function findZipcode() {
 				$("#zipcode").val(data.zonecode);
 				$("#address1").val(addr);
 				$("#address2").focus();
+				
+				// 주소 선택 시 지도에 표시 (아래 함수 호출)
+	            showMap(addr);
     	}
 	}).open();
 }
 
-//로그인 여부 읽기
-var isLogin = document.body.dataset.login === "true";
+// 지도 표시 함수
+function showMap(address) {
+	// kakao 객체 체크
+    if (!(window.kakao && kakao.maps && kakao.maps.services)) return;
 
-//로그인상태 확인
+    var mapContainer = document.getElementById('shop-map');
+    // 맵 영역이 숨겨져있으면 보여줌
+    if (mapContainer && mapContainer.style.display === "none") {
+        mapContainer.style.display = "block";
+    }
+	var mapOption = {
+        center: new kakao.maps.LatLng(37.566826, 126.9786567), // 초기 중심 좌표 (서울시청)
+        level: 3
+    };
+    var map = new kakao.maps.Map(mapContainer, mapOption);
+
+    // 주소로 좌표 검색
+    var geocoder = new kakao.maps.services.Geocoder();
+    geocoder.addressSearch(address, function(result, status) {
+        if (status === kakao.maps.services.Status.OK) {
+            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+            // 결과값으로 받은 위치에 마커 표시
+            var marker = new kakao.maps.Marker({
+                map: map,
+                position: coords
+            });
+            // 지도의 중심을 결과값으로 받은 위치로 이동
+            map.setCenter(coords);
+        }
+    });
+}
+
+
+// 로그인 여부 읽기 (body가 있는지, 속성이 있는지 확인)
 function requireLogin(event) {
+    var isLogin = false;
+    if (document.body && document.body.dataset && document.body.dataset.login) {
+        isLogin = document.body.dataset.login === "true";
+    }
     if (!isLogin) {
         event.preventDefault();
         window.location.href = '/login';
@@ -104,9 +165,10 @@ function requireLogin(event) {
 }
 
 
-// name 기준으로 에러메시지 출력하는 함수 (필드 아래에 동적으로 만듦)
+// 에러 메시지 함수 (필드 아래에 동적으로 생성)
 function setError(fieldName, msg) {
     let input = document.querySelector(`[name="${fieldName}"]`);
+    if (!input) return;
     let errorSpan = input.parentNode.querySelector('.js-err-msg');
     if (!errorSpan) {
         errorSpan = document.createElement('span');
@@ -116,29 +178,14 @@ function setError(fieldName, msg) {
     errorSpan.innerText = msg;
 }
 
-
-document.addEventListener('DOMContentLoaded', function() {
-    const phoneNumberInput = document.getElementById('phone');
-
-    if (phoneNumberInput) { // 요소가 존재하는지 확인
-        phoneNumberInput.addEventListener('input', function(event) {
-            let value = event.target.value.replace(/[^0-9]/g, ''); // 숫자 이외의 문자 제거
-
-            if (value.length > 11) {
-                value = value.substring(0, 11); // 11자리 초과 시 잘라냄
-            }
-
-            let formattedValue = '';
-            if (value.length < 4) {
-                formattedValue = value;
-            } else if (value.length < 8) {
-                formattedValue = value.substring(0, 3) + '-' + value.substring(3);
-            } else {
-                formattedValue = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7);
-            }
-
-            event.target.value = formattedValue;
-        });
+if (window.kakao && kakao.maps && kakao.maps.load) {
+  kakao.maps.load(function() {
+    // 페이지 열릴 때, 기존에 주소가 있으면 지도 표시
+    const addr = document.getElementById('address1').value;
+    if (addr) {
+      const mapContainer = document.getElementById('shop-map');
+      mapContainer.style.display = 'block';
+      showMap(addr);
     }
-});
-
+  });
+}

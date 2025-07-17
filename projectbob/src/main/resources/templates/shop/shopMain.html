@@ -28,7 +28,7 @@
 	                    </div>
 	                    <div class="icon-col">
 						    <a th:if="${#lists.size(shopListMain) == 1}"
-						       th:href="@{|/shopBasicSet?s_id=${shopListMain[0].sId}|}"
+						       th:href="@{|/shopBasicView?s_id=${shopListMain[0].sId}|}"
 						       class="mains-icon-box login-required">
 						        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
 						        <div class="mains-icon-label">기본설정</div>

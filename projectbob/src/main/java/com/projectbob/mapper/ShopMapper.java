@@ -30,5 +30,6 @@ public interface ShopMapper {
 	//다수가게에서 선택가게 고정
 	public Shop findByShopIdAndOwnerId(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
 
-	
+	//기본정보 수정
+	public void updateShopBasicInfo(Shop shop);
 }

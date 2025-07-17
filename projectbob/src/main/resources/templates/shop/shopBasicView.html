@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/shop_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>가게 기본 정보</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="content-card">
+	    <h2 class="text-center fw-bold mb-4">기본 설정</h2>
+	    <ul class="list-group list-group-flush shop-basic-list">
+	        <li class="list-group-item d-flex align-items-center">
+	            <i class="bi bi-shop me-3 text-primary fs-4"></i>
+	            <span class="fw-semibold me-2">가게명</span>
+	            <span class="ms-auto" th:text="${shop.name}"></span>
+	        </li>
+	        <li class="list-group-item d-flex align-items-center">
+	            <i class="bi bi-telephone me-3 text-success fs-4"></i>
+	            <span class="fw-semibold me-2">연락처</span>
+	            <span class="ms-auto" th:text="${shop.phone}"></span>
+	        </li>
+	        
+	        <li class="list-group-item d-flex align-items-center">
+			    <i class="bi bi-geo-alt me-3 text-danger fs-4"></i>
+			    <span class="fw-semibold me-2">주소</span>
+			    <span class="ms-auto" style="min-width: 200px;">
+			        <span class="text-secondary small">[</span>
+			        <span th:text="${shop.zipcode}"></span>
+			        <span class="text-secondary small">]</span>
+			        <span th:text="${shop.address1}"></span>
+			        <span th:text="${shop.address2}"></span>
+			    </span>
+			</li>
+	        <li class="list-group-item d-flex align-items-center">
+	            <i class="bi bi-person-vcard me-3 text-warning fs-4"></i>
+	            <span class="fw-semibold me-2">대표자명</span>
+	            <span class="ms-auto" th:text="${shop.owner}"></span>
+	        </li>
+	        <li class="list-group-item d-flex align-items-center">
+	            <i class="bi bi-file-earmark-text me-3 text-info fs-4"></i>
+	            <span class="fw-semibold me-2">사업자등록번호</span>
+	            <span class="ms-auto" th:text="${shop.sNumber}"></span>
+	        </li>
+<!-- 	        
+	        <li class="list-group-item d-flex align-items-center">
+	            <i class="bi bi-image me-3 text-secondary fs-4"></i>
+	            <span class="fw-semibold me-2">가게사진</span>
+	            <span class="ms-auto">
+	                <img th:if="${shop.sPictureURL != null}" th:src="${shop.sPictureURL}" alt="가게사진" style="height:40px;border-radius:7px;">
+	                <span th:if="${shop.sPictureURL == null}" class="text-muted">등록된 사진 없음</span>
+	            </span>
+	        </li>
+ -->	        
+	        <li class="list-group-item d-flex align-items-center">
+	            <i class="bi bi-info-circle me-3 text-primary fs-4"></i>
+	            <span class="fw-semibold me-2">가게 정보</span>
+	            <span class="ms-auto" th:text="${shop.sInfo}"></span>
+	        </li>
+	        <li class="list-group-item d-flex align-items-center">
+	            <i class="bi bi-megaphone me-3 text-secondary fs-4"></i>
+	            <span class="fw-semibold me-2">공지사항</span>
+	            <span class="ms-auto" th:text="${shop.notice}"></span>
+	        </li>
+	    </ul>
+	    <div class="text-center mt-5">
+	        <a th:href="@{|/shopBasicSet?s_id=${shop.sId}|}" class="btn btn-lg btn-primary px-5 fw-bold">
+	            <i class="bi bi-pencil-square me-2"></i> 수정하기
+	        </a>
+	    </div>
+	</div>
+</div>
+</body>
+</html>

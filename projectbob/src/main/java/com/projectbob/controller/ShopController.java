@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.*;
 import java.io.IOException;
 import java.util.*;
 import java.security.Principal;
+import java.sql.Timestamp;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -158,16 +159,34 @@ public class ShopController {
 		return "shop/shopInfo";
 	}
 	
-	@GetMapping("/shopBasicSet")
-	public String shopBasicSet(
+	@GetMapping("/shopBasicView")
+	public String shopBasicView(
 	    @RequestParam("s_id") Integer sId,
 	    @SessionAttribute(name = "loginId", required = false) String loginId,
 	    Model model) 
 	{
 	    if (loginId == null) return "redirect:/login";
+
 	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
-	    model.addAttribute("shop", currentShop);          // 본문에서 사용
-	    model.addAttribute("currentShop", currentShop);   // 드롭박스 표시용
+
+	    if (currentShop == null) {
+	        model.addAttribute("errorMessage", "가게 정보를 찾을 수 없습니다.");
+	        return "redirect:/shopMain";  // 또는 에러용 뷰
+	    }
+
+	    model.addAttribute("shop", currentShop);
+	    model.addAttribute("currentShop", currentShop);
+	    return "shop/shopBasicView";
+	}
+	
+	// 기본설정 수정(폼) 페이지
+	@GetMapping("/shopBasicSet")
+	public String shopBasicSet(@RequestParam("s_id") Integer sId,
+	                           @SessionAttribute(name = "loginId", required = false) String loginId,
+	                           Model model) {
+	    if (loginId == null) return "redirect:/login";
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    model.addAttribute("shop", currentShop);
 	    return "shop/shopBasicSet";
 	}
 	
@@ -182,6 +201,18 @@ public class ShopController {
 		return "shop/shopListMain";
 	}
 	
+	//기본정보 수정 로직
+	@PostMapping("/shop/updateBasic")
+	public String updateBasicInfo(@ModelAttribute Shop shop, Model model) {
+	    // 수정일자 갱신
+	    shop.setModiDate(new Timestamp(System.currentTimeMillis()));
+	    
+	    // DB 업데이트
+	    shopService.updateShopBasicInfo(shop);
+
+	    // redirect or model 추가
+	    return "redirect:/shopBasicView?s_id=" + shop.getSId();
+	}
 	
 }
 

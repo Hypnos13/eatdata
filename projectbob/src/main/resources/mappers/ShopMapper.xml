@@ -45,6 +45,22 @@
 	    SELECT * FROM shop WHERE s_id = #{sId} AND id = #{ownerId}
 	</select>
 
-	
-	
+	<!-- 기본정보 수정 -->
+	<update id="updateShopBasicInfo" parameterType="com.projectbob.domain.Shop">
+	  UPDATE shop
+	  SET name = #{name},
+	      phone = #{phone},
+	      zipcode = #{zipcode},
+	      address1 = #{address1},
+	      address2 = #{address2},
+	      owner = #{owner},
+	      s_number = #{sNumber},
+	      category = #{category},
+	      info = #{info},
+	      notice = #{notice},
+	      s_info = #{sInfo},
+	      modi_date = #{modiDate}
+	  WHERE s_id = #{sId}
+	</update>
+
 </mapper>	

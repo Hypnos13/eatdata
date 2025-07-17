@@ -81,7 +81,7 @@
 	    <div class="collapse" id="collapseStore">
 	      <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
 	        <li th:if="${shopListMain != null and !#lists.isEmpty(shopListMain)}">
-			  <a class="sidebar-sub-link" th:href="@{|/shopBasicSet?s_id=${shopListMain[0].sId}|}">
+			  <a class="sidebar-sub-link" th:href="@{|/shopBasicView?s_id=${shopListMain[0].sId}|}">
 			    기본설정
 			  </a>
 			</li>
@@ -215,17 +215,12 @@
        </aside>
        
 	      <!-- 본문 -->
-	      <div class="container-fluid">
-     		<div class="d-flex flex-row">
-				<section class="col-lg-9 col-md-8 col-12 services-main p-0 m-0">
-			  		<div class="card shadow-sm p-4 w-100" 
-			      		style="min-width:350px; width:100%; border-radius:18px;">
-			    	<main layout:fragment="content">
-					      <!-- 여기에 자식 뷰 페이지의 본문이 들어옴 -->
-					    </main>
-					  </div>
-					</section>
-				</div>
+	      <div class="main-content-outer">
+			  <div class="content-card">
+			    <main layout:fragment="content">
+			      <!-- 자식 뷰 페이지의 본문이 들어옴 -->
+			    </main>
+			  </div>
 			</div>
 	    </div>
 	</div>
