@@ -6,22 +6,35 @@
 <script th:src="@{js/login.js}"></script>
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <div class ="container">
-	<Form name="deleteNaverMemberForm" id="deleteNaverMemberForm" method="post" action="deleteNaverMember">
+	<Form name="deleteMemberForm" id="deleteMemberForm" method="post" action="deleteMember">
 	<div class="row my-2 mt-5 justify-content-center">
 			<div class="col-5 text-end">
 				<input class="form-control" name="userId" id="userId" type="hidden" th:value="${Member.id}" readonly>
+				<input class="form-control" name="userPass" id="userPass" type="hidden">
 				<input type="submit" class="form-control btn btn-danger" id="btnUnsubscript" value="탈퇴하기">
 			</div>
 	</div>
 	</Form>
-	<Form name="updateNaverMemberForm" id="updateNaverMemberForm" method="post" action="updateNaverMember">
-		<input class="form-control" name="id" id="id" type="hidden" th:value="${Member.id}" readonly>
+	<Form name="updateMemberForm" id="updateMemberForm" method="post" action="updateMember">
 		<div class="row my-2">
 			<div class="col-5 text-end">
-				*이메일 : 
+				*아이디 : 
 			</div>
 			<div class="col-5">
-				<input type="email" class="form-control" name="email" id="email" th:value="${Member.email}" readonly>
+				<input class="form-control" name="id" id="id" type="text" th:value="${Member.id}" readonly>
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-5 text-end">
+				*비밀번호 : 
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="pass" id="password" type="password" placeholder="비밀번호를 입력해주세요">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-10 text-end">
+				<div class="text-danger text-center" id="passInfo"></div>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -65,6 +78,19 @@
 			</div>
 			<div class="col-5">
 				<input class="form-control" name="address2" id="address2" type="text" th:value="${Member.address2}" placeholder="상세 주소를 입력해주세요">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-5 text-end">
+				*이메일 : 
+			</div>
+			<div class="col-5">
+				<input type="email" class="form-control" name="email" id="email" th:value="${Member.email}" placeholder="이메일을 입력해주세요. (ex.name@example.com)">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-10 text-end">
+				<div class="text-danger text-center" id="emailInfo"></div>
 			</div>
 		</div>
 		<div class="row my-2">
