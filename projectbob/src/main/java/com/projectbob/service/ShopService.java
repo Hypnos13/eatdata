@@ -59,6 +59,8 @@ public class ShopService {
 	
 	//기본정보 수정
 	public void updateShopBasicInfo(Shop shop) {
-	    shopMapper.updateShopBasicInfo(shop);
+	    // 업데이트 후 로그
+	    int result = shopMapper.updateShopBasicInfo(shop);
+	    log.info("업데이트 결과: {}", result);
 	}
 }

@@ -31,5 +31,5 @@ public interface ShopMapper {
 	public Shop findByShopIdAndOwnerId(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
 
 	//기본정보 수정
-	public void updateShopBasicInfo(Shop shop);
+	public int updateShopBasicInfo(Shop shop);
 }
