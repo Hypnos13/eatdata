@@ -63,4 +63,26 @@ public class ShopService {
 	    int result = shopMapper.updateShopBasicInfo(shop);
 	    log.info("업데이트 결과: {}", result);
 	}
+	
+	public List<String[]> getOpenTimeList(Shop shop) {
+	    String opTime = shop.getOpTime();
+	    List<String[]> result = new ArrayList<>();
+	    if (opTime == null || opTime.isBlank()) {
+	        for (int i = 0; i < 7; i++) result.add(new String[] {"-", "-"});
+	        return result;
+	    }
+	    String[] arr = opTime.split(",");
+	    for (String s : arr) {
+	        if (s.equals("휴무") || s.isBlank()) {
+	            result.add(new String[] {"휴무", ""});
+	        } else {
+	            String[] t = s.split("-");
+	            if (t.length == 2) result.add(new String[] {t[0], t[1]});
+	            else result.add(new String[] {"-", "-"});
+	        }
+	    }
+	    while (result.size() < 7) result.add(new String[] {"-", "-"});
+	    return result;
+	}
+	
 }

@@ -40,6 +40,7 @@
 				    <a class="dropdown-item"
 				       th:href="@{|/shopListMain?s_id=${shop.sId}|}"
 				       th:text="${shop.name}">가게이름</a>
+				       
 				  </li>
 				</ul>
 			</div>
@@ -101,7 +102,7 @@
 	    </button>
 	    <div class="collapse" id="collapseTime">
 	      <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
-	        <li><a href="#" class="sidebar-sub-link">영업시간</a></li>
+	        <li><a th:href="@{|/shopOpenTime?s_id=${shop.sId}|}" class="sidebar-sub-link">영업시간</a></li>
 	        <li><a href="#" class="sidebar-sub-link">휴무일</a></li>
 	        <li><a href="#" class="sidebar-sub-link">일시중지</a></li>
 	      </ul>

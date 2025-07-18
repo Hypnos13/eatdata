@@ -191,15 +191,58 @@ public class ShopController {
 	}
 	
 	@GetMapping("/shopListMain")
-	public String shopListMain(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
-		if (loginId == null) return "redirect:/login";
-		List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
-		if (shopListMain == null || shopListMain.isEmpty()) {
-			return "shop/shopInfo"; // 가게 없으면 안내페이지로 이동
-		}
-		model.addAttribute("shopListMain", shopListMain); // 이 부분!
-		return "shop/shopListMain";
+	public String shopListMain(
+	        Model model,
+	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        @RequestParam(name = "s_id", required = false) Integer sId) {
+
+	    if (loginId == null) return "redirect:/login";
+	    List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+
+	    if (shopListMain == null || shopListMain.isEmpty()) {
+	        return "shop/shopInfo"; // 가게 없으면 안내페이지로 이동
+	    }
+
+	    // ★ 현재 선택된 가게 찾기: sId로 조회, 없으면 첫번째
+	    Shop shop = null;
+	    if (sId != null) {
+	        shop = shopListMain.stream()
+	                .filter(s -> s.getSId() == sId)
+	                .findFirst()
+	                .orElse(shopListMain.get(0)); // 못찾으면 첫 번째
+	    } else {
+	        shop = shopListMain.get(0);
+	    }
+
+	    model.addAttribute("shopListMain", shopListMain);
+	    model.addAttribute("shop", shop); // ★ 이 부분 추가!
+
+	    return "shop/shopListMain";
 	}
+
+	
+	@GetMapping("/shopOpenTime")
+	public String shopOpenTime(
+	        @RequestParam("s_id") Integer sId,
+	        Model model,
+	        @SessionAttribute(name = "loginId", required = false) String loginId
+	) {
+	    if (loginId == null) return "redirect:/login";
+	    Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    if (shop == null) {
+	        model.addAttribute("message", "가게를 찾을 수 없습니다.");
+	        return "shop/errorPage";
+	    }
+	    List<String[]> openTimeList = shopService.getOpenTimeList(shop);
+
+	    // 요일 리스트 직접 추가
+	    List<String> daysOfWeek = Arrays.asList("월", "화", "수", "목", "금", "토", "일");
+	    model.addAttribute("shop", shop);
+	    model.addAttribute("openTimeList", openTimeList);
+	    model.addAttribute("daysOfWeek", daysOfWeek);
+	    return "shop/shopOpenTime";
+	}
+
 	
 	//기본정보 수정 로직
 	@PostMapping("/shop/updateBasic")
@@ -213,6 +256,7 @@ public class ShopController {
 	    // redirect or model 추가
 	    return "redirect:/shopBasicView?s_id=" + shop.getSId();
 	}
+	
 	
 }
 

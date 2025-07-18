@@ -12,7 +12,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 	<script
-	  src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2b87d757b240dd70a51d682dd3cc37ed&libraries=services&autoload=false">
+	  src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2b87d757b240dd70a51d682dd3cc37ed&libraries=services">
 	</script>
 	<script src="/js/shop.js"></script>
 </head>
@@ -21,7 +21,7 @@
     <div class="content-card">
         <h2 class="text-center fw-bold mb-4">기본 정보 수정</h2>
         <form method="post" enctype="multipart/form-data" th:action="@{/shop/updateBasic}">
-            <input type="hidden" name="s_id" th:value="${shop.sId}" />
+            <input type="hidden" name="sId" th:value="${shop.sId}" />
 
             <div class="mb-3 row align-items-center">
                 <label class="col-sm-2 col-form-label fw-semibold">가게명*</label>
@@ -64,7 +64,7 @@
             <div class="mb-3 row align-items-center">
                 <label class="col-sm-2 col-form-label fw-semibold">사업자등록번호*</label>
                 <div class="col-sm-10">
-                    <input type="text" name="s_number" class="form-control" th:value="${shop.sNumber}" maxlength="10" required>
+                    <input type="text" name="sNumber" class="form-control" th:value="${shop.sNumber}" maxlength="10" required>
                 </div>
             </div>
 <!--             
@@ -81,13 +81,13 @@
             <div class="mb-3 row align-items-center">
                 <label class="col-sm-2 col-form-label fw-semibold">가게 정보</label>
                 <div class="col-sm-10">
-                    <input type="text" name="shop_tagline" class="form-control" th:value="${shop.sInfo}" maxlength="100">
+                    <input type="text" name="sInfo" class="form-control" th:value="${shop.sInfo}" maxlength="100">
                 </div>
             </div>
             <div class="mb-3 row align-items-center">
                 <label class="col-sm-2 col-form-label fw-semibold">공지사항</label>
                 <div class="col-sm-10">
-                    <textarea name="shop_notice" class="form-control" rows="3" th:text="${shop.notice}"></textarea>
+                    <textarea name="notice" class="form-control" rows="3" th:text="${shop.notice}"></textarea>
                 </div>
             </div>
             <div class="text-center mt-5">
