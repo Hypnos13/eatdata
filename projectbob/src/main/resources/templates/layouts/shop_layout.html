@@ -15,7 +15,7 @@
 </head>
 <body>
     <!-- 헤더 fragment include -->
-    <th:block th:replace="fragments/shopHeader :: shopHeader" />
+    <div th:insert="~{fragments/shopHeader :: shopHeader}"></div>
 
     <div class="container-fluid">
 	    <div class="d-flex flex-row">
@@ -204,7 +204,7 @@
 	</div>
 
     <!-- 푸터 fragment include -->
-    <th:block th:replace="fragments/shopFooter :: shopFooter" />
+    <div th:insert="~{fragments/shopFooter :: shopFooter}"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
