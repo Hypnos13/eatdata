@@ -290,7 +290,7 @@ $("#reviewWrite").on("click", function(){
 	console.log("리뷰쓰기 버튼 클릭");
 		$("#reviewFormOriginalContainer").append($("#reviewForm").removeClass("d-none"));
 		$("#reviewForm form").attr("id", "reviewWriteForm").removeAttr("data-no");
-		$("#reviewSubmitButton").val("댓글쓰기").text("댓글쓰기");
+		$("#reviewForm input[type='submit']").val("댓글쓰기").text("댓글쓰기");
 		$("#reviewContent").val("");
 		$('input[name="rating"]').prop('checked', false);
 		$("#imgPreview").hide().attr('src', '');
@@ -377,11 +377,11 @@ $(document).on("click", ".modifyReview", function(){
 	$reviewRow.after($("#reviewForm").removeClass("d-none"));
 	console.log("폼 실제 위치:", $("#reviewForm").parent()[0]);
 	
+	let $form = $("#reviewForm").find("form");
 	let reviewContent = $reviewRow.find(".review-content").text();
-		$("#reviewContent").val($.trim(reviewContent));
-			
-	$("#reviewForm form").attr("id", "reviewUpdateForm").attr("data-no", rno);		
-	$("#reviewSubmitButton").val("댓글수정").text("댓글수정");
+	$form.find("#reviewContent").val($.trim(reviewContent));			
+	$form.attr("id", "reviewUpdateForm").attr("data-no", rno);		
+	$("#reviewForm input[type='submit']").val("댓글수정").text("댓글수정");
 		
 });
 
@@ -483,6 +483,7 @@ function reportReview(elemId){
 // 리뷰쓰기/수정/삭제 AJAX 성공 후~
 function recallReviewList(reviewArr){
 	const loginId = $("#loginId").val();
+	$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
 	$("#reviewList").empty();
 	reviewArr.forEach(r => {
 		let isMine = (loginId && r.id == loginId);
@@ -536,16 +537,20 @@ function recallReviewList(reviewArr){
 // 리뷰 폼 리셋
 function resetReviewForm(){
 	$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
-	let $form = $("#reviewForm form");
+	let $form = $("#reviewForm").find("form");
 	console.log('$form.length:', $form.length, '$form:', $form);
 	if($form.length && $form[0]){
 		$form.attr("id", "reviewWriteForm").removeAttr("data-no");
 		$form[0].reset();
+		$form.find("#reviewSubmitButton").val("댓글쓰기").text("댓글쓰기");
+		$form.find("#reviewContent").val("");
+		$form.find('input[name="rating"]').prop('checked',false);
+		$form.find("#imgPreview").hide().attr('src', '');
+		
+		console.log("리뷰폼 구조:", $("#reviewForm").html());
+		console.log("폼 개수:", $("#reviewForm").find("form").length);
 	}
-
-	$("#reviewContent").val("");
-	$('input[name="rating"]').prop('checked', false);
-	$("#imgPreview").hide().attr('src', '');
+	
 	if(previewUrl){URL.revokeObjectURL(previewUrl); previewUrl = null;}
 	lastEditRno = null;
 }

@@ -120,6 +120,7 @@
 								<input type="hidden" name="sId" th:value="${shop.sId}">
 						  	<input type="hidden" name="id" th:value="${member?.id}">
 						  	<input type="hidden" id="loginId" th:value="${member != null ? member.id : ''}">
+						  	<input type="hidden" id="reviewSubmitButton" value="댓글쓰기">
 						  	<!-- <input type="hidden" name="mId" th:value="${menu.mId}"> -->			
 								<div class="row bg-light my-3 p-3 border">
 									<div class="col">
@@ -160,7 +161,7 @@
 												<textarea name="content" id="reviewContent" class="form-control" rows="4"></textarea>												
 											</div>
 											<div class="col-md">
-												<input type="submit" value="댓글쓰기" class="btn btn-success h-100 w-100" id="reviewWriteButton">
+												<input type="submit" value="댓글쓰기" class="btn btn-success h-100 w-100" id="reviewSubmitButton">
 											</div>
 										</div>
 									</div>
