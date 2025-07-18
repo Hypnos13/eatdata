@@ -31,7 +31,7 @@
 						<img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
 						<div class="ms-3">
 							<h5 class="mb-0">[[ ${shop.name} ]] - [[ ${shop.address1} ]]</h5>
-							<small>★ [[${shop.rating}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원 / 가게 찜 [[${shop.heart}]]</small>
+							<small>★ [[${shop.rating}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원</small>
 						</div>
 					</div>
 
@@ -119,6 +119,7 @@
 							<form name="reviewWriteForm" id="reviewWriteForm" enctype="multipart/form-data">
 								<input type="hidden" name="sId" th:value="${shop.sId}">
 						  	<input type="hidden" name="id" th:value="${member?.id}">
+						  	<input type="hidden" id="loginId" th:value="${member != null ? member.id : ''}">
 						  	<!-- <input type="hidden" name="mId" th:value="${menu.mId}"> -->			
 								<div class="row bg-light my-3 p-3 border">
 									<div class="col">

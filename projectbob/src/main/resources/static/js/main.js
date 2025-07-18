@@ -288,9 +288,9 @@ $(function(){
 // 댓글쓰기 버튼 클릭 이벤트
 $("#reviewWrite").on("click", function(){
 	console.log("리뷰쓰기 버튼 클릭");
-		$("#reviewFormOriginalContainer").$("#reviewForm").removeClass("d-none");
+		$("#reviewFormOriginalContainer").append($("#reviewForm").removeClass("d-none"));
 		$("#reviewForm form").attr("id", "reviewWriteForm").removeAttr("data-no");
-		$("#reviewWriteButton").val("댓글쓰기");
+		$("#reviewSubmitButton").val("댓글쓰기").text("댓글쓰기");
 		$("#reviewContent").val("");
 		$('input[name="rating"]').prop('checked', false);
 		$("#imgPreview").hide().attr('src', '');
@@ -300,10 +300,10 @@ $("#reviewWrite").on("click", function(){
 	
 	$(document).on("submit", "#reviewWriteForm", function(e){
 		e.preventDefault();
-		if($("#reviewContent").val().length < 5){
+		/*if($("#reviewContent").val().length < 5){
 			alert("댓글은 5자 이상 입력하세요~");
 			return false;
-		}
+		}*/
 		if (!$('input[name="rating"]:checked').val()){
 			alert("별점을 선택하세요~!");
 			return false;
@@ -323,62 +323,12 @@ $("#reviewWrite").on("click", function(){
 			"success": function(resData){
 				console.log(resData);
 				
-				$("#reviewList").empty();
-				$.each(resData,function(i, r){
-					
-					let date = new Date(r.regDate);
-					let strDate = date.getFullYear() + "-" + ((date.getMonth() + 1 < 10)
-													? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
-													+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
-													+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
-													+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
-													+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
-													
-				let result = `
-				<div class="border-bottom pb-3 mb-3">
-												<div class="d-flex align-items-center mb-1">
-													<span class="fw-bold">${r.id.substr(0,2)}**님</span>
-													<span class="text-muted small ms-2">${strDate}</span>
-													<div class="ms-auto">
-													<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rno}">
-														<i class="bi bi-journal-text">수정</i>									
-													</button>
-													<button class="deleteReview btn btn-outline-warning btn-sm" data-no="${r.rno}">
-														<i class="bi bi-trash">삭제</i>
-													</button>
-													<button class="btn btn-outline-danger btn-sm" onclick="reportReview('${r.rno}')">
-														<i class="bi bi-telephone-outbound">신고</i>
-													</button>
-													</div>												
-												</div>
-											
-												<div class="mb-1">
-													<span class="me-2 text-warning">
-														<i class="bi bi-star-fill"></i>										
-													</span>
-													<span class="fw-bold ms-1">${r.rating}점</span>
-												</div>
-												
-												${r.rpicture ? `<div>
-													<img src="/images/review/${r.rpicture}?t=${Date.now()}" alt="리뷰사진" 
-																	style="max-width:200px;" class="rounded shadow-sm mb-2" />
-												</div>` : ' '}
-											
-												<div class="text-secondary small mb-1">
-													<span>${r.menuName}</span>
-												</div>
-												
-												<div>${r.content}</div>
-											</div>`;
-					
-											$("#reviewList").append(result);
+				recallReviewList(resData);
+				resetReviewForm();
+				
+				console.log('버튼 찾기:', $("#reviewSubmitButton"));
+
 								
-				});
-				$("#reviewList").removeClass("text-center p-5");
-				$("#reviewWriteForm")[0].reset();
-				$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
-				$("#reviewForm form").attr("id", "reviewWriteForm").removeAttr("data-no");
-				$("#reviewSubmitButton").val("댓글쓰기");
 			},
 			"error": function(xhr, status){
 				console.log("error : " + status);
@@ -413,6 +363,7 @@ $("#rPicture").on('change', function(e){
 //댓글 수정하기 버튼클릭
 lastEditRno = null;
 $(document).on("click", ".modifyReview", function(){
+	resetReviewForm();
 	console.log("수정 버튼 클릭");
 	console.log($("#reviewForm").css("display"));
 	console.log($("#reviewForm").is(":visible"));
@@ -430,7 +381,7 @@ $(document).on("click", ".modifyReview", function(){
 		$("#reviewContent").val($.trim(reviewContent));
 			
 	$("#reviewForm form").attr("id", "reviewUpdateForm").attr("data-no", rno);		
-	$("#reviewWriteButton").val("댓글수정");
+	$("#reviewSubmitButton").val("댓글수정").text("댓글수정");
 		
 });
 
@@ -438,16 +389,18 @@ $(document).on("click", ".modifyReview", function(){
 $(document).on("submit", "#reviewUpdateForm", function(e){
 	e.preventDefault();
 	
-	if($("#reviewContent").val().length <= 5){
+	/*if($("#reviewContent").val().length <= 5){
 		alert("댓글은 5자 이상 입력해야 합니다.");
 		return false;
-	}
+	}*/
 	//$("#global-content > div").append($("#reviewForm"));
 	
 	let form = this;
 	let formData = new FormData(form);
 	formData.append("rNo", $(form).attr("data-no"));
 	
+	console.log("전송할 rNo (수정):", $(form).attr("data-no"));
+	console.log("전송할 FormData:", formData);
 	
 	$.ajax({
 			"url": "reviewUpdate.ajax",
@@ -459,66 +412,13 @@ $(document).on("submit", "#reviewUpdateForm", function(e){
 			"success": function(resData){
 				console.log("수정 ajax",resData);
 				
-				$("#reviewList").empty();
-				$.each(resData,function(i, r){
-					console.log('리뷰사진 파일명:' , r.rpicture);
-					
-					let date = new Date(r.regDate);
-					let strDate = date.getFullYear() + "-" + ((date.getMonth() + 1 < 10)
-													? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
-													+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
-													+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
-													+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
-													+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
-													
-				let result = `
-				<div class="reviewRow border-bottom pb-3 mb-3" data-rno="${r.rno}">				
-												<div class="d-flex align-items-center mb-1">
-													<span class="fw-bold">${r.id.substr(0,2)}**님</span>
-													<span class="text-muted small ms-2">${strDate}</span>
-													<div class="ms-auto">
-													<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rno}">
-														<i class="bi bi-journal-text">수정</i>									
-													</button>
-													<button class="deleteReview btn btn-outline-warning btn-sm" data-no="${r.rno}">
-														<i class="bi bi-trash">삭제</i>
-													</button>
-													<button class="btn btn-outline-danger btn-sm" onclick="reportReview('${r.rno}')">
-														<i class="bi bi-telephone-outbound">신고</i>
-													</button>
-													</div>												
-												</div>
-											
-												<div class="mb-1">
-													<span class="me-2 text-warning">
-														<i class="bi bi-star-fill"></i>										
-													</span>
-													<span class="fw-bold ms-1">${r.rating}점</span>
-												</div>
-												
-												${r.rpicture ? `<div>
-													<img src="/images/review/${r.rpicture}?t=${Date.now()}" alt="리뷰사진" 
-																	style="max-width:200px;" class="rounded shadow-sm mb-2" />
-												</div>` : ' '}
-											
-												<div class="text-secondary small mb-1">
-													<span>${r.menuName}</span>
-												</div>
-												
-												<div>${r.content}</div>
-											</div>`;
-					
-											$("#reviewList").append(result);
-											
-																		
-				});											
-				console.log("리뷰 다시 그림. 폼 숨기기");				
-				$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
-				$("#reviewForm form").attr("id", "reviewWriteForm").removeAttr("data-no");
-				console.log("수정 후 폼 위치:", $("#reviewForm").parent()[0]);				
-				$("#reviewWriteButton").val("댓글쓰기");						
-				$("#reviewContent").val("");
+				recallReviewList(resData);
+				resetReviewForm();
+										
+				console.log("리뷰 다시 그림. 폼 숨기기");			
+				console.log('버튼 찾기:', $("#reviewSubmitButton"));
 				
+		
 			},
 			"error": function(xhr, status){
 				console.log("error : " + status);
@@ -537,13 +437,16 @@ $(document).on("click", ".deleteReview", function(){
 	
 	let rNo = $(this).attr("data-no");
 	console.log('삭제할 rNo:' , rNo);
-	let id = $(this).closest(".border-bottom").find(".fw-bold").text();
+	let id = $(this).closest(".border-bottom").find(".fw-bold").first().text().replace('님', '');
 	let sId = $("#reviewForm input[name=sId]").val();
 	
 	let params = {rNo: rNo, sId: sId};
 	console.log(params);
 	
 	let result = confirm(id + "님이 작성한 " + rNo + "번 댓글을 삭제하시봉?");
+	
+	console.log("전송할 rNo (삭제):", rNo);
+	console.log("전송할 params:", params);
 	
 	if(result){
 	$.ajax({
@@ -554,57 +457,9 @@ $(document).on("click", ".deleteReview", function(){
 				"success": function(resData, status, xhr){
 					console.log(resData);
 					
-					$("#reviewList").empty();
-					$.each(resData,function(i, r){						
-						
-						let date = new Date(r.regDate);
-						let strDate = date.getFullYear() + "-" + ((date.getMonth() + 1 < 10)
-														? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
-														+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
-														+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
-														+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
-														+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
-														
-					let result = `
-					<div class="border-bottom pb-3 mb-3">
-													<div class="d-flex align-items-center mb-1">
-														<span class="fw-bold">${r.id.substr(0,2)}**님</span>
-														<span class="text-muted small ms-2">${strDate}</span>
-														<div class="ms-auto">
-														<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rno}">
-															<i class="bi bi-journal-text">수정</i>									
-														</button>
-														<button class="deleteReview btn btn-outline-warning btn-sm" data-no="${r.rno}">
-															<i class="bi bi-trash">삭제</i>
-														</button>
-														<button class="btn btn-outline-danger btn-sm" onclick="reportReview('${r.rno}')">
-															<i class="bi bi-telephone-outbound">신고</i>
-														</button>
-														</div>												
-													</div>
-												
-													<div class="mb-1">
-														<span class="me-2 text-warning">
-															<i class="bi bi-star-fill"></i>										
-														</span>
-														<span class="fw-bold ms-1">${r.rating}점</span>
-													</div>
-													
-													${r.rpicture ? `<div>
-														<img src="/images/review/${r.rpicture}?t=${Date.now()}" alt="리뷰사진" 
-																		style="max-width:200px;" class="rounded shadow-sm mb-2" />
-													</div>` : ' '}
-												
-													<div class="text-secondary small mb-1">
-														<span>${r.menuName}</span>
-													</div>
-													
-													<div>${r.content}</div>
-												</div>`;
-						
-												$("#reviewList").append(result);
-									
-					});				
+				recallReviewList(resData);
+				resetReviewForm();
+
 				},
 				"error": function(xhr, status){
 					console.log("error : " + status);
@@ -617,7 +472,7 @@ $(document).on("click", ".deleteReview", function(){
 
 
 // 신고하기 버튼
-function reportReview(ememId){
+function reportReview(elemId){
 	let result = confirm("이 댓글을 신고하시봉?");
 	if(result == true){
 		alert("report - " + result);
@@ -625,9 +480,75 @@ function reportReview(ememId){
 }
 
 
+// 리뷰쓰기/수정/삭제 AJAX 성공 후~
+function recallReviewList(reviewArr){
+	const loginId = $("#loginId").val();
+	$("#reviewList").empty();
+	reviewArr.forEach(r => {
+		let isMine = (loginId && r.id == loginId);
+		let buttons = '';
+		if(isMine){
+			buttons += `
+				<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rno}">
+					<i class="bi bi-journal-text">수정</i>
+				</button>
+				<button class="deleteReview btn btn-outline-dark btn-sm" data-no="${r.rno}">
+					<i class="bi bi-telephone-outbound">삭제</i>
+				</button>				
+			`;
+		} else {
+			buttons += `
+				<button class="btn btn-outline-danger btn-sm" onclick="reportReview('${r.rno}')">
+					<i class="bi bi-telephone-outbound">신고</i>
+				</button>
+			`;
+		}
+		let date = new Date(r.regDate);
+							let strDate = date.getFullYear() + "-" + ((date.getMonth() + 1 < 10)
+															? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
+															+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
+															+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
+															+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
+															+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
+		let reviewHtml = `
+			<div class="reviewRow border-bottom pb-3 mb-3" data-rno="${r.rno}">
+				<div class="d-flex align-items-center mb-1">
+					<span class="fw-bold">${r.id.substr(0,2)}**님</span>
+					<span class="text-muted small ms-2">${strDate}</span>
+					<div class="ms-auto">${buttons}</div>
+			</div>
+			<div class="mb-1">
+				<span class="me-2 text-warning"><i class="bi bi-star-fill"></i></span>
+				<span class="fw-bold ms-1">${r.rating}점</span>
+			</div>
+			${r.rpicture ? `<div>
+					<img src="/images/review/${r.rpicture}?t=${Date.now()}" alt="리뷰사진" 
+						style="max-width:200px;" class="rounded shadow-sm mb-2" />
+			</div>` : ''}
+			<div class="text-secondary small mb-1"><span>${r.menuName}</span></div>
+			<div class="review-content">${r.content}</div>
+			</div>
+		`;
+		$("#reviewList").append(reviewHtml);
+	});
+}
 
+// 리뷰 폼 리셋
+function resetReviewForm(){
+	$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
+	let $form = $("#reviewForm form");
+	console.log('$form.length:', $form.length, '$form:', $form);
+	if($form.length && $form[0]){
+		$form.attr("id", "reviewWriteForm").removeAttr("data-no");
+		$form[0].reset();
+	}
 
-
+	$("#reviewContent").val("");
+	$('input[name="rating"]').prop('checked', false);
+	$("#imgPreview").hide().attr('src', '');
+	if(previewUrl){URL.revokeObjectURL(previewUrl); previewUrl = null;}
+	lastEditRno = null;
+}
 
 
 
