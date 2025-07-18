@@ -1,72 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/shop_layout}"> <th:block layout:fragment="content">
+      layout:decorate="~{layouts/shop_layout}">
+<th:block layout:fragment="content">
 
-    <div class="row my-5" id="global-content">
-        <div class="col">
-            <div class="row my-3 text-center">
-                <div class="col">
-                    <h2 class="fs-3 fw-bold">전체 메뉴 목록</h2>
-                </div>
-            </div>
+    <div class="container my-5">
+        <h2 class="text-center mb-4">메뉴 목록</h2>
 
-            <div th:if="${errorMessage}" class="alert alert-danger text-center">
-                <span th:text="${errorMessage}"></span>
-            </div>
-            <div th:if="${message}" class="alert alert-success text-center">
-                <span th:text="${message}"></span>
-            </div>
-
-            <div class="row my-3">
-                <div class="col-10 offset-1 text-end">
-                    <a href="/shop/menuRegisterForm" class="btn btn-primary">새 메뉴 등록</a>
-                </div>
-            </div>
-
-            <div class="row my-3">
-                <div class="col-10 offset-1">
-                    <table class="table table-hover table-striped">
-                        <thead class="table-dark">
-                            <tr>
-                                <th scope="col">메뉴 ID</th>
-                                <th scope="col">가게 ID</th>
-                                <th scope="col">카테고리</th>
-                                <th scope="col">메뉴 이름</th>
-                                <th scope="col">가격</th>
-                                <th scope="col">메뉴 설명</th>
-                                <th scope="col">메뉴 사진</th>
-                                <th scope="col">수정 / 삭제</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="menu : ${menuList}">
-                                <td th:text="${menu.mId}">1</td>
-                                <td th:text="${menu.sId}">1</td>
-                                <td th:text="${menu.category}">피자</td>
-                                <td th:text="${menu.name}">불고기 피자</td>
-                                <td th:text="${#numbers.formatDecimal(menu.price, 0, 'COMMA_DELIMITER', 0, 'POINT')}">20000</td>
-                                <td th:text="${menu.mInfo}">맛있는 불고기 피자</td>
-                                <td>
-                                    <img th:if="${menu.mPictureUrl}" th:src="${menu.mPictureUrl}" alt="메뉴 사진" style="width: 100px; height: auto;">
-                                    <span th:unless="${menu.mPictureUrl}">사진 없음</span>
-                                </td>
-                                <td>
-                                    <a th:href="@{/shop/updateForm(mId=${menu.mId})}" class="btn btn-sm btn-info me-2">수정</a>
-                                    <form th:action="@{/shop/deleteMenu}" method="post" style="display:inline;" onsubmit="return confirm('정말로 이 메뉴를 삭제하시겠습니까?');">
-                                        <input type="hidden" name="mId" th:value="${menu.mId}">
-                                        <button type="submit" class="btn btn-sm btn-danger">삭제</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(menuList)}">
-                                <td colspan="8" class="text-center">등록된 메뉴가 없습니다.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="text-end mb-3">
+            <a href="/shop/menuRegisterForm" class="btn btn-primary">새 메뉴 등록</a>
         </div>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>가게 ID</th>
+                    <th>카테고리</th>
+                    <th>메뉴 이름</th>
+                    <th>가격</th>
+                    <th>사진</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(menuList)}">
+                    <td colspan="7" class="text-center">등록된 메뉴가 없습니다.</td>
+                </tr>
+                <tr th:each="menu : ${menuList}">
+                    <td th:text="${menu.mId}"></td>
+                    <td th:text="${menu.sId}"></td>
+                    <td th:text="${menu.category}"></td>
+                    <td th:text="${menu.name}"></td>
+                    <td th:text="${menu.price}"></td>
+                    <td>
+                        <img th:if="${menu.mPictureUrl}" th:src="${menu.mPictureUrl}" alt="메뉴 사진" style="width: 80px; height: auto;">
+                        <span th:unless="${menu.mPictureUrl}">사진 없음</span>
+                    </td>
+                    <td>
+                        <a th:href="@{/shop/menuUpdateForm(mId=${menu.mId})}" class="btn btn-sm btn-info">수정</a>
+                        <button type="button" class="btn btn-sm btn-danger" id="menuDelete" name="menuDelete">삭제</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
 </th:block>
