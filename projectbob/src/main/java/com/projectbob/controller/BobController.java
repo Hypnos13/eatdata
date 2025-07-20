@@ -2,6 +2,7 @@ package com.projectbob.controller;
 
 import org.springframework.beans.factory.annotation.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -69,7 +70,7 @@ public class BobController {
 		  model.addAttribute("shop", shop);
 		  model.addAttribute("menuList", menuList);
 		  
-		  List<Review> reviewList = bobService.reviewList(sId);
+		  List<Review> reviewList = bobService.getReviewList(sId);
 		  model.addAttribute("reviewList", reviewList);
 		  
 		  String loginId = (String) session.getAttribute("loginId");
@@ -86,6 +87,9 @@ public class BobController {
 		  model.addAttribute("reviewAvg", reviewAvg);
 		  
 		  model.addAttribute("now", System.currentTimeMillis());
+		  		  
+		 Map<Integer, ReviewReply> reviewReplyMap = bobService.getReviewReplyMap(sId);
+		 model.addAttribute("reviewReplyMap", reviewReplyMap);
 		  
 		  return "views/MenuDetail"; 
 		  }

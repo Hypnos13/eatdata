@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Review;
+import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 
 @Mapper
@@ -24,7 +25,8 @@ public interface BobMapper {
 	public List<String> getMenuCategoriesByShopId(int sId);
 	
 	// 가게 번호에 해당하는 리뷰리스트에 사용
-	public List<Review> reviewList(int sId);
+	//public List<Review> reviewList(int sId);
+	public List<Review> getReviewList(int sId);
 
 	
 	// shop 하트 증가	
@@ -40,6 +42,14 @@ public interface BobMapper {
 	//댓글 삭제하는 메서드
 	public void deleteReview(int rNo);
 	
+	// 대댓글 리뷰리스트
+	/* public ReviewReply reviewreplyList(int rNo); */
+	
+	// 대댓글 DB에 등록하는 메서드
+	public void addReviewReply(ReviewReply reviewreply);
+	
+	// 가게 전체 대댓글
+	public List<ReviewReply> getReviewReplyList(int sId);
 
 }
 

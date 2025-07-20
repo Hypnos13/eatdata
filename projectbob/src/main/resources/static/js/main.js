@@ -321,9 +321,9 @@ $("#reviewWrite").on("click", function(){
 			"contentType": false,
 			"dataType": "json",
 			"success": function(resData){
-				console.log(resData);
+				console.log('resData: ' ,resData);
 				
-				recallReviewList(resData);
+				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
 				resetReviewForm();
 				
 				console.log('버튼 찾기:', $("#reviewSubmitButton"));
@@ -410,9 +410,9 @@ $(document).on("submit", "#reviewUpdateForm", function(e){
 			"contentType": false,
 			"dataType": "json",
 			"success": function(resData){
-				console.log("수정 ajax",resData);
+				console.log('resData: ' ,resData);
 				
-				recallReviewList(resData);
+				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
 				resetReviewForm();
 										
 				console.log("리뷰 다시 그림. 폼 숨기기");			
@@ -455,9 +455,9 @@ $(document).on("click", ".deleteReview", function(){
 				"type": "delete",				
 				"dataType": "json",
 				"success": function(resData, status, xhr){
-					console.log(resData);
+					console.log('resData: ' ,resData);
 					
-				recallReviewList(resData);
+				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
 				resetReviewForm();
 
 				},
@@ -479,9 +479,61 @@ function reportReview(elemId){
 	}
 }
 
+// 사장님 댓글쓰기 버튼 클릭 시
+$(document).on('click', '.review-reply-btn', function(){
+	const rNo = $(this).data('review-no');
+	const $replyForm = $(this).closest('.reviewRow').find('.reviewReplyForm');
+	const sId = $("input[name='sId']").first().val();
+	$replyForm.find('input[name="rNo"]').val(rNo);
+	$replyForm.find('input[name="sId"]').val(sId);
+	$('.reviewReplyForm').addClass('d-none');
+	$replyForm.removeClass('d-none');	
+	
+	console.log('사장님 대댓글 버튼 클릭 rNo:', rNo, 'sId', sId);	
+	console.log('폼 input[name="rNo"] 값:', $replyForm.find('input[name="rNo"]').val());
+});
+// 사장님 댓글쓰기 submit
+$(document).on('submit', '.review-reply-form', function(e){
+	e.preventDefault();
+	
+	const $form = $(this);
+	const rNo = $form.find('input[name="rNo"]').val();	
+	const sId = $form.find('input[name="sId"]').val();
+	const content = $form.find('input[name="content"]').val();
+	const shopOwnerId = $("#shopOwnerId").val();
+
+	console.log('ajax전송 전 rNo:', rNo, 'sId:' , sId, 'shopOwnerId:', shopOwnerId);
+	
+	if(!content || content.trim().length == 0){
+		alert('댓글을 입력하세요.');
+		return;
+	}
+	$.ajax({
+		url: '/reviewReplyWrite.ajax',
+		type: 'post',
+		data: JSON.stringify({
+			rNo: Number(rNo),
+			sId: Number(sId),
+			id: shopOwnerId,
+			content: content
+		}),
+		contentType: "application/json",
+		dataType: 'json',
+		success: function(resData){
+			recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
+			
+			$form.closest('.reviewReplyForm').addClass('d-none');
+			$form[0].reset();
+		},
+		error: function(xhr, status){
+			alert('사장님 댓글 등록 오류: ' + status);
+		}
+	});
+});
+
 
 // 리뷰쓰기/수정/삭제 AJAX 성공 후~
-function recallReviewList(reviewArr){
+function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
 	const loginId = $("#loginId").val();
 	$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
 	$("#reviewList").empty();
@@ -511,25 +563,58 @@ function recallReviewList(reviewArr){
 															+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
 															+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
 															+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
+	
+		
+		let ownerReplyHtml = '';
+		const reply = reviewreplyMap[r.rno];
+		if(reply){
+			ownerReplyHtml =`
+			<div class="card p-2 bg-light border-info" style="border-left:4px solid #3498db;">
+													<div class="d-flex align-items-center mb-1">
+														<span class="fw-bold text-primary">
+															<i class="bi bi-person-badge"></i>사장님
+														</span>
+														<span class="text-muted small ms-2">${reply.regDate}</span>											
+													</div>
+													<div class="ms-3">${reply.content}</div>
+												</div>
+			`;
+		} else if (loginId == shopOwnerId) {			
+			ownerReplyHtml =	`
+			<div class="mt-2 text-end">
+												<button type="button" class="btn btn-outline-primary btn-sm px-2 py-0 review-reply-btn" data-review-no="${r.rno}">
+													<i class="bi bi-person-badge"></i>사장님 댓글쓰기
+												</button>
+												<form class="reviewReplyForm review-reply-form d-none" style="margin-top:10px;">
+												        <input type="hidden" name="rNo" value="${r.rno}">
+												        <input type="hidden" name="sId" value="${$('#shopId').val()}">
+												        <input type="text" name="content" class="form-control" placeholder="사장님 대댓글 입력">
+												        <button type="submit" class="btn btn-info btn-sm mt-1">등록</button>
+												</form>
+											</div>
+			`;
+		}
 		let reviewHtml = `
-			<div class="reviewRow border-bottom pb-3 mb-3" data-rno="${r.rno}">
-				<div class="d-flex align-items-center mb-1">
-					<span class="fw-bold">${r.id.substr(0,2)}**님</span>
-					<span class="text-muted small ms-2">${strDate}</span>
-					<div class="ms-auto">${buttons}</div>
-			</div>
-			<div class="mb-1">
-				<span class="me-2 text-warning"><i class="bi bi-star-fill"></i></span>
-				<span class="fw-bold ms-1">${r.rating}점</span>
-			</div>
-			${r.rpicture ? `<div>
-					<img src="/images/review/${r.rpicture}?t=${Date.now()}" alt="리뷰사진" 
-						style="max-width:200px;" class="rounded shadow-sm mb-2" />
-			</div>` : ''}
-			<div class="text-secondary small mb-1"><span>${r.menuName}</span></div>
-			<div class="review-content">${r.content}</div>
-			</div>
+		<div class="reviewRow border-bottom pb-3 mb-3" data-rno="${r.rno}">
+						<div class="d-flex align-items-center mb-1">
+							<span class="fw-bold">${r.id.substr(0,2)}**님</span>
+							<span class="text-muted small ms-2">${strDate}</span>
+							<div class="ms-auto">${buttons}</div>
+					</div>
+					<div class="mb-1">
+						<span class="me-2 text-warning"><i class="bi bi-star-fill"></i></span>
+						<span class="fw-bold ms-1">${r.rating}점</span>
+					</div>
+					${r.rpicture ? `<div>
+							<img src="/images/review/${r.rpicture}?t=${Date.now()}" alt="리뷰사진" 
+								style="max-width:200px;" class="rounded shadow-sm mb-2" />
+					</div>` : ''}
+					<div class="text-secondary small mb-1"><span>${r.menuName}</span></div>
+					<div class="review-content">${r.content}</div>
+					${ownerReplyHtml}
+					</div>
 		`;
+		
 		$("#reviewList").append(reviewHtml);
 	});
 }

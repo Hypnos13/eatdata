@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Review;
+import com.projectbob.domain.ReviewReply;
+import com.projectbob.domain.Shop;
 import com.projectbob.service.BobService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +58,7 @@ public class MenuAjaxController {
 	// 댓글 쓰기 메서드
 	@PostMapping("/reviewWrite.ajax")
 	@ResponseBody
-	public List<Review> addReview(@ModelAttribute Review review,
+	public Map<String, Object> addReview(@ModelAttribute Review review,
 			@RequestParam(value="reviewUploadFile", required=false) MultipartFile rPicture){
 		
 		String uploadDir = "C:/projectbob/images/review/";
@@ -72,18 +75,27 @@ public class MenuAjaxController {
 				e.printStackTrace();
 			}
 		}
-		
 		review.setStatus("일반");
-	
-		
 		bobService.addReview(review);
-		return bobService.reviewList(review.getSId());
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("reviewList", bobService.getReviewList(review.getSId()));
+		result.put("reviewReplyMap", bobService.getReviewReplyMap(review.getSId()));
+		String shopOwnerId = null;
+		Shop shop = bobService.getShopDetail(review.getSId());
+		if(shop != null) {
+			shopOwnerId = shop.getId();
+		}
+		result.put("shopOwnerId", shopOwnerId);
+				
+		//return bobService.getReviewList(review.getSId());
+		return result;
 	}
 	
 	//댓글 수정 메서드
 	@PatchMapping("/reviewUpdate.ajax")
 	@ResponseBody
-	public List<Review> updateReview(@ModelAttribute Review review,
+	public Map<String, Object> updateReview(@ModelAttribute Review review,
 			@RequestParam(value="reviewUploadFile", required=false) MultipartFile rPicture){
 		
 		if(rPicture != null && !rPicture.isEmpty()) {
@@ -102,21 +114,66 @@ public class MenuAjaxController {
 		}
 		
 		bobService.updateReview(review);
-		return bobService.reviewList(review.getSId());
 		
+		Map<String, Object> result = new HashMap<>();
+		result.put("reviewList", bobService.getReviewList(review.getSId()));
+		result.put("reviewReplyMap", bobService.getReviewReplyMap(review.getSId()));
+		String shopOwnerId = null;
+		Shop shop = bobService.getShopDetail(review.getSId());
+		if(shop != null) {
+			shopOwnerId = shop.getId();
+		}
+		result.put("shopOwnerId", shopOwnerId);
+		
+		//return bobService.getReviewList(review.getSId());
+		return result;		
 	}
 	
 	// 댓글 삭제 메서드
 	@DeleteMapping("/reviewDelete.ajax")
-	public List<Review> deleteReview(@RequestParam("rNo") int rNo,
+	public Map<String, Object> deleteReview(@RequestParam("rNo") int rNo,
 			@RequestParam("sId")int sId){
 		bobService.deleteReview(rNo);
-		return bobService.reviewList(sId);
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("reviewList", bobService.getReviewList(sId));
+		result.put("reviewReplyMap", bobService.getReviewReplyMap(sId));
+		String shopOwnerId = null;
+		Shop shop = bobService.getShopDetail(sId);
+		if(shop != null) {
+			shopOwnerId = shop.getId();
+		}
+		result.put("shopOwnerId", shopOwnerId);
+		
+		//return bobService.getReviewList(sId);
+		return result;
 	}
 	
 	
-	
-	
-	
+	// 대댓글 쓰기 메서드	
+	@PostMapping("/reviewReplyWrite.ajax")
+	@ResponseBody
+	public Map<String, Object> addReviewReply(@RequestBody ReviewReply reviewreply){
+		log.info("대댓글 등록 rNo: {}", reviewreply.getRNo());		
+		log.info("대댓글 등록 reviewreply: {}", reviewreply);
+		log.info("addReviewReply: reviewreply={}", reviewreply);
+		log.info("addReviewReply: rNo={}, sId={}, id={}", reviewreply.getRNo(), reviewreply.getSId(), reviewreply.getId());
+		reviewreply.setStatus("일반");
+		bobService.addReviewReply(reviewreply);
+		List<Review> reviewList = bobService.getReviewList(reviewreply.getSId());
+		Map<Integer, ReviewReply> reviewReplyMap = bobService.getReviewReplyMap(reviewreply.getSId());
+		
+		String shopOwnerId = null;
+		Shop shop = bobService.getShopDetail(reviewreply.getSId());
+		if(shop != null) {
+			shopOwnerId = shop.getId();
+		}
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("reviewList", reviewList);
+		result.put("reviewReplyMap", reviewReplyMap);
+		result.put("shopOwnerId", shopOwnerId);
+		return result;
+	}
 
 }

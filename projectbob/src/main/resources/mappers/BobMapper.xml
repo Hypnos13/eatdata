@@ -2,6 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
+<!-- 대댓글 추가 -->
+<insert id="addReviewReply" parameterType="ReviewReply">
+	INSERT INTO review_reply(r_no, s_id, id, content, status)
+	VALUES(#{rNo}, #{sId}, #{id}, #{content}, #{status})
+</insert>
+
+<!-- 대댓글 -->
+<select id="reviewreplyList" parameterType="int" resultType="ReviewReply">
+	SELECT * FROM review_reply WHERE r_no = #{rNo}
+</select>
+
+<!-- 전체 대댓글 가져오기 -->
+<select id="getReviewReplyList" resultType="com.projectbob.domain.ReviewReply">
+	SELECT * FROM review_reply WHERE s_id = #{sId}
+</select>
+
 <!-- 댓글 삭제 -->
 <delete id="deleteReview">
 	DELETE FROM review WHERE r_no = #{rNo}
@@ -29,7 +45,7 @@
 </select>
 
 <!-- 리뷰 -->
-<select id="reviewList" parameterType="int" resultType="com.projectbob.domain.Review">
+<select id="getReviewList" parameterType="int" resultType="com.projectbob.domain.Review">
 	SELECT review.r_no, review.id, review.s_id, review.m_id, review.content, review.rating,
 		review.r_picture, review.liked, review.reg_date, review.modi_date, review.status, 
 	menu.name AS menuName FROM review
