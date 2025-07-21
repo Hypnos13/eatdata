@@ -2,11 +2,11 @@ package com.projectbob.configurations;
 
 
 import org.springframework.context.annotation.Configuration;
-<<<<<<< HEAD
+
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-=======
+
 import org.springframework.web.servlet.config.annotation.*;
->>>>>>> develop
+
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -24,13 +24,11 @@ public class WebConfig implements WebMvcConfigurer{
 		
 	}
 	
-<<<<<<< HEAD
 	//리뷰 사진 추가
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("/images/review/**")
 			.addResourceLocations("file:///C:/projectbob/images/review/");
 	}
-=======
->>>>>>> develop
+
 }

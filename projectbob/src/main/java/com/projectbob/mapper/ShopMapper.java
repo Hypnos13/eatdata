@@ -18,7 +18,7 @@ public interface ShopMapper {
 	//가게 정보
 	public Shop findByOwnerId(String ownerId);
 	
-<<<<<<< HEAD
+
 	// 메뉴 관련 메서드
     void insertMenu(Menu menu);                  // 메뉴 등록
     List<Menu> getAllMenus();                    // 모든 메뉴 목록 조회 (간단한 정보)
@@ -33,7 +33,7 @@ public interface ShopMapper {
     void deleteMenuOption(int moId);                     // 특정 메뉴 옵션 삭제
     void deleteMenuOptionsByMenuId(int mId);             // 특정 메뉴의 모든 옵션 삭제 (메뉴 삭제 시 호출)
 	
-=======
+
 	//가게 유무 확인후 보여주기
 	public List<Shop> findShopListByOwnerId(String ownerId);
 	
@@ -42,5 +42,5 @@ public interface ShopMapper {
 
 	//기본정보 수정
 	public int updateShopBasicInfo(Shop shop);
->>>>>>> develop
+
 }

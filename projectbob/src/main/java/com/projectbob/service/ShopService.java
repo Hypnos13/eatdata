@@ -34,7 +34,7 @@ public class ShopService {
 		return shopMapper.shopList();
 	}
 	
-<<<<<<< HEAD
+
 	// 메뉴 등록
 	@Transactional
 	public void insertMenu(Menu menu, MultipartFile mPicture) throws IOException {
@@ -158,7 +158,8 @@ public class ShopService {
 		}
 		String relativePath = webPath.substring("/images/".length());
 		return fileUploadService.getUploadBaseDir() + File.separator + relativePath.replace("/", File.separator);
-=======
+	}
+
 	//가게 정보 불러오기
 	public Shop findByOwnerId(String ownerId) {
 	    return shopMapper.findByOwnerId(ownerId);
@@ -205,7 +206,7 @@ public class ShopService {
 	    }
 	    while (result.size() < 7) result.add(new String[] {"-", "-"});
 	    return result;
->>>>>>> develop
+
 	}
 	
 }
