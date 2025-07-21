@@ -499,10 +499,10 @@ $(document).on('submit', '.review-reply-form', function(e){
 	const $form = $(this);
 	const rNo = $form.find('input[name="rNo"]').val();	
 	const sId = $form.find('input[name="sId"]').val();
-	const content = $form.find('input[name="content"]').val();
+	const content = $form.find('textarea[name="content"]').val();
 	const shopOwnerId = $("#shopOwnerId").val();
 
-	console.log('ajax전송 전 rNo:', rNo, 'sId:' , sId, 'shopOwnerId:', shopOwnerId);
+	console.log('ajax전송 전 rNo:', rNo, 'sId:' , sId, 'shopOwnerId:', shopOwnerId, '대댓글 content값:', content);
 	
 	if(!content || content.trim().length == 0){
 		alert('댓글을 입력하세요.');
@@ -533,16 +533,20 @@ $(document).on('submit', '.review-reply-form', function(e){
 
 // 사장님 댓글 수정 클릭
 $(document).on("click", ".modifyReviewReply", function(){
-	const rNo = $(this).data('review-no');
-		const $replyForm = $(this).closest('.reviewRow').find('.reviewReplyForm');
+		const rNo = $(this).data('rno');		
+		const $reviewRow = $(this).closest('.reviewRow');
+		const $replyForm = $reviewRow.find('.reviewReplyForm');
 		const sId = $("input[name='sId']").first().val();
-		const content = $(this).closest("form").find("[name='content']").val();
+		const content = $reviewRow.find('.ms-3.fs-5.py-2').text().trim();
+		
 		$replyForm.find('input[name="rNo"]').val(rNo);
 		$replyForm.find('input[name="sId"]').val(sId);
-		$replyForm.find('input[name="content"]').val(content);
+		$replyForm.find('textarea[name="content"]').val(content);
 		$replyForm.attr('id', 'reviewReplyUpdateForm');
 		$('.reviewReplyForm').addClass('d-none');
 		$replyForm.removeClass('d-none');	
+		
+		console.log('수정 클릭 시 content 값:', content);
 });
 // 사장님 댓글수정 submit
 $(document).on("submit", "#reviewReplyUpdateForm", function(e){
@@ -551,10 +555,11 @@ $(document).on("submit", "#reviewReplyUpdateForm", function(e){
 		const $form = $(this);
 		const rNo = $form.find('input[name="rNo"]').val();	
 		const sId = $form.find('input[name="sId"]').val();
-		const content = $form.find('input[name="content"]').val();
+		const content = $form.find('[name="content"]').val();
 		const shopOwnerId = $("#shopOwnerId").val();
 
-		console.log('수정ajax전송 전 rNo:', rNo, 'sId:' , sId, 'shopOwnerId:', shopOwnerId);
+		console.log('수정ajax전송 전 rNo:', rNo, 'sId:' , sId, 'shopOwnerId:', shopOwnerId, '대댓글 content값:', content);
+		console.log('shopOwnerId:', $('#shopOwnerId').val());
 		
 		if(!content || content.trim().length == 0){
 			alert('댓글을 입력하세요.');
@@ -588,9 +593,14 @@ $(document).on("submit", "#reviewReplyUpdateForm", function(e){
 // 리뷰쓰기/수정/삭제 AJAX 성공 후~
 function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
 	const loginId = $("#loginId").val();
+	
+	console.log('shopOwnerId:', $('#shopOwnerId').val());
+	
 	$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
-	$("#reviewList").empty();
+	$("#reviewList").empty();	
 	reviewArr.forEach(r => {
+		const reply = reviewreplyMap[r.rno];
+		console.log('loginId:', loginId, 'shopOwnerId:', shopOwnerId, 'reply', reply);
 		let isMine = (loginId && r.id == loginId);
 		let buttons = '';
 		if(isMine){
@@ -619,8 +629,7 @@ function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
 	
 		
 		let ownerReplyHtml = '';
-		const reply = reviewreplyMap[r.rno];
-		if(reply){
+		if(reviewreplyMap[r.rno]){
 			if(loginId == shopOwnerId){
 			ownerReplyHtml =`
 			<div class="card p-2 bg-light border-info" style="border-left:4px solid #3498db;">
@@ -628,13 +637,13 @@ function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
 														<span class="fw-bold text-primary">
 															<i class="bi bi-person-badge"></i>사장님
 														</span>
-														<span class="text-muted small ms-2">${formDate(reply.regDate)}</span>
+														<span class="text-muted small ms-2">${childDate(reviewreplyMap[r.rno].regDate)}</span>
 														<div class="ms-auto">
-															<button type="button" class="btn btn-outline-primary btn-sm px-3 modifyReviewReply" data-rrno="${reply.rrNo}" data-rno="${r.rno}" data-content="${reply.content}">수정</button>
-														  <button type="button" class="btn btn-outline-danger btn-sm px-3 deleteReviewReply" data-rrno="${reply.rrNo}" data-rno="${r.rno}">삭제</button>
+															<button type="button" class="btn btn-outline-primary btn-sm px-3 modifyReviewReply" data-rrno="${reviewreplyMap[r.rno].rrNo}" data-rno="${r.rno}" data-content="${reviewreplyMap[r.rno].content}">수정</button>
+														  <button type="button" class="btn btn-outline-danger btn-sm px-3 deleteReviewReply" data-rrno="${reviewreplyMap[r.rno].rrNo}" data-rno="${r.rno}">삭제</button>
 														</div>										
 													</div>
-													<div class="ms-3 fs-5 py-2">${reply.content}</div>
+													<div class="ms-3 fs-5 py-2">${reviewreplyMap[r.rno].content}</div>
 												</div>
 												<div class="reviewReplyEditForm d-none mt-2">
 													<form>
@@ -654,9 +663,9 @@ function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
 					<span class="fw-bold text-primary">
 						<i class="bi bi-person-badge"></i>사장님
 					</span>
-					<span class="text-muted small ms-2">${formDate(reply.regDate)}</span>
+					<span class="text-muted small ms-2">${childDate(reviewreplyMap[r.rno].regDate)}</span>
 				</div>
-				<div class="ms-3 fs-5 py-2">${reply.content}</div>
+				<div class="ms-3 fs-5 py-2">${reviewreplyMap[r.rno].content}</div>
 			</div>
 			`;
 		}
@@ -702,6 +711,17 @@ function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
 		
 		$("#reviewList").append(reviewHtml);
 	});
+}
+
+// 대댓글 날짜 함수
+function childDate(rawDate) {
+    const date = new Date(rawDate);
+    return date.getFullYear() + "-"
+        + ((date.getMonth() + 1 < 10) ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
+        + (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
+        + (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
+        + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
+        + (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
 }
 
 // 리뷰 폼 리셋

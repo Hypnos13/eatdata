@@ -216,7 +216,14 @@
 											<span class="fw-bold text-primary">
 												<i class="bi bi-person-badge"></i>사장님
 											</span>
-											<span class="text-muted small ms-2" th:text="${#dates.format(reviewReplyMap[review.rNo].regDate, 'yyyy-MM-dd HH:mm')}">날짜</span>											
+											<span class="text-muted small ms-2" th:text="${#dates.format(reviewReplyMap[review.rNo].regDate, 'yyyy-MM-dd HH:mm')}">날짜</span>
+											<div class="ms-auto" th:if="${member != null and member.id ==shop.id}">
+												<button type="button" class="btn btn-outline-primary btn-sm px-3 modifyReviewReply"
+																	th:data-rrno="${reviewReplyMap[review.rNo].rrNo}" th:data-rno="${review.rNo}"
+																	th:data-content="${reviewReplyMap[review.rNo].content}">수정</button>
+												<button type="button" class="btn btn-outline-danger btn-sm px-3 deleteReviewReply"
+																	th:data-rrno="${reviewReplyMap[review.rNo].rrNo}" th:data-rno="${review.rNo}">삭제</button>
+											</div>										
 										</div>
 										<div th:text="${reviewReplyMap[review.rNo].content}" class="ms-3"></div>
 									</div>
