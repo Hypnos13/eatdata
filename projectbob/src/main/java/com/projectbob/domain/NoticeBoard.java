@@ -15,7 +15,7 @@ import lombok.Setter;
 public class NoticeBoard {
 
 	int no;
-	String title, content, disivion;
+	String title, content, division;
 	Timestamp regDate, modiDate, startDay, endDay;
 	
 }
