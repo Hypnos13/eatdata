@@ -41,6 +41,7 @@
 	<select id="shopList" resultType="Shop">
 		SELECT * From shop
 	</select>
+<<<<<<< HEAD
 
 	<insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
        INSERT INTO menu(s_id, category, name, price, m_info, m_picture_url, reg_date, modi_date)
@@ -93,3 +94,45 @@
     </delete>
 
 </mapper>
+=======
+	
+	<!-- 가게정보 불러오기 -->
+	<select id="findByOwnerId" resultType="com.projectbob.domain.Shop">
+	    SELECT *
+	    FROM shop
+	    WHERE id = #{ownerId}
+	</select>
+	
+	<!-- 가게 유무 확인 후 보여주기 -->
+	<select id="findShopListByOwnerId" resultType="com.projectbob.domain.Shop">
+	    SELECT *
+	    FROM shop
+	    WHERE id = #{ownerId}
+	    ORDER BY reg_date DESC
+	</select>
+	
+	<!-- 다수 가게에서 현재 선택한 가게고정 -->
+	<select id="findByShopIdAndOwnerId" resultType="com.projectbob.domain.Shop">
+	    SELECT * FROM shop WHERE s_id = #{sId} AND id = #{ownerId}
+	</select>
+
+	<!-- 기본정보 수정 -->
+	<update id="updateShopBasicInfo" parameterType="com.projectbob.domain.Shop">
+	  UPDATE shop
+	  SET name = #{name},
+	      phone = #{phone},
+	      zipcode = #{zipcode},
+	      address1 = #{address1},
+	      address2 = #{address2},
+	      owner = #{owner},
+	      s_number = #{sNumber},
+	      category = #{category},
+	      info = #{info},
+	      notice = #{notice},
+	      s_info = #{sInfo},
+	      modi_date = #{modiDate}
+	  WHERE s_id = #{sId}
+	</update>
+
+</mapper>	
+>>>>>>> develop

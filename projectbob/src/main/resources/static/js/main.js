@@ -137,7 +137,12 @@ function runKakaoScript() {
 
           geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
             if (status === kakao.maps.services.Status.OK) {
-              inputField.value = result[0].address.address_name;
+              const address = result[0].address.address_name;
+              inputField.value = address;
+
+              // ✅ shopList로 이동하면서 category=전체보기, address 값도 함께 전달
+              const url = `/shopList?category=전체보기&address=${encodeURIComponent(address)}`;
+              window.location.href = url;
             } else {
               alert('주소 변환 실패');
             }
@@ -149,6 +154,7 @@ function runKakaoScript() {
     });
   });
 }
+
 
 // ==============================
 // Kakao 지도: 가게 위치 표시
@@ -229,4 +235,183 @@ document.addEventListener("DOMContentLoaded", () => {
       searchBox.classList.toggle("d-none");
     });
   }
+	
+	//검색버튼
+	document.getElementById('searchSubmitBtn').addEventListener('click', function () {
+	    const keyword = document.querySelector('#searchBox input[type="text"]').value.trim();
+
+	    // 현재 선택된 카테고리도 함께 보내고 싶다면 추가로 처리 가능
+	    // 예: const category = '치킨'; 또는 URL에서 파싱 가능
+
+	    // URL 구성
+	    const searchUrl = `/shopList?keyword=${encodeURIComponent(keyword)}`;
+
+	    // 페이지 이동
+	    window.location.href = searchUrl;
+	});
+	
 });
+
+
+
+
+
+
+
+
+// 찜하기 하트
+$(function(){
+	
+	$("#btnHeart").click(function(){
+		let sId = $(this).data("sid") || $("input[name='sId']").val();
+		if (!sId){
+			alert('가게 정보를 찾을 수 없습니다.');
+			return;
+		}
+		
+		$.ajax({
+			url: "/heart.ajax",
+			type: "post",
+			data : { sId : sId },
+			dataType: "json",
+			success: function(data){
+			$("#heartCount").text(data.heartCount);
+				alert("찜하기가 반영되었습니다.");
+			},
+			error: function(xhr, status, error){
+				alert("error : " + xhr.statusText + "," + status + "," + error);
+			}
+		});
+	});
+});
+
+// 댓글쓰기 버튼 클릭 이벤트
+$("#reviewWrite").on("click", function(){
+		$("#reviewForm").toggleClass("d-none");
+	});
+	
+	$(document).on("submit", "#reviewWriteForm", function(e){
+		e.preventDefault();
+		if($("#reviewContent").val().length < 5){
+			alert("댓글은 5자 이상 입력하세요~");
+			return false;
+		}
+		if (!$('input[name="rating"]:checked').val()){
+			alert("별점을 선택하세요~!");
+			return false;
+		}
+		let formData = new FormData(this);
+		
+		let params = $(this).serialize();
+		console.log(params);
+		
+		$.ajax({
+			"url": "reviewWrite.ajax",
+			"data": formData,
+			"type": "post",
+			"processData": false,
+			"contentType": false,
+			"dataType": "json",
+			"success": function(resData){
+				console.log(resData);
+				
+				$("#reviewList").empty();
+				$.each(resData,function(i, r){
+					
+					let date = new Date(r.regDate);
+					let strDate = date.getFullYear() + "-" + ((date.getMonth() + 1 < 10)
+													? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
+													+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
+													+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
+													+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
+													+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
+													
+				let result = `
+				<div class="border-bottom pb-3 mb-3">
+												<div class="d-flex align-items-center mb-1">
+													<span class="fw-bold">${r.id.substr(0,2)}**님</span>
+													<span class="text-muted small ms-2">${strDate}</span>
+													<div class="ms-auto">
+													<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rNo}">
+														<i class="bi bi-journal-text">수정</i>									
+													</button>
+													<button class="deleteReview btn btn-outline-warning btn-sm" data-no="${r.rNo}">
+														<i class="bi bi-trash">삭제</i>
+													</button>
+													<button class="btn btn-outline-danger btn-sm" onclick="reportReview('${r.rNo}')">
+														<i class="bi bi-telephone-outbound">신고</i>
+													</button>
+													</div>												
+												</div>
+											
+												<div class="mb-1">
+													<span class="me-2 text-warning">
+														<i class="bi bi-star-fill"></i>										
+													</span>
+													<span class="fw-bold ms-1">${r.rating}점</span>
+												</div>
+												
+												${r.rPicture ? `<div>
+													<img src="/images/review/${r.rPicture}" alt="리뷰사진" 
+																	style="max-width:200px;" class="rounded shadow-sm mb-2" />
+												</div>` : ' '}
+											
+												<div class="text-secondary small mb-1">
+													<span>${r.menuName}</span>
+												</div>
+												
+												<div>${r.content}</div>
+											</div>`;
+					
+											$("#reviewList").append(result);
+								
+				});
+				$("#reviewList").removeClass("text-center p-5");
+				$("#reviewWriteForm")[0].reset();
+				$("#reviewForm").addClass("d-none");
+			},
+			"error": function(xhr, status){
+				console.log("error : " + status);
+			}
+		});
+		return false;
+	});
+
+
+//댓글 사진 미리보기
+let previewUrl = null;
+
+$("#rPicture").on('change', function(e){
+	const [file] = e.target.files;
+	if(file){
+		if(previewUrl){
+			URL.revokeObjectURL(previewUrl);
+		}
+		previewUrl = URL.createObjectURL(file);
+		$("#imgPreview").attr('src', previewUrl).show();
+	} else {
+		if(previewUrl){
+			URL.revokeObjectURL(previewUrl);
+			previewUrl = null;
+		}
+		$("#imgPreview").hide();
+	}
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

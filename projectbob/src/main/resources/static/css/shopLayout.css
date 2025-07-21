@@ -10,6 +10,12 @@
 }
 
 /* === 헤더 === */
+.layout-wrapper, .header {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
 .header {
   display: flex;
   justify-content: space-between;

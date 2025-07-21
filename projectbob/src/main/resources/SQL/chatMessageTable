@@ -1,0 +1,8 @@
+CREATE TABLE chat_messages (
+    no INT AUTO_INCREMENT PRIMARY KEY,     
+    id VARCHAR(50) NOT NULL,                
+    role VARCHAR(20) NOT NULL,               
+    message TEXT NOT NULL,              
+    reg_date TIMESTAMP,  
+    modi_date TIMESTAMP
+);

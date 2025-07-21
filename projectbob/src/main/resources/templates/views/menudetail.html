@@ -31,7 +31,7 @@
 						<img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
 						<div class="ms-3">
 							<h5 class="mb-0">[[ ${shop.name} ]] - [[ ${shop.address1} ]]</h5>
-							<small>★ [[${shop.rating}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원</small>
+							<small>★ [[${shop.rating}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원 / 가게 찜 [[${shop.heart}]]</small>
 						</div>
 					</div>
 
@@ -90,9 +90,11 @@
 													
 							</div>
 							<!-- 찜버튼 -->
-							<div class="d-flex align-items-center">
+							<div class="d-flex align-items-center">						
+							<span>가게 찜하기</span>		
+								<button type="button" id="btnHeart" class="btn btn-outline-danger btn-sm px-2 py-0"
+														th:data-sid="${shop.sId}">
 								<span class="me-1" id="heartCount" th:text="${shop.heart}">0</span>
-								<button type="button" id="btnHeart" class="btn btn-outline-danger btn-sm px-2 py-0">
 									<i class="bi bi-heart-fill"></i>
 								</button>
 							</div>
@@ -101,14 +103,79 @@
 								리뷰 <span th:text="${reviewList.size()}">0</span>개
 							</div>
 						</div>
-						----------
+						<!-- 댓글쓰기 -->
+						<div class="row my-3">
+						<div class="col border p-1 text-center">
+						<span id="reviewWrite" class="text-success" style="cursor: pointer;">
+							<i class="bi bi-file-earmark-text-fill" style="color: cornflowerblue;"></i>리뷰쓰기
+						</span>
+						</div>
+						</div>
+						<!-- 댓글 헤더 영역 -->						
+						<!-- 댓글 쓰기 폼 -->
+					<div class="row my-3 d-none" id="reviewForm">
+						<div class="col">
+							<form name="reviewWriteForm" id="reviewWriteForm" enctype="multipart/form-data">
+								<input type="hidden" name="sId" th:value="${shop.sId}">
+						<!-- 	<input type="hidden" name="id" th:value="${member.id}"> -->						
+								<div class="row bg-light my-3 p-3 border">
+									<div class="col">
+										<div class="row">
+											<div class="col text-center">
+											
+											<!-- 별점 영역 -->
+						<div class="mb-2">
+							<label class="form-label">별점</label>
+							<div id="starRating" class="star-rating">
+								<input type="radio" name="rating" id="star5" value="5"><label for="star5">&#9733;</label>
+								<input type="radio" name="rating" id="star4" value="4"><label for="star4">&#9733;</label>
+								<input type="radio" name="rating" id="star3" value="3"><label for="star3">&#9733;</label>
+								<input type="radio" name="rating" id="star2" value="2"><label for="star2">&#9733;</label>
+								<input type="radio" name="rating" id="star1" value="1"><label for="star1">&#9733;</label>
+							</div>
+						</div>
+						<!-- 사진 -->
+						<div class="mb-2">
+							<label for="rPicture" class="form-label">사진 첨부</label>
+							<input type="file" name="rPicture" id="rPicture" accept="image/*" class="form-control">
+							<!-- 썸네일 -->
+							<img id="imgPreview" style="disply:none; max-width:100px; margin-top:8px;">
+						</div>
+												
+											</div>
+										</div>
+										<div class="row my-3">
+											<div class="col-md-10">
+												<textarea name="reviewContent" id="reviewContent" class="form-control" rows="4"></textarea>												
+											</div>
+											<div class="col-md">
+												<input type="submit" value="댓글쓰기" class="btn btn-success h-100 w-100" id="reviewWriteButton">
+											</div>
+										</div>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+						
 						<!-- 리뷰 리스트 -->
 						<div th:if="${not #lists.isEmpty(reviewList)}">
 							<div th:each="review : ${reviewList}" class="border-bottom pb-3 mb-3">
 								<div class="d-flex align-items-center mb-1">
 									<span class="fw-bold" th:text="${#strings.substring(review.id,0,2) + '**님'}">ad**님</span>
 									<span class="text-muted small ms-2" th:text="${#dates.format(review.regDate, 'yyyy-MM-dd')}">날짜</span>
-									<span class="ms-auto text-danger small" style="cursor:pointer">신고</span>
+									<div class="ms-auto">
+									<button class="modifyReview btn btn-outline-success btn-sm" th:data-no="${review.rNo}">
+										<i class="bi bi-journal-text">수정</i>									
+									</button>
+									<button class="deleteReview btn btn-outline-warning btn-sm" th:data-no="${review.rNo}">
+										<i class="bi bi-trash">삭제</i>
+									</button>
+									<button class="btn btn-outline-danger btn-sm" th:onclick="reportReview('${review.rNo}')">
+										<i class="bi bi-telephone-outbound">신고</i>
+									</button>
+									</div>
+									<!-- <span class="ms-auto text-danger small" style="cursor:pointer">신고</span> -->
 								</div>
 								<!-- 별점  -->
 								<div class="mb-1">
@@ -127,21 +194,14 @@
 									<span th:text="${review.menuName}">싹싹김치</span>
 								</div>
 								<!-- 리뷰 내용 -->
-								<div th:text="${review.content}">good day commando</div>
+								<div th:text="${review.content}">good day</div>
 							</div>
 						</div>
 						<!-- 리뷰 없을때 -->
 						<div th:unless="${not #lists.isEmpty(reviewList)}" class="text-center text-muted p-5">
 							no 리뷰~
-						</div>
+						</div>									
 					
-						
-							<!-- <p>총 10,706개의 리뷰가 있습니다.</p>
-							<ul>
-								<li>"햄버거가 따뜻하고 맛있어요!"</li>
-								<li>"포장이 깔끔하고 배달이 빨라요."</li>
-								<li>"소스가 넉넉하게 들어있어요."</li>
-							</ul> -->
 						</div>
 
 						<!-- 정보 탭 -->

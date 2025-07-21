@@ -45,10 +45,15 @@ public class BobController {
 	  @GetMapping("/shopList") 
 	  public String shopList(@RequestParam(value="category",required=false,
 			  	defaultValue="전체보기") String category,
-			  Model model) {
+			  @RequestParam(value="keyword", required= false, defaultValue="null")String keyword,
+			  Model model,@RequestParam(value="address", required = false) String address) {
 	  log.info("BobController: shopList() called, category={}", category); 
-	  model.addAttribute("sList",bobService.shopList(category));
+	  if (keyword == null || "null".equals(keyword)) keyword = "";
+		if(category == null) category = "전체보기";
+		 log.info("category = {}", category);
+	  model.addAttribute("sList",bobService.shopList(category,keyword));
 	  model.addAttribute("selectedCategory", category);
+	  model.addAttribute("userAddress", address);
 	  	return "views/shopList"; 
 	  }
 
@@ -72,6 +77,8 @@ public class BobController {
 		  
 		  List<Review> reviewList = bobService.reviewList(sId);
 		  model.addAttribute("reviewList", reviewList);
+		  
+		 //model.addAttribute("member", member);
 		  
 		  double reviewAvg = 0.0;
 		  if (!reviewList.isEmpty()) {

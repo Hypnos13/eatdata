@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<link th:href="@{css/admin.css}" rel="stylesheet" />
+ <div class="container mt-5">
+
+  <div class="chat-container">
+    <th:block th:each="msg : ${messages}">
+      <div class="chat-message" th:classappend="${msg.role == 'user'} ? ' user' : ' bot'">
+        <div>
+          <div class="chat-name" th:text="${msg.role == 'user'} ? ${session.loginId} : '상담봇'"></div>
+          <div class="bubble" th:classappend="${msg.role == 'user'} ? ' user' : ' bot'"
+               th:text="${msg.message}"></div>
+        </div>
+      </div>
+    </th:block>
+  </div>
+
+  <form th:action="@{/send}" method="post" class="mt-4">
+    <input type="hidden" name="id" th:value="${session.loginId}" />
+    <div class="d-flex">
+      <textarea class="form-control me-2" name="message" placeholder="문의할 내용을 입력하세요" rows="2" style="resize: none;"></textarea>
+      <button type="submit" class="btn btn-success">전송</button>
+    </div>
+  </form>
+
+</div>
+</th:block>
+</html>
