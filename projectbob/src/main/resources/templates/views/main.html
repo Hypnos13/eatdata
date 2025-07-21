@@ -10,6 +10,9 @@
 
 		<!-- 배경 + 검색 -->
 		<div class="search-box">
+			<div class="text-center mb-2">
+				<h5 class="mb-1 fw-semibold text-black">배달받으실 주소를 입력해주세요</h5>
+			</div>
 			<div class="d-flex justify-content-center mt-2">
 				<button id="btn-search-toggle"
 					class="btn text-white me-2 d-flex align-items-center"
@@ -17,12 +20,13 @@
 					<img src="https://img.icons8.com/ios-filled/24/000000/marker.png"
 						alt="위치" class="me-1" />
 				</button>
-				<input id="location-input" type="text" class="form-control w-25 me-2" placeholder="서울특별시 관악구..." />
+				<input id="location-input" type="text"
+					class="form-control w-25 me-2" th:value="${userAddress}"
+					placeholder="서울특별시 관악구..." />
 				<button class="btn text-dark fw-semibold"
 					style="background-color: #43d091">검색</button>
 			</div>
 		</div>
-
 		<!-- 카테고리 영역 -->
 		<div class="container mt-5">
 			<div class="row g-3">

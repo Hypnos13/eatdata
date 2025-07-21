@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.projectbob.domain.Cart;
+import com.projectbob.domain.CartAddRequestDto;
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Review;
@@ -22,6 +23,35 @@ public class BobService {
 	// DB작업에 필요한 BobMapper 객체 의존성 주입 설정
 	@Autowired
 	private BobMapper bobMapper;
+	
+	public void addCartItem(CartAddRequestDto dto) {
+        // 1) 메뉴 기본정보 + 수량으로 Cart insert (옵션 제외)
+        Cart cart = new Cart();
+        cart.setId(dto.getUId());
+        cart.setMId(dto.getMId());
+        cart.setSId(dto.getSId());
+        cart.setQuantity(dto.getQuantity());
+        // 가격 계산 필요 시 추가 처리 가능 (dto 또는 서비스 내 계산)
+
+        // 총 가격은 (메뉴 가격 + 옵션 가격 합산) * 수량 계산해서 setTotalPrice 해야 하지만
+        // 여기서는 임시 0으로 세팅 (실제 가격 계산 로직은 서비스 내 추가 필요)
+        cart.setTotalPrice(0);
+
+        bobMapper.insertCart(cart);  // insert 후 자동으로 caId 세팅됨
+
+        int cartId = cart.getCaId();
+
+        // 2) 옵션이 있으면 cart_option 테이블에 하나씩 insert
+        if (dto.getOptionList() != null) {
+            for (MenuOption option : dto.getOptionList()) {
+                bobMapper.insertCartOption(cartId, option.getMoId());
+            }
+        }
+    }
+
+    public List<Cart> getCartListByUser(String userId) {
+        return bobMapper.selectCartListByUser(userId);
+    }
 
 	// 가게 검색하기
 //	public List<Shop> searchList(String keyword){
@@ -84,9 +114,9 @@ public class BobService {
 	}
 	
 	//주문 추가
-	public boolean insertCart(Cart cart) {
-		return bobMapper.insertCart(cart) > 0;
-	}
+//	public boolean insertCart(Cart cart) {
+//		return bobMapper.insertCart(cart) > 0;
+//	}
 	
 	//수량 업데이트
 	public boolean updateCartQuantity(Cart cart) {

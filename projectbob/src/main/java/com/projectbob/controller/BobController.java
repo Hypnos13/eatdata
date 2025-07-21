@@ -122,25 +122,25 @@ public class BobController {
 		    }
 
 		    // ▶ 메뉴 추가
-		    @PostMapping("/addMenu")
-		    public String addCart(@RequestBody Cart cart, HttpSession session) {
-		        // 1. 로그인 ID 확인
-		        String id = (String) session.getAttribute("loginId");
-
-		        // 2. 로그인 안 된 경우 guestId 생성
-		        if (id == null) {
-		            id = (String) session.getAttribute("guestId");
-
-		            // 3. 세션에 guestId가 없다면 새로 생성해서 저장
-		            if (id == null) {
-		                id = "guest_" + UUID.randomUUID().toString().substring(0, 8);
-		                session.setAttribute("guestId", id);
-		            }
-		        }
-		        // 4. cart에 ID 설정 후 저장
-		        cart.setId(id);
-		        return bobService.insertCart(cart) ? "success" : "fail";
-		    }
+//		    @PostMapping("/addMenu")
+//		    public String addCart(@RequestBody Cart cart, HttpSession session) {
+//		        // 1. 로그인 ID 확인
+//		        String id = (String) session.getAttribute("loginId");
+//
+//		        // 2. 로그인 안 된 경우 guestId 생성
+//		        if (id == null) {
+//		            id = (String) session.getAttribute("guestId");
+//
+//		            // 3. 세션에 guestId가 없다면 새로 생성해서 저장
+//		            if (id == null) {
+//		                id = "guest_" + UUID.randomUUID().toString().substring(0, 8);
+//		                session.setAttribute("guestId", id);
+//		            }
+//		        }
+//		        // 4. cart에 ID 설정 후 저장
+//		        cart.setId(id);
+//		        return bobService.insertCart(cart) ? "success" : "fail";
+//	    }
 
 		    // ▶ 수량 및 가격 수정
 		    @PutMapping("/countUpdate")

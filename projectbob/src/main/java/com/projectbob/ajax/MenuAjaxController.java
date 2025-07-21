@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.projectbob.domain.Cart;
+import com.projectbob.domain.CartAddRequestDto;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Review;
 import com.projectbob.service.BobService;
@@ -59,9 +62,22 @@ public class MenuAjaxController {
 		return bobService.reviewList(review.getSId());
 	}
 	
-	
 
-	
+
+	@PostMapping("/add")
+    public ResponseEntity<?> addToCart(@RequestBody CartAddRequestDto dto) {
+        try {
+            bobService.addCartItem(dto);
+
+            List<Cart> updatedCart = bobService.getCartListByUser(dto.getUId());
+
+            return ResponseEntity.ok(Map.of("status", "success", "cartList", updatedCart));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(Map.of("status", "fail", "message", e.getMessage()));
+        }
+    }
 	
 	
 	

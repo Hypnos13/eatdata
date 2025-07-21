@@ -13,6 +13,17 @@ import com.projectbob.domain.Shop;
 
 @Mapper
 public interface BobMapper {
+	
+	// Cart insert (caId 자동생성, useGeneratedKeys)
+    void insertCart(Cart cart);
+
+    // CartOption insert
+    void insertCartOption(@Param("cartId") int cartId, @Param("moId") int moId);
+
+    // 특정 유저 장바구니 리스트 조회
+    List<Cart> selectCartListByUser(@Param("userId") String userId);
+	//-----------------------------------------------------------------
+	
 	public List<Shop> shopList(@Param("category") String category,@Param("keyword") String keyword); //shopList 페이지
 	
 	public Shop getShopDetail(int sId); // s_id를 받아 Shop 객체 반환
@@ -39,7 +50,7 @@ public interface BobMapper {
     List<Cart> getCart(String id);
 
     // 주문표 메뉴 등록
-    int insertCart(Cart cart);
+   // int insertCart(Cart cart);
 
     // 주문표 수량 수정
     int countUpdateCart(Cart cart);
