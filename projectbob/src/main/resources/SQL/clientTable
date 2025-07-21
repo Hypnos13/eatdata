@@ -9,7 +9,7 @@ CREATE TABLE client (
 	email	 varchar(50)	NOT NULL,
 	phone 	varchar(13)	NOT NULL,
 	point	int(10)	NULL	DEFAULT 0,
-	disivion	varchar(20)	NOT NULL,
+	division	varchar(20)	NOT NULL,
 	reg_date	timestamp	NOT NULL,
 	modi_date	timestamp	NOT NULL,
 	isuse varchar(2) NOT NULL DEFAULT 'Y'

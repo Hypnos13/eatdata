@@ -14,14 +14,14 @@ CREATE TABLE customerService (
 select * from client where id = "admin";
 -- client 테이블에 admin이 없다면 insert 실행
 
-insert into client (id, pass, name, nickname, birthday, address1, address2, email, phone, point, disivion, reg_date, modi_date)
+insert into client (id, pass, name, nickname, birthday, address1, address2, email, phone, point, division, reg_date, modi_date)
 values( 'admin', '1234', '관리자', '관리자', '20250101', '서울 관악구 관악로 1 (신림동)', '1층', 'admin@naver.com', '010-0101-1234', 0 , 'master', sysdate(), sysdate());
 commit;
 
 -- client 테이블에 admin이 있다면 update 실행
 
 update client
-set disivion = 'master'
+set division = 'master'
 where id = 'admin';
 commit;
 
