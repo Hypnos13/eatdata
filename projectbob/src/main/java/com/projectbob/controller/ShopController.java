@@ -3,6 +3,10 @@ package com.projectbob.controller;
 import org.springframework.beans.factory.annotation.*;
 
 import java.io.IOException;
+import java.util.*;
+import java.security.Principal;
+import java.sql.Timestamp;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -121,8 +125,18 @@ public class ShopController {
 	}
 	
 	@GetMapping("/shopMain")
-	public String shopMain() {
-		return "shop/shopMain";
+	public String shopMain(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
+	    boolean hasShop = false;
+	    boolean isLogin = (loginId != null);
+	    List<Shop> shopListMain = new ArrayList<>();
+	    if (isLogin) {
+	        shopListMain = shopService.findShopListByOwnerId(loginId);
+	        hasShop = (shopListMain != null && !shopListMain.isEmpty());
+	    }
+	    model.addAttribute("hasShop", hasShop);
+	    model.addAttribute("isLogin", isLogin);
+	    model.addAttribute("shopListMain", shopListMain); // 추가
+	    return "shop/shopMain";
 	}
 	
 	@GetMapping("/shopJoinForm")
@@ -150,8 +164,106 @@ public class ShopController {
 		return "shop/shopInfo";
 	}
 	
-	@GetMapping("/shopBasicSet")
-	public String shopBasicSet() {
-		return "shop/shopBasicSet";
+	@GetMapping("/shopBasicView")
+	public String shopBasicView(
+	    @RequestParam("s_id") Integer sId,
+	    @SessionAttribute(name = "loginId", required = false) String loginId,
+	    Model model) 
+	{
+	    if (loginId == null) return "redirect:/login";
+
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+
+	    if (currentShop == null) {
+	        model.addAttribute("errorMessage", "가게 정보를 찾을 수 없습니다.");
+	        return "redirect:/shopMain";  // 또는 에러용 뷰
+	    }
+
+	    model.addAttribute("shop", currentShop);
+	    model.addAttribute("currentShop", currentShop);
+	    return "shop/shopBasicView";
 	}
+	
+	// 기본설정 수정(폼) 페이지
+	@GetMapping("/shopBasicSet")
+	public String shopBasicSet(@RequestParam("s_id") Integer sId,
+	                           @SessionAttribute(name = "loginId", required = false) String loginId,
+	                           Model model) {
+	    if (loginId == null) return "redirect:/login";
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    model.addAttribute("shop", currentShop);
+	    return "shop/shopBasicSet";
+	}
+	
+	@GetMapping("/shopListMain")
+	public String shopListMain(
+	        Model model,
+	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        @RequestParam(name = "s_id", required = false) Integer sId) {
+
+	    if (loginId == null) return "redirect:/login";
+	    List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+
+	    if (shopListMain == null || shopListMain.isEmpty()) {
+	        return "shop/shopInfo"; // 가게 없으면 안내페이지로 이동
+	    }
+
+	    // ★ 현재 선택된 가게 찾기: sId로 조회, 없으면 첫번째
+	    Shop shop = null;
+	    if (sId != null) {
+	        shop = shopListMain.stream()
+	                .filter(s -> s.getSId() == sId)
+	                .findFirst()
+	                .orElse(shopListMain.get(0)); // 못찾으면 첫 번째
+	    } else {
+	        shop = shopListMain.get(0);
+	    }
+
+	    model.addAttribute("shopListMain", shopListMain);
+	    model.addAttribute("shop", shop); // ★ 이 부분 추가!
+
+	    return "shop/shopListMain";
+	}
+
+	
+	@GetMapping("/shopOpenTime")
+	public String shopOpenTime(
+	        @RequestParam("s_id") Integer sId,
+	        Model model,
+	        @SessionAttribute(name = "loginId", required = false) String loginId
+	) {
+	    if (loginId == null) return "redirect:/login";
+	    Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    if (shop == null) {
+	        model.addAttribute("message", "가게를 찾을 수 없습니다.");
+	        return "shop/errorPage";
+	    }
+	    List<String[]> openTimeList = shopService.getOpenTimeList(shop);
+
+	    // 요일 리스트 직접 추가
+	    List<String> daysOfWeek = Arrays.asList("월", "화", "수", "목", "금", "토", "일");
+	    model.addAttribute("shop", shop);
+	    model.addAttribute("openTimeList", openTimeList);
+	    model.addAttribute("daysOfWeek", daysOfWeek);
+	    return "shop/shopOpenTime";
+	}
+
+	
+	//기본정보 수정 로직
+	@PostMapping("/shop/updateBasic")
+	public String updateBasicInfo(@ModelAttribute Shop shop, Model model) {
+	    // 수정일자 갱신
+	    shop.setModiDate(new Timestamp(System.currentTimeMillis()));
+	    
+	    // DB 업데이트
+	    shopService.updateShopBasicInfo(shop);
+
+	    // redirect or model 추가
+	    return "redirect:/shopBasicView?s_id=" + shop.getSId();
+	}
+	
+	
 }
+
+
+

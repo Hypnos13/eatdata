@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layouts/shop_layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>영업시간 안내</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="content-card">
+        <h2 class="fw-bold mb-4">영업시간 안내</h2>
+        <table class="table table-bordered text-center">
+            <thead>
+                <tr>
+                    <th>요일</th>
+                    <th>오픈</th>
+                    <th>마감</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="day, i : ${#lists.arrayList('월','화','수','목','금','토','일')}">
+                    <td th:text="${day}요일"></td>
+                    <td th:if="${openTimeList[i.index][0] == '휴무'}" colspan="2" class="text-danger">휴무</td>
+                    <td th:unless="${openTimeList[i.index][0] == '휴무'}" th:text="${openTimeList[i.index][0]}"></td>
+                    <td th:unless="${openTimeList[i.index][0] == '휴무'}" th:text="${openTimeList[i.index][1]}"></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="text-end">
+            <a th:href="@{|/shopBasicSet?s_id=${shop.sId}|}" class="btn btn-outline-primary btn-sm">기본정보 수정</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

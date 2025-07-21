@@ -6,138 +6,98 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>가게 기본 설정</title>
+    <title>가게 기본 정보 수정</title>
+    <link rel="stylesheet" href="/css/shopInfo.css">
+    <!-- 지도/주소 API 연동 시 이렇게 JS키를 넣습니다 -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	<script
+	  src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2b87d757b240dd70a51d682dd3cc37ed&libraries=services">
+	</script>
+	<script src="/js/shop.js"></script>
 </head>
-
 <body>
-    <div layout:fragment="content">
+<div layout:fragment="content">
+    <div class="content-card">
+        <h2 class="text-center fw-bold mb-4">기본 정보 수정</h2>
+        <form method="post" enctype="multipart/form-data" th:action="@{/shop/updateBasic}">
+            <input type="hidden" name="sId" th:value="${shop.sId}" />
 
-        <!-- 옵션리스트 (탭/버튼 네비) -->
-        <nav class="nav nav-tabs mb-4" style="margin-left: 8px;">
-            <a class="nav-link active" href="/shopBasicSet">기본설정</a>
-            <a class="nav-link" href="#">#####</a>
-            <a class="nav-link" href="#">#####</a>
-        </nav>
+            <div class="mb-3 row align-items-center">
+                <label class="col-sm-2 col-form-label fw-semibold">가게명*</label>
+                <div class="col-sm-10">
+                    <input type="text" name="name" class="form-control" th:value="${shop.name}" maxlength="50" required>
+                </div>
+            </div>
+            <div class="mb-3 row align-items-center">
+                <label class="col-sm-2 col-form-label fw-semibold">연락처*</label>
+                <div class="col-sm-10">
+                    <input type="text" name="phone" class="form-control" th:value="${shop.phone}" maxlength="13" required>
+                </div>
+            </div>
+            <div class="mb-3 row align-items-center">
+			    <label class="col-sm-2 col-form-label fw-semibold">주소*</label>
+			    <div class="col-sm-10">
+			        <div class="row g-2 mb-2">
+			            <div class="col-auto">
+			                <button type="button" class="btn btn-outline-primary" onclick="findZipcode()">우편번호 찾기</button>
+			            </div>
+			            <div class="col-2">
+			                <input type="text" id="zipcode" name="zipcode" class="form-control" placeholder="우편번호" readonly th:value="${shop.zipcode}">
+			            </div>
+			            <div class="col">
+			                <input type="text" id="address1" name="address1" class="form-control" placeholder="기본주소" readonly th:value="${shop.address1}" oninput="updateMapFromAddress()">
+			            </div>
+			        </div>
+			        <input type="text" id="address2" name="address2" class="form-control" placeholder="상세주소" th:value="${shop.address2}">
+			    </div>
+			</div>
+			<!-- 지도 표시 영역 (상세주소 아래) -->
+            <div id="shop-map" style="width:100%;height:320px;border-radius:14px;margin-bottom:18px;"></div>
 
-        <!-- 여기엔 본문 내용만 -->
-        <div class="main-content-card card shadow-sm p-4" style="margin-left:8px; min-height:480px;">
-            <form method="post" enctype="multipart/form-data" action="/shop/update">
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">가게명*</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="name" class="form-control"/>
-<!--                  <input type="text" name="name" class="form-control" th:value="${shop.name}" /> -->
+			<div class="mb-3 row align-items-center">
+                <label class="col-sm-2 col-form-label fw-semibold">대표자명*</label>
+                <div class="col-sm-10">
+                    <input type="text" name="owner" class="form-control" th:value="${shop.owner}" maxlength="20" required>
+                </div>
+            </div>
+            <div class="mb-3 row align-items-center">
+                <label class="col-sm-2 col-form-label fw-semibold">사업자등록번호*</label>
+                <div class="col-sm-10">
+                    <input type="text" name="sNumber" class="form-control" th:value="${shop.sNumber}" maxlength="10" required>
+                </div>
+            </div>
+<!--             
+            <div class="mb-3 row align-items-center">
+                <label class="col-sm-2 col-form-label fw-semibold">가게사진</label>
+                <div class="col-sm-10">
+                    <input type="file" name="s_picture" class="form-control">
+                    <div th:if="${shop.sPictureURL != null}">
+                        <img th:src="${shop.sPictureURL}" alt="가게사진" style="height:44px;border-radius:7px; margin-top:7px;">
                     </div>
                 </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">대표자명*</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="owner" class="form-control"/>
-<!--                         <input type="text" name="owner" class="form-control" th:value="${shop.owner}" /> -->
-                    </div>
+            </div>
+ -->            
+            <div class="mb-3 row align-items-center">
+                <label class="col-sm-2 col-form-label fw-semibold">가게 정보</label>
+                <div class="col-sm-10">
+                    <input type="text" name="sInfo" class="form-control" th:value="${shop.sInfo}" maxlength="100">
                 </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">사업자등록번호*</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="s_number" class="form-control" />
-<!--                         <input type="text" name="s_number" class="form-control" th:value="${shop.s_number}" /> -->
-                    </div>
+            </div>
+            <div class="mb-3 row align-items-center">
+                <label class="col-sm-2 col-form-label fw-semibold">공지사항</label>
+                <div class="col-sm-10">
+                    <textarea name="notice" class="form-control" rows="3" th:text="${shop.notice}"></textarea>
                 </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">연락처*</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="phone" class="form-control" />
-<!--                         <input type="text" name="phone" class="form-control" th:value="${shop.phone}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">이메일</label>
-                    <div class="col-sm-10">
-                        <input type="email" name="email" class="form-control" />
-<!--                         <input type="email" name="email" class="form-control" th:value="${shop.email}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">가게 주소*</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="address1" class="form-control" />
-<!--                         <input type="text" name="address1" class="form-control" th:value="${shop.address1}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">상세주소</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="address2" class="form-control" />
-<!--                         <input type="text" name="address2" class="form-control" th:value="${shop.address2}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">가게사진</label>
-                    <div class="col-sm-10">
-                        <input type="file" name="s_picture" class="form-control" />
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">한줄소개</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="shop_tagline" class="form-control" />
-<!--                         <input type="text" name="shop_tagline" class="form-control" th:value="${shop.shop_tagline}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">상세설명</label>
-                    <div class="col-sm-10">
-                        <textarea name="shop_description" class="form-control" rows="3"></textarea>
-<!--                         <textarea name="shop_description" class="form-control" rows="3" th:text="${shop.shop_description}"></textarea> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">오픈일</label>
-                    <div class="col-sm-10">
-                        <input type="date" name="open_date" class="form-control" />
-<!--                         <input type="date" name="open_date" class="form-control" th:value="${shop.open_date}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">영업시간</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="op_time" class="form-control" />
-<!--                         <input type="text" name="op_time" class="form-control" th:value="${shop.op_time}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">휴무일</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="off_day" class="form-control" />
-<!--                         <input type="text" name="off_day" class="form-control" th:value="${shop.off_day}" /> -->
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">공지사항</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="notice" class="form-control" />
-<!--                         <input type="text" name="notice" class="form-control" th:value="${shop.notice}" /> -->
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-success">저장</button>
-            </form>
-        </div>
-
+            </div>
+            <div class="text-center mt-5">
+                <button type="submit" class="btn btn-lg btn-success px-5 fw-bold">
+                    <i class="bi bi-check-lg me-2"></i> 저장
+                </button>
+                <a th:href="@{|/shopBasicView?s_id=${shop.sId}|}" class="btn btn-outline-secondary btn-lg ms-2 px-4">취소</a>
+            </div>
+        </form>
     </div>
+</div>
 </body>
 </html>
