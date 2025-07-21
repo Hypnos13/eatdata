@@ -41,7 +41,7 @@
 	<select id="shopList" resultType="Shop">
 		SELECT * From shop
 	</select>
-<<<<<<< HEAD
+
 
 	<insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
        INSERT INTO menu(s_id, category, name, price, m_info, m_picture_url, reg_date, modi_date)
@@ -93,8 +93,6 @@
         DELETE FROM menu_option WHERE m_id = #{mId}
     </delete>
 
-</mapper>
-=======
 	
 	<!-- 가게정보 불러오기 -->
 	<select id="findByOwnerId" resultType="com.projectbob.domain.Shop">
@@ -135,4 +133,3 @@
 	</update>
 
 </mapper>	
->>>>>>> develop
