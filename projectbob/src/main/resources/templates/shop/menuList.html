@@ -27,7 +27,7 @@
                 <tr th:if="${#lists.isEmpty(menuList)}">
                     <td colspan="7" class="text-center">등록된 메뉴가 없습니다.</td>
                 </tr>
-                <tr th:each="menu : ${menuList}">
+               <tr th:each="menu : ${menuList}">
                     <td th:text="${menu.mId}"></td>
                     <td th:text="${menu.sId}"></td>
                     <td th:text="${menu.category}"></td>
@@ -38,8 +38,11 @@
                         <span th:unless="${menu.mPictureUrl}">사진 없음</span>
                     </td>
                     <td>
-                        <a th:href="@{/shop/menuUpdateForm(mId=${menu.mId})}" class="btn btn-sm btn-info">수정</a>
-                        <button type="button" class="btn btn-sm btn-danger" id="menuDelete" name="menuDelete">삭제</button>
+                        <a th:href="@{/shop/menuUpdateForm(mId=${menu.mId})}" class="btn btn-sm btn-info me-2">수정</a>
+                        <form th:action="@{/shop/deleteMenu}" method="post" style="display:inline;">
+                            <input type="hidden" name="mId" th:value="${menu.mId}">
+                            <button type="submit" class="btn btn-sm btn-danger delete-menu-btn">삭제</button>
+                        </form>
                     </td>
                 </tr>
             </tbody>

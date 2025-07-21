@@ -30,9 +30,9 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 	// 삭제 버튼 이벤트 위임
 	if(optionsContainer) {
-		optionsContainer.addEventListener('click', function (event) {
+		optionsContainer.addEventListener('click', function (e) {
 			if(e.target.classList.contains('remove-option-btn')) {
-				const optionItem = event.target.closest('.menu-option-item');
+				const optionItem = e.target.closest('.menu-option-item');
 				if(optionItem) {
 					const moIdInput = optionItem.querySelector('input[name$=".moid"]');
 					const statusInput = optionItem.querySelector('input[name$=".status"]');
@@ -127,37 +127,45 @@ document.addEventListener('DOMContentLoaded', function () {
 			}
 		});
 	}
+	// 페이지 로드 시 초기 메뉴 데이터 설정(수정 폼)
+	if(menuUpdateForm) {
+		const initialMenuDataElement = document.getElementById('initialMenuDataJson');
+		let initialMenu = null;
+		
+		if(initialMenuDataElement && initialMenuDataElement.dataset.menuJson) {
+			try {
+				// 컨트롤러에서 ObjectMapper로 변환된 JSON 문자열을 파싱
+				initialMenu = JSON.parse(initialMenuDataElement.dataset.menuJson);
+			} catch (e) {
+				console.error("Failed to parse initial menu JSON: ", e);
+				initialMenu = null;
+			}
+		}
+		if (initialMenu && initialMenu.options && initialMenu.options.length > 0 ) {
+			optionsContainer.innerHTML = '';// 기본에 Thymeleaf 로 렌더링된 옵션들을 초기화
+			optionIndex = 0; // 인덱스 초기화
+			initialMenu.options.forEach(option => {
+				addOptionRow(option.moId, option.moption, option.content, option.price, option.status);
+			})
+		}
+	}
+	// 메뉴 목록 페이지
+	const deleteMenuButtons = document.querySelectorAll('.delete-menu-btn');// 클래스명으로 변경
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	if (deleteMenuButtons.length > 0) {
+		deleteMenuButtons.forEach(button => {
+			button.addEventListener('click', function(e) {
+				const form = this.closest('form');
+				if(form) {
+					if (confirm('정말로 이 메뉴를 삭제하시겠습니까?')) {
+						form.submit(); // 확인 시 폼 제출
+					} else {
+						e.preventDefault(); // 취소 시 폼 제출 방지
+					}
+				}
+			})
+		})
+	}
 	
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

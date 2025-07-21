@@ -67,12 +67,22 @@ public class ShopService {
 	}
 	// 특정 메뉴 상세 조회(옵션 포함)
 	public Menu getMenuDetail(int mId) {
-		Menu menu = shopMapper.getMenuById(mId);
-		if (menu != null) {
-			List<MenuOption> options = shopMapper.getMenuOptionsByMenuId(mId);
-			menu.setOptions(options);
-		}
-		return menu;
+	    Menu menu = shopMapper.getMenuById(mId); // 1. 메뉴 기본 정보 로드
+	    if (menu != null) {
+	        List<MenuOption> options = shopMapper.getMenuOptionsByMenuId(mId); // 2. 메뉴 옵션 로드
+
+	        // ★★★ 이 지점 (2번 라인 바로 다음)에 브레이크포인트 설정 ★★★
+	        // 이 시점에서 `options` 리스트의 내용을 디버거의 변수 창에서 확인하세요.
+	        // 예를 들어, mId가 7인 메뉴를 불러왔다면, options 리스트에 2개의 MenuOption 객체가 담겨 있어야 합니다.
+	        // 각 MenuOption 객체의 필드(mOption, content, price 등)에 값이 제대로 들어있는지 확인하세요.
+
+	        menu.setOptions(options); // 3. 로드된 옵션을 Menu 객체에 설정
+
+	        // ★★★ 이 지점 (3번 라인 바로 다음)에도 브레이크포인트 설정 ★★★
+	        // 이 시점에서 `menu` 객체 자체를 확인하세요.
+	        // `menu.options` 필드에 방금 로드한 options 리스트가 제대로 설정되어 있는지 확인합니다.
+	    }
+	    return menu;
 	}
 	// 메뉴 정보 수정
 	@Transactional
