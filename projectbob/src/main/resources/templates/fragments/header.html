@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<div th:fragment="header" class="top-bar row border-bottom border-primary align-items-center py-1">
+<div th:fragment="header" class="top-bar row">
 
   <th:block th:if="${(session.loginDisivion == 'client' || session.loginDisivion == null && from != 'owner' )}">
   <div class="col-5 logo-area">
@@ -27,20 +27,20 @@
   <div class="col-7 text-end fs-6">
     <th:block th:if="${session.isLogin}">
       <a class="me-2">[[${session.loginNickname}]] 님 어서오세요.</a>
-      <a th:href="@{/logout}" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">로그아웃</a>
-      <a th:href="@{/myProfile}" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">내정보수정</a>
+      <a th:href="@{/logout}" class="topbar-href">로그아웃</a>
+      <a th:href="@{/myProfile}" class="topbar-href">내정보수정</a>
     </th:block>
     <th:block th:unless="${session.isLogin}">
-      <a th:href="@{/login}" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">로그인</a>  
+      <a th:href="@{/login}" class="topbar-href">로그인</a>  
     </th:block>
     <th:block th:if="${session.loginDisivion == 'client'}">
-    	<a href="orderList" class="border border-white px-2 py-1 text-decoration-none" style="font-size: 0.85rem;">주문표(0)</a>
+    	<a href="orderList" class="topbar-href">주문표(0)</a>
     </th:block>
     <th:block th:if="${session.loginDisivion == 'master'}">
-    	<a href="faqList" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">FAQ관리</a>
-    	<a href="noticeList" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">공지사항관리</a>
-    	<a href="userList" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">사용자관리</a>
-    	<a href="shopManage" class="border border-white px-2 py-1 text-decoration-none me-2" style="font-size: 0.85rem;">가게관리</a>
+    	<a href="faqList" class="topbar-href">FAQ관리</a>
+    	<a href="noticeList" class="topbar-href">공지사항관리</a>
+    	<a href="userList" class="topbar-href">사용자관리</a>
+    	<a href="shopManage" class="topbar-href">가게관리</a>
     </th:block>
   </div>
 </div>

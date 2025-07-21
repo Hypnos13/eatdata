@@ -233,7 +233,7 @@ public class LoginController {
 		
 		model.addAttribute("Member", loginService.getMember(id));
 		
-		if(id.substring(1, 2).equals("N_")) {
+		if(id.substring(0, 2).equals("N_") || id.substring(0, 2).equals("K_")) {
 			return "members/updateNaverMemberships";
 		}
 		
