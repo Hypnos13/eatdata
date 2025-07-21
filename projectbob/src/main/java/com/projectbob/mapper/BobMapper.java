@@ -42,20 +42,23 @@ public interface BobMapper {
 	//댓글 삭제하는 메서드
 	public void deleteReview(int rNo);
 	
-	// 대댓글 리뷰리스트
-	/* public ReviewReply reviewreplyList(int rNo); */
+	// 댓글에 달린 대댓글 가져오기 메서드
+	public ReviewReply reviewreplyList(@Param("rNo") int rNo);
 	
 	// 대댓글 DB에 등록하는 메서드
 	public void addReviewReply(ReviewReply reviewreply);
 	
 	// 가게 전체 대댓글
-	public List<ReviewReply> getReviewReplyList(int sId);
+	public List<ReviewReply> getReviewReplyList(@Param("sId") int sId);
 	
 	// 대댓글 수정
 	public void updateReviewReply(ReviewReply reviewreply);
 	
 	// 대댓글 삭제
-	public void deleteReviewReply(int rrNo);
+	public void deleteReviewReply(@Param("rrNo") int rrNo);
+	
+	// 대댓글 개수조회
+	public int countReviewReply(@Param("rNo") int rNo);
 
 }
 

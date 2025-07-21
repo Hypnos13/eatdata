@@ -108,9 +108,15 @@ public class BobService{
 	 * bobMapper.reviewreplyList(rNo); }
 	 */
 	
-	// 대댓글 등록하는 메서드	
+	// 대댓글 등록/수정하는 메서드	
 	  public void addReviewReply(ReviewReply reviewreply) {
-	  bobMapper.addReviewReply(reviewreply); }
+		  int count = bobMapper.countReviewReply(reviewreply.getRNo());
+		  if (count == 0) {
+			  bobMapper.addReviewReply(reviewreply);
+		  } else {
+			  bobMapper.updateReviewReply(reviewreply);
+		  }
+	   }
 	 
 	// 가게 번호에 해당하는 전체 대댓글을 rNo(리뷰 번호) 기준으로 Map에 담아 반환
 	public Map<Integer, ReviewReply> getReviewReplyMap(int sId) {

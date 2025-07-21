@@ -222,7 +222,7 @@
 																	th:data-rrno="${reviewReplyMap[review.rNo].rrNo}" th:data-rno="${review.rNo}"
 																	th:data-content="${reviewReplyMap[review.rNo].content}">수정</button>
 												<button type="button" class="btn btn-outline-danger btn-sm px-3 deleteReviewReply"
-																	th:data-rrno="${reviewReplyMap[review.rNo].rrNo}" th:data-rno="${review.rNo}">삭제</button>
+																	th:data-rrno="${reviewReplyMap[review.rNo].rrNo}" th:data-rno="${review.rNo}" th:data-sid="${shop.sId}">삭제</button>
 											</div>										
 										</div>
 										<div th:text="${reviewReplyMap[review.rNo].content}" class="ms-3"></div>
@@ -238,15 +238,16 @@
 									<form class="review-reply-form">
 										<input type="hidden" name="rNo" th:value="${review.rNo}">
 										<input type="hidden" name="sId" th:value="${shop.sId}">
+										<input type="hidden" name="rrNo" th:value="${reviewReplyMap[review.rNo].rrNo}" th:if="${reviewReplyMap[review.rNo] != null}">
 										<div class="mb-2">
 											<textarea name="content" class="form-control fs-5 py-3" rows="3" maxlength="250"
 													placeholder="사장님 댓글을 입력하세요" style="resize: none;"></textarea>																				
 										</div>
 										<div class="text-end">
 											<th:block th:if="${member != null and member.id == shop.id}">
-												<button class="btn btn-success px-4 me-1" type="submit">등록</button>
+												<button class="btn btn-success px-4 me-1 review-reply-submit-btn" type="submit">등록</button>
 												<button type="button" class="btn btn-outline-primary px-4 me-1 modifyReviewReply">수정</button>
-												<button type="button" class="btn btn-outline-danger px-4 deleteReviewReply">삭제</button>
+												<button type="button" class="btn btn-outline-danger px-4 deleteReviewReply" th:attr="data-rrno=${reviewReplyMap[review.rNo].rrNo}" th:if="${reviewReplyMap[review.rNo] != null}" th:data-sid="${shop.sId}">삭제</button>
 											</th:block>
 										</div>
 									</form>

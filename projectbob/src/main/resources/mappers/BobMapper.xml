@@ -2,6 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
+<!-- 대댓글 개수 조회 -->
+<select id="countReviewReply" parameterType="int" resultType="int">
+	SELECT COUNT(*) FROM review_reply WHERE r_no = #{rNo}
+</select>
+
 <!-- 대댓글 삭제 -->
 <delete id="deleteReviewReply" parameterType="int">
 	DELETE FROM review_reply WHERE rr_no = #{rrNo}
@@ -24,7 +29,7 @@
 	SELECT * FROM review_reply WHERE r_no = #{rNo}
 </select>
 
-<!-- 전체 대댓글 가져오기 -->
+<!-- 가게 전체 대댓글 가져오기 -->
 <select id="getReviewReplyList" resultType="com.projectbob.domain.ReviewReply">
 	SELECT * FROM review_reply WHERE s_id = #{sId}
 </select>
