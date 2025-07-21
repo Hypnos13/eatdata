@@ -90,7 +90,8 @@ public class ShopController {
 	}
 	
 	@GetMapping("/shopJoinForm")
-	public String shopJoinForm() {
+	public String shopJoinForm(Model model ) {
+		model.addAttribute("shop", new Shop());
 		return "shop/shopJoinForm";
 	}
 	
