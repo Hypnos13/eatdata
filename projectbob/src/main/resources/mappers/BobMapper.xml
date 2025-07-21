@@ -66,6 +66,12 @@
 	ORDER BY s_id DESC
 </select>
 
-
+<!-- 영업시간 업데이트 -->
+<update id="updateShopOpenTime" parameterType="com.projectbob.domain.Shop">
+    UPDATE shop
+    SET op_time = #{opTime},
+        off_day = #{offDay}
+    WHERE s_id = #{sId}
+</update>
 
 </mapper>

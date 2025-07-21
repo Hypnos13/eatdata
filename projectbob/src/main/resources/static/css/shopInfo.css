@@ -81,7 +81,9 @@ body {
   max-width: 370px;
   flex-shrink: 0;
 }
-@media (max-width: 991px) {
+
+/* 반응형 사이드바(700px 이하) */
+@media (max-width: 700px) {
   .services-sidebar, .services-main {
     width: 100% !important;
     min-width: 0 !important;
@@ -291,4 +293,90 @@ body {
 }
 .shop-basic-list img {
   margin-left: 10px;
+}
+
+/* ===== shopOpenTime(영업시간) ===== */
+.shop-opentime-table {
+  width: 100%;
+  margin: 0 auto 36px auto;
+  border-collapse: separate;
+  border-spacing: 0 13px;
+  background: #fcfcfd;
+  border-radius: 16px;
+  overflow: hidden;
+  font-size: 1.09em;
+  box-shadow: 0 3px 15px rgba(67,208,145,0.07);
+}
+.shop-opentime-table th, .shop-opentime-table td {
+  text-align: center;
+  vertical-align: middle;
+  padding: 13px 8px;
+}
+.shop-opentime-table th {
+  background: #eef5f3;
+  color: #188368;
+  font-weight: 800;
+  font-size: 1.09em;
+  letter-spacing: 0.05em;
+  border-bottom: 2.5px solid #d6eae3;
+}
+.shop-opentime-table tr {
+  border-bottom: 1.5px solid #e5e5ec;
+}
+.shop-opentime-table td {
+  background: #fff;
+  border-radius: 10px;
+}
+.shop-opentime-table select {
+  width: 72px;
+  font-size: 1.1em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccd3d8;
+  margin: 0 6px;
+  text-align: center;
+}
+.time-unit {
+  color: #555;
+  margin: 0 2px;
+  font-size: 1em;
+  font-weight: 500;
+}
+
+/* ===== 스위치 버튼(휴무 등) ===== */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ddd;
+  transition: .3s;
+  border-radius: 34px;
+}
+.switch input:checked + .slider {
+  background-color: #43D091;
+}
+.switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 15px; width: 15px;
+  left: 3px; bottom: 2.5px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+.switch input:checked + .slider:before {
+  transform: translateX(16px);
 }

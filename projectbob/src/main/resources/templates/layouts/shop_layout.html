@@ -82,8 +82,8 @@
 	    </button>
 	    <div class="collapse" id="collapseStore">
 	      <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
-	        <li th:if="${shopListMain != null and !#lists.isEmpty(shopListMain)}">
-			  <a class="sidebar-sub-link" th:href="@{|/shopBasicView?s_id=${shopListMain[0].sId}|}">
+	        <li th:if="${currentShop != null}">
+			  <a class="sidebar-sub-link" th:href="@{|/shopBasicView?s_id=${currentShop.sId}|}">
 			    기본설정
 			  </a>
 			</li>
@@ -104,7 +104,7 @@
 	    <div class="collapse" id="collapseTime">
 	      <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
 	        <li><a th:href="@{|/shopOpenTime?s_id=${shop.sId}|}" class="sidebar-sub-link">영업시간</a></li>
-	        <li><a href="#" class="sidebar-sub-link">휴무일</a></li>
+	        <li><a th:href="@{|/shopStatus?s_id=${shop.sId}|}" class="sidebar-sub-link">영업상태</a></li>
 	        <li><a href="#" class="sidebar-sub-link">일시중지</a></li>
 	      </ul>
 	    </div>
@@ -125,7 +125,7 @@
 	      </ul>
 	    </div>
 	  </div>
-	  </div>
+	  
 	  
 		<!-- 할인랭킹 -->
 		<div class="mb-2">
@@ -207,6 +207,7 @@
 		      <li><a href="/setting/profile" class="sidebar-sub-link">프로필설정</a></li>
 		    </ul>
 		  </div>
+		</div>
 		</div>
 	  
 		<!-- 하단 공지부분 -->

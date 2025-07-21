@@ -1,34 +1,71 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layouts/shop_layout}">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/shop_layout}">
 <head>
     <meta charset="UTF-8">
-    <title>영업시간 안내</title>
+    <title>영업시간</title>
+    <link rel="stylesheet" href="/css/shopInfo.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="content-card">
-        <h2 class="fw-bold mb-4">영업시간 안내</h2>
-        <table class="table table-bordered text-center">
-            <thead>
-                <tr>
-                    <th>요일</th>
-                    <th>오픈</th>
-                    <th>마감</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="day, i : ${#lists.arrayList('월','화','수','목','금','토','일')}">
-                    <td th:text="${day}요일"></td>
-                    <td th:if="${openTimeList[i.index][0] == '휴무'}" colspan="2" class="text-danger">휴무</td>
-                    <td th:unless="${openTimeList[i.index][0] == '휴무'}" th:text="${openTimeList[i.index][0]}"></td>
-                    <td th:unless="${openTimeList[i.index][0] == '휴무'}" th:text="${openTimeList[i.index][1]}"></td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="text-end">
-            <a th:href="@{|/shopBasicSet?s_id=${shop.sId}|}" class="btn btn-outline-primary btn-sm">기본정보 수정</a>
-        </div>
-    </div>
+  <div class="content-card">
+    <h2 class="text-center fw-bold mb-4">영업시간</h2>
+    <form id="openTimeForm" th:action="@{|/shopOpenTimeUpdate?s_id=${shop.sId}|}" method="post" autocomplete="off">
+	  <table class="shop-opentime-table table align-middle">
+	    <thead>
+	      <tr>
+	        <th>요일</th>
+	        <th>시작시간</th>
+	        <th>종료시간</th>
+	        <th>휴무</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr th:each="day, i : ${daysOfWeek}">
+	        <td th:text="${day + '요일'}"></td>
+	        <td>
+	          <div class="d-flex align-items-center time-group">
+	            <select th:name="'openHour['+${i.index}+']'" class="hour-select">
+	              <option th:each="h : ${#numbers.sequence(0,23)}" th:value="${h < 10 ? '0'+h : h}" th:text="${h < 10 ? '0'+h : h}"></option>
+	            </select>
+	            <span class="time-unit">시</span>
+	            <select th:name="'openMin['+${i.index}+']'" class="min-select">
+	              <option th:each="m : ${#numbers.sequence(0,59,10)}" th:value="${m < 10 ? '0'+m : m}" th:text="${m < 10 ? '0'+m : m}"></option>
+	            </select>
+	            <span class="time-unit">분</span>
+	          </div>
+	        </td>
+	        <td>
+	          <div class="d-flex align-items-center time-group">
+	            <select th:name="'closeHour['+${i.index}+']'" class="hour-select">
+	              <option th:each="h : ${#numbers.sequence(0,23)}" th:value="${h < 10 ? '0'+h : h}" th:text="${h < 10 ? '0'+h : h}"></option>
+	            </select>
+	            <span class="time-unit">시</span>
+	            <select th:name="'closeMin['+${i.index}+']'" class="min-select">
+	              <option th:each="m : ${#numbers.sequence(0,59,10)}" th:value="${m < 10 ? '0'+m : m}" th:text="${m < 10 ? '0'+m : m}"></option>
+	            </select>
+	            <span class="time-unit">분</span>
+	          </div>
+	        </td>
+	        <td>
+	          <label class="switch">
+	            <input type="checkbox" th:name="'isOpen['+${i.index}+']'" checked>
+	            <span class="slider"></span>
+	          </label>
+	        </td>
+	      </tr>
+	    </tbody>
+	  </table>
+	  <div class="text-center mt-4">
+	    <button type="submit" class="btn btn-primary open-time-edit-save px-4 fw-semibold">
+	      <i class="bi bi-check2-circle me-1"></i> 변경사항 저장
+	    </button>
+	  </div>
+	</form>
+  </div>
 </div>
 </body>
 </html>

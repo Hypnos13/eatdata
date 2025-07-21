@@ -68,8 +68,8 @@
   opacity: 0.85;
 }
 
-/* === 반응형 헤더 (991px 이하) === */
-@media (max-width: 991px) {
+/* 반응형 헤더 (700px 이하) */
+@media (max-width: 700px) {
   .header { 
     flex-direction: column; 
     padding: 15px 12px; 

@@ -62,5 +62,11 @@
 	      modi_date = #{modiDate}
 	  WHERE s_id = #{sId}
 	</update>
-
+	
+	<!-- 가게 상태 업데이트 -->
+	<update id="updateStatus">
+	    UPDATE shop
+	    SET status = #{status}
+	    WHERE s_id = #{sId}
+	</update>
 </mapper>	

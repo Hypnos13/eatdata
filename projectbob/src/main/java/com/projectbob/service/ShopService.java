@@ -64,25 +64,42 @@ public class ShopService {
 	    log.info("업데이트 결과: {}", result);
 	}
 	
+	//가게 상태 업데이트
+	public void updateStatus(Integer sId, String status) {
+		shopMapper.updateStatus(sId, status);
+	}
+
+	//영업시간 정보
 	public List<String[]> getOpenTimeList(Shop shop) {
 	    String opTime = shop.getOpTime();
 	    List<String[]> result = new ArrayList<>();
 	    if (opTime == null || opTime.isBlank()) {
-	        for (int i = 0; i < 7; i++) result.add(new String[] {"-", "-"});
+	        for (int i = 0; i < 7; i++) result.add(new String[]{"-", "-"});
 	        return result;
 	    }
-	    String[] arr = opTime.split(",");
+	    String[] arr = opTime.split(";");
 	    for (String s : arr) {
-	        if (s.equals("휴무") || s.isBlank()) {
-	            result.add(new String[] {"휴무", ""});
+	        s = s.trim();
+	        if (s.equals("-,-") || s.equals("휴무") || s.isBlank()) {
+	            result.add(new String[]{"휴무", ""});
 	        } else {
-	            String[] t = s.split("-");
-	            if (t.length == 2) result.add(new String[] {t[0], t[1]});
-	            else result.add(new String[] {"-", "-"});
+	            String[] t = s.split(",");
+	            if (t.length == 2) result.add(new String[]{t[0].trim(), t[1].trim()});
+	            else result.add(new String[]{"-", "-"});
 	        }
 	    }
-	    while (result.size() < 7) result.add(new String[] {"-", "-"});
+	    while (result.size() < 7) result.add(new String[]{"-", "-"});
 	    return result;
 	}
 	
+	//영업시간 업데이트
+	public void updateShopOpenTime(Shop shop) {
+	    shopMapper.updateShopOpenTime(shop);
+	}
+	
+	// 가게 운영상태 변경 요청
+	public void updateShopStat(Integer sId, String stat) {
+	    shopMapper.updateShopStat(sId, stat);
+	}
+
 }

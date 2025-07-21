@@ -32,4 +32,19 @@ public interface ShopMapper {
 
 	//기본정보 수정
 	public int updateShopBasicInfo(Shop shop);
+	
+	//가게 상태 업데이트
+	public void updateStatus(@Param("sId") Integer sId, @Param("status") String status);
+
+	// 영업시간/휴무 정보만 업데이트
+	@Update("UPDATE shop SET op_time = #{opTime}, off_day = #{offDay} WHERE s_id = #{sId}")
+	public void updateShopOpenTime(Shop shop);
+
+	@Select("SELECT * FROM shop WHERE s_id = #{sId} AND id = #{ownerId}")
+	public Shop findByShopIdAndOwnerIdShop(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
+
+	// 가게 운영상태 변경 요청
+	@Update("UPDATE shop SET stat = #{stat} WHERE s_id = #{sId}")
+	void updateShopStat(@Param("sId") Integer sId, @Param("stat") String stat);
+
 }
