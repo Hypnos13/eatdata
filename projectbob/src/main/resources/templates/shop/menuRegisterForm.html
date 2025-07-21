@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/shop_layout}"> <th:block layout:fragment="content">
+
+    <div class="row my-5" id="global-content">
+        <div class="col">
+            <div class="row my-3 text-center">
+                <div class="col">
+                    <h2 class="fs-3 fw-bold">메뉴 등록</h2>
+                </div>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger text-center">
+                <span th:text="${errorMessage}"></span>
+            </div>
+            <div th:if="${message}" class="alert alert-success text-center">
+                <span th:text="${message}"></span>
+            </div>
+
+            <form action="/shop/insertMenu" name="menuRegisterForm" method="post" id="menuRegisterForm"
+                  enctype="multipart/form-data" th:object="${menu}">
+                <div class="row my-3">
+                    <div class="col-8 offset-2">
+                        <label for="sId" class="form-label">* 가게ID(임시) : </label>
+                        <input type="text" class="form-control" name="sId" id="sId" th:field="*{sId}" required>
+                    </div>
+                </div>
+                <div class="row my-3">
+                    <div class="col-8 offset-2">
+                        <label for="category" class="form-label">* 카테고리 : </label>
+                        <input type="text" class="form-control" name="category" id="category" th:field="*{category}" required>
+                    </div>
+                </div>
+                <div class="row my-3">
+                    <div class="col-8 offset-2">
+                        <label for="name" class="form-label">* 메뉴 이름 : </label>
+                        <input type="text" class="form-control" name="name" id="name" th:field="*{name}" required>
+                    </div>
+                </div>
+                <div class="row my-3">
+                    <div class="col-8 offset-2">
+                        <label for="price" class="form-label">* 가격 : </label>
+                        <input type="number" class="form-control" name="price" id="price" th:field="*{price}" required>
+                    </div>
+                </div>
+                <div class="row my-3">
+                    <div class="col-8 offset-2">
+                        <label for="mInfo" class="form-label">* 메뉴 설명 : </label>
+                        <textarea class="form-control" name="mInfo" id="mInfo" rows="5" th:field="*{mInfo}"></textarea>
+                    </div>
+                </div>
+                <div class="row my-3">
+                    <div class="col-8 offset-2">
+                        <label for="mPicture">* 메뉴 사진 : </label>
+                        <input type="file" id="mPicture" name="mPicture" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row my-3">
+                    <div class="col-8 offset-2">
+                        <label class="form-label">메뉴 옵션:</label>
+                        <div id="menuOptionsContainer">
+                            </div>
+                        <button type="button" class="btn btn-success mt-2" id="addOptionBtn">옵션 추가</button>
+                    </div>
+                </div>
+
+                <div class="row mb-3 mt-5">
+                    <div class="col-8 offset-2">
+                        <input type="submit" value="메뉴 등록하기" class="btn btn-primary">
+                        <a href="/menu/list" class="btn btn-secondary">목록으로</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+   
+</th:block>
+</html>

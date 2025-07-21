@@ -40,4 +40,8 @@ public class FileUploadService {
 		return "/images/"+subDirectory+savedFilename;
 	}
 	
+	public String getUploadBaseDir() {
+		return uploadBaseDir;
+	}
+	
 }

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/shop_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>내 가게 리스트</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="row my-3 text-center">
+            <div class="col">
+                <h2 class="fs-3 fw-bold">내 가게 리스트</h2>
+            </div>
+        </div>
+        <div class="main-content-card card shadow-sm p-4" style="margin-left:8px; min-height:480px;">
+            <table class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th>가게명</th>
+                        <th>대표자명</th>
+                        <th>연락처</th>
+                        <th>상태</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="shop : ${shopListMain}">
+                        <td th:text="${shop.name}"></td>
+                        <td th:text="${shop.owner}"></td>
+                        <td th:text="${shop.phone}"></td>
+                        <td th:text="${shop.status}"></td>
+                        <td>
+                            <a th:href="@{|/shopBasicView?s_id=${shop.sId}|}" class="btn btn-outline-success btn-sm">설정</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

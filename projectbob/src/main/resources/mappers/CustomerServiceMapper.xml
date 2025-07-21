@@ -112,7 +112,18 @@
 	SET category = #{category} , status = #{status} , modi_date = SYSDATE()
 	WHERE s_id = #{sId}
 </update>
-</mapper>	
 
+<insert id="insertChatMessage" parameterType="chatMessage">
+	INSERT INTO chat_messages (id, role, message, reg_date, modi_date) 
+	VALUES (#{id}, #{role}, #{message}, SYSDATE(), SYSDATE())
+</insert>
+
+<select id="getChatMessage" resultType="ChatMessage">
+	SELECT *
+	FROM  chat_messages
+	WHERE id = #{id}
+	ORDER BY reg_date ASC
+</select>
+</mapper>	
 
 

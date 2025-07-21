@@ -6,36 +6,23 @@
 <script th:src="@{js/login.js}"></script>
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <link th:href="@{/css/login.css}" rel="stylesheet" />
-<div class ="container">
-	<h1>내 정보 수정</h1>
-		<div class="col-9 d-flex justify-content-end mb-2">
-		<Form name="deleteMemberForm" id="deleteMemberForm" method="post" action="deleteMember">
-			<input class="form-control" name="userId" id="userId" type="hidden" th:value="${Member.id}" readonly>
-			<input class="form-control" name="userPass" id="userPass" type="hidden">
-			<input type="submit" id="btnUnsubscript" value="탈퇴하기">
-		</Form>
-	</div>
+<div class="container">
+	  <h1>내 정보 수정</h1>
+	  <div class="col-9 d-flex justify-content-end mb-2">
+	    <form method="post" action="deleteNaverMember">
+	      <input type="hidden" name="userId" th:value="${Member.id}" />
+	      <input type="submit" id="btnUnsubscript" value="탈퇴하기">
+	    </form>
+	  </div>
 	
-	<Form name="updateMemberForm" id="updateMemberForm" method="post" action="updateMember">
+	<Form name="updateNaverMemberForm" id="updateNaverMemberForm" method="post" action="updateNaverMember">
+		<input class="form-control" name="id" id="id" type="hidden" th:value="${Member.id}" readonly>
 		<div class="row my-2">
 			<div class="col-4 text-end">
-				<label for="id">*아이디 :</label>  
+				<label for="email">*이메일 :</label> 
 			</div>
 			<div class="col-5">
-				<input class="form-control" name="id" id="id" type="text" th:value="${Member.id}" readonly>
-			</div>
-		</div>
-		<div class="row my-2">
-			<div class="col-4 text-end">
-				<label for="password">*비밀번호 :</label>  
-			</div>
-			<div class="col-5">	
-				<input class="form-control" name="pass" id="password" type="password" placeholder="비밀번호를 입력해주세요">
-			</div>
-		</div>
-		<div class="row my-2">
-			<div class="col-10 text-end">
-				<div class="text-danger text-center" id="passInfo"></div>
+				<input type="email" class="form-control" name="email" id="email" th:value="${Member.email}" readonly>
 			</div>
 		</div>
 		<div class="row my-2">
@@ -48,7 +35,7 @@
 		</div>
 		<div class="row my-2">
 			<div class="col-4 text-end">
-				<label for="nickname">별명 :</label>  
+				<label for="nickname">별명 :</label>
 			</div>
 			<div class="col-5">
 				<input class="form-control" name="nickname" id="nickname" type="text" th:value="${Member.nickname}">
@@ -56,7 +43,7 @@
 		</div>
 		<div class="row my-2">
 			<div class="col-4 text-end">
-				<label for="birthday">*생년월일 :</label>  
+				<label for="birthday">*생년월일 :</label> 
 			</div>
 			<div class="col-5">
 				<input class="form-control" name="birthday" id="birthday" type="text" th:value="${Member.birthday}" readonly>
@@ -64,7 +51,7 @@
 		</div>
 		<div class="row my-2">
 			<div class="col-4 text-end">
-				<label for="address1">*주소 :</label>  
+				<label for="address1">*주소 :</label> 
 			</div>
 			<div class="col-4">
 				<input class="form-control" name="address1" id="address1" th:value="${Member.address1}" readonly>
@@ -75,23 +62,10 @@
 		</div>
 		<div class="row my-2">
 			<div class="col-4 text-end">
-				<label for="address2">상세주소 : </label>  
+				<label for="address2">*상세주소 :</label>  
 			</div>
 			<div class="col-5">
 				<input class="form-control" name="address2" id="address2" type="text" th:value="${Member.address2}" placeholder="상세 주소를 입력해주세요">
-			</div>
-		</div>
-		<div class="row my-2">
-			<div class="col-4 text-end">
-				<label for="email">*이메일 :</label>  
-			</div>
-			<div class="col-5">
-				<input type="email" class="form-control" name="email" id="email" th:value="${Member.email}" placeholder="이메일을 입력해주세요. (ex.name@example.com)">
-			</div>
-		</div>
-		<div class="row my-2">
-			<div class="col-10 text-end">
-				<div class="text-danger text-center" id="emailInfo"></div>
 			</div>
 		</div>
 		<div class="row my-2">

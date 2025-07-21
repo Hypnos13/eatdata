@@ -156,6 +156,43 @@ $(function(){
 			window.location.href="userList?disivion="+searchDisivion+"&keyword="+keyword;	
 		}
 	});
+	
+	
+	// 네이버로 가입시 로그인 검사
+	$("#naverJoinForm").on("submit", function(){
+			
+		let check = 0;		
+
+		check += CheckBirthday();	
+				
+		check += CheckAddress();
+			
+		check += CheckPhone();
+			
+		if(check != 3){
+			return false;
+		}
+	});
+	
+	// 네이버로 로그인 후 내정보 수정하기 유효성 검사
+	$("#updateNaverMemberForm").on("submit",function(){
+				
+		let check = 0;	
+					
+		check += CheckAddress();
+		check += CheckPhone();
+				
+		if(check != 2){	return false; }
+	});
+	
+	// 네이버 아이디 회원 탈퇴 시
+	$("#deleteNaverMemberForm").on("submit",function(){
+		if (!confirm("정말로 탈퇴 하시겠습니까? (복원이 불가능합니다.)")) {
+		      return false;
+		} else {
+		    $("#userPass").val($("#password").val());
+		}			
+	});
 });
 
 

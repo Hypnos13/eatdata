@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.projectbob.domain.ChatMessage;
 import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.NoticeBoard;
 import com.projectbob.domain.Shop;
@@ -24,4 +25,6 @@ public interface CustomerServiceMapper {
 	void deleteNotice(int no);
 	List<Shop> shopManageList(@Param("searchShop") String searchShop, @Param("keyword") String keyword );
 	void updateShopManage(@Param("sId") String sId, @Param("category") String category, @Param("status") String status);
+	void insertChatMessage(ChatMessage chatMessage);
+	List<ChatMessage> getChatMessage(String id);
 }

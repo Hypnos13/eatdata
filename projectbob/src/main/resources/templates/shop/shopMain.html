@@ -10,9 +10,9 @@
     <link rel="stylesheet" href="/css/shopLayout.css">
 	<link rel="stylesheet" href="/css/shopMain.css">
 </head>
-<body>
+<body th:attr="data-login=${isLogin} ? 'true' : 'false'">
     <!-- 헤더 include -->
-    <th:block th:replace="fragments/shopHeader :: shopHeader" />
+    <th:block th:replace="~{fragments/shopHeader :: shopHeader}" />
     
 	  	<!-- 상단 메뉴 & 로그인 카드 (넓게 펼침) -->
 	    <div class="container-fluid">
@@ -21,73 +21,87 @@
 	            <div class="mains-icons-col">
 	                <div class="mains-icon-grid">
 	                    <div class="icon-col">
-	                        <a href="/store-hours" class="mains-icon-box">
-	                            <div class="mains-icon"><i class="bi bi-clock"></i></div>
-	                            <div class="mains-icon-label">영업시간</div>
+	                        <a th:href="${hasShop} ? '/shopListMain' : '/shopInfo'" class="mains-icon-box">
+	                            <div class="mains-icon"><i class="bi bi-house-gear"></i></div>
+	                            <div class="mains-icon-label">서비스 홈</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/coupon" class="mains-icon-box">
-	                            <div class="mains-icon"><i class="bi bi-ticket-perforated-fill"></i></div>
-	                            <div class="mains-icon-label">쿠폰관리</div>
+						    <a th:if="${#lists.size(shopListMain) == 1}"
+						       th:href="@{|/shopBasicView?s_id=${shopListMain[0].sId}|}"
+						       class="mains-icon-box login-required">
+						        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+						        <div class="mains-icon-label">기본설정</div>
+						    </a>
+						    <a th:if="${#lists.size(shopListMain) > 1}"
+						       th:href="@{/shopListMain}"
+						       class="mains-icon-box login-required">
+						        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+						        <div class="mains-icon-label">기본설정</div>
+						    </a>
+						    <a th:if="${#lists.size(shopListMain) == 0}"
+						       th:href="@{/shopInfo}"
+						       class="mains-icon-box login-required">
+						        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+						        <div class="mains-icon-label">기본설정</div>
+						    </a>
+						</div>
+	                    <div class="icon-col">
+	                        <a href="/menuJoinForm" class="mains-icon-box login-required"  >
+	                            <div class="mains-icon"><i class="bi bi-receipt"></i></div>
+	                            <div class="mains-icon-label">메뉴등록</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/delivery-fee" class="mains-icon-box">
-	                            <div class="mains-icon"><i class="bi bi-truck"></i></div>
-	                            <div class="mains-icon-label">배달요금</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-	                        <a href="/ads" class="mains-icon-box">
+	                        <a href="/ads" class="mains-icon-box"  >
 	                            <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
 	                            <div class="mains-icon-label">추천광고</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/menu-quality" class="mains-icon-box">
+	                        <a href="/menu-quality" class="mains-icon-box"  >
 	                            <div class="mains-icon"><i class="bi bi-list-check"></i></div>
 	                            <div class="mains-icon-label">메뉴품질</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/holiday" class="mains-icon-box">
+	                        <a href="/holiday" class="mains-icon-box"  >
 	                            <div class="mains-icon"><i class="bi bi-calendar-x"></i></div>
 	                            <div class="mains-icon-label">휴무일</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/settlement" class="mains-icon-box">
+	                        <a href="/settlement" class="mains-icon-box"  >
 	                            <div class="mains-icon"><i class="bi bi-coin"></i></div>
 	                            <div class="mains-icon-label">정산/세금</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/review" class="mains-icon-box">
+	                        <a href="/review" class="mains-icon-box"  >
 	                            <div class="mains-icon"><i class="bi bi-chat-left-text"></i></div>
 	                            <div class="mains-icon-label">리뷰관리</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/store-info" class="mains-icon-box">
+	                        <a href="/store-info" class="mains-icon-box"  >
 	                            <div class="mains-icon"><i class="bi bi-shop"></i></div>
 	                            <div class="mains-icon-label">가게정보</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/ads/event" class="mains-icon-box">
+	                        <a href="/ads/event" class="mains-icon-box"  >
 	                            <div class="mains-icon"><i class="bi bi-gift"></i></div>
 	                            <div class="mains-icon-label">이벤트관리</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/stat/sales" class="mains-icon-box">
+	                        <a href="/stat/sales" class="mains-icon-box"  >
 	                            <div class="mains-icon"><i class="bi bi-graph-up-arrow"></i></div>
 	                            <div class="mains-icon-label">매출통계</div>
 	                        </a>
 	                    </div>
 	                    <div class="icon-col">
-	                        <a href="/setting/profile" class="mains-icon-box">
+	                        <a href="/setting/profile" class="mains-icon-box"  >
 	                            <div class="mains-icon"><i class="bi bi-person-circle"></i></div>
 	                            <div class="mains-icon-label">프로필설정</div>
 	                        </a>
@@ -101,7 +115,7 @@
 	        <section class="hero">
 	            <h1>사장님의 가게에 날개를 달아주세요</h1>
 	            <p>간편한 입점 신청으로 더 많은 고객을 만나보세요.<br>저희가 사장님의 성공적인 비즈니스를 돕겠습니다.</p>
-	            <a href="/shopJoinForm" class="btn-cta">지금 바로 입점신청하기</a>
+	            <a href="/shopJoinForm" class="btn-cta login-required">지금 바로 입점신청하기</a>
 	        </section>
 	
 	        <section id="benefits" class="section">
@@ -146,7 +160,10 @@
 	            </div>
 	        </section>
 	    </main>
-	    <!-- 푸터 include (shopFooter) -->
-    <th:block th:replace="fragments/shopFooter :: shopFooter" />
+
+    <!-- 푸터 include (shopFooter) -->
+    <th:block th:replace="~{fragments/shopFooter :: shopFooter}" />
+<script src="/js/jquery-3.7.1.min.js"></script>
+<script src="/js/shop.js"></script>
 </body>
 </html>

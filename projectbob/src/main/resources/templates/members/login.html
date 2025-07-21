@@ -3,54 +3,67 @@
 		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
 		layout:decorate="~{layouts/main_layout}">
 <th:block layout:fragment="content">
-<script th:src="@{js/login.js}"></script>
+<script type="text/javascript" src="https://static.nid.naver.com/js/naverLogin_implicit-1.0.3.js" charset="utf-8"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.5/kakao.min.js"></script>
+<script th:src="@{/js/login.js}"></script>
+<link th:href="@{/css/login.css}" rel="stylesheet" />
+<div class ="loginContainer">
+<div class ="loginContainerTitle">ProjectBOB</div>
 <div class ="container">
-	<div class="row border mt-5">
+	<div class="row justify-content-center">
 		<form name="loginForm" id="loginForm" method="post" action="login" class="col-10">
-			<div class="row my-2">
-				<div class="col-5 text-end">
-					아이디 : 
-			  	</div>
-			  	<div class="col-5">
-			  		<input class="form-control" name="id" id="id" type="text" placeholder="아이디를 입력해주세요">
-			  	</div>
+		
+			<div class="row justify-content-center align-items-center">
+			  <div class="col-10 d-flex align-items-stretch">
+			    <!-- 입력 영역 -->
+			    <div class="flex-grow-1 me-3">
+			      <div class="d-flex align-items-center mb-2">
+			        <label for="id" class="form-label me-2" style="width: 80px;">아이디:</label>
+			        <input type="text" class="form-control" name="id" id="id" placeholder="아이디를 입력해주세요">
+			      </div>
+			      <div class="d-flex align-items-center">
+			        <label for="pass" class="form-label me-2" style="width: 80px;">비밀번호:</label>
+			        <input type="password" class="form-control" name="pass" id="pass" placeholder="비밀번호를 입력해주세요">
+			      </div>
+			    </div>
+			    <!-- 로그인 버튼 -->
+			    <div class="d-flex align-items-center">
+			      <button type="submit" class="login-side-btn">로그인</button>
+			    </div>
+			  </div>
 			</div>
+			
 			<div class="row my-2">
-				<div class="col-5 text-end">
-					비밀번호 : 
+				<div class="col text-center">
+					 <div id="naver_id_login"></div>
+					  <script type="text/javascript">
+						  	var naver_id_login = new naver_id_login("geNaa92ft6eNyAmK2TxC", "http://localhost:8080/login/naver/callback");
+						  	var state = naver_id_login.getUniqState();
+						  	naver_id_login.setButton("white", 3,40);
+						  	naver_id_login.setDomain("http://localhost:8080");
+						  	naver_id_login.setState(state);
+						  	naver_id_login.init_naver_id_login();
+  					  </script>
 			  	</div>
-			  	<div class="col-5">
-			  		<input class="form-control" name="pass" id="pass" type="password" placeholder="비밀번호를 입력해주세요">
-			  	</div>
-			</div>
-			<div class="row my-2">
-				<div class="col-12 text-center">
-					<button type="submit" class="btn btn-success">로그인</button>
-				</div>
 			</div>
 			<div class="row my-2">
 				<div class="col text-center">
-					네이버 로그인 연동
-			  	</div>
-			</div>
-			<div class="row my-2">
-				<div class="col text-center">
-					카카오 로그인 연동
+					 <a href="https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a6ce69b235d3336723f4b86140c8a301&redirect_uri=http://localhost:8080/kakao">
+					 	<img src="images/kakaobtn.png"/>
+					 </a>
 			  	</div>
 			</div>
 			</form>
 		</div>
 	</div>
-	<div class="row border mt-2">
-		<div class="col-10">
-			<div class="row my-2">
-				<div class="col-12 text-center">
-					<a class="text-decoration-none" href="searchIdPassForm?search=id">아이디찾기</a> | 
-					<a class="text-decoration-none" href="searchIdPassForm?search=pass">비밀번호찾기</a> | 
-					<a class="text-decoration-none" href="joinMemberForm">회원가입</a>
-				</div>
-			</div>
-		</div>
+	<div class="row login-links">
+	  <div class="col-12">
+	    <a href="searchIdPassForm?search=id">아이디찾기</a> |
+	    <a href="searchIdPassForm?search=pass">비밀번호찾기</a> |
+	    <a href="joinMemberForm">회원가입</a>
+	  </div>
 	</div>
+</div>
 </th:block>
 </html>
