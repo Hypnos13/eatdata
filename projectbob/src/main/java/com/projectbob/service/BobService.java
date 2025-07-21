@@ -108,8 +108,7 @@ public class BobService{
 	 * bobMapper.reviewreplyList(rNo); }
 	 */
 	
-	// 대댓글 등록하는 메서드
-	
+	// 대댓글 등록하는 메서드	
 	  public void addReviewReply(ReviewReply reviewreply) {
 	  bobMapper.addReviewReply(reviewreply); }
 	 
@@ -123,7 +122,15 @@ public class BobService{
 	    return map;
 	}
 
+	// 대댓글 수정하기
+	public void updateReviewReply(ReviewReply reviewreply) {
+		bobMapper.updateReviewReply(reviewreply);
+	}
 
+	// 대댓글 삭제하기
+	public void deleteReviewReply(int rrNo) {
+		bobMapper.deleteReviewReply(rrNo);
+	}
 	
 	
 	

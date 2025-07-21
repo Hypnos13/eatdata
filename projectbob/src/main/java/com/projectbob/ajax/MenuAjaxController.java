@@ -175,5 +175,55 @@ public class MenuAjaxController {
 		result.put("shopOwnerId", shopOwnerId);
 		return result;
 	}
+	
+	// 대댓글 수정 메서드
+	@PatchMapping("/reviewReplyUpdate.ajax")
+	@ResponseBody
+	public Map<String, Object> updateReviewReply(@RequestBody ReviewReply reviewreply){
+		bobService.updateReviewReply(reviewreply);
+		
+		List<Review> reviewList = bobService.getReviewList(reviewreply.getSId());
+		Map<Integer, ReviewReply> reviewReplyMap = bobService.getReviewReplyMap(reviewreply.getSId());
+		
+		String shopOwnerId = null;
+		Shop shop = bobService.getShopDetail(reviewreply.getSId());
+		if(shop != null) {
+			shopOwnerId = shop.getId();
+		}
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("reviewList", reviewList);
+		result.put("reviewReplyMap", reviewReplyMap);
+		result.put("shopOwnerId", shopOwnerId);
+		return result;
+	}
+	
+	// 대댓글 삭제 메서드
+	@DeleteMapping("/reviewReplyDelete.ajax")
+	@ResponseBody
+	public Map<String, Object> deleteReviewReply(@RequestParam("rrNo") int rrNo, @RequestParam("sId") int sId){
+		bobService.deleteReviewReply(rrNo);
+		
+		List<Review> reviewList = bobService.getReviewList(sId);
+		Map<Integer, ReviewReply> reviewReplyMap = bobService.getReviewReplyMap(sId);
+		
+		String shopOwnerId = null;
+		Shop shop = bobService.getShopDetail(sId);
+		if(shop != null) {
+			shopOwnerId = shop.getId();
+		}
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("reviewList", reviewList);
+		result.put("reviewReplyMap", reviewReplyMap);
+		result.put("shopOwnerId", shopOwnerId);
+		return result;
+	}
+	
+	
+	
+	
+	
+	
 
 }

@@ -489,7 +489,7 @@ $(document).on('click', '.review-reply-btn', function(){
 	$('.reviewReplyForm').addClass('d-none');
 	$replyForm.removeClass('d-none');	
 	
-	console.log('사장님 대댓글 버튼 클릭 rNo:', rNo, 'sId', sId);	
+	console.log('사장님 대댓글쓰기 버튼 클릭 rNo:', rNo, 'sId', sId);	
 	console.log('폼 input[name="rNo"] 값:', $replyForm.find('input[name="rNo"]').val());
 });
 // 사장님 댓글쓰기 submit
@@ -531,6 +531,59 @@ $(document).on('submit', '.review-reply-form', function(e){
 	});
 });
 
+// 사장님 댓글 수정 클릭
+$(document).on("click", ".modifyReviewReply", function(){
+	const rNo = $(this).data('review-no');
+		const $replyForm = $(this).closest('.reviewRow').find('.reviewReplyForm');
+		const sId = $("input[name='sId']").first().val();
+		const content = $(this).closest("form").find("[name='content']").val();
+		$replyForm.find('input[name="rNo"]').val(rNo);
+		$replyForm.find('input[name="sId"]').val(sId);
+		$replyForm.find('input[name="content"]').val(content);
+		$replyForm.attr('id', 'reviewReplyUpdateForm');
+		$('.reviewReplyForm').addClass('d-none');
+		$replyForm.removeClass('d-none');	
+});
+// 사장님 댓글수정 submit
+$(document).on("submit", "#reviewReplyUpdateForm", function(e){
+	e.preventDefault();
+		
+		const $form = $(this);
+		const rNo = $form.find('input[name="rNo"]').val();	
+		const sId = $form.find('input[name="sId"]').val();
+		const content = $form.find('input[name="content"]').val();
+		const shopOwnerId = $("#shopOwnerId").val();
+
+		console.log('수정ajax전송 전 rNo:', rNo, 'sId:' , sId, 'shopOwnerId:', shopOwnerId);
+		
+		if(!content || content.trim().length == 0){
+			alert('댓글을 입력하세요.');
+			return;
+		}
+		$.ajax({
+			url: '/reviewReplyUpdate.ajax',
+			type: 'patch',
+			data: JSON.stringify({
+				rNo: Number(rNo),
+				sId: Number(sId),
+				id: shopOwnerId,
+				content: content
+			}),
+			contentType: "application/json",
+			dataType: 'json',
+			success: function(resData){
+				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
+				
+				$form.closest('.reviewReplyForm').addClass('d-none');
+				$form[0].reset();
+				$form.attr('id', '');
+			},
+			error: function(xhr, status){
+				alert('사장님 댓글 수정 오류: ' + status);
+			}
+		});
+});
+
 
 // 리뷰쓰기/수정/삭제 AJAX 성공 후~
 function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
@@ -568,30 +621,62 @@ function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
 		let ownerReplyHtml = '';
 		const reply = reviewreplyMap[r.rno];
 		if(reply){
+			if(loginId == shopOwnerId){
 			ownerReplyHtml =`
 			<div class="card p-2 bg-light border-info" style="border-left:4px solid #3498db;">
 													<div class="d-flex align-items-center mb-1">
 														<span class="fw-bold text-primary">
 															<i class="bi bi-person-badge"></i>사장님
 														</span>
-														<span class="text-muted small ms-2">${reply.regDate}</span>											
+														<span class="text-muted small ms-2">${formDate(reply.regDate)}</span>
+														<div class="ms-auto">
+															<button type="button" class="btn btn-outline-primary btn-sm px-3 modifyReviewReply" data-rrno="${reply.rrNo}" data-rno="${r.rno}" data-content="${reply.content}">수정</button>
+														  <button type="button" class="btn btn-outline-danger btn-sm px-3 deleteReviewReply" data-rrno="${reply.rrNo}" data-rno="${r.rno}">삭제</button>
+														</div>										
 													</div>
-													<div class="ms-3">${reply.content}</div>
+													<div class="ms-3 fs-5 py-2">${reply.content}</div>
+												</div>
+												<div class="reviewReplyEditForm d-none mt-2">
+													<form>
+														<textarea name="content" class="form-control fs-5 py-3 mb-2" rows="3" maxlength="250" placeholder="사장님 댓글 수정"></textarea>
+														<div class="text-end">
+															<button type="submit" class="btn btn-success px-4 me-1">수정완료</button>
+															<button type="button" class="btn btn-outline-secondary px-4 cancelEditReply">취소</button>
+														</div>
+													</form>
 												</div>
 			`;
+			
+		} else {
+			ownerReplyHtml =`
+			<div class="card p-3 bg-light border-info mt-3" style="border-left:4px solid #3498db;">
+				<div class="d-flex align-items-center mb-1">
+					<span class="fw-bold text-primary">
+						<i class="bi bi-person-badge"></i>사장님
+					</span>
+					<span class="text-muted small ms-2">${formDate(reply.regDate)}</span>
+				</div>
+				<div class="ms-3 fs-5 py-2">${reply.content}</div>
+			</div>
+			`;
+		}
 		} else if (loginId == shopOwnerId) {			
 			ownerReplyHtml =	`
 			<div class="mt-2 text-end">
-												<button type="button" class="btn btn-outline-primary btn-sm px-2 py-0 review-reply-btn" data-review-no="${r.rno}">
-													<i class="bi bi-person-badge"></i>사장님 댓글쓰기
-												</button>
-												<form class="reviewReplyForm review-reply-form d-none" style="margin-top:10px;">
-												        <input type="hidden" name="rNo" value="${r.rno}">
-												        <input type="hidden" name="sId" value="${$('#shopId').val()}">
-												        <input type="text" name="content" class="form-control" placeholder="사장님 대댓글 입력">
-												        <button type="submit" class="btn btn-info btn-sm mt-1">등록</button>
-												</form>
-											</div>
+					<button type="button" class="btn btn-outline-primary btn-sm px-2 py-0 review-reply-btn" data-review-no="${r.rno}">
+							<i class="bi bi-person-badge"></i>사장님 댓글쓰기
+					</button>
+			</div>
+			<div class="reviewReplyForm d-none p-3 rounded shadow-sm mt-2" style="background:#f8fafc;">
+					<form class="review-reply-form">
+						<input type="hidden" name="rNo" value="${r.rno}">
+						<input type="hidden" name="sId" value="${$('#shopId').val()}">
+						<textarea name="content" class="form-control fs-5 py-3 mb-2" rows="3" maxlength="250" placeholder="사장님 댓글을 입력하세요" style="resize: none;"></textarea>
+						<div class="text-end mt-2">
+							<button type="submit" class="btn btn-success px-4 me-1">등록</button>
+						</div>
+					</form>
+			</div>
 			`;
 		}
 		let reviewHtml = `
@@ -632,7 +717,7 @@ function resetReviewForm(){
 		$form.find('input[name="rating"]').prop('checked',false);
 		$form.find("#imgPreview").hide().attr('src', '');
 		
-		console.log("리뷰폼 구조:", $("#reviewForm").html());
+		//console.log("리뷰폼 구조:", $("#reviewForm").html());
 		console.log("폼 개수:", $("#reviewForm").find("form").length);
 	}
 	

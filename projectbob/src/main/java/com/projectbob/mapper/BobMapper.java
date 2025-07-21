@@ -50,6 +50,12 @@ public interface BobMapper {
 	
 	// 가게 전체 대댓글
 	public List<ReviewReply> getReviewReplyList(int sId);
+	
+	// 대댓글 수정
+	public void updateReviewReply(ReviewReply reviewreply);
+	
+	// 대댓글 삭제
+	public void deleteReviewReply(int rrNo);
 
 }
 
