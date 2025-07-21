@@ -141,19 +141,19 @@ $(function(){
 	
 	// 관리자 페이지 - 사용자관리 - 검색어 검색
 	$("#btn_search").on("click",function(){
-		let searchDisivion = $("#searchDisivion").val();
+		let searchDivision = $("#searchDivision").val();
 		let keyword = $("#keyword").val();
 		
-		window.location.href="userList?disivion="+searchDisivion+"&keyword="+keyword;		
+		window.location.href="userList?division="+searchDivision+"&keyword="+keyword;		
 	});
 	
 	// 관리자 페이지 - 사용자관리 - 검색어 검색시
 	$("#keyword").on("keydown",function(e){
 		if(e.key == 'Enter'){
-			let searchDisivion = $("#searchDisivion").val();
+			let searchDivision = $("#searchDivision").val();
 			let keyword = $("#keyword").val();
 					
-			window.location.href="userList?disivion="+searchDisivion+"&keyword="+keyword;	
+			window.location.href="userList?division="+searchDivision+"&keyword="+keyword;	
 		}
 	});
 	

@@ -13,7 +13,7 @@
 	    <th:block th:unless="${session.isLogin}">
 	      <a href="login?from=owner" class="btn-login">로그인</a>  
 	    </th:block>
-	    <th:block th:if="${session.loginDisivion == 'master'}">
+	    <th:block th:if="${session.loginDivision == 'master'}">
 	    	<a href="faqList" class="btn-register">FAQ관리</a>
 	    	<a href="noticeList" class="btn-register">공지사항관리</a>
 	    	<a href="userList" class="btn-register">사용자관리</a>
