@@ -10,19 +10,30 @@ import org.springframework.web.bind.annotation.*;
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @Slf4j
 public class BobController {
 
-    private final LoginController loginController;
+    
+    @Autowired
+	private LoginController loginController;
 	
-	@Autowired private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
+	@Autowired
+	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	
-    BobController(LoginController loginController) {
-        this.loginController = loginController;
-    }
+	//회원인지 비회원인지 체크 
+	 private String resolveId(HttpSession session) {
+	        String id = (String) session.getAttribute("loginId");
+	        if (id == null) {
+	            id = (String) session.getAttribute("guestId"); // 비회원용
+	        }
+	        return id;
+	    }
+
+	
 
 	@GetMapping({"/", "/main"})
 	public String Main() {		
@@ -101,5 +112,92 @@ public class BobController {
 			  return "views/pay";			  
 		  }
 		  
+		  
+			// ▶ 장바구니 목록 조회
+		    @GetMapping("/getmenuList")
+		    public List<Cart> getCart(HttpSession session) {
+		        String id = resolveId(session);
+		        if (id == null) return Collections.emptyList(); // guestId도 없으면 빈값
+		        return bobService.getCart(id);
+		    }
 
+		    // ▶ 메뉴 추가
+		    @PostMapping("/addMenu")
+		    public String addCart(@RequestBody Cart cart, HttpSession session) {
+		        // 1. 로그인 ID 확인
+		        String id = (String) session.getAttribute("loginId");
+
+		        // 2. 로그인 안 된 경우 guestId 생성
+		        if (id == null) {
+		            id = (String) session.getAttribute("guestId");
+
+		            // 3. 세션에 guestId가 없다면 새로 생성해서 저장
+		            if (id == null) {
+		                id = "guest_" + UUID.randomUUID().toString().substring(0, 8);
+		                session.setAttribute("guestId", id);
+		            }
+		        }
+		        // 4. cart에 ID 설정 후 저장
+		        cart.setId(id);
+		        return bobService.insertCart(cart) ? "success" : "fail";
+		    }
+
+		    // ▶ 수량 및 가격 수정
+		    @PutMapping("/countUpdate")
+		    public String updateCart(@RequestBody Cart cart, HttpSession session) {
+		        String id = resolveId(session);
+		        if (id == null || !id.equals(cart.getId())) return "login_required";
+		        return bobService.updateCartQuantity(cart) ? "success" : "fail";
+		    }
+
+		    // ▶ 개별 항목 삭제
+		    @DeleteMapping("/deleteMenu")
+		    public String deleteCartItem(@RequestBody Cart cart, HttpSession session) {
+		        String id = resolveId(session);
+		        if (id == null || !id.equals(cart.getId())) return "login_required";
+		        return bobService.deleteMenu(cart) ? "deleted" : "fail";
+		    }
+
+		    // ▶ 장바구니 전체 삭제
+		    @DeleteMapping("/deleteMenuall")
+		    public String deleteAllCart(HttpSession session) {
+		        String id = resolveId(session);
+		        if (id == null) return "login_required";
+		        return bobService.deleteAllCart(id) ? "cleared" : "fail";
+		    }
+		    
+		    //대기 컨트롤러 추가
+//		    @PostMapping("/login")
+//		    public String login(@RequestParam String id, @RequestParam String pw, HttpSession session) {
+//		        if (userService.login(id, pw)) {
+//		            // 1. 로그인 성공 → 세션 저장
+//		            session.setAttribute("loginId", id);
+		//
+//		            // 2. guestId가 있다면 → cart 데이터 이전
+//		            String guestId = (String) session.getAttribute("guestId");
+//		            if (guestId != null) {
+//		                bobService.transferGuestCartToUser(guestId, id);
+//		                session.removeAttribute("guestId"); // 사용 완료 후 삭제
+//		            }
+		//
+//		            return "redirect:/main";
+//		        } else {
+//		            return "redirect:/login?error";
+//		        }
+//		    }
+		    
+		    //대기 서비스단추가
+//		    public void transferGuestCartToUser(String guestId, String loginId) {
+//		        bobMapper.updateCartOwner(guestId, loginId);
+//		    }
+		    
+		    //대기 쿼리추가
+//		    <update id="updateCartOwner">
+//		    UPDATE cart
+//		    SET id = #{loginId}
+//		    WHERE id = #{guestId}
+//		    </update>
+
+		  
+		
 }

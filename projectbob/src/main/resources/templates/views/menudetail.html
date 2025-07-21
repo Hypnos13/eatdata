@@ -247,36 +247,38 @@
 					</div>
 				</div>
 
-				<!-- 주문표 -->
-				<div class="col-md-4">
-					<div class="card order-summary p-3">
-						<h5 class="card-title">🛒 주문표</h5>
+<!-- 주문표 -->
+<div class="col-md-4">
+  <div class="card order-summary p-3">
+    <h5 class="card-title">🛒 주문표</h5>
 
-						<div class="order-item-list mb-3">
-							<!-- 주문 메뉴 및 추가 메뉴가 여기 동적으로 들어갑니다 -->
-						</div>
+    <div class="order-item-list mb-3">
+      <!-- 주문 메뉴 및 추가 메뉴가 여기 동적으로 들어갑니다 -->
+      <div class="text-muted fst-italic">주문한 메뉴가 없습니다.</div>
+    </div>
 
-						<hr />
-						<div>
-							<p>
-								주문 수량: <strong id="itemCount">0</strong>개
-							</p>
-							<strong>총 가격: <span id="totalPrice">0원</span></strong><br /> <small
-								class="text-muted" id="deliveryInfo" style="display: none;">
-								(배달비 3,000원 포함) </small>
-						</div>
+    <hr />
+    <div>
+      <p>
+        주문 수량: <strong id="itemCount">0</strong>개
+      </p>
+      <strong>총 가격: <span id="totalPrice">0원</span></strong><br />
+      <small class="text-muted" id="deliveryInfo" style="display: none;">
+        (배달비 3,000원 포함)
+      </small>
+    </div>
 
-						<div id="qtyWrapper" class="d-flex align-items-center mb-3"></div>
+    <div id="qtyWrapper" class="d-flex align-items-center mb-3"></div>
 
-						<!-- 주문 초기화(삭제) 버튼 -->
-						<button class="btn btn-danger w-100 mb-2" id="btnRemoveItem">주문
-							전체 취소</button>
+    <!-- 주문 초기화(삭제) 버튼 -->
+    <button class="btn btn-danger w-100 mb-2" id="btnRemoveItem">주문 전체 취소</button>
 
-						<button class="btn text-white w-100"
-							style="background-color: #43d091;" id="btnOrderNow">
-							주문하기</button>
-					</div>
-				</div>
+    <button class="btn text-white w-100" style="background-color: #43d091;" id="btnOrderNow">
+      주문하기
+    </button>
+  </div>
+</div>
+
 
 			</div>
 		</div>

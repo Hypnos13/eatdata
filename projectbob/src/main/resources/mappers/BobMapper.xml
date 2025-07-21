@@ -2,21 +2,40 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
+<!-- 주문표 모두 불러오기 -->
 <select id="getCart" resultType="com.projectbob.domain.Cart">
-select * from Cart
+select ca_id, m_id, mo_id, id, s_id, quantity, total_price, reg_date, modi_date
+ from cart
+  where id= #{id}
 </select>
 
+<!-- 주문표 메뉴 등록 -->
 <insert id="insertCart" parameterType="Cart">
-insert into Cart VALUES 
-(1,'null','qwer',1000,'2022-12-22 11:44:58','2022-12-22 11:44:58','상태');
-
+INSERT INTO cart (m_id, mo_id, id, s_id, quantity, total_price)
+  VALUES (#{mId}, #{moId}, #{id}, #{sId}, #{quantity}, #{totalPrice})
 </insert>
 
+<!-- 주문표 수량 수정 -->
 <update id="countUpdateCart" parameterType="Cart">
+ UPDATE cart
+  SET quantity = #{quantity},
+      total_price = #{totalPrice},
+      modi_date = CURRENT_TIMESTAMP
+  WHERE ca_id = #{caId}
+   AND id = #{id}
 </update>
 
-<delete id="deleteCart" parameterType="Cart">
+<!-- 주문표 메뉴 삭제 -->
+<delete id="deleteMenu" parameterType="Cart">
+  DELETE FROM cart
+  WHERE ca_id = #{caId}
+    AND id = #{id}
+</delete>
 
+<!-- 주문 전체 삭제 -->
+<delete id="deleteAllCart" parameterType="com.projectbob.domain.Cart">
+  DELETE FROM cart
+  WHERE id = #{id}
 </delete>
 
 <!-- 댓글 추가 맵핑 구문 -->
