@@ -9,7 +9,7 @@ h1 {
   color: #1e293b;
 }
 
-#btnAdress {
+#btnAdress, #btn-phoneCertify {
   height: 40px;
   padding: 0 16px;
   font-size: 12px;

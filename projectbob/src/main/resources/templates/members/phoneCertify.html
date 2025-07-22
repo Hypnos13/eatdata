@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>핸드폰 인증</title>
+<link href="/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script src="/js/jquery-3.7.1.min.js"></script>
+<script src="js/login.js"></script>
+</head>
+<body>
+<div class="container">
+	<div class="row text-center mt-5">
+		<h1>핸드폰 인증</h1>
+	</div>
+	<form name="phoneCertifyForm" id="phoneCertifyForm" method="post" action="certifyNumber">
+	<input type="hidden" id="phone" name="phone" th:value="${phone}">
+	<div class="row text-center my-3 mx-auto">
+			<div class="col-4 fw-bold">
+				<label for="phoneCheckNumber">인증번호 :</label> 
+			</div>
+			<div class="col-6">
+				<input type="text" class="form-control" name="certifyNumber" id="certifyNumber">
+			</div>
+	</div>
+	<div class="row text-center my-5">
+		<div class="col">
+			<input type="submit" class="btn btn-success" value="인증하기">
+		</div>
+	</div>
+	</form>
+</div>
+</body>
+</html>

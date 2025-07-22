@@ -17,7 +17,6 @@ public class WebConfig implements WebMvcConfigurer{
 		registry.addViewController("/writeNoticeForm").setViewName("admin/writeNoticeForm");
 		registry.addViewController("/shopJoinForm").setViewName("shop/shopJoinForm");
 		registry.addViewController("/login/naver/callback").setViewName("members/naverCallback");
-		
 	}
 	
 }
