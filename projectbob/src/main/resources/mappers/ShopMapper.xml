@@ -146,4 +146,9 @@
 	    SET status = #{status}
 	    WHERE s_id = #{sId}
 	</update>
+	
+	<!-- 메뉴 컨트롤러에 shop 모델 추가 -->
+	<select id="findBySId" resultType="com.projectbob.domain.Shop">
+	    SELECT * FROM shop WHERE s_id = #{sId}
+	</select>
 </mapper>	

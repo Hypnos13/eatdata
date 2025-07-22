@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
@@ -189,7 +190,7 @@ public class ShopController {
 	    return "ok";
 	}
 	
-	//영업시간 페이지
+	// 영업시간 페이지
 	@GetMapping("/shopOpenTime")
 	public String shopOpenTime(
 	    @RequestParam("s_id") Integer sId,
@@ -205,7 +206,6 @@ public class ShopController {
 	    }
 
 	    List<String[]> openTimeListRaw = shopService.getOpenTimeList(shop);
-	    if (openTimeListRaw == null) openTimeListRaw = new ArrayList<>();
 	    while (openTimeListRaw.size() < 7) openTimeListRaw.add(new String[]{"", ""});
 
 	    List<String> openTimeList = new ArrayList<>();
@@ -215,8 +215,7 @@ public class ShopController {
 	        closeTimeList.add(times.length > 1 ? times[1] : "");
 	    }
 
-	    List<String> daysOfWeek = Arrays.asList("월","화","수","목","금","토","일");
-	    int todayIndex = java.time.LocalDate.now().getDayOfWeek().getValue() % 7;
+	    List<String> daysOfWeek = Arrays.asList("월", "화", "수", "목", "금", "토", "일");
 
 	    List<String> offDayList = new ArrayList<>();
 	    if (shop.getOffDay() != null && !shop.getOffDay().isBlank()) {
@@ -225,7 +224,6 @@ public class ShopController {
 	    while (offDayList.size() < 7) offDayList.add("0");
 
 	    model.addAttribute("daysOfWeek", daysOfWeek);
-	    model.addAttribute("todayIndex", todayIndex);
 	    model.addAttribute("shop", shop);
 	    model.addAttribute("openTimeList", openTimeList);
 	    model.addAttribute("closeTimeList", closeTimeList);
@@ -235,12 +233,15 @@ public class ShopController {
 	    return "shop/shopOpenTime";
 	}
 
-	//영업시간 업데이트
+	// 영업시간 업데이트
 	@PostMapping("/shopOpenTimeUpdate")
 	public String shopOpenTimeUpdate(
 	    @RequestParam("s_id") Integer sId,
-	    @RequestParam("openTime") String[] openTimes,
-	    @RequestParam("closeTime") String[] closeTimes,
+	    @RequestParam("openHour") String[] openHour,
+	    @RequestParam("openMin") String[] openMin,
+	    @RequestParam("closeHour") String[] closeHour,
+	    @RequestParam("closeMin") String[] closeMin,
+	    @RequestParam(value="isOpen", required=false) String[] isOpen,
 	    @SessionAttribute(name = "loginId", required = false) String loginId,
 	    RedirectAttributes redirectAttributes
 	) {
@@ -249,16 +250,16 @@ public class ShopController {
 	    StringBuilder offDayBuilder = new StringBuilder();
 	    StringBuilder opTimeBuilder = new StringBuilder();
 
-	    for (int i = 0; i < openTimes.length; i++) {
-	        String open = openTimes[i];
-	        String close = closeTimes[i];
-
-	        if ((open == null || open.isBlank()) && (close == null || close.isBlank())) {
+	    for (int i = 0; i < openHour.length; i++) {
+	        final int idx = i;  // 람다 내에서 사용할 변수
+	        boolean closed = (isOpen == null || Arrays.stream(isOpen).noneMatch(v -> v.equals(String.valueOf(idx))));
+	        if (closed) {
 	            offDayBuilder.append(i).append(",");
 	            opTimeBuilder.append("-,").append("-;");
 	        } else {
-	            opTimeBuilder.append(open == null ? "-" : open).append(",");
-	            opTimeBuilder.append(close == null ? "-" : close).append(";");
+	            String open = openHour[i] + ":" + openMin[i];
+	            String close = closeHour[i] + ":" + closeMin[i];
+	            opTimeBuilder.append(open).append(",").append(close).append(";");
 	        }
 	    }
 	    String opTime = opTimeBuilder.toString();
@@ -278,6 +279,7 @@ public class ShopController {
 	    redirectAttributes.addFlashAttribute("message", "영업시간 정보가 저장되었습니다.");
 	    return "redirect:/shopOpenTime?s_id=" + sId;
 	}
+
 	
 	// 가게 운영상태 변경 요청
 	@PostMapping("/shop/statusUpdate")
@@ -308,6 +310,22 @@ public class ShopController {
 	    return "shop/shopStatus"; 
 	}
 
+	@ControllerAdvice
+	public class GlobalModelAdvice {
+
+	    @ModelAttribute
+	    public void addGlobalAttributes(Model model, HttpServletRequest request) {
+	        // 현재 경로(페이지)별로 다르게 텍스트 지정 가능
+	        String uri = request.getRequestURI();
+	        String pageTitle = "";
+	        if (uri.contains("shopBasic")) pageTitle = "기본설정";
+	        else if (uri.contains("shopOpenTime")) pageTitle = "영업시간";
+	        else if (uri.contains("shopStatus")) pageTitle = "영업상태";
+	        else if (uri.contains("menu")) pageTitle = "메뉴관리";
+
+	        model.addAttribute("pageTitle", pageTitle);
+	    }
+	}
 }
 
 

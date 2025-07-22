@@ -36,6 +36,11 @@ public class MenuController {
 	    menu.setSId(sId);
 	    // 2. sId가 설정된 menu 객체를 모델에 담아 뷰로 전달
 	    model.addAttribute("menu", menu); 
+	    
+	    // 영업시간 안나와서 넣은거 - 준혁
+	    Shop shop = shopService.findBySId(sId);
+	    model.addAttribute("shop", shop);
+
 	    return "/shop/menuRegisterForm";
 	}
 	// 메뉴 등록
@@ -66,6 +71,11 @@ public class MenuController {
 
 	    model.addAttribute("menuList", menuList);
 	    model.addAttribute("currentShopId", sId); // 새 메뉴 등록 시 sId를 넘겨주기 위해 추가
+
+	    // 영업시간 안나와서 넣은거 - 준혁
+	    Shop shop = shopService.findBySId(sId);
+	    model.addAttribute("shop", shop);
+	    
 	    return "/shop/menuList";
 	}
 	// 메뉴 수정 폼 이동
@@ -78,6 +88,10 @@ public class MenuController {
 	    // 2. 드롭다운 목록을 현재 가게(sId)의 메뉴로만 채웁니다.
 	    List<Menu> menuListForDropdown = shopService.getMenusByShopId(sId);
 	    model.addAttribute("menuList", menuListForDropdown);
+	    
+	    // 영업시간 안나와서 넣은거 - 준혁
+	    Shop shop = shopService.findBySId(sId);
+	    model.addAttribute("shop", shop);
 
 	    Menu selectedMenu = null;
 	    if (mId != null) {

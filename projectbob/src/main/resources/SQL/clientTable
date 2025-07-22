@@ -1,3 +1,4 @@
+drop table client;
 CREATE TABLE client (
 	id	varchar(20)	primary key,
 	pass	varchar(255)	NOT NULL,
@@ -14,3 +15,28 @@ CREATE TABLE client (
 	modi_date	timestamp	NOT NULL,
 	isuse varchar(2) NOT NULL DEFAULT 'Y'
 );
+
+select * from client;
+
+INSERT INTO client (
+  id, pass, name, nickname, birthday,
+  address1, address2, email, phone, point,
+  disivion, reg_date, modi_date, isuse
+) VALUES (
+  'owner01',
+  '1234',  -- (임의의 bcrypt 해시 예시)
+  '홍길동',
+  '길동이',
+  '19991212',
+  '서울특별시 강남구 테헤란로 123',
+  '101동 1001호',
+  'testuser01@email.com',
+  '01012345678',
+  1000,
+  'owner',
+  NOW(),
+  NOW(),
+  'Y'
+);
+
+commit;

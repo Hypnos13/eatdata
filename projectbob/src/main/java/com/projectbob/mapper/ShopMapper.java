@@ -58,4 +58,6 @@ public interface ShopMapper {
 	@Update("UPDATE shop SET status = #{status} WHERE s_id = #{sId}")
 	void updateShopStatus(@Param("sId") Integer sId, @Param("status") String status);
 
+	//메뉴 컨트롤러에 shop 모델 추가
+	Shop findBySId(int sId);
 }

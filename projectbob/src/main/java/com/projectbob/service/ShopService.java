@@ -245,5 +245,10 @@ public class ShopService {
 	public void updateShopStatus(Integer sId, String status) {
 	    shopMapper.updateShopStatus(sId, status);
 	}
+	
+	//메뉴 컨트롤러 shop 모델 추가
+	public Shop findBySId(int sId) {
+	    return shopMapper.findBySId(sId);
+	}
 
 }

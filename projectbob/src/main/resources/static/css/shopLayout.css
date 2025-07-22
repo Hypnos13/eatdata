@@ -37,6 +37,28 @@
   border-bottom: none !important; /* 밑줄 방지 */
 }
 
+.header-home-link {
+  font-size: 1.07rem;
+  color: var(--main-color);          /* 헤더 포인트 컬러(초록) */
+  text-decoration: none;             /* 밑줄 제거 */
+  transition: color 0.18s;
+}
+
+.page-title-text {
+  color: var(--text-color);   /* 또는 원하는 색상 */
+  font-size: 1.07rem;
+  letter-spacing: -0.01em;
+  vertical-align: middle;
+  margin-left: 0.7rem;
+  margin-right: 0.7rem;
+}
+
+.header-home-link:hover,
+.header-home-link:focus {
+  color: #188368;                   /* 호버시 약간 어두운 포인트컬러로 */
+  text-decoration: underline;       /* 호버시만 밑줄 줄 수도 있음 */
+}
+
 .header nav {
   display: flex;
   align-items: flex-start;
