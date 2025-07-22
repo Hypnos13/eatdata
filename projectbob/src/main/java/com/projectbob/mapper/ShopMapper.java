@@ -25,6 +25,7 @@ public interface ShopMapper {
     Menu getMenuById(int mId);                   // 특정 메뉴 상세 조회
     void updateMenu(Menu menu);                  // 메뉴 정보 수정
     void deleteMenu(int mId);                    // 메뉴 삭제
+    List<Menu> getMenusByShopId(int sId);		 // ID에 따른 메뉴 리스트 조회
 
     // 메뉴 옵션 관련 메서드
     void insertMenuOption(MenuOption menuOption);        // 메뉴 옵션 등록

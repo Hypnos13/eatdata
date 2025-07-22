@@ -117,15 +117,19 @@ document.addEventListener('DOMContentLoaded', function () {
 	const menuUpdateForm = document.getElementById('menuUpdateForm');
 	//드롭다운 메뉴 변경 시 메뉴 정보 로드
 	if(menuSelect) {
-		menuSelect.addEventListener('change', function () {
-			const selectedMenuId = this.value;
-			if(selectedMenuId) {
-				window.location.href = '/shop/menuUpdateForm?mId=' + selectedMenuId // 페이지 리로드 방식으로 메뉴 정보 로드
-			} else {
-				// "메뉴를 선택하세요" 를 선택한 경우 폼 필드 초기화(mId 없이 페이지 재로드)
-				window.location.href = '/shop/menuUpdateForm';
-			}
-		});
+	    menuSelect.addEventListener('change', function () {
+	        const selectedMenuId = this.value;
+	        // HTML에 심어둔 현재 가게 ID (sId)를 가져옵니다.
+	        const currentShopId = this.dataset.sId; 
+
+	        if(selectedMenuId) {
+	            // URL에 s_id와 mId를 모두 포함하여 전달합니다.
+	            window.location.href = `/shop/menuUpdateForm?s_id=${currentShopId}&mId=${selectedMenuId}`;
+	        } else {
+	            // 선택을 해제하면 s_id만 가지고 페이지를 리로드합니다.
+	            window.location.href = `/shop/menuUpdateForm?s_id=${currentShopId}`;
+	        }
+	    });
 	}
 	// 페이지 로드 시 초기 메뉴 데이터 설정(수정 폼)
 	if(menuUpdateForm) {

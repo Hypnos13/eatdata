@@ -30,9 +30,13 @@ public class MenuController {
 	
 	// 메뉴 등록 폼으로 이동
 	@GetMapping("/menuRegisterForm")
-	public String showRegisterForm(Model model) {
-		model.addAttribute("menu", new Menu()); //빈 Menu 객체를 넘겨 폼 바인딩 준비
-		return "/shop/menuRegisterForm";
+	public String showRegisterForm(@RequestParam("s_id") Integer sId, Model model) {
+	    Menu menu = new Menu();
+	    // 1. URL로부터 받은 sId를 새로운 Menu 객체에 설정
+	    menu.setSId(sId);
+	    // 2. sId가 설정된 menu 객체를 모델에 담아 뷰로 전달
+	    model.addAttribute("menu", menu); 
+	    return "/shop/menuRegisterForm";
 	}
 	// 메뉴 등록
 	@PostMapping("/insertMenu")
@@ -56,42 +60,50 @@ public class MenuController {
 	}
 	// 메뉴 목록 페이지(전체 메뉴)
 	@GetMapping("/menuList")
-	public String getMenuList(Model model) {
-		List<Menu> menuList = shopService.getAllMenus();// 간단한 목록
-		 for (Menu menu : menuList) {
-			 System.out.println("Menu ID: " + menu.getMId() +
-		                           ", Category: " + menu.getCategory() +
-		                           ", Price: " + menu.getPrice() +
-		                           ", Picture URL: " + menu.getMPictureUrl());
-			 }
-		model.addAttribute("menuList", menuList);
-		return "/shop/menuList";
+	public String getMenuList(@RequestParam("s_id") Integer sId, Model model) {
+	    // sId로 해당 가게의 메뉴만 필터링해서 가져옴
+	    List<Menu> menuList = shopService.getMenusByShopId(sId); 
+
+	    model.addAttribute("menuList", menuList);
+	    model.addAttribute("currentShopId", sId); // 새 메뉴 등록 시 sId를 넘겨주기 위해 추가
+	    return "/shop/menuList";
 	}
 	// 메뉴 수정 폼 이동
 	@GetMapping("/menuUpdateForm")
-	public String showUpdateForm(@RequestParam(value = "mId", required = false) Integer mId, Model model) {
-		Menu selectedMenu = null;
-		if(mId != null) {
-			selectedMenu = shopService.getMenuDetail(mId);
-		}
-		if(selectedMenu != null) {
-			try {
-				// selectedMenu 객체를 JSON 문자열로 변환하여 모델에 추가 (JS에서 사용)
-				String menuJson = objectMapper.writeValueAsString(selectedMenu);
-				model.addAttribute("menuJson", menuJson);
-			} catch (JsonProcessingException e) {
-				log.error("메뉴 객체 JSON 변환 오류: " + e.getMessage());
-				model.addAttribute("errorMessage", "메뉴 정보를 불러오는데 실패했습니다.");
-			}
-		} else {
-			// mId가 없거나 메뉴를 찾지 못했을 경우 빈 Menu 객체 또는 Null 처리
-			selectedMenu = new Menu(); // 새로운 매뉴 객체 생성
-			model.addAttribute("menuJson", "{}");
-		}
-		model.addAttribute("menu", selectedMenu);
-		model.addAttribute("menuList", shopService.getAllMenus());
-		
-		return "/shop/menuUpdateForm";
+	public String showUpdateForm(
+	        @RequestParam("s_id") Integer sId, // 1. 현재 가게 ID를 받습니다.
+	        @RequestParam(value = "mId", required = false) Integer mId, 
+	        Model model) {
+
+	    // 2. 드롭다운 목록을 현재 가게(sId)의 메뉴로만 채웁니다.
+	    List<Menu> menuListForDropdown = shopService.getMenusByShopId(sId);
+	    model.addAttribute("menuList", menuListForDropdown);
+
+	    Menu selectedMenu = null;
+	    if (mId != null) {
+	        // 3. mId가 있으면, 해당 메뉴의 상세 정보를 불러옵니다.
+	        selectedMenu = shopService.getMenuDetail(mId);
+	    }
+
+	    // 4. 만약 mId 없이 sId만 넘어왔다면, (드롭다운의 기본 선택값이 없도록) 빈 객체를 전달하거나
+	    //    혹은 목록의 첫 번째 메뉴를 기본으로 보여줄 수도 있습니다. (현재는 null로 처리)
+	    if (selectedMenu == null) {
+	        selectedMenu = new Menu();
+	        selectedMenu.setSId(sId); // sId는 기본으로 설정
+	    }
+
+	    try {
+	        String menuJson = objectMapper.writeValueAsString(selectedMenu);
+	        model.addAttribute("menuJson", menuJson);
+	    } catch (JsonProcessingException e) {
+	        log.error("메뉴 객체 JSON 변환 오류: " + e.getMessage());
+	        model.addAttribute("menuJson", "{}");
+	    }
+
+	    model.addAttribute("menu", selectedMenu);
+	    model.addAttribute("sId", sId); // 5. sId를 뷰에 전달하여 '목록으로' 버튼 등에서 사용
+
+	    return "/shop/menuUpdateForm";
 	}
 	
 	// 메뉴 수정 처리
@@ -111,15 +123,22 @@ public class MenuController {
 	}
 	// 메뉴 삭제 처리
 	@PostMapping("/deleteMenu")
-	public String deleteMenu(@RequestParam("mId") int mId, RedirectAttributes reAttrs) {
-		try {
-			shopService.deleteMenu(mId);
-			reAttrs.addFlashAttribute("message", "메뉴가 정상적으로 삭제되었습니다.");
-		} catch (Exception e) {
-			log.error("메뉴 삭제 실패: " + e.getMessage(), e);
-			reAttrs.addFlashAttribute("errorMeaage", "메뉴 삭제에 실패했습니다.");
-		}
-		return "redirect:/shop/menuList";
+	public String deleteMenu(@RequestParam("mId") int mId, 
+	                         @SessionAttribute(name = "loginId", required = false) String loginId, 
+	                         RedirectAttributes reAttrs) {
+	    if (loginId == null) return "redirect:/login"; // 로그인 체크
+
+	    try {
+	        // 1. 서비스에 권한 확인 로직 추가
+	        shopService.deleteMenuWithAuthorization(mId, loginId); 
+	        reAttrs.addFlashAttribute("message", "메뉴가 정상적으로 삭제되었습니다.");
+	    } catch (SecurityException e) {
+	        reAttrs.addFlashAttribute("errorMessage", "권한이 없습니다.");
+	    } catch (Exception e) {
+	        log.error("메뉴 삭제 실패: " + e.getMessage(), e);
+	        reAttrs.addFlashAttribute("errorMessage", "메뉴 삭제에 실패했습니다.");
+	    }
+	    return "redirect:/shop/menuList";
 	}
 	
 }
