@@ -280,31 +280,33 @@ public class ShopController {
 	}
 	
 	// 가게 운영상태 변경 요청
-	@PostMapping("/shop/statUpdate")
+	@PostMapping("/shop/statusUpdate")
 	@ResponseBody
-	public String updateShopStat(
+	public String updateShopStatus(
 	    @RequestParam("sId") Integer sId,
-	    @RequestParam("stat") String stat,
+	    @RequestParam("status") String status, 
 	    @SessionAttribute(name = "loginId", required = false) String loginId
 	) {
 	    if (loginId == null) return "NOT_LOGIN";
 	    // (추가: 로그인한 사용자의 가게만 수정 가능하게 검증해도 됨)
-	    shopService.updateShopStat(sId, stat);
+	    shopService.updateShopStatus(sId, status);
 	    return "OK";
 	}
-	
-	//가게 리스트 가져오기
-	@GetMapping("/shopStat")
-	public String shopStatPage(
+
+	// 가게 리스트 가져오기
+	@GetMapping("/shopStatus")
+	public String shopStatusPage(
 	    @SessionAttribute(name = "loginId", required = false) String loginId,
 	    Model model
 	) {
 	    if (loginId == null) return "redirect:/login";
 	    List<Shop> shopList = shopService.findShopListByOwnerId(loginId);
 	    model.addAttribute("shopList", shopList);
-	    return "shop/shopStat"; // 운영상태 관리 페이지명
+	    if (!shopList.isEmpty()) {
+	        model.addAttribute("shop", shopList.get(0)); // 또는 선택된 가게
+	    }
+	    return "shop/shopStatus"; 
 	}
-
 
 }
 

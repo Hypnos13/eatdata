@@ -201,44 +201,29 @@ function showMap(address) {
     });
 }
 
-//가게 상태 업데이트
+// 영업상태 ON/OFF 토글
 $(function() {
-    // 상태 스위치 변경 시 (toggle)
-    $(document).on("change", ".status-switch", function() {
-        var $switch = $(this);
-        var sId = $switch.data("sid");
-        var newStatus = $switch.is(":checked") ? "Y" : "N";
-        var $row = $switch.closest("tr");
-        
-        // Ajax로 상태값 저장 요청
-        $.ajax({
-            url: "/shop/updateStatus",
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({ sId: sId, status: newStatus }),
-            success: function(result) {
-                // UI에 즉시 반영 (뱃지/라벨)
-                var $badge = $row.find(".badge");
-                var $label = $row.find(".form-check-label span");
-                if (newStatus === "Y") {
-                    $badge.removeClass("bg-secondary").addClass("bg-success").text("영업중");
-                    $label.text("ON");
-                } else {
-                    $badge.removeClass("bg-success").addClass("bg-secondary").text("휴점");
-                    $label.text("OFF");
-                }
-            },
-            error: function() {
-                alert("상태 변경 실패! 다시 시도해 주세요.");
-                // 롤백 (실패 시 원래 상태로)
-                $switch.prop("checked", !$switch.is(":checked"));
-            }
-        });
+    $('.shop-status-table input[type="checkbox"]').on('change', function() {
+        const $checkbox = $(this);
+        const sId = $checkbox.data('sid');
+        const isChecked = $checkbox.is(':checked');
+        // AJAX로 상태 변경 요청
+        $.post('/shop/statusUpdate', { sId: sId, status: isChecked ? 'Y' : 'N' })
+            .done(function() {
+                location.reload(); // 새로고침(동적으로 UI만 바꿔도 됨)
+            })
+            .fail(function() {
+                alert('상태 변경에 실패했습니다.');
+                // 실패 시 체크박스 원복
+                $checkbox.prop('checked', !isChecked);
+            });
     });
 });
 
-//영업시간 관리
+
+// ----- 영업시간 관리 (휴무/전체휴무 토글 등) -----
 $(function(){
+  // 전체휴무 체크박스 변경
   $(".allDay-check").on("change", function() {
     var $tr = $(this).closest('tr');
     if ($(this).is(":checked")) {
@@ -251,6 +236,7 @@ $(function(){
     }
   });
 
+  // 각 요일별 사용 여부
   $(".switch input[type='checkbox']").on("change", function() {
     var $tr = $(this).closest('tr');
     if (!$(this).is(":checked")) {
@@ -263,18 +249,6 @@ $(function(){
   });
 });
 
-//휴무 토글 관리
-$(function() {
-    $('.shop-status-table input[type="checkbox"]').on('change', function() {
-        const sId = $(this).data('sid');
-        const isChecked = $(this).is(':checked');
-        // AJAX로 상태 변경 요청 (간단 예시)
-        $.post('/shop/statusUpdate', { sId: sId, status: isChecked ? 'Y' : 'N' })
-          .done(function() {
-              location.reload(); // 새로고침 또는 row 상태만 동적으로 갱신해도 됨
-          })
-          .fail(function() {
-              alert('상태 변경에 실패했습니다.');
-          });
-    });
-});
+
+
+

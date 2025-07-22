@@ -222,8 +222,8 @@ public class ShopService {
 	}
 	
 	// 가게 운영상태 변경 요청
-	public void updateShopStat(Integer sId, String stat) {
-	    shopMapper.updateShopStat(sId, stat);
+	public void updateShopStatus(Integer sId, String status) {
+	    shopMapper.updateShopStatus(sId, status);
 	}
 
 }

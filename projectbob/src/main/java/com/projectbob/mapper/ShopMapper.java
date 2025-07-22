@@ -42,7 +42,6 @@ public interface ShopMapper {
 
 	//기본정보 수정
 	public int updateShopBasicInfo(Shop shop);
-<<<<<<< HEAD
 	
 	//가게 상태 업데이트
 	public void updateStatus(@Param("sId") Integer sId, @Param("status") String status);
@@ -55,9 +54,7 @@ public interface ShopMapper {
 	public Shop findByShopIdAndOwnerIdShop(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
 
 	// 가게 운영상태 변경 요청
-	@Update("UPDATE shop SET stat = #{stat} WHERE s_id = #{sId}")
-	void updateShopStat(@Param("sId") Integer sId, @Param("stat") String stat);
-=======
->>>>>>> develop
+	@Update("UPDATE shop SET status = #{status} WHERE s_id = #{sId}")
+	void updateShopStatus(@Param("sId") Integer sId, @Param("status") String status);
 
 }
