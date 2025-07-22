@@ -81,7 +81,7 @@
 	      <i class="bi bi-shop me-2"></i> 가게 관리
 	      <i class="bi bi-chevron-down float-end"></i>
 	    </button>
-	    <div class="collapse" id="collapseStore">
+	    <div class="collapse" id="collapseStore" th:if="${currentShop != null}" >
 	      <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
 	        <li th:if="${currentShop != null}">
 			  <a class="sidebar-sub-link" th:href="@{|/shopBasicView?s_id=${currentShop.sId}|}">
@@ -122,14 +122,12 @@
 	      <i class="bi bi-list-check me-2"></i> 메뉴 관리
 	      <i class="bi bi-chevron-down float-end"></i>
 	    </button>
-	    <div class="collapse" id="collapseMenu">
+	    <div class="collapse" id="collapseMenu" th:if="${currentShop != null}" >
 	      <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
-
-	      	<li><a href="/shop/menuList" class="sidebar-sub-link">메뉴 리스트</a></li>
-	      	<li><a href="/shop/menuRegisterForm" class="sidebar-sub-link">메뉴 등록</a></li>
-	        <li><a href="/shop/menuUpdateForm" class="sidebar-sub-link">메뉴 관리</a></li>
-
-	        <li><a href="#" class="sidebar-sub-link">메뉴 품절</a></li>
+		      <li><a th:href="@{|/shop/menuList?s_id=${currentShop.sId}|}" class="sidebar-sub-link">메뉴 리스트</a></li>
+		      <li><a th:href="@{|/shop/menuRegisterForm?s_id=${currentShop.sId}|}" class="sidebar-sub-link">메뉴 등록</a></li>
+		      <li><a th:href="@{|/shop/menuUpdateForm?s_id=${currentShop.sId}|}" class="sidebar-sub-link">메뉴 관리</a></li>
+		      <li><a href="#" class="sidebar-sub-link">메뉴 품절</a></li>
 	      </ul>
 	    </div>
 	  </div>

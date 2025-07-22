@@ -91,7 +91,15 @@
 
 	<delete id="deleteMenuOptionsByMenuId" parameterType="int">
         DELETE FROM menu_option WHERE m_id = #{mId}
-    </delete>
+  </delete>
+    
+  <select id="getMenusByShopId" parameterType="int" resultMap="menuResultMap">
+    SELECT 
+        m_id, s_id, category, name, price, m_info, m_picture_url, liked, reg_date, modi_date
+    FROM menu
+    WHERE s_id = #{sId}
+    ORDER BY category, name
+	</select>
 
 	
 	<!-- 가게정보 불러오기 -->

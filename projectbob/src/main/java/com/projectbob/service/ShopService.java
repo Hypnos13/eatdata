@@ -34,6 +34,10 @@ public class ShopService {
 		return shopMapper.shopList();
 	}
 	
+	// 메뉴 리스트
+	public List<Menu> getMenusByShopId(int sId) {
+        return shopMapper.getMenusByShopId(sId);
+    }
 
 	// 메뉴 등록
 	@Transactional
@@ -150,6 +154,22 @@ public class ShopService {
 				}
 			}
 		}
+	}
+	@Transactional
+	public void deleteMenuWithAuthorization(int mId, String ownerId) {
+	    Menu menu = shopMapper.getMenuById(mId);
+	    if (menu == null) {
+	        throw new IllegalArgumentException("존재하지 않는 메뉴입니다.");
+	    }
+	    // ★★★ 핵심: 메뉴의 가게(sId)가 로그인한 유저(ownerId)의 소유인지 확인
+	    Shop shop = shopMapper.findByShopIdAndOwnerId(menu.getSId(), ownerId);
+	    if (shop == null) {
+	        // 남의 가게 메뉴를 지우려는 시도!
+	        throw new SecurityException("해당 메뉴를 삭제할 권한이 없습니다.");
+	    }
+
+	    // 권한이 확인되었으므로 기존 삭제 로직 수행
+	    deleteMenu(mId); 
 	}
 	// 웹 경로를 시스템 파일 경로로 변환하는 헬퍼 메서드
 	private String convertWebPathToSystemPath(String webPath) {

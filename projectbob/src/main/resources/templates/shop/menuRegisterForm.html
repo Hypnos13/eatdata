@@ -19,12 +19,7 @@
 
             <form action="/shop/insertMenu" name="menuRegisterForm" method="post" id="menuRegisterForm"
                   enctype="multipart/form-data" th:object="${menu}">
-                <div class="row my-3">
-                    <div class="col-8 offset-2">
-                        <label for="sId" class="form-label">* 가게ID(임시) : </label>
-                        <input type="text" class="form-control" name="sId" id="sId" th:field="*{sId}" required>
-                    </div>
-                </div>
+                <input type="hidden" name="sId" id="sId" th:field="*{sId}" />
                 <div class="row my-3">
                     <div class="col-8 offset-2">
                         <label for="category" class="form-label">* 카테고리 : </label>
