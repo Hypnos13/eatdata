@@ -51,6 +51,11 @@ public class BobController {
 	  if (keyword == null || "null".equals(keyword)) keyword = "";
 		if(category == null) category = "전체보기";
 		 log.info("category = {}", category);
+		 List<Shop> shopList = bobService.shopList(category,keyword);
+		  		  
+		  for (Shop shop : shopList) {
+		      log.info("Shop in sList: sId={}, name={}", shop.getSId(), shop.getName());
+		  }
 	  model.addAttribute("sList",bobService.shopList(category,keyword));
 	  model.addAttribute("selectedCategory", category);
 	  model.addAttribute("userAddress", address);
@@ -66,6 +71,13 @@ public class BobController {
 		  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", sId); // 가게 정보 가져오기
 		  
 		  Shop shop = bobService.getShopDetail(sId);
+		  
+		  if (shop != null) {
+		      log.info("BobController: getMenuDetail - Retrieved shop sId: {}", shop.getSId());
+		  } else {
+		      log.warn("BobController: getMenuDetail - No shop found for sId: {}", sId);
+		  }
+		  
 		  List<Menu> menuList = bobService.getMenuListByShopId(sId);
 		  model.addAttribute("shop", shop);
 		  model.addAttribute("menuList", menuList);

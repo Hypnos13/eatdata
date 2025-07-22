@@ -450,6 +450,9 @@ $(document).on("click", ".deleteReview", function(){
 	let rNo = $(this).data("no");
 	console.log('삭제할 rNo:' , rNo);
 	let sId = $(this).data("sid");
+		if(sId == undefined || sId == 'undefined'){
+			sId = $('#reviewWriteForm input[name="sId"]').val();
+		}
 	let id = $(this).closest(".border-bottom").find(".fw-bold").first().text().replace('님', '');
 	
 	
@@ -495,15 +498,14 @@ function reportReview(elemId){
 // 사장님 댓글쓰기 버튼 클릭 시
 $(document).on('click', '.review-reply-btn', function(){
 	const rNo = $(this).data('review-no');
-	const $replyForm = $(this).closest('.reviewRow').find('.reviewReplyForm');
-	const sId = Number($form.find("input[name='sId']").val());
-	$replyForm.find('input[name="rNo"]').val(rNo);
-	$replyForm.find('input[name="sId"]').val(sId);
+	const $replyFormContainer = $(this).closest('.reviewRow').find('.reviewReplyForm');
+	const sId = $replyFormContainer.find("input[name='sId']").val();
 	$('.reviewReplyForm').addClass('d-none');
-	$replyForm.removeClass('d-none');	
+	$replyFormContainer.removeClass('d-none');
+	$replyFormContainer.find('input[name="rNo"]').val(rNo);
 	
 	console.log('사장님 대댓글쓰기 버튼 클릭 rNo:', rNo, 'sId', sId);	
-	console.log('폼 input[name="rNo"] 값:', $replyForm.find('input[name="rNo"]').val());
+	console.log('폼 input[name="rNo"] 값:', $replyFormContainer.find('input[name="rNo"]').val());
 });
 // 사장님 댓글쓰기 submit
 $(document).on('submit', '.review-reply-form', function(e){
@@ -512,7 +514,13 @@ $(document).on('submit', '.review-reply-form', function(e){
 	const $form = $(this);
 	const rNo = $form.find('input[name="rNo"]').val();	
 	const rrNo = $form.find('input[name="rrNo"]').val();	
-	const sId = $form.find('input[name="sId"]').val();
+	
+	const $sIdInput = $form.find('input[name="sId"]'); // Get the sId input element
+	const sId = $sIdInput.val(); // Get its value
+
+	console.log('main.js - $sIdInput found:', $sIdInput.length > 0); // Check if element is found
+	console.log('main.js - sId from form:', sId); 
+
 	const content = $form.find('textarea[name="content"]').val();
 	const shopOwnerId = $("#shopOwnerId").val();
 
@@ -558,7 +566,7 @@ $(document).on("click", ".modifyReviewReply", function(){
 		const $replyForm = $reviewRow.find('.reviewReplyForm');
 		console.log("$replyForm length:", $replyForm.length);
 		console.log("$replyForm hasClass('d-none') before toggle:", $replyForm.hasClass("d-none"));
-		const sId = $("input[name='sId']").first().val();
+				const sId = Number($replyForm.find("input[name='sId']").first().val());
 		const content = $reviewRow.find('.ms-3.fs-5.py-2').text().trim();
 		
 		$replyForm.find('.review-reply-submit-btn').text('수정하기');
@@ -625,9 +633,11 @@ $(document).on("submit", "#reviewReplyUpdateForm", function(e){
 // 사장님 댓글 삭제
 $(document).on("click", ".deleteReviewReply", function(){
 	const rrNo = $(this).data("rrno");
-	const sId = Number($(this).data('sid'));
+	let sId = $(this).data("sid");
 	console.log("대댓글 삭제 클릭 ->", {rrNo: $(this).data("rrno"), sId: $(this).data("sid")});
-	
+		if(!sId){
+			sId = $('#reviewWriteForm input[name="sId"]').val();
+		}
 	if (!confirm("댓글을 정말 삭제하시겠습니까?")) return;
 	
 	$.ajax({
@@ -668,8 +678,9 @@ function recallReviewList(reviewArr, reviewreplyMap){
 		
 	$("#reviewList").empty();	
 	reviewArr.forEach(r => {
-		const reply = reviewreplyMap[r.rno];	
-		const shopId = r.sId;
+		const reply = reviewreplyMap[r.rno];		
+		const shopId = r.s_id;
+								
 		console.log(`-- 리뷰 ${r.rno} 에 대한 ownerReplyHtml:`, reviewreplyMap[r.rno]);
 		console.log('loginId:', loginId, 'shopOwnerId:', shopOwnerId, 'reply', reply);
 		let isMine = (loginId && r.id == loginId);
@@ -724,7 +735,7 @@ function recallReviewList(reviewArr, reviewreplyMap){
 												<div class="reviewReplyForm d-none mt-2">
 													<form>			
 												   <input type="hidden" name="rNo"  value="${r.rno}">
-													 <input type="hidden" name="sId"  value="${shopOwnerId}">
+													 <input type="hidden" name="sId"  value="${shopId}">
 													 <input type="hidden" name="rrNo" value="${reply.rrNo}">											
 														<textarea name="content" class="form-control fs-5 py-3 mb-2" rows="3" maxlength="250" placeholder="사장님 댓글 수정"></textarea>
 														<div class="text-end">

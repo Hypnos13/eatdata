@@ -73,7 +73,7 @@ public class BobService{
 	/*
 	 * public List<Review> reviewList(int sId){ return bobMapper.reviewList(sId); }
 	 */	
-	public List<Review> getReviewList(int sId){
+			public List<Review> getReviewList(int sId){
 	    return bobMapper.getReviewList(sId);
 	}
 

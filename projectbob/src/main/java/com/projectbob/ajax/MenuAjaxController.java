@@ -160,9 +160,16 @@ public class MenuAjaxController {
 		log.info("addReviewReply: rNo={}, sId={}, id={}", reviewreply.getRNo(), reviewreply.getSId(), reviewreply.getId());
 		reviewreply.setStatus("일반");
 		bobService.addReviewReply(reviewreply);
-		List<Review> reviewList = bobService.getReviewList(reviewreply.getSId());
+				List<Review> reviewList = bobService.getReviewList(reviewreply.getSId());
 		Map<Integer, ReviewReply> reviewReplyMap = bobService.getReviewReplyMap(reviewreply.getSId());
 		
+		// --- 추가할 로그 시작 ---
+		log.info("MenuAjaxController: reviewList sId check:");
+		for (Review r : reviewList) {
+		    log.info("  Review rNo: {}, sId: {}", r.getRNo(), r.getSId());
+		}
+		// --- 추가할 로그 끝 ---
+
 		String shopOwnerId = null;
 		Shop shop = bobService.getShopDetail(reviewreply.getSId());
 		if(shop != null) {
