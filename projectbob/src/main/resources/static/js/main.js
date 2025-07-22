@@ -183,6 +183,13 @@ function showStoreOnMap() {
 // DOM 로드 후 이벤트 설정
 // ==============================
 document.addEventListener("DOMContentLoaded", () => {
+	
+	if(document.querySelectorAll("#reviewList .reviewRow").length > 0){
+		document.getElementById("noReview").style.display = "none";
+	} else {
+		document.getElementById("noReview").style.display = "block";
+	}
+	
   updateOrder();
 
   // 주문 전송
@@ -288,6 +295,7 @@ $(function(){
 // 댓글쓰기 버튼 클릭 이벤트
 $("#reviewWrite").on("click", function(){
 	console.log("리뷰쓰기 버튼 클릭");
+	resetReviewForm();
 		$("#reviewFormOriginalContainer").append($("#reviewForm").removeClass("d-none"));
 		$("#reviewForm form").attr("id", "reviewWriteForm").removeAttr("data-no");
 		$("#reviewForm input[type='submit']").val("댓글쓰기").text("댓글쓰기");
@@ -323,10 +331,10 @@ $("#reviewWrite").on("click", function(){
 			"success": function(resData){
 				console.log('resData: ' ,resData);
 				
-				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
+				recallReviewList(resData.reviewList, resData.reviewReplyMap);
 				resetReviewForm();
 				
-				console.log('버튼 찾기:', $("#reviewSubmitButton"));
+				console.log('버튼 찾기:', $("#reviewFormMode"));
 
 								
 			},
@@ -370,6 +378,10 @@ $(document).on("click", ".modifyReview", function(){
 	
 	console.log($(this).parents(".reviewRow"));
 	let $reviewRow = $(this).closest(".reviewRow");
+	if(!$reviewRow.length){
+		alert("리뷰 요소를 못찾음");
+		return;
+	}
 	let rno = $(this).attr("data-no");
 	lastEditRno = rno;
 	console.log("폼을 해당리뷰 아래로 이동:", $reviewRow, "rno", rno);
@@ -412,11 +424,11 @@ $(document).on("submit", "#reviewUpdateForm", function(e){
 			"success": function(resData){
 				console.log('resData: ' ,resData);
 				
-				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
+				recallReviewList(resData.reviewList, resData.reviewReplyMap);
 				resetReviewForm();
 										
 				console.log("리뷰 다시 그림. 폼 숨기기");			
-				console.log('버튼 찾기:', $("#reviewSubmitButton"));
+				console.log('버튼 찾기:', $("#reviewFormMode"));
 				
 		
 			},
@@ -435,10 +447,11 @@ $(document).on("click", ".deleteReview", function(){
 	$("#reviewContent").val("");
 	$("#reviewForm").addClass("d-none");
 	
-	let rNo = $(this).attr("data-no");
+	let rNo = $(this).data("no");
 	console.log('삭제할 rNo:' , rNo);
+	let sId = $(this).data("sid");
 	let id = $(this).closest(".border-bottom").find(".fw-bold").first().text().replace('님', '');
-	let sId = $("#reviewForm input[name=sId]").val();
+	
 	
 	let params = {rNo: rNo, sId: sId};
 	console.log(params);
@@ -450,14 +463,14 @@ $(document).on("click", ".deleteReview", function(){
 	
 	if(result){
 	$.ajax({
-				"url": "reviewDelete.ajax?rNo=" + rNo + "&sId=" + sId,
-				"data": params,
+				"url": "reviewDelete.ajax",
+				"data": { rNo: rNo, sId: sId },
 				"type": "delete",				
 				"dataType": "json",
 				"success": function(resData, status, xhr){
 					console.log('resData: ' ,resData);
 					
-				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
+				recallReviewList(resData.reviewList, resData.reviewReplyMap);
 				resetReviewForm();
 
 				},
@@ -483,7 +496,7 @@ function reportReview(elemId){
 $(document).on('click', '.review-reply-btn', function(){
 	const rNo = $(this).data('review-no');
 	const $replyForm = $(this).closest('.reviewRow').find('.reviewReplyForm');
-	const sId = $("input[name='sId']").first().val();
+	const sId = Number($form.find("input[name='sId']").val());
 	$replyForm.find('input[name="rNo"]').val(rNo);
 	$replyForm.find('input[name="sId"]').val(sId);
 	$('.reviewReplyForm').addClass('d-none');
@@ -521,7 +534,7 @@ $(document).on('submit', '.review-reply-form', function(e){
 		contentType: "application/json",
 		dataType: 'json',
 		success: function(resData){
-			recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
+			recallReviewList(resData.reviewList, resData.reviewReplyMap);
 			
 			$form.closest('.reviewReplyForm').addClass('d-none');
 			$form[0].reset();
@@ -594,14 +607,14 @@ $(document).on("submit", "#reviewReplyUpdateForm", function(e){
 				console.log("✔ reviewReplyWrite.ajax resData:", resData);				    
 				    console.log("   → reviewReplyMap keys:", Object.keys(resData.reviewReplyMap));
 				    console.log("   → reviewReplyMap[rNo]:", resData.reviewReplyMap[resData.reviewList[0].rNo]);
-				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
+				recallReviewList(resData.reviewList, resData.reviewReplyMap);
 				
 				const $replyForm = $form.closest('.reviewReplyForm');
 				$replyForm.addClass('d-none');
 				if($form[0] && $form[0].tagName == "FORM") $form[0].reset();
 				$form.removeAttr('id');				
 				$replyForm.find('.review-reply-submit-btn').text('등록');
-				$form.find('.modifyreviewReply, .deleteReviewReply').show();
+				$replyForm.find('.modifyReviewReply, .deleteReviewReply').show();
 			},
 			error: function(xhr, status){
 				alert('사장님 댓글 수정 오류: ' + status);
@@ -612,7 +625,7 @@ $(document).on("submit", "#reviewReplyUpdateForm", function(e){
 // 사장님 댓글 삭제
 $(document).on("click", ".deleteReviewReply", function(){
 	const rrNo = $(this).data("rrno");
-	const sId = $(this).data("sid");
+	const sId = Number($(this).data('sid'));
 	console.log("대댓글 삭제 클릭 ->", {rrNo: $(this).data("rrno"), sId: $(this).data("sid")});
 	
 	if (!confirm("댓글을 정말 삭제하시겠습니까?")) return;
@@ -624,7 +637,7 @@ $(document).on("click", ".deleteReviewReply", function(){
 		dataType: "json",
 		success: function(resData){
 			delete resData.reviewReplyMap[rrNo];
-			recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);		
+			recallReviewList(resData.reviewList, resData.reviewReplyMap);		
 		},
 		error: function(xhr, status){
 			alert("사장님 댓글 삭제 중 오류:" + status);
@@ -634,27 +647,39 @@ $(document).on("click", ".deleteReviewReply", function(){
 
 
 // 리뷰쓰기/수정/삭제 AJAX 성공 후~
-function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
+function recallReviewList(reviewArr, reviewreplyMap){
 	console.log("recallReviewList 호출!:", reviewArr, reviewreplyMap);
+	$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
 	const loginId = $("#loginId").val();	
+	const shopOwnerId = $("#shopOwnerId").val();
+//	const shopId = $("input[name='sId']").first().val();
+	const $list = $("#reviewList");
+	const $none = $("#noReview");	
+	
+	if(!reviewArr.length){
+		$list.empty();
+		$none.show();
+		return;
+	}
+	$none.hide();
+	$list.empty();
 	
 	console.log('shopOwnerId:', $('#shopOwnerId').val());
-	
-	$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
+		
 	$("#reviewList").empty();	
 	reviewArr.forEach(r => {
-		const reply = reviewreplyMap[r.rNo];
-		const shopOwnerId = $('input[name="sId"]').first().val();
-		console.log(`-- 리뷰 ${r.rNo} 에 대한 ownerReplyHtml:`, reviewreplyMap[r.rNo]);
+		const reply = reviewreplyMap[r.rno];	
+		const shopId = r.sId;
+		console.log(`-- 리뷰 ${r.rno} 에 대한 ownerReplyHtml:`, reviewreplyMap[r.rno]);
 		console.log('loginId:', loginId, 'shopOwnerId:', shopOwnerId, 'reply', reply);
 		let isMine = (loginId && r.id == loginId);
 		let buttons = '';
 		if(isMine){
 			buttons += `
-				<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rno}">
+				<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rno}" data-sid="${shopId}">
 					<i class="bi bi-journal-text">수정</i>
 				</button>
-				<button class="deleteReview btn btn-outline-dark btn-sm" data-no="${r.rno}">
+				<button class="deleteReview btn btn-outline-dark btn-sm" data-no="${r.rno}" data-sid="${shopId}">
 					<i class="bi bi-telephone-outbound">삭제</i>
 				</button>				
 			`;
@@ -683,15 +708,15 @@ function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
 														<span class="fw-bold text-primary">
 															<i class="bi bi-person-badge"></i>사장님
 														</span>
-														<span class="text-muted small ms-2">${childDate(reviewreplyMap[r.rno].regDate)}</span>
+														<span class="text-muted small ms-2">${new Date(r.regDate).toLocaleString()}</span>
 														<div class="ms-auto">
 															<button type="button" class="btn btn-outline-primary btn-sm px-3 modifyReviewReply" 
 															data-rrno="${reply.rrNo}" 
 															data-rno="${r.rno}"
-															data-sid="${shopOwnerId}">수정</button>
+															data-sid="${shopId}">수정</button>
 														  <button type="button" class="btn btn-outline-danger btn-sm px-3 deleteReviewReply" 
 															data-rrno="${reply.rrNo}" 
-															data-sid="${shopOwnerId}">삭제</button>
+															data-sid="${shopId}">삭제</button>
 														</div>										
 													</div>
 													<div class="ms-3 fs-5 py-2">${reply.content}</div>
@@ -732,7 +757,7 @@ function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
 			<div class="reviewReplyForm d-none p-3 rounded shadow-sm mt-2" style="background:#f8fafc;">
 					<form class="review-reply-form">
 						<input type="hidden" name="rNo" value="${r.rno}">
-						<input type="hidden" name="sId" value="${shopOwnerId}">						
+						<input type="hidden" name="sId" value="${shopId}">						
 						<textarea name="content" class="form-control fs-5 py-3 mb-2" rows="3" maxlength="250" placeholder="사장님 댓글을 입력하세요" style="resize: none;"></textarea>
 						<div class="text-end mt-2">
 							<button type="submit" class="btn btn-success px-4 me-1">등록</button>
@@ -745,8 +770,10 @@ function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
 		<div class="reviewRow border-bottom pb-3 mb-3" data-rno="${r.rno}">
 						<div class="d-flex align-items-center mb-1">
 							<span class="fw-bold">${r.id.substr(0,2)}**님</span>
-							<span class="text-muted small ms-2">${strDate}</span>
-							<div class="ms-auto">${buttons}</div>
+							<span class="text-muted small ms-2">${new Date(r.regDate).toLocaleString()}</span>
+							<div class="ms-auto">
+								${buttons}
+							</div>
 					</div>
 					<div class="mb-1">
 						<span class="me-2 text-warning"><i class="bi bi-star-fill"></i></span>
@@ -763,7 +790,7 @@ function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId){
 		`;
 		
 		console.log("   appending reviewHtml:", /* reviewHtml 변수 */);
-		$("#reviewList").append(reviewHtml);
+		$list.append(reviewHtml);		
 	});
 }
 

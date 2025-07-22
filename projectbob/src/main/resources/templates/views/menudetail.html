@@ -120,7 +120,7 @@
 								<input type="hidden" name="sId" th:value="${shop.sId}">
 						  	<input type="hidden" name="id" th:value="${member?.id}">
 						  	<input type="hidden" id="loginId" th:value="${member != null ? member.id : ''}">
-						  	<input type="hidden" id="reviewSubmitButton" value="댓글쓰기">
+						  	<input type="hidden" id="reviewFormMode" value="댓글쓰기">
 						  	<input type="hidden" id="shopOwnerId" th:value="${shop.id}">
 						  	<!-- <input type="hidden" name="mId" th:value="${menu.mId}"> -->			
 								<div class="row bg-light my-3 p-3 border">
@@ -173,7 +173,8 @@
 		</div>
 		
 						<!-- 리뷰 리스트 -->
-						<div id="reviewList" th:if="${not #lists.isEmpty(reviewList)}">
+						<!-- <div id="reviewList" th:if="${not #lists.isEmpty(reviewList)}"> -->
+						<div id="reviewList">
 							<div th:each="review : ${reviewList}" class="reviewRow border-bottom pb-3 mb-3">
 								<div class="d-flex align-items-center mb-1">
 									<span class="fw-bold" th:text="${#strings.substring(review.id,0,2) + '**님'}">ad**님</span>
@@ -182,7 +183,7 @@
 									<button th:if="${member != null and review.id == member.id}" class="modifyReview btn btn-outline-success btn-sm" th:data-no="${review.rNo}">
 										<i class="bi bi-journal-text">수정</i>									
 									</button>
-									<button th:if="${member != null and review.id == member.id }" class="deleteReview btn btn-outline-dark btn-sm" th:data-no="${review.rNo}">
+									<button th:if="${member != null and review.id == member.id }" class="deleteReview btn btn-outline-dark btn-sm" th:data-no="${review.rNo}" th:data-sid="${review.sId}">
 										<i class="bi bi-trash">삭제</i>
 									</button>
 									<button th:unless="${member != null and review.id == member.id}" class="btn btn-outline-danger btn-sm" th:onclick="reportReview('${review.rNo}')">
@@ -217,7 +218,7 @@
 												<i class="bi bi-person-badge"></i>사장님
 											</span>
 											<span class="text-muted small ms-2" th:text="${#dates.format(reviewReplyMap[review.rNo].regDate, 'yyyy-MM-dd HH:mm')}">날짜</span>
-											<div class="ms-auto" th:if="${member != null and member.id ==shop.id}">
+											<div class="ms-auto" th:if="${member != null and member.id == shop.id}">
 												<button type="button" class="btn btn-outline-primary btn-sm px-3 modifyReviewReply"
 																	th:data-rrno="${reviewReplyMap[review.rNo].rrNo}" th:data-rno="${review.rNo}"
 																	th:data-content="${reviewReplyMap[review.rNo].content}">수정</button>
@@ -255,7 +256,9 @@
 							</div><!-- 리뷰리스트 끝 -->
 						</div>
 						<!-- 리뷰 없을때 -->
-						<div th:unless="${not #lists.isEmpty(reviewList)}" class="text-center text-muted p-5">
+						<!-- <div th:unless="${not #lists.isEmpty(reviewList)}" class="text-center text-muted p-5"> -->
+						<div id="noReview" th:style="${not #lists.isEmpty(reviewList)} ? 'display:none;' : 'display:block;'" 
+									class="text-center text-muted p-5">
 							no 리뷰~
 						</div>									
 					
