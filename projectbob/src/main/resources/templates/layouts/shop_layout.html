@@ -103,10 +103,14 @@
 	    </button>
 	    <div class="collapse" id="collapseTime">
 	      <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
-	        <li><a th:href="@{|/shopOpenTime?s_id=${shop.sId}|}" class="sidebar-sub-link">영업시간</a></li>
-	        <li><a th:href="@{|/shopStatus?s_id=${shop.sId}|}" class="sidebar-sub-link">영업상태</a></li>
-	        <li><a href="#" class="sidebar-sub-link">일시중지</a></li>
-	      </ul>
+		    <li th:if="${shop != null}">
+		        <a th:href="@{|/shopOpenTime?s_id=${shop.sId}|}" class="sidebar-sub-link">영업시간</a>
+		    </li>
+		    <li th:if="${shop != null}">
+		        <a th:href="@{|/shopStatus?s_id=${shop.sId}|}" class="sidebar-sub-link">영업상태</a>
+		    </li>
+		    <li><a href="#" class="sidebar-sub-link">일시중지</a></li>
+		</ul>
 	    </div>
 	  </div>
 	

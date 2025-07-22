@@ -164,7 +164,7 @@ public class ShopController {
 	
 	@GetMapping("/shopInfo")
 	public String shopInfo() {
-		return "shop/shopInfo";
+	    return "shop/shopInfo";
 	}
 	
 	//기본정보 뷰페이지
