@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.projectbob.domain.Cart;
-import com.projectbob.domain.CartAddRequestDto;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Review;
 import com.projectbob.service.BobService;
@@ -64,22 +63,6 @@ public class MenuAjaxController {
 	
 
 
-	@PostMapping("/add")
-    public ResponseEntity<?> addToCart(@RequestBody CartAddRequestDto dto) {
-        try {
-            bobService.addCartItem(dto);
-
-            List<Cart> updatedCart = bobService.getCartListByUser(dto.getUId());
-
-            return ResponseEntity.ok(Map.of("status", "success", "cartList", updatedCart));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body(Map.of("status", "fail", "message", e.getMessage()));
-        }
-    }
-	
-	
 	
 	
 	

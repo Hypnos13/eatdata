@@ -4,67 +4,27 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
-<!--  나중에 제거할지도... 아래부분 부터.. -->
- 
-  <!-- Cart insert : caId 자동생성 -->
-    <insert id="insertCart" parameterType="com.projectbob.domain.Cart" useGeneratedKeys="true" keyProperty="caId">
-        INSERT INTO cart (id, m_id, s_id, quantity, reg_date)
-        VALUES (#{id}, #{mId}, #{sId}, #{quantity}, NOW())
-    </insert>
+ <!-- 장바구니에 같은 메뉴+옵션이 이미 있는지 조회 -->
+  <select id="findCartItem" parameterType="map" resultType="com.projectbob.domain.Cart">
+    SELECT * FROM cart
+    WHERE id = #{id} AND m_id = #{mId} AND mo_id = #{moId} 
+  </select>
 
-    <!-- CartOption insert -->
-    <insert id="insertCartOption">
-        INSERT INTO cart_option (ca_id, mo_id)
-        VALUES (#{cartId}, #{moId})
-    </insert>
-
-    <!-- 특정 유저 장바구니 리스트 조회 -->
-    <select id="selectCartListByUser" parameterType="string" resultType="com.projectbob.domain.Cart">
-        SELECT *
-        FROM cart
-        WHERE id = #{id}
-        ORDER BY reg_date DESC
-    </select>
- 
- 
-<!--  나중에 제거할지도... 윗부분.. -->
-
-
-<!-- 주문표 모두 불러오기 -->
-<select id="getCart" resultType="com.projectbob.domain.Cart">
-select ca_id, m_id, mo_id, id, s_id, quantity, total_price, reg_date, modi_date
- from cart
-  where id= #{id}
-</select>
-
-<!-- 주문표 메뉴 등록 -->
-<insert id="insertCart" parameterType="Cart">
-INSERT INTO cart (m_id, mo_id, id, s_id, quantity, total_price)
-  VALUES (#{mId}, #{moId}, #{id}, #{sId}, #{quantity}, #{totalPrice})
+  <!-- 장바구니 아이템 추가 -->
+ <insert id="insertCart" parameterType="com.projectbob.domain.Cart" useGeneratedKeys="true" keyProperty="caId">
+  INSERT INTO cart (m_id, mo_id, id, s_id, quantity, total_price, reg_date)
+  VALUES (#{mId}, #{moId}, #{id}, #{sId}, #{quantity}, #{totalPrice}, NOW())
 </insert>
 
-<!-- 주문표 수량 수정 -->
-<update id="countUpdateCart" parameterType="Cart">
- UPDATE cart
-  SET quantity = #{quantity},
-      total_price = #{totalPrice},
-      modi_date = CURRENT_TIMESTAMP
-  WHERE ca_id = #{caId}
-   AND id = #{id}
-</update>
+  <!-- 장바구니 아이템 수량 및 가격 업데이트 -->
+  <update id="updateCart" parameterType="com.projectbob.domain.Cart">
+    UPDATE cart
+    SET quantity = #{quantity},
+        total_price = #{totalPrice},
+        modi_date = NOW()
+    WHERE ca_id = #{caId}
+  </update>
 
-<!-- 주문표 메뉴 삭제 -->
-<delete id="deleteMenu" parameterType="Cart">
-  DELETE FROM cart
-  WHERE ca_id = #{caId}
-    AND id = #{id}
-</delete>
-
-<!-- 주문 전체 삭제 -->
-<delete id="deleteAllCart" parameterType="com.projectbob.domain.Cart">
-  DELETE FROM cart
-  WHERE id = #{id}
-</delete>
 
 <!-- 댓글 추가 맵핑 구문 -->
 <insert id="addReview" parameterType="Review">

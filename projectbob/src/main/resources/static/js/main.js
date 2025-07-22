@@ -7,13 +7,21 @@ let selectedMenuPrice = 0;
 let count = 1;
 let previewUrl = null;
 let selectedOptions = [];
-
+let selectedOptionIds = [];
 // ==============================
 // 메뉴 카드 클릭 시 모달 띄우기
 // ==============================
+
+
+$(document).on("click", ".shop-item", function () {
+  selectedShopId = $(this).data("shop-id");
+  console.log("selectedShopId:", selectedShopId);
+});
+
 $(document).on("click", ".menu-card", function () {
   selectedMenuId = $(this).data("id");
   selectedMenuName = $(this).data("name");
+	selectedShopId = parseInt($(this).data("shop-id"));
   selectedMenuPrice = $(this).data("price");
 
   const menuImage = "https://i.imgur.com/Sg4b61a.png"; // 실제 이미지 경로로 변경 가능
@@ -27,11 +35,13 @@ $(document).on("click", ".menu-card", function () {
   count = 1;
   $("#modalCount").val(count);
   $("#optionArea").empty();
-
+	console.log("선택된 메뉴 ID (mId):", selectedMenuId);
+	console.log("타입 확인:", typeof selectedMenuId);
   $.ajax({
     url: "/ajax/menu/options",
     data: { mId: selectedMenuId },
     success: function (options) {
+			console.log("받은 옵션 데이터:", options);
       // 기존 options 배열은 MenuOption 도메인 객체 리스트임
       const html = options.map(option => `
         <div class="form-check">
@@ -51,22 +61,26 @@ $(document).on("click", ".menu-card", function () {
 // ==============================
 // 수량 조절
 // ==============================
-$("#btnCountMinus").click(() => {
-  if (count > 1) {
-    count--;
+$(document).ready(function () {
+  // 수량 감소 버튼
+  $("#btnCountMinus").click(() => {
+    if (count > 1) {
+      count--;
+      $("#modalCount").val(count);
+    }
+  });
+
+  // 수량 증가 버튼
+  $("#btnCountPlus").click(() => {
+    count++;
     $("#modalCount").val(count);
-  }
-});
+  });
 
-$("#btnCountPlus").click(() => {
-  count++;
-  $("#modalCount").val(count);
-});
-
-// 모달 초기화 (열릴 때 수량 초기화)
-$('#addMenuModal').on('show.bs.modal', function () {
-  count = 1;
-  $('#modalCount').val(count);
+  // 모달이 열릴 때 수량 초기화
+  $('#addMenuModal').on('show.bs.modal', function () {
+    count = 1;
+    $('#modalCount').val(count);
+  });
 });
 
 // ==============================
@@ -78,42 +92,65 @@ $(document).on("click", "#btnAddExtras", function () {
   let quantity = parseInt($("#modalCount").val());
   if (quantity < 1) quantity = 1;
 
+	selectedOptionIds = [];
   // 선택된 옵션 아이디 배열 수집
-  let selectedOptionIds = [];
   $("#optionArea input[type=checkbox]:checked").each(function () {
     selectedOptionIds.push(parseInt($(this).val()));
   });
+		console.log("selectedOptionIds",selectedOptionIds);
 
   // 현재 로그인된 회원 아이디, 예시: 전역 JS 변수 혹은 서버 렌더링 시 주입 필요
-  const userId = CURRENT_USER_ID || "guest"; // 꼭 실제 로그인 아이디로 변경하세요!
+  const userId = window.currentUserId || null; 
 
+	let cartItems = [];
+	
+	
+	if(selectedOptionIds.length > 0){
+		selectedOptionIds.forEach((moId) => {
+			cartItems.push({
+				mId : selectedMenuId,
+				moId:moId,
+				quantity : quantity,
+				id: userId,
+			});
+		});
+	}else {
+		cartItems.push({
+			mId : selectedMenuId,
+			moId: null,
+			quantity: quantity,
+			id: userId,
+		});
+	}
+	
+	console.log("장바구니에 담기는 데이터:", cartItems);
   // 서버에 장바구니 추가 요청
-  $.ajax({
-    type: "POST",
-    url: "/cart/add",
-    contentType: "application/json",
-    data: JSON.stringify({
-      mId: selectedMenuId,
-      quantity: quantity,
-      optionIds: selectedOptionIds,
-      userId: userId
-    }),
-    success: function (response) {
-      if (response.status === "success") {
-        alert("장바구니에 추가되었습니다.");
-        updateOrderSummary(response.cartList);
-        // 모달 닫기
-        const modalEl = document.getElementById("addMenuModal");
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
-      } else {
-        alert("장바구니 추가 실패");
-      }
-    },
-    error: () => alert("서버 오류로 인해 장바구니 추가 실패"),
-  });
-});
+	 $.ajax({
+	    type: "POST",
+	    url: "/addCart",
+	    contentType: "application/json",
+	    data: JSON.stringify(cartItems),
+	    success: function (response) {
+				console.log(response);
+	      if (response.cartList) {
+	        alert("장바구니에 추가되었습니다.");
+	        updateOrderSummary(response.cartList);
 
+	        // 모달 닫기
+	        const modalEl = document.getElementById("addMenuModal");
+	        const modal = bootstrap.Modal.getInstance(modalEl);
+	        modal.hide();
+	      } else {
+	        alert("장바구니 추가 실패");
+	      }
+	    },
+			error: ( status, error) => {
+			  console.error("서버 오류:", status, error);
+			  //console.error("응답 본문:", xhr.responseText);
+			  alert("서버 오류로 인해 장바구니 추가 실패");
+			}
+	  });
+	});
 // ==============================
 // 주문표(장바구니) UI 업데이트 함수
 // ==============================
@@ -183,6 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
     runKakaoScript();
     showStoreOnMap();
   }
+	
 
   document.getElementById("searchBtn")?.addEventListener("click", () => {
     document.getElementById("searchBox")?.classList.toggle("d-none");
@@ -193,6 +231,66 @@ document.addEventListener("DOMContentLoaded", () => {
     if (keyword) window.location.href = `/shopList?keyword=${encodeURIComponent(keyword)}`;
   });
 });
+
+function runKakaoScript() {
+  if (typeof kakao === 'undefined' || !kakao.maps) return;
+
+  const searchButton = document.getElementById('btn-search-toggle');
+  const inputField = document.getElementById('location-input');
+  if (!searchButton || !inputField) return;
+
+  searchButton.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const geocoder = new kakao.maps.services.Geocoder();
+        const coord = new kakao.maps.LatLng(lat, lon);
+
+        geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+          if (status === kakao.maps.services.Status.OK) {
+            const address = result[0].address.address_name;
+            inputField.value = address;
+
+            // shopList 페이지로 category=전체보기, address 전달
+            const url = `/shopList?category=전체보기&address=${encodeURIComponent(address)}`;
+            window.location.href = url;
+          } else {
+            alert('주소 변환 실패');
+          }
+        });
+      },
+      (error) => alert('위치 정보를 가져오지 못했습니다: ' + error.message),
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
+  });
+}
+
+// 가게 주소를 받아서 지도에 마커 표시하고 지도 중심을 이동시키는 함수
+function showStoreOnMap() {
+  const address = document.getElementById('storeAddress')?.innerText;
+  const mapContainer = document.getElementById('map');
+  if (!address || !mapContainer) return;
+
+  const map = new kakao.maps.Map(mapContainer, {
+    center: new kakao.maps.LatLng(33.450701, 126.570667), // 기본 중심 좌표
+    level: 3
+  });
+
+  const geocoder = new kakao.maps.services.Geocoder();
+  geocoder.addressSearch(address, (result, status) => {
+    if (status === kakao.maps.services.Status.OK) {
+      const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+      new kakao.maps.Marker({ map, position: coords });
+      map.setCenter(coords);
+    }
+  });
+}
 
 // ==============================
 // 찜하기 기능

@@ -57,7 +57,7 @@
 								<th:block th:if="${not #lists.isEmpty(menuList)}">
 									<div class="col-md-6 mb-4" th:each="menu, status: ${menuList}">
 										<div class="card text-center p-3 menu-card"
-											th:attr="data-id=${menu.mId},data-name=${menu.name},data-price=${menu.price}">
+											th:attr="data-id=${menu.mId},data-name=${menu.name},data-price=${menu.price},data-shop-id=${menu.sId}">
 											<div
 												class="d-flex justify-content-between align-items-center mb-2">
 												<span class="menu-title">[[ ${menu.name} ]]</span>

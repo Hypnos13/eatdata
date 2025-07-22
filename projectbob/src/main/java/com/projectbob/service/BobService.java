@@ -5,9 +5,9 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.projectbob.domain.Cart;
-import com.projectbob.domain.CartAddRequestDto;
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Review;
@@ -24,40 +24,24 @@ public class BobService {
 	@Autowired
 	private BobMapper bobMapper;
 	
-	public void addCartItem(CartAddRequestDto dto) {
-        // 1) 메뉴 기본정보 + 수량으로 Cart insert (옵션 제외)
-        Cart cart = new Cart();
-        cart.setId(dto.getUId());
-        cart.setMId(dto.getMId());
-        cart.setSId(dto.getSId());
-        cart.setQuantity(dto.getQuantity());
-        // 가격 계산 필요 시 추가 처리 가능 (dto 또는 서비스 내 계산)
+	public Cart findCartItem(String userId, int mId, int moId) {
+        return bobMapper.findCartItem(userId, mId, moId);
+    }
 
-        // 총 가격은 (메뉴 가격 + 옵션 가격 합산) * 수량 계산해서 setTotalPrice 해야 하지만
-        // 여기서는 임시 0으로 세팅 (실제 가격 계산 로직은 서비스 내 추가 필요)
-        cart.setTotalPrice(0);
-
-        bobMapper.insertCart(cart);  // insert 후 자동으로 caId 세팅됨
-
-        int cartId = cart.getCaId();
-
-        // 2) 옵션이 있으면 cart_option 테이블에 하나씩 insert
-        if (dto.getOptionList() != null) {
-            for (MenuOption option : dto.getOptionList()) {
-                bobMapper.insertCartOption(cartId, option.getMoId());
-            }
+    @Transactional
+    public void addOrUpdateCartItem(Cart cart) {
+        Cart existing = bobMapper.findCartItem(cart.getId(), cart.getMId(), cart.getMoId());
+        if (existing != null) {
+            existing.setQuantity(existing.getQuantity() + cart.getQuantity());
+            existing.setTotalPrice(existing.getTotalPrice() + cart.getTotalPrice());
+            bobMapper.updateCart(existing);
+        } else {
+            bobMapper.insertCart(cart);
         }
     }
 
-    public List<Cart> getCartListByUser(String userId) {
-        return bobMapper.selectCartListByUser(userId);
-    }
-
-	// 가게 검색하기
-//	public List<Shop> searchList(String keyword){
-//		return bobMapper.searchList(keyword);
-//	}
-
+	
+	
 	// 전체 게시글을 읽어와 반환하는 메서드
 
 	public List<Shop> shopList(String category, String keyword) {
@@ -108,29 +92,6 @@ public class BobService {
 		bobMapper.addReview(review);
 	}
 
-	//주문 목록보기
-	public List<Cart> getCart(String id) {
-		return bobMapper.getCart(id);
-	}
-	
-	//주문 추가
-//	public boolean insertCart(Cart cart) {
-//		return bobMapper.insertCart(cart) > 0;
-//	}
-	
-	//수량 업데이트
-	public boolean updateCartQuantity(Cart cart) {
-		return bobMapper.countUpdateCart(cart) > 0;
-	}
-	
-	//주문메뉴 개당 삭제
-	public boolean deleteMenu(Cart cart) {
-		return bobMapper.deleteMenu(cart) > 0;
-	}
-	
-	//주문표 전체삭제
-	public boolean deleteAllCart(String id) {
-		return bobMapper.deleteAllCart(id) > 0;
-	}
+
 
 }
