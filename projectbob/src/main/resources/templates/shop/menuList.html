@@ -81,6 +81,7 @@
                         <a th:href="@{|/shop/menuUpdateForm?mId=${menu.mId}&s_id=${menu.sId}|}" class="btn btn-sm btn-theme me-2">수정</a>
                         <form th:action="@{/shop/deleteMenu}" method="post" style="display:inline;">
                             <input type="hidden" name="mId" th:value="${menu.mId}">
+                            <input type="hidden" name="sId" th:value="${menu.sId}">
                             <button type="submit" class="btn btn-sm btn-outline-danger delete-menu-btn">삭제</button>
                         </form>
                     </td>
