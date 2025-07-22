@@ -59,9 +59,9 @@ public class CustomerServiceService {
 	}
 	
 	
-	public List<NoticeBoard> noticeList(String userDisivion){
+	public List<NoticeBoard> noticeList(String userDivision){
 		
-		List<NoticeBoard> notice = csMapper.noticeList(userDisivion);
+		List<NoticeBoard> notice = csMapper.noticeList(userDivision);
 		
 		return notice;
 	}

@@ -8,15 +8,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <div class ="container">
-	<th:block th:if="${session.loginDisivion == 'master'}">
+	<th:block th:if="${session.loginDivision == 'master'}">
 
 	
 	<div class="row text-center mt-5">
 		<div class="col-2 text-end">
-			<select id="searchDisivion" name="searchDisivion">
-				<option value="client" th:selected="${disivion == 'client'}">고객</option>
-				<option value="master" th:selected="${disivion == 'master'}">관리자</option>
-				<option value="owner" th:selected="${disivion == 'owner'}">사장</option>
+			<select id="searchDivision" name="searchDivision">
+				<option value="client" th:selected="${division == 'client'}">고객</option>
+				<option value="master" th:selected="${division == 'master'}">관리자</option>
+				<option value="owner" th:selected="${division == 'owner'}">사장</option>
 			</select>
 		</div>
 		<div class="col-5 text-start">
@@ -37,7 +37,7 @@
 					<th:block th:each="user, status: ${userList}">
 					<tr>
 						<td><span id="id" th:text="${user.id}"></span></td>
-						<td><span id="disivion" th:text="${user.disivion == 'client' ? '고객' : user.disivion == 'owner' ? '사장' : '관리자' }"></span></td>
+						<td><span id="division" th:text="${user.division == 'client' ? '고객' : user.division== 'owner' ? '사장' : '관리자' }"></span></td>
 						<td><span id="name" th:text="${user.name}"></span></td>
 						<td><span id="nickname" th:text="${user.nickname}"></span></td>
 						<td><span id="address1" th:text="${user.address1}"></span></td>

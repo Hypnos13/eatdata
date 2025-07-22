@@ -81,7 +81,7 @@ public class CustomerServiceController {
 	@GetMapping("/noticeList")
 	public String noticeList(Model model, NoticeBoard noticeBoard  , HttpSession session, @RequestParam(name ="from", defaultValue = "client") String from) {
 		
-		String userDv = (String) session.getAttribute("loginDisivion");
+		String userDv = (String) session.getAttribute("loginDivision");
 		if(userDv == null) { userDv="client";}
 		
 		List<NoticeBoard> notice =  csService.noticeList(userDv);

@@ -75,56 +75,6 @@ public class ShopController {
 		return "redirect:shopMain";
 	}
 	
-	@PostMapping("/insertMenu")
-	public String insertMenu( @RequestParam("sId") int sId,
-			@RequestParam("category") String category, @RequestParam("name") String name, 
-			@RequestParam("price") int price, @RequestParam("mInfo") String mInfo, 
-			@RequestParam("mPicture") MultipartFile mPictureFile, Model model ) {
-		
-		String mPictureUrl = null;
-
-        try {
-        	mPictureUrl = fileUploadService.uploadFile(mPictureFile, "business-licenses/");
-            System.out.println("메뉴사진 업로드 성공. URL: " + mPictureUrl);
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("errorMessage", e.getMessage()); // 파일이 비어있는 경우
-            return "/shop/menuJoinForm";
-        } catch (IOException e) {
-            e.printStackTrace();
-            model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-            return "/shop/menuJoinForm";
-        }
-        Menu menu = new Menu();
-        menu.setSId(sId);
-        menu.setCategory(category);
-        menu.setName(name);
-        menu.setPrice(price);
-        menu.setMInfo(mInfo);
-        menu.setMPictureUrl(mPictureUrl);
-        
-        shopService.insertMenu(menu);
-
-        model.addAttribute("message", "메뉴 정보가 성공적으로 등록되었습니다.");
-		return "redirect:menuJoinForm";
-	}
-	
-	@PostMapping("/insertMenuOption")
-	public String insertMenuOption( @RequestParam("mId") int mId,
-			@RequestParam("mOption") String mOption, @RequestParam("content") String content, 
-			@RequestParam("price") int price, Model model ) {
-		
-        MenuOption menuOption = new MenuOption();
-        menuOption.setMId(mId);
-        menuOption.setMOption(mOption);
-        menuOption.setContent(content);
-        menuOption.setPrice(price);
-        
-        shopService.insertMenuOption(menuOption);
-
-        model.addAttribute("message", "메뉴옵션 정보가 성공적으로 등록되었습니다.");
-		return "redirect:optionJoinForm";
-	}
-	
 	@GetMapping("/shopMain")
 	public String shopMain(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
 	    boolean hasShop = false;
@@ -143,23 +93,9 @@ public class ShopController {
 	}
 	
 	@GetMapping("/shopJoinForm")
-	public String shopJoinForm() {
+	public String shopJoinForm(Model model ) {
+		model.addAttribute("shop", new Shop());
 		return "shop/shopJoinForm";
-	}
-	
-	@GetMapping("/menuJoinForm")
-	public String menuJoinForm() {
-		return "shop/menuJoinForm";
-	}
-	
-	@GetMapping("/menuUpdateForm")
-	public String menuUpdateForm() {
-		return "shop/menuUpdateForm";
-	}
-	
-	@GetMapping("/optionJoinForm")
-	public String optionJoinForm() {
-		return "shop/optionJoinForm";
 	}
 	
 	@GetMapping("/shopInfo")

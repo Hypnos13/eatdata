@@ -95,8 +95,8 @@ public class LoginController {
 		session.setAttribute("isLogin", true);
 		session.setAttribute("loginId", id);
 		session.setAttribute("loginNickname", member.getNickname());
-		session.setAttribute("loginDisivion", member.getDisivion());
-		if(member.getDisivion().equals("owner")){
+		session.setAttribute("loginDivision", member.getDivision());
+		if(member.getDivision().equals("owner")){
 			return "redirect:/shopMain";
 		}
 		
@@ -233,7 +233,7 @@ public class LoginController {
 		
 		model.addAttribute("Member", loginService.getMember(id));
 		
-		if(id.substring(1, 2).equals("N_")) {
+		if(id.substring(0, 2).equals("N_") || id.substring(0, 2).equals("K_")) {
 			return "members/updateNaverMemberships";
 		}
 		
@@ -261,7 +261,7 @@ public class LoginController {
 		loginService.updateMember(member);
 		session.setAttribute("loginNickname", member.getNickname());
 		
-		if(session.getAttribute("loginDisivion").equals("owner")) {
+		if(session.getAttribute("loginDivision").equals("owner")) {
 			return "redirect:/shopMain";
 		}
 		
@@ -272,7 +272,7 @@ public class LoginController {
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
 		String path = "";
-		if(session.getAttribute("loginDisivion").equals("owner")) {
+		if(session.getAttribute("loginDivision").equals("owner")) {
 			path = "redirect:/shopMain";
 		}else {
 			path = "redirect:/main";
@@ -307,12 +307,12 @@ public class LoginController {
 	
 	// 관리자권한 - 사용자관리
 	@GetMapping("/userList")
-	public String userList(Model model, @RequestParam(name = "disivion", defaultValue = "") String disivion, @RequestParam(name="keyword", defaultValue = "") String keyword) {
+	public String userList(Model model, @RequestParam(name = "division", defaultValue = "") String division, @RequestParam(name="keyword", defaultValue = "") String keyword) {
 		
-		List<Member> userList = loginService.userList(disivion, keyword);
+		List<Member> userList = loginService.userList(division, keyword);
 		model.addAttribute("userList", userList);
-		if(disivion != "") {
-			model.addAttribute("disivion", disivion);
+		if(division != "") {
+			model.addAttribute("division", division);
 		}
 		
 		return "admin/userList";
@@ -323,9 +323,9 @@ public class LoginController {
 	public String updateIsuse(Model model, @RequestParam("id") String id, @RequestParam("isuse") String isuse, HttpSession session, HttpServletResponse response)
 			throws ServletException, IOException{
 		
-		String loginDisivion = (String) session.getAttribute("loginDisivion");
+		String loginDivision = (String) session.getAttribute("loginDivision");
 		
-		if(loginDisivion.equals("master")) {
+		if(loginDivision.equals("master")) {
 			loginService.updateIsuse(id, isuse);
 		}
 		
@@ -360,7 +360,7 @@ public class LoginController {
 			member.setAddress1("");
 			member.setAddress2("");
 			member.setPhone("");
-			member.setDisivion("client");
+			member.setDivision("client");
 			
 			model.addAttribute("Member", member);
 			
@@ -373,7 +373,7 @@ public class LoginController {
 			session.setAttribute("isLogin", true);
 			session.setAttribute("loginId", id);
 			session.setAttribute("loginNickname", member.getNickname());
-			session.setAttribute("loginDisivion", member.getDisivion());
+			session.setAttribute("loginDivision", member.getDivision());
 		
 		
 		return "redirect:/main";
@@ -384,7 +384,7 @@ public class LoginController {
 	@PostMapping("/naverJoin")
 	public String naverLogin(Model model, Member member, HttpSession session){
 		
-		member.setDisivion("client");
+		member.setDivision("client");
 		
 		loginService.joinMember(member);
 		
@@ -393,7 +393,7 @@ public class LoginController {
 		session.setAttribute("isLogin", true);
 		session.setAttribute("loginId", member.getId());
 		session.setAttribute("loginNickname", member.getNickname());
-		session.setAttribute("loginDisivion", member.getDisivion());
+		session.setAttribute("loginDivision", member.getDivision());
 		
 		return "redirect:/main";
 	}
@@ -476,7 +476,7 @@ public class LoginController {
 				member.setAddress1("");
 				member.setAddress2("");
 				member.setPhone("");
-				member.setDisivion("client");
+				member.setDivision("client");
 				
 				model.addAttribute("Member", member);
 				
@@ -489,7 +489,7 @@ public class LoginController {
 				session.setAttribute("isLogin", true);
 				session.setAttribute("loginId", id);
 				session.setAttribute("loginNickname", member.getNickname());
-				session.setAttribute("loginDisivion", member.getDisivion());
+				session.setAttribute("loginDivision", member.getDivision());
 			
 			
 		  return "redirect:/main";

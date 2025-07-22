@@ -11,7 +11,7 @@
 <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 
 <div class ="container">
-	<th:block th:if="${session.loginDisivion == 'master'}">
+	<th:block th:if="${session.loginDivision == 'master'}">
 		<div class="row mt-2">
 			<div class="col-12 text-end ">
 				<a th:href="@{writeFAQForm}" class="btn btn-success">글쓰기</a>
@@ -55,7 +55,7 @@
 								</th:block>
 								[[${cs.title}]]
 							</span> 
-							<th:block th:if="${session.loginDisivion == 'master'}">
+							<th:block th:if="${session.loginDivision == 'master'}">
 								<div class="btn-group ">
 									<div class="btn uBtn btn-sm btn-warning mx-3" th:data-btn-no="${cs.csNo}">수정</div> 
 									<div class="btn dBtn btn-sm btn-danger" th:data-btn-no="${cs.csNo}">삭제</div>

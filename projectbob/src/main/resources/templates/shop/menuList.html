@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/shop_layout}">
+<th:block layout:fragment="content">
+
+    <div class="container my-5">
+        <h2 class="text-center mb-4">메뉴 목록</h2>
+
+        <div class="text-end mb-3">
+            <a href="/shop/menuRegisterForm" class="btn btn-primary">새 메뉴 등록</a>
+        </div>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>가게 ID</th>
+                    <th>카테고리</th>
+                    <th>메뉴 이름</th>
+                    <th>가격</th>
+                    <th>사진</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(menuList)}">
+                    <td colspan="7" class="text-center">등록된 메뉴가 없습니다.</td>
+                </tr>
+               <tr th:each="menu : ${menuList}">
+                    <td th:text="${menu.mId}"></td>
+                    <td th:text="${menu.sId}"></td>
+                    <td th:text="${menu.category}"></td>
+                    <td th:text="${menu.name}"></td>
+                    <td th:text="${menu.price}"></td>
+                    <td>
+                        <img th:if="${menu.mPictureUrl}" th:src="${menu.mPictureUrl}" alt="메뉴 사진" style="width: 80px; height: auto;">
+                        <span th:unless="${menu.mPictureUrl}">사진 없음</span>
+                    </td>
+                    <td>
+                        <a th:href="@{/shop/menuUpdateForm(mId=${menu.mId})}" class="btn btn-sm btn-info me-2">수정</a>
+                        <form th:action="@{/shop/deleteMenu}" method="post" style="display:inline;">
+                            <input type="hidden" name="mId" th:value="${menu.mId}">
+                            <button type="submit" class="btn btn-sm btn-danger delete-menu-btn">삭제</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</th:block>
+</html>
