@@ -25,10 +25,16 @@
        <result property="modiDate" column="modi_date"/>
        <result property="status" column="status"/>
    </resultMap>
+   
+   <update id="updateMenuStatus">
+    UPDATE menu
+    SET status = #{status}, modi_date = SYSDATE()
+    WHERE m_id = #{mId}
+    </update>
 
    <select id="getAllMenus" resultMap="menuResultMap">
        SELECT
-           m_id, s_id, category, name, price, m_info, m_picture_url, liked, reg_date, modi_date
+           m_id, s_id, category, name, price, m_info, m_picture_url, liked, reg_date, modi_date, status 
        FROM menu
        ORDER BY m_id DESC
    </select>
@@ -50,7 +56,7 @@
 
 	<select id="getMenuById" parameterType="int" resultMap="menuResultMap">
         SELECT m_id, s_id, category, name, price, m_info,
-               m_picture_url, liked, reg_date, modi_date
+               m_picture_url, liked, reg_date, modi_date, status 
         FROM menu WHERE m_id = #{mId}
     </select>
 
@@ -93,13 +99,22 @@
         DELETE FROM menu_option WHERE m_id = #{mId}
   </delete>
     
-  <select id="getMenusByShopId" parameterType="int" resultMap="menuResultMap">
-    SELECT 
-        m_id, s_id, category, name, price, m_info, m_picture_url, liked, reg_date, modi_date
+  <select id="getMenusByShopId" resultType="com.projectbob.domain.Menu"> SELECT 
+        m_id, s_id, category, name, price, m_info, m_picture_url, liked, reg_date, modi_date, status
     FROM menu
     WHERE s_id = #{sId}
+    <if test="category != null and category != ''">
+        AND category = #{category}
+    </if>
     ORDER BY category, name
-	</select>
+   </select>
+   
+   <select id="getMenuCategoriesByShopId" parameterType="int" resultType="string">
+    SELECT DISTINCT category 
+    FROM menu 
+    WHERE s_id = #{sId} 
+    ORDER BY category
+   </select>
 
 	
 	<!-- 가게정보 불러오기 -->

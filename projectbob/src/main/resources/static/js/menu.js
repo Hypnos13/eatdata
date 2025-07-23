@@ -171,5 +171,56 @@ document.addEventListener('DOMContentLoaded', function () {
 		})
 	}
 	
+	// 메뉴 목록 페이지: 판매 상태(On/Off) 변경 처리
+	const statusToggles = document.querySelectorAll('.menu-status-toggle');
+	statusToggles.forEach(toggle => {
+		toggle.addEventListener('change', function() {
+			const mId = this.dataset.mid;
+			const currentStatus = this.dataset.status;
+	        const statusBadge = this.closest('td').querySelector('.badge');
+	
+	        // 서버에 상태 변경 요청 보내기 (Fetch API 사용)
+	        fetch('/shop/menu/updateStatus', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify({ mId: parseInt(mId), status: currentStatus })
+	        })
+	        .then(response => {
+	            if (!response.ok) {
+	                throw new Error('Network response was not ok');
+	            }
+	            return response.json();
+	        })
+	        .then(data => {
+	            if (data.success) {
+	                // 1. 성공 시, UI를 즉시 업데이트
+	                this.dataset.status = data.newStatus; // 스위치의 데이터 상태 업데이트
+	                statusBadge.textContent = data.newStatus; // 뱃지 텍스트 업데이트
+	                
+	                // 2. 뱃지 색상 변경
+	                if (data.newStatus === '판매중') {
+	                    statusBadge.classList.remove('bg-danger');
+	                    statusBadge.classList.add('bg-success');
+	                } else {
+	                    statusBadge.classList.remove('bg-success');
+	                    statusBadge.classList.add('bg-danger');
+	                }
+	            } else {
+	                // 3. 서버에서 실패 응답을 보낸 경우
+	                alert('상태 변경에 실패했습니다.');
+	                this.checked = !this.checked; // 스위치를 원래 상태로 되돌림
+	            }
+	        })
+	        .catch(error => {
+	            // 4. 네트워크 오류 등 예외 발생 시
+	            console.error('Error:', error);
+	            alert('오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+	            this.checked = !this.checked; // 스위치를 원래 상태로 되돌림
+	        });
+	    });
+	});
+	
 })
 

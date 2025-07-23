@@ -26,6 +26,7 @@ public interface ShopMapper {
     void updateMenu(Menu menu);                  // 메뉴 정보 수정
     void deleteMenu(int mId);                    // 메뉴 삭제
     List<Menu> getMenusByShopId(int sId);		 // ID에 따른 메뉴 리스트 조회
+    void updateMenuStatus(@Param("mId") int mId, @Param("status") String status); // 메뉴상태 업데이트
 
     // 메뉴 옵션 관련 메서드
     void insertMenuOption(MenuOption menuOption);        // 메뉴 옵션 등록
@@ -33,6 +34,8 @@ public interface ShopMapper {
     void updateMenuOption(MenuOption menuOption);        // 메뉴 옵션 수정
     void deleteMenuOption(int moId);                     // 특정 메뉴 옵션 삭제
     void deleteMenuOptionsByMenuId(int mId);             // 특정 메뉴의 모든 옵션 삭제 (메뉴 삭제 시 호출)
+    List<Menu> getMenusByShopId(@Param("sId") int sId, @Param("category") String category);
+    List<String> getMenuCategoriesByShopId(int sId); //카테고리 목록 조회를 위한 메서드 추가
 	
 
 	//가게 유무 확인후 보여주기
