@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
+import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.Member;
 import com.projectbob.service.LoginService;
 
@@ -581,4 +582,17 @@ public class LoginController {
 		  
 	 return "members/myPage";			  
 	}
+	
+	// 주소 관리
+	@GetMapping("/myAddressbook")
+	public String myAddressbook(Model model, HttpSession session){
+			
+	 String id = (String)session.getAttribute("loginId");  
+	 List<Addressbook> addressbook = loginService.getMyAddress(id);
+	 
+	 model.addAttribute("addressbook", addressbook);
+		  
+	 return "members/myAddressbook";			  
+	}
+	
 }

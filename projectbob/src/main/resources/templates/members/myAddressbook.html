@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<div class="container my-5">
+	<div class="card shadow-sm mb-4 p-4 text-center">
+		<div class="text-end mb-3">
+			<a href="/addAddressForm" class="btn btn-success">주소 추가</a>
+		</div>
+		
+		<th:block th:unless="${#lists.isEmpty(addressbook)}">
+			<th:block th:each="address, status: ${addressbook}">
+			<div class="my-2 border">
+				장소명 : [[${address.aName}]]
+				주소 : [[${address.address1}]]
+				상세 주소 : [[${address.address2}]]
+			</div> 
+			</th:block>
+		</th:block>
+		
+		<th:block th:if="${#lists.isEmpty(addressbook)}">
+			<div class="my-2 border">
+				등록된 주소가 없습니다.
+			</div>
+		</th:block>
+	
+	</div>
+</div>
+</th:block>
+</html>

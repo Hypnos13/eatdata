@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{js/faq.js}"></script>
+	<form name = "addAddressForm" id = "addAddressForm" method = "post" action="#">
+		<div class="row mt-5">
+			<div class="col-3 text-center">
+				<h3>유형 :</h3>
+			</div>
+			<div class="col-7">
+				<select class="form-select form-select-lg mb-3" name="type" id="type">
+				<option value="주문">주문</option>
+				<option value="서비스">서비스</option>
+				<option value="회원정보">회원정보</option>
+				<option value="결제">결제</option>
+				<option value="리뷰">리뷰</option>
+				<option value="기타">기타</option>
+			</select>
+			</div>
+		</div>
+		<div class="row mt-2">
+			<div class="col-3 text-center">
+				<h3>질문 :</h3>
+			</div>
+			<div class="col-7">
+				<input class="form-control form-control-lg" name="title" id="title" type="text" placeholder="질문을 작성해주세요.">
+			</div>
+		</div>
+		<div class="row mt-2">
+			<div class="col-3 text-center">
+				<h3>답변 :</h3>
+			</div>
+			<div class="col-7">
+				<textarea class="form-control" name="content" id="content" style="height: 300px" placeholder="답변을 작성해주세요."></textarea>
+			</div>
+		</div>
+		<div class="row mt-5">
+			<div class="col-10 text-center">
+				<input class="btn btn-secondary btn-lg" type="submit" value="게시하기">
+			</div>
+
+		</div>
+	</form>
+</th:block>
+</html>
