@@ -569,4 +569,16 @@ public class LoginController {
 		
 		return null;	
 	}
+	
+	// 마이페이지
+	@GetMapping("/myPage")
+	public String myPage(Model model, HttpSession session){
+			
+	 String id = (String)session.getAttribute("loginId");  
+	 Member member =  loginService.getMember(id);
+	 
+	 model.addAttribute("member", member);
+		  
+	 return "members/myPage";			  
+	}
 }

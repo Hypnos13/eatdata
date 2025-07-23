@@ -162,3 +162,30 @@ label {
   background-color: #e05555;
 }
 
+.myNickname{
+	text-decoration: none;
+	color :  #43d091;
+	font-size : 30px;
+	font-weight: bold;
+	padding : 2px 2px;
+	margin-bottom : 10px;
+}
+
+.mypage-img{
+  width: 64px;
+  height: 64px;
+}
+
+.mypage-box{
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mypage-box-name{
+	text-decoration: none;
+	color :  #43d091;
+	font-weight: bold;
+	padding : 2px 2px;
+}
