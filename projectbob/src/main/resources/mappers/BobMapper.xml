@@ -4,27 +4,67 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
- <!-- 장바구니에 같은 메뉴+옵션이 이미 있는지 조회 -->
-  <select id="findCartItem" parameterType="map" resultType="com.projectbob.domain.Cart">
-    SELECT * FROM cart
-    WHERE id = #{id} AND m_id = #{mId} AND mo_id = #{moId} 
-  </select>
+<delete id="deleteByUserId" parameterType="string">
+    DELETE FROM cart WHERE id = #{userId}
+</delete>
 
-  <!-- 장바구니 아이템 추가 -->
- <insert id="insertCart" parameterType="com.projectbob.domain.Cart" useGeneratedKeys="true" keyProperty="caId">
-  INSERT INTO cart (m_id, mo_id, id, s_id, quantity, total_price, reg_date)
-  VALUES (#{mId}, #{moId}, #{id}, #{sId}, #{quantity}, #{totalPrice}, NOW())
+<delete id="deleteByGuestId" parameterType="string">
+    DELETE FROM cart WHERE guest_id = #{guestId}
+</delete>
+
+<insert id="insertCart" parameterType="com.projectbob.domain.Cart" useGeneratedKeys="true" keyProperty="caId">
+  INSERT INTO cart (m_id, mo_id, id, guest_id, s_id, quantity, total_price, reg_date)
+  VALUES (#{mId}, #{moId}, #{id}, #{guestId}, #{sId}, #{quantity}, #{totalPrice}, NOW())
 </insert>
 
-  <!-- 장바구니 아이템 수량 및 가격 업데이트 -->
-  <update id="updateCart" parameterType="com.projectbob.domain.Cart">
-    UPDATE cart
-    SET quantity = #{quantity},
-        total_price = #{totalPrice},
-        modi_date = NOW()
-    WHERE ca_id = #{caId}
-  </update>
+<select id="selectCartByUserOrGuest" resultMap="CartDetailResultMap" parameterType="map">
+  SELECT
+    c.ca_id,
+    c.m_id,
+    c.mo_id,
+    c.id,
+    c.guest_id,
+    c.s_id,
+    c.quantity,
+    c.status,
+    c.total_price,
+    m.name AS menuName,
+    m.price AS menuPrice,
+    mo.content AS optionName,
+    mo.price AS optionPrice
+  FROM cart c
+  INNER JOIN menu m ON c.m_id = m.m_id
+  LEFT JOIN menu_option mo ON c.mo_id = mo.mo_id
+  <where>
+    <if test="userId != null">
+      c.id = #{userId}
+    </if>
+    <if test="guestId != null">
+      <if test="userId != null">
+        OR
+      </if>
+      c.guest_id = #{guestId}
+    </if>
+  </where>
+</select>
 
+<resultMap id="CartDetailResultMap" type="com.projectbob.domain.Cart">
+  <id property="caId" column="ca_id" />
+  <result property="mId" column="m_id" />
+  <result property="moId" column="mo_id" />
+  <result property="id" column="id" />
+  <result property="guestId" column="guest_id" />
+  <result property="sId" column="s_id" />
+  <result property="quantity" column="quantity" />
+  <result property="status" column="status" />
+  <result property="totalPrice" column="total_price" />
+
+  <!-- 🟢 추가 정보 매핑 (Cart 클래스에 추가한 필드) -->
+  <result property="menuName" column="menuName" />
+  <result property="menuPrice" column="menuPrice" />
+  <result property="optionName" column="optionName" />
+  <result property="optionPrice" column="optionPrice" />
+</resultMap>
 
 <!-- 댓글 추가 맵핑 구문 -->
 <insert id="addReview" parameterType="Review">

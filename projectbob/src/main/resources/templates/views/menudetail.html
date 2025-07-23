@@ -13,7 +13,6 @@
 
 <!-- 사용자 정의 CSS -->
 <link rel="stylesheet" href="/css/main.css">
-<link rel="stylesheet" href="/css/main_additional.css">
 
 <!-- Bootstrap Bundle JS -->
 <script
@@ -27,7 +26,7 @@
 				<!-- 왼쪽: 메뉴 영역 -->
 				<div class="col-md-8">
 
-					<div class="d-flex align-items-center mb-3"> 
+					<div class="d-flex align-items-center mb-3">
 						<img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
 						<div class="ms-3">
 							<h5 class="mb-0">[[ ${shop.name} ]] - [[ ${shop.address1} ]]</h5>
@@ -57,14 +56,24 @@
 								<th:block th:if="${not #lists.isEmpty(menuList)}">
 									<div class="col-md-6 mb-4" th:each="menu, status: ${menuList}">
 										<div class="card text-center p-3 menu-card"
-											th:attr="data-id=${menu.mId},data-name=${menu.name},data-price=${menu.price},data-shop-id=${menu.sId}">
+											th:attr="
+            data-id=${menu.mId},
+            data-name=${menu.name},
+            data-price=${menu.price},
+            data-shop-id=${menu.sId},
+            data-image=${menu.mPictureUrl},
+            data-info=${menu.mInfo}">
+
 											<div
 												class="d-flex justify-content-between align-items-center mb-2">
 												<span class="menu-title">[[ ${menu.name} ]]</span>
 											</div>
-											<img src="https://i.imgur.com/Sg4b61a.png" alt="메뉴 사진"
+
+											<img th:src="${menu.mPictureUrl}" alt="메뉴 사진"
 												class="img-fluid mb-2" />
+
 											<div class="fw-semibold">[[ ${menu.mInfo} ]]</div>
+
 											<div class="menu-price">[[
 												${#numbers.formatInteger(menu.price, 0, 'COMMA')} ]]원</div>
 										</div>
@@ -247,37 +256,47 @@
 					</div>
 				</div>
 
-<!-- 주문표 -->
-<div class="col-md-4">
-  <div class="card order-summary p-3">
-    <h5 class="card-title">🛒 주문표</h5>
+				<div class="col-12 col-md-4">
+					<div class="card order-summary p-3">
+						<h5 class="card-title mb-3">🛒 주문표</h5>
 
-    <div class="order-item-list mb-3">
-      <!-- 주문 메뉴 및 추가 메뉴가 여기 동적으로 들어갑니다 -->
-      <div class="text-muted fst-italic">주문한 메뉴가 없습니다.</div>
-    </div>
+						<div class="order-item-list mb-3">
 
-    <hr />
-    <div>
-      <p>
-        주문 수량: <strong id="itemCount">0</strong>개
-      </p>
-      <strong>총 가격: <span id="totalPrice">0원</span></strong><br />
-      <small class="text-muted" id="deliveryInfo" style="display: none;">
-        (배달비 3,000원 포함)
-      </small>
-    </div>
+							<!-- 장바구니 비어있을 때 메시지 -->
+							<div class="text-muted fst-italic small text-center"
+								id="emptyOrderMessage">주문한 메뉴가 없습니다.</div>
 
-    <div id="qtyWrapper" class="d-flex align-items-center mb-3"></div>
+							<!-- 장바구니 항목 출력 자리 -->
+							<div class="pb-2 mb-2 border-bottom">
+								<!-- 동적 주문 항목이 여기 들어갑니다 -->
+							</div>
 
-    <!-- 주문 초기화(삭제) 버튼 -->
-    <button class="btn btn-danger w-100 mb-2" id="btnRemoveItem">주문 전체 취소</button>
+						</div>
 
-    <button class="btn text-white w-100" style="background-color: #43d091;" id="btnOrderNow">
-      주문하기
-    </button>
-  </div>
-</div>
+						<hr />
+
+						<!-- 수량 및 총 가격 계산 자리 -->
+						<div>
+							<p class="mb-1 small">
+								주문 수량: <strong id="itemCount">0</strong>개
+							</p>
+							<strong class="small"> 총 가격: <span id="totalPrice">0원</span>
+								<small class="text-muted d-block" id="deliveryInfo"
+								style="display: none;"> (배달비 3,000원 포함) </small>
+							</strong>
+						</div>
+
+						<div id="qtyWrapper" class="d-flex align-items-center mb-3"></div>
+
+						<button class="btn btn-danger w-100 mb-2 btn-sm"
+							id="btnRemoveItem">주문 전체 취소</button>
+						<button class="btn text-white w-100 btn-sm"
+							style="background-color: #43d091;" id="btnOrderNow">주문하기</button>
+					</div>
+				</div>
+
+
+
 
 
 			</div>

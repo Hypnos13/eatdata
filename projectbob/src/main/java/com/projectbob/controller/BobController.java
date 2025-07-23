@@ -28,23 +28,6 @@ public class BobController {
 	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	
 	
-	
-	 @PostMapping("/addCart")
-	    public ResponseEntity<String> addToCart(@RequestBody List<Cart> cartItems, Principal principal ) {
-	        String userId = null;
-
-	        if(principal != null) {
-	        	userId = principal.getName();
-	       
-	        }
-	        for (Cart cart : cartItems) {
-	            cart.setId(userId);
-	            bobService.addOrUpdateCartItem(cart);
-	        }
-
-	        return ResponseEntity.ok("장바구니에 추가되었습니다.");
-	    }
-	
 
 	@GetMapping({"/", "/main"})
 	public String Main() {		
@@ -75,7 +58,7 @@ public class BobController {
 
 	  	// 가게 상세보기 메서드		
 		  @GetMapping("/MenuDetail") 
-		  public String getMenuDetail(Model model,		  
+		  public String getMenuDetail(Model model,HttpSession session,	  
 		  @RequestParam("sId") int sId) {
 		  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", sId); // 가게 정보 가져오기
 		  Shop shop = bobService.getShopDetail(sId);
@@ -93,6 +76,15 @@ public class BobController {
 			  reviewAvg = reviewList.stream().mapToInt(Review::getRating).average().orElse(0.0);			  
 		  }
 		  model.addAttribute("reviewAvg", reviewAvg);
+		  
+		  String userId = null;  // 로그인 회원 아이디 (예: 세션이나 인증에서 가져오기)
+		    // 예시: userId = (String) session.getAttribute("userId");
+		    String guestId = (String) session.getAttribute("guestId"); // 비회원 guestId
+
+		    // 카트 정보 조회 (회원 or 비회원)
+		    List<Cart> cartList = bobService.getCartByUser(userId, guestId);
+
+		    model.addAttribute("cartList", cartList);
 		  
 		  return "views/MenuDetail"; 
 		  }

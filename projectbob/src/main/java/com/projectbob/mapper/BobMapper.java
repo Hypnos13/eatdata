@@ -14,11 +14,16 @@ import com.projectbob.domain.Shop;
 @Mapper
 public interface BobMapper {
 	
-	Cart findCartItem(@Param("id") String id, @Param("mId") int mId, @Param("moId") int moId);
+	 // 회원 아이디로 카트 전체 삭제
+    int deleteByUserId(String userId);
 
-	int insertCart(Cart cart);
+    // 비회원 guestId로 카트 전체 삭제
+    int deleteByGuestId(String guestId);
+	
+	void insertCart(Cart cart);  // insert용
 
-	int updateCart(Cart cart);
+	List<Cart> selectCartByUserOrGuest(@Param("userId") String userId, @Param("guestId") String guestId);
+	
 
 	public List<Shop> shopList(@Param("category") String category,@Param("keyword") String keyword); //shopList 페이지
 	

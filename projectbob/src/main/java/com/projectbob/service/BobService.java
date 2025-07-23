@@ -24,22 +24,25 @@ public class BobService {
 	@Autowired
 	private BobMapper bobMapper;
 	
-	public Cart findCartItem(String userId, int mId, int moId) {
-        return bobMapper.findCartItem(userId, mId, moId);
-    }
+	public void deleteCartByUserId(String userId) {
+	    bobMapper.deleteByUserId(userId);
+	}
 
-    @Transactional
-    public void addOrUpdateCartItem(Cart cart) {
-        Cart existing = bobMapper.findCartItem(cart.getId(), cart.getMId(), cart.getMoId());
-        if (existing != null) {
-            existing.setQuantity(existing.getQuantity() + cart.getQuantity());
-            existing.setTotalPrice(existing.getTotalPrice() + cart.getTotalPrice());
-            bobMapper.updateCart(existing);
-        } else {
-            bobMapper.insertCart(cart);
-        }
-    }
+	public void deleteCartByGuestId(String guestId) {
+	    bobMapper.deleteByGuestId(guestId);
+	}
+		
+	  public void addCartItems(List<Cart> cartItems) {
+	        for (Cart cart : cartItems) {
+	            // 옵션 가격을 포함한 총 가격 계산 예시 (원한다면)
+	            // cart.setTotalPrice(계산값);
+	            bobMapper.insertCart(cart);
+	        }
+	    }
 
+	    public List<Cart> getCartByUser(String userId ,String guestId) {
+	        return bobMapper.selectCartByUserOrGuest(userId, guestId);
+	    }
 	
 	
 	// 전체 게시글을 읽어와 반환하는 메서드
