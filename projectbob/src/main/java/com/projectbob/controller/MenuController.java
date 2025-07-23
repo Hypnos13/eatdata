@@ -73,18 +73,13 @@ public class MenuController {
 		// sId로 해당 가게의 메뉴만 필터링해서 가져옴
 	    List<Menu> menuList = shopService.getMenusByShopId(sId, category);
 	    
-	    model.addAttribute("menuList", menuList);
-	    model.addAttribute("categories", categories);
-	    model.addAttribute("currentShopId", sId); // 새 메뉴 등록 시 sId를 넘겨주기 위해 추가
-<<<<<<< HEAD
-
 	    // 영업시간 안나와서 넣은거 - 준혁
 	    Shop shop = shopService.findBySId(sId);
 	    model.addAttribute("shop", shop);
-	    
-=======
+	    model.addAttribute("menuList", menuList);
+	    model.addAttribute("categories", categories);
+	    model.addAttribute("currentShopId", sId); // 새 메뉴 등록 시 sId를 넘겨주기 위해 추가
 	    model.addAttribute("selectedCategory", category );
->>>>>>> Yong
 	    return "/shop/menuList";
 	}
 	

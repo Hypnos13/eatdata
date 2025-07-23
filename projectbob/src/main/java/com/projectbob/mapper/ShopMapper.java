@@ -56,20 +56,8 @@ public interface ShopMapper {
     void updateMenuOption(MenuOption menuOption);        // 메뉴 옵션 수정
     void deleteMenuOption(int moId);                     // 특정 메뉴 옵션 삭제
     void deleteMenuOptionsByMenuId(int mId);             // 특정 메뉴의 모든 옵션 삭제 (메뉴 삭제 시 호출)
-<<<<<<< HEAD
-=======
     List<Menu> getMenusByShopId(@Param("sId") int sId, @Param("category") String category);
     List<String> getMenuCategoriesByShopId(int sId); //카테고리 목록 조회를 위한 메서드 추가
 	
-
-	//가게 유무 확인후 보여주기
-	public List<Shop> findShopListByOwnerId(String ownerId);
-	
-	//다수가게에서 선택가게 고정
-	public Shop findByShopIdAndOwnerId(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
-
-	//기본정보 수정
-	public int updateShopBasicInfo(Shop shop);
->>>>>>> Yong
 
 }
