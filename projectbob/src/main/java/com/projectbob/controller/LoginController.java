@@ -2,6 +2,7 @@ package com.projectbob.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 
@@ -95,8 +96,8 @@ public class LoginController {
 		session.setAttribute("isLogin", true);
 		session.setAttribute("loginId", id);
 		session.setAttribute("loginNickname", member.getNickname());
-		session.setAttribute("loginDisivion", member.getDisivion());
-		if(member.getDisivion().equals("owner")){
+		session.setAttribute("loginDivision", member.getDivision());
+		if(member.getDivision().equals("owner")){
 			return "redirect:/shopMain";
 		}
 		
@@ -261,7 +262,7 @@ public class LoginController {
 		loginService.updateMember(member);
 		session.setAttribute("loginNickname", member.getNickname());
 		
-		if(session.getAttribute("loginDisivion").equals("owner")) {
+		if(session.getAttribute("loginDivision").equals("owner")) {
 			return "redirect:/shopMain";
 		}
 		
@@ -272,7 +273,7 @@ public class LoginController {
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
 		String path = "";
-		if(session.getAttribute("loginDisivion").equals("owner")) {
+		if(session.getAttribute("loginDivision").equals("owner")) {
 			path = "redirect:/shopMain";
 		}else {
 			path = "redirect:/main";
@@ -307,12 +308,12 @@ public class LoginController {
 	
 	// 관리자권한 - 사용자관리
 	@GetMapping("/userList")
-	public String userList(Model model, @RequestParam(name = "disivion", defaultValue = "") String disivion, @RequestParam(name="keyword", defaultValue = "") String keyword) {
+	public String userList(Model model, @RequestParam(name = "division", defaultValue = "") String division, @RequestParam(name="keyword", defaultValue = "") String keyword) {
 		
-		List<Member> userList = loginService.userList(disivion, keyword);
+		List<Member> userList = loginService.userList(division, keyword);
 		model.addAttribute("userList", userList);
-		if(disivion != "") {
-			model.addAttribute("disivion", disivion);
+		if(division != "") {
+			model.addAttribute("division", division);
 		}
 		
 		return "admin/userList";
@@ -323,9 +324,9 @@ public class LoginController {
 	public String updateIsuse(Model model, @RequestParam("id") String id, @RequestParam("isuse") String isuse, HttpSession session, HttpServletResponse response)
 			throws ServletException, IOException{
 		
-		String loginDisivion = (String) session.getAttribute("loginDisivion");
+		String loginDivision = (String) session.getAttribute("loginDivision");
 		
-		if(loginDisivion.equals("master")) {
+		if(loginDivision.equals("master")) {
 			loginService.updateIsuse(id, isuse);
 		}
 		
@@ -360,7 +361,7 @@ public class LoginController {
 			member.setAddress1("");
 			member.setAddress2("");
 			member.setPhone("");
-			member.setDisivion("client");
+			member.setDivision("client");
 			
 			model.addAttribute("Member", member);
 			
@@ -373,7 +374,7 @@ public class LoginController {
 			session.setAttribute("isLogin", true);
 			session.setAttribute("loginId", id);
 			session.setAttribute("loginNickname", member.getNickname());
-			session.setAttribute("loginDisivion", member.getDisivion());
+			session.setAttribute("loginDivision", member.getDivision());
 		
 		
 		return "redirect:/main";
@@ -384,7 +385,7 @@ public class LoginController {
 	@PostMapping("/naverJoin")
 	public String naverLogin(Model model, Member member, HttpSession session){
 		
-		member.setDisivion("client");
+		member.setDivision("client");
 		
 		loginService.joinMember(member);
 		
@@ -393,7 +394,7 @@ public class LoginController {
 		session.setAttribute("isLogin", true);
 		session.setAttribute("loginId", member.getId());
 		session.setAttribute("loginNickname", member.getNickname());
-		session.setAttribute("loginDisivion", member.getDisivion());
+		session.setAttribute("loginDivision", member.getDivision());
 		
 		return "redirect:/main";
 	}
@@ -476,7 +477,7 @@ public class LoginController {
 				member.setAddress1("");
 				member.setAddress2("");
 				member.setPhone("");
-				member.setDisivion("client");
+				member.setDivision("client");
 				
 				model.addAttribute("Member", member);
 				
@@ -489,10 +490,83 @@ public class LoginController {
 				session.setAttribute("isLogin", true);
 				session.setAttribute("loginId", id);
 				session.setAttribute("loginNickname", member.getNickname());
-				session.setAttribute("loginDisivion", member.getDisivion());
+				session.setAttribute("loginDivision", member.getDivision());
 			
 			
 		  return "redirect:/main";
 	}
 	
+	// 인증번호 창 띄우기
+	@GetMapping("/phoneCertify")
+	public String phoneCertifyPop(Model model, @RequestParam("phone") String phone, HttpSession session, HttpServletResponse response) throws ServletException, IOException{
+		
+		
+		String code = (String) session.getAttribute("code") ;
+		
+		if(code == null) {
+			SecureRandom random = new SecureRandom();
+			StringBuilder sb = new StringBuilder();
+			
+			for(int i = 0 ; i < 6 ; i++) {	sb.append(random.nextInt(10)); }
+			
+			code = sb.toString();
+			session.setAttribute("code", code);
+			
+		/*
+			Message m = new Message();
+			m.setFrom("01042273840");
+			m.setTo(phone.replace("-", ""));
+			m.setText("인증번호는 " +code+" 입니다.");
+			
+			SingleMessageSentResponse res =  MESSAGE_SERVICE.sendOne(new SingleMessageSendingRequest(m));
+			
+		*/
+			
+			response.setContentType("text/html; charset=utf-8");
+			PrintWriter out = response.getWriter();
+			
+			out.print("<script>");
+			out.print(" alert('인증번호가 전송 되었습니다.');");
+			out.print("</script>");
+			
+		}
+			System.out.println("코드 : " + code);
+		
+			model.addAttribute("phone", phone);	
+		
+		return "members/phoneCertify";
+	}
+	
+	// 인증번호 확인
+	@PostMapping("/certifyNumber")
+	public String certifyNumber(@RequestParam("certifyNumber") String certifyNumber, @RequestParam("phone") String phone, HttpSession session , HttpServletResponse response)
+			throws ServletException, IOException{
+		
+		String code = (String) session.getAttribute("code");
+		
+		response.setContentType("text/html; charset=utf-8");
+		PrintWriter out = response.getWriter();
+		
+		if(code.equals(certifyNumber)) {
+			session.removeAttribute("code");
+			
+			out.print("<script>");
+			out.print(" alert('인증이 완료되었습니다.');");
+			out.print("let btn = window.opener.document.getElementById(\"btn-phoneCertify\");");
+			out.print("btn.disabled = true;");
+			out.print("btn.value = '인증완료';");
+			out.print("btn.style.backgroundColor = '#94a3b8';");
+			out.print("btn.style.color = '#ffffff';");
+			out.print("window.opener.document.getElementById(\"phone\").readOnly = true;");
+			out.print("window.close();");
+			out.print("</script>");
+		}else {
+			out.print("<script>");
+			out.print(" alert('인증번호가 일치하지 않습니다');");
+			out.print(" history.back();");
+			out.print("</script>");
+		}
+		
+		return null;	
+	}
 }

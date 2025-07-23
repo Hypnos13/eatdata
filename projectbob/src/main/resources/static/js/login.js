@@ -2,6 +2,8 @@ $(function(){
 	// 회원가입시 유효성 검사
 	$("#joinMemberForm").on("submit",async function(e){
 		
+		let phoneIsReadOnly = $("#phone").prop("readonly");
+		
 		e.preventDefault();
 		
 		let check = 0;
@@ -20,7 +22,13 @@ $(function(){
 		
 		check += CheckPhone();
 		
-		if(check != 7){
+		if(phoneIsReadOnly){
+			check += 1;
+		}else{
+			alert("핸드폰 인증을 완료해주세요.");
+		}
+		
+		if(check != 8){
 			return false;
 		}
 		
@@ -42,13 +50,27 @@ $(function(){
 	$("#updateMemberForm").on("submit",function(){
 			
 			let check = 0;	
+			let oldPhone = $("#oldPhone").val();
+			let phone = $("#phone").val();
+			let phoneIsReadOnly = $("#phone").prop("readonly");
 			
 			check += CheckPass();			
 			check += CheckAddress();
 			check += CheckEmail();
 			check += CheckPhone();
 			
-			if(check != 4){	return false; }
+			if(oldPhone == phone){
+				check += 1;
+			}else{
+				if(phoneIsReadOnly){
+					check += 1;
+				}else{
+					alert("핸드폰 인증을 완료해주세요.");
+				}
+			}
+			
+			
+			if(check != 5){	return false; }
 		});
 	
 	
@@ -108,6 +130,7 @@ $(function(){
 	
 	$("#searchIdPassForm").on("submit",function(){
 		let check = 0;	
+		let phoneIsReadOnly = $("#phone").prop("readonly");
 		
 		if($("#search").val() == "false"){
 			check += 1;
@@ -123,7 +146,13 @@ $(function(){
 			check += CheckPhone();
 		}
 		
-		if(check != 3){
+		if(phoneIsReadOnly){
+			check += 1;
+		}else{
+			alert("핸드폰 인증을 완료해주세요.");
+		}
+		
+		if(check != 4){
 			return false;
 		}
 		
@@ -141,19 +170,19 @@ $(function(){
 	
 	// 관리자 페이지 - 사용자관리 - 검색어 검색
 	$("#btn_search").on("click",function(){
-		let searchDisivion = $("#searchDisivion").val();
+		let searchDivision = $("#searchDivision").val();
 		let keyword = $("#keyword").val();
 		
-		window.location.href="userList?disivion="+searchDisivion+"&keyword="+keyword;		
+		window.location.href="userList?division="+searchDivision+"&keyword="+keyword;		
 	});
 	
 	// 관리자 페이지 - 사용자관리 - 검색어 검색시
 	$("#keyword").on("keydown",function(e){
 		if(e.key == 'Enter'){
-			let searchDisivion = $("#searchDisivion").val();
+			let searchDivision = $("#searchDivision").val();
 			let keyword = $("#keyword").val();
 					
-			window.location.href="userList?disivion="+searchDisivion+"&keyword="+keyword;	
+			window.location.href="userList?division="+searchDivision+"&keyword="+keyword;	
 		}
 	});
 	
@@ -162,14 +191,21 @@ $(function(){
 	$("#naverJoinForm").on("submit", function(){
 			
 		let check = 0;		
+		let phoneIsReadOnly = $("#phone").prop("readonly");
 
 		check += CheckBirthday();	
 				
 		check += CheckAddress();
 			
 		check += CheckPhone();
+		
+		if(phoneIsReadOnly){
+			check += 1;
+		}else{
+			alert("핸드폰 인증을 완료해주세요.");
+		}
 			
-		if(check != 3){
+		if(check != 4){
 			return false;
 		}
 	});
@@ -178,11 +214,24 @@ $(function(){
 	$("#updateNaverMemberForm").on("submit",function(){
 				
 		let check = 0;	
+		let oldPhone = $("#oldPhone").val();
+		let phone = $("#phone").val();
+		let phoneIsReadOnly = $("#phone").prop("readonly");
 					
 		check += CheckAddress();
 		check += CheckPhone();
+		
+		if(oldPhone == phone){
+			check += 1;
+		}else{
+			if(phoneIsReadOnly){
+				check += 1;
+			}else{
+				alert("핸드폰 인증을 완료해주세요.");
+			}
+		}
 				
-		if(check != 2){	return false; }
+		if(check != 3){	return false; }
 	});
 	
 	// 네이버 아이디 회원 탈퇴 시
@@ -193,6 +242,47 @@ $(function(){
 		    $("#userPass").val($("#password").val());
 		}			
 	});
+	
+	// 휴대폰 인증
+	$("#btn-phoneCertify").on("click",function(){
+		var regExp = /^(01[016789]{1})-?[0-9]{3,4}-?[0-9]{4}$/;
+		var phone = $("#phone").val();
+		
+		
+		if($("#phone").val().length <= 0){
+			$("#phoneInfo").text("연락처를 입력해주세요.");	
+			$("#phone").css("border-color", "#F76159");
+			$("#phone").css("color", "#F76159");	
+			$("#phone").focus();			
+			return false;
+		}else if(!regExp.test($("#phone").val())){
+			$("#phoneInfo").text("연락처가 올바르지 않습니다. (ex.010-0000-0000)");	
+			$("#phone").css("border-color", "#F76159");
+			$("#phone").css("color", "#F76159");		
+			$("#phone").focus();		
+			return false;
+		}else{
+			$("#phoneInfo").text("");
+			$("#phone").css("border-color", "#DEE2E6");
+			$("#phone").css("color", "black");
+		}
+		
+		window.open("/phoneCertify?phone="+phone, "phoneCheckPopup",`width=500,height=300,scrollbar=no`);
+	});
+	
+	// 휴대폰 인증 - 인증하기
+	$("#phoneCertifyForm").on("submit",function(){
+		let certifyNumber = $("#certifyNumber").val();
+		let phone = $("#phone").val();
+		
+		
+		
+		if(certifyNumber.length < 6){
+			alert("인증번호 6자리를 입력해주세요.");
+			return false;
+		}
+	});
+	
 });
 
 
@@ -430,4 +520,38 @@ function CheckPhone(){
 		$("#phone").css("color", "black");
 		return 1;
 	}
+}
+
+// 타이머 시작
+function startTimer(duration) {
+        let time = duration;
+        interval = setInterval(function () {
+            const min = String(Math.floor(time / 60)).padStart(2, '0');
+            const sec = String(time % 60).padStart(2, '0');
+            $(".timer").text(`${min}:${sec}`);
+
+            if (time <= 0) {
+                clearInterval(interval);
+                $(".timer").text("만료됨");
+                $("#btn-phoneCheck").val("재인증 요청").removeClass("btn-success").addClass("btn-warning");
+                sessionStorage.removeItem("phoneAuthEnd");
+            }
+
+            time--;
+        }, 1000);
+}
+
+// 타이머 체크
+function checkAndStartTimer() {
+        const endTime = sessionStorage.getItem("phoneAuthEnd");
+        if (endTime) {
+            const remainSec = Math.floor((new Date(endTime) - new Date()) / 1000);
+            if (remainSec > 0) {
+                startTimer(remainSec);
+            }else{
+                $(".timer").text("만료됨");
+                $("#btn-phoneCheck").val("재인증 요청").removeClass("btn-success").addClass("btn-warning");
+                sessionStorage.removeItem("phoneAuthEnd");
+            }
+        }
 }

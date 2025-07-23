@@ -3,8 +3,8 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.LoginMapper" >
 <insert id="joinMember" parameterType="Member">
-	INSERT INTO client(id, pass, name, nickname, birthday, address1, address2, email, phone, disivion, reg_date, modi_date) 
-	VALUES (#{id}, #{pass}, #{name}, #{nickname}, #{birthday}, #{address1}, #{address2}, #{email}, #{phone}, #{disivion}, SYSDATE(), SYSDATE())
+	INSERT INTO client(id, pass, name, nickname, birthday, address1, address2, email, phone, division, reg_date, modi_date) 
+	VALUES (#{id}, #{pass}, #{name}, #{nickname}, #{birthday}, #{address1}, #{address2}, #{email}, #{phone}, #{division}, SYSDATE(), SYSDATE())
 </insert>
 
 <select id="getMember" resultType="Member">
@@ -53,14 +53,14 @@
 	SELECT *
 	FROM client
 	<where>
-    	<if test="disivion != null and disivion != ''">
-        	disivion = #{disivion}
+    	<if test="division != null and division != ''">
+        	division = #{division}
     	</if>
     	<if test="keyword != null and keyword != ''">
         	AND id LIKE CONCAT('%', #{keyword}, '%') 
     	</if>
 </where>
-	ORDER BY disivion, id
+	ORDER BY division, id
 </select>
 
 <update id="updateIsuse">
