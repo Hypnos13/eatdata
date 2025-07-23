@@ -29,6 +29,7 @@
 	SELECT * FROM review_reply WHERE r_no = #{rNo}
 </select>
 
+<!-- 댓글 대댓글 연결 -->
 <resultMap id="reviewReplyResultMap" type="com.projectbob.domain.ReviewReply">
     <id property="rrNo" column="rr_no"/>
     <result property="rNo" column="r_no"/>
@@ -63,6 +64,22 @@
 	VALUES(#{id}, #{sId}, #{mId}, #{content}, #{rating}, #{rPicture}, #{liked}, #{status}, SYSDATE(), SYSDATE())
 </insert>
 
+<!-- 찜목록 버튼 -->
+<select id="countLikeList" parameterType="LikeList" resultType="int">
+	SELECT COUNT(*) FROM likeList
+	WHERE id = #{id} AND s_id = #{sId}
+</select>
+<insert id="addLikeList" parameterType="LikeList">
+	INSERT INTO likeList(id, s_id, status)
+	VALUES(#{id}, #{sId}, #{status})
+</insert>
+<delete id="deleteLikeList" parameterType="LikeList">
+	DELETE FROM likeList WHERE id = #{id} AND s_id = #{sId}
+</delete>
+<select id="shopCountLike" parameterType="int" resultType="int">
+	SELECT COUNT(*) FROM likeList WHERE s_id = #{sId}	
+</select>
+
 <!-- 하트 버튼 증가시키는 쿼리 -->
 <update id="plusHeart" parameterType="int">
 	UPDATE shop SET heart = heart + 1 WHERE s_id = #{sId}
@@ -71,10 +88,11 @@
 	SELECT heart FROM shop WHERE s_id = #{sId}
 </select>
 
+<!-- 댓글 대댓글 연결 -->
 <resultMap id="reviewResultMap" type="com.projectbob.domain.Review">
     <id property="rNo" column="r_no"/>
     <result property="id" column="id"/>
-    <result property="sId" column="s_id"/> <!-- Explicit mapping for s_id -->
+    <result property="sId" column="s_id"/> 
     <result property="mId" column="m_id"/>
     <result property="content" column="content"/>
     <result property="rating" column="rating"/>

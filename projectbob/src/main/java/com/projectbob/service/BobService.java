@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.projectbob.domain.LikeList;
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Review;
@@ -78,12 +79,44 @@ public class BobService{
 	}
 
 	
-	// 가게 찜 (하트) 증가
+	// 가게 (하트) 증가
 	public int plusHeart(int sId) {
 		return bobMapper.plusHeart(sId);
 	}
 	public Integer getHeartCount(int sId) {
 		return bobMapper.getHeartCount(sId);
+	}
+	
+	// 가게 찜하기
+	public int countLikeList(LikeList likeList) {
+		return bobMapper.countLikeList(likeList);
+	}
+	
+	// 찜 등록
+	public int addLikeList(LikeList likeList) {
+		return bobMapper.addLikeList(likeList);
+	}
+	
+	// 찜 삭제
+	public int deleteLikeList(LikeList likeList) {
+		return bobMapper.deleteLikeList(likeList);
+	}
+	
+	// 가게 찜
+	public int shopCountLike(int sId) {
+		return bobMapper.shopCountLike(sId);
+	}
+			
+	// 찜 버튼 토글
+	public boolean toggleLike(LikeList likeList) {
+		boolean exists = bobMapper.countLikeList(likeList) > 0;
+		if (exists) {
+			bobMapper.deleteLikeList(likeList);
+			return false;
+		} else {
+			bobMapper.addLikeList(likeList);
+			return true;
+		}
 	}
 	
 	

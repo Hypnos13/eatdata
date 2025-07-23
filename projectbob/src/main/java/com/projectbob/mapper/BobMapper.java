@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.projectbob.domain.LikeList;
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Review;
@@ -32,6 +33,18 @@ public interface BobMapper {
 	// shop 하트 증가	
 		int plusHeart(int sId);
 		Integer getHeartCount(int sId);
+		
+	// 찜
+	public int countLikeList(LikeList likeList);
+	
+	// 찜 추가
+	public int addLikeList(LikeList likeList);
+	
+	// 찜 삭제
+	public int deleteLikeList(LikeList likeList);
+	
+	// 가게 찜 수
+	public int shopCountLike(@Param("sId") int sId);
 		
 	// 댓글을 DB에 등록하는 메서드
 	public void addReview(Review review);

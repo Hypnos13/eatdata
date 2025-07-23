@@ -292,6 +292,27 @@ $(function(){
 	});
 });
 
+
+//찜하기~
+$(function(){
+	$('#btnLikeList').click(function(){
+		const $btn = $(this);
+		const isLiked = $btn.hasClass('liked');
+		
+		if(!isLiked){
+			$btn.addClass('liked');
+			$('#likeText').text('찜취소');
+			alert('찜!');
+		} else {
+			$btn.removeClass('liked');
+			$('#likeText').text('찜');
+			alert('찜 해제!');
+		}
+	});
+});
+
+
+
 // 댓글쓰기 버튼 클릭 이벤트
 $("#reviewWrite").on("click", function(){
 	console.log("리뷰쓰기 버튼 클릭");

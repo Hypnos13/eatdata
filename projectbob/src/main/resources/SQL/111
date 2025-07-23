@@ -225,6 +225,7 @@ insert into review (id,s_id,m_id,content,rating,status) values('admin',1,1,'리�
 
 -- 대댓글 테이블(사장만 가능)
 -- 대댓글 번호, 리뷰 번호, 가게id, 사장id, 내용, 작성일, 수정일, 상태
+DROP TABLE IF EXISTS review_reply;
 CREATE TABLE review_reply(
 	rr_no INT AUTO_INCREMENT PRIMARY KEY,
     r_no INT NOT NULL,
@@ -243,5 +244,19 @@ CREATE TABLE review_reply(
 	UNIQUE(r_no)
 );
 
+-- 찜목록 테이블
+-- 회원ID, 가게ID, 생성일, 상태
+DROP TABLE IF EXISTS likeList;
+CREATE TABLE likeList(
+	id VARCHAR(20) NOT NULL,
+    s_id int NOT NULL,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50),
+    PRIMARY KEY (id, s_id),
+    CONSTRAINT fk_likeList_client FOREIGN KEY (id) REFERENCES client(id)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT fk_likeList_shop FOREIGN KEY(s_id) REFERENCES shop(s_id)
+		ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 commit;

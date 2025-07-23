@@ -33,6 +33,15 @@
 							<h5 class="mb-0">[[ ${shop.name} ]] - [[ ${shop.address1} ]]</h5>
 							<small>★ [[${shop.rating}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원</small>
 						</div>
+						
+						<!-- 찜버튼 -->
+							<div class="ms-auto">									
+								<button type="button" id="btnLikeList" class="btn btn-outline-danger">
+								<i class="bi bi-bag-heart-fill me-1"></i>
+								<span id="likeText">찜</span>									
+								</button>
+							</div>
+						
 					</div>
 
 					<!-- 탭 메뉴 -->
@@ -89,9 +98,9 @@
 								<h2 class="fw-bold me-3" th:text="${#numbers.formatDecimal(reviewAvg, 1, 1)}">4.9</h2>
 													
 							</div>
-							<!-- 찜버튼 -->
+							<!-- 하트버튼 -->
 							<div class="d-flex align-items-center">						
-							<span>가게 찜하기</span>		
+							<span>가게 좋아요</span>		
 								<button type="button" id="btnHeart" class="btn btn-outline-danger btn-sm px-2 py-0"
 														th:data-sid="${shop.sId}">
 								<span class="me-1" id="heartCount" th:text="${shop.heart}">0</span>

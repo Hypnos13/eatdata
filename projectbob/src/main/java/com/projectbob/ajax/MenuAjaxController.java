@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.projectbob.domain.LikeList;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Review;
 import com.projectbob.domain.ReviewReply;
@@ -53,6 +55,18 @@ public class MenuAjaxController {
 		map.put("success", result > 0);
 		map.put("heartCount", heartCount);
 		return map;
+	}
+	
+	// 찜 버튼
+	@PostMapping("/like.ajax")
+	public Map<String, Object> toggleLike(@RequestBody LikeList likeList){
+		boolean liked = bobService.toggleLike(likeList);
+		int totalLikes = bobService.shopCountLike(likeList.getSId());
+		return Map.of(
+				"liked", liked,
+				"heartCount", bobService.countLikeList(likeList)
+				);
+				
 	}
 		
 	// 댓글 쓰기 메서드
