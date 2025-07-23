@@ -85,6 +85,7 @@ public class BobController {
 		  List<Review> reviewList = bobService.getReviewList(sId);
 		  model.addAttribute("reviewList", reviewList);
 		  
+		  // 회원 정보 세팅
 		  String loginId = (String) session.getAttribute("loginId");
 		  Member member = null;
 		  if(loginId != null) {
@@ -92,6 +93,18 @@ public class BobController {
 		  }
 		 model.addAttribute("member", member);
 		  
+		 // 찜
+		 boolean liked = false;
+		 if(member != null) {
+			 LikeList likeDto = new LikeList();
+			 likeDto.setId(loginId);
+			 likeDto.setSId(sId);
+			 liked = bobService.isLiked(likeDto) > 0;			 
+		 }
+		 model.addAttribute("liked", liked);
+		 model.addAttribute("heartCount", shop.getHeart());
+		 
+		 // 리뷰 탭
 		  double reviewAvg = 0.0;
 		  if (!reviewList.isEmpty()) {
 			  reviewAvg = reviewList.stream().mapToInt(Review::getRating).average().orElse(0.0);			  

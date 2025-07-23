@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.projectbob.domain.LikeList;
 import com.projectbob.domain.Menu;
@@ -88,8 +89,8 @@ public class BobService{
 	}
 	
 	// 가게 찜하기
-	public int countLikeList(LikeList likeList) {
-		return bobMapper.countLikeList(likeList);
+	public int isLiked(LikeList likeList) {
+		return bobMapper.isLiked(likeList);
 	}
 	
 	// 찜 등록
@@ -108,15 +109,26 @@ public class BobService{
 	}
 			
 	// 찜 버튼 토글
-	public boolean toggleLike(LikeList likeList) {
-		boolean exists = bobMapper.countLikeList(likeList) > 0;
+	@Transactional
+	public Map<String, Object> toggleLike(LikeList likeList) {
+		boolean exists = bobMapper.isLiked(likeList) > 0;
+		int sId = likeList.getSId();
+		int newCount;
+		
 		if (exists) {
 			bobMapper.deleteLikeList(likeList);
-			return false;
+			bobMapper.decrementHeart(likeList.getSId());
+			
 		} else {
 			bobMapper.addLikeList(likeList);
-			return true;
-		}
+			bobMapper.incrementHeart(likeList.getSId());
+			
+		}		
+		newCount = bobMapper.getHeartCount(likeList.getSId());
+		return Map.of(
+				"liked", !exists,
+				"heartCount", newCount
+				);
 	}
 	
 	

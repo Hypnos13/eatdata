@@ -35,7 +35,7 @@ public interface BobMapper {
 		Integer getHeartCount(int sId);
 		
 	// 찜
-	public int countLikeList(LikeList likeList);
+	public int isLiked(LikeList likeList);
 	
 	// 찜 추가
 	public int addLikeList(LikeList likeList);
@@ -45,6 +45,10 @@ public interface BobMapper {
 	
 	// 가게 찜 수
 	public int shopCountLike(@Param("sId") int sId);
+	
+	// 찜 추가 시 shop.heart + 1 , - 1
+	public int incrementHeart(@Param("sId") int sId);
+	public int decrementHeart(@Param("sId") int sId);
 		
 	// 댓글을 DB에 등록하는 메서드
 	public void addReview(Review review);

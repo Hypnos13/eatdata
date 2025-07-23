@@ -13,7 +13,6 @@
 
 <!-- 사용자 정의 CSS -->
 <link rel="stylesheet" href="/css/main.css">
-<link rel="stylesheet" href="/css/main_additional.css">
 
 <!-- Bootstrap Bundle JS -->
 <script
@@ -36,9 +35,12 @@
 						
 						<!-- 찜버튼 -->
 							<div class="ms-auto">									
-								<button type="button" id="btnLikeList" class="btn btn-outline-danger">
-								<i class="bi bi-bag-heart-fill me-1"></i>
-								<span id="likeText">찜</span>									
+								<button type="button" id="btnLikeList" th:data-sid="${shop.sId}" 
+								class="btn btn-outline-secondary" 
+								th:classappend="${liked} ? ' btn-secondary liked' : ' btn-outline-secondary'">
+								<i class="bi bi-heart-fill me-1"></i>
+								<span id="likeText" th:text="${liked} ? '찜' : '찜 하기'">()찜</span>			
+								(<span id="likeCount" th:text="${heartCount}">0</span>)						
 								</button>
 							</div>
 						
@@ -99,14 +101,14 @@
 													
 							</div>
 							<!-- 하트버튼 -->
-							<div class="d-flex align-items-center">						
+							<!-- <div class="d-flex align-items-center">						
 							<span>가게 좋아요</span>		
 								<button type="button" id="btnHeart" class="btn btn-outline-danger btn-sm px-2 py-0"
 														th:data-sid="${shop.sId}">
 								<span class="me-1" id="heartCount" th:text="${shop.heart}">0</span>
 									<i class="bi bi-heart-fill"></i>
 								</button>
-							</div>
+							</div> -->
 							</div>
 							<div>
 								리뷰 <span th:text="${reviewList.size()}">0</span>개

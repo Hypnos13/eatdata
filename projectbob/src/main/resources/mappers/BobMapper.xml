@@ -64,14 +64,22 @@
 	VALUES(#{id}, #{sId}, #{mId}, #{content}, #{rating}, #{rPicture}, #{liked}, #{status}, SYSDATE(), SYSDATE())
 </insert>
 
+<!-- 찜 추가 시 shop.heart + 1 -->
+<update id="incrementHeart" parameterType="int">
+	UPDATE shop SET heart = heart + 1 WHERE s_id = #{sId}
+</update>
+<update id="decrementHeart" parameterType="int">
+	UPDATE shop SET heart = GREATEST(heart -1, 0) WHERE s_id = #{sId}
+</update>
+
 <!-- 찜목록 버튼 -->
-<select id="countLikeList" parameterType="LikeList" resultType="int">
+<select id="isLiked" parameterType="LikeList" resultType="int">
 	SELECT COUNT(*) FROM likeList
 	WHERE id = #{id} AND s_id = #{sId}
 </select>
 <insert id="addLikeList" parameterType="LikeList">
-	INSERT INTO likeList(id, s_id, status)
-	VALUES(#{id}, #{sId}, #{status})
+	INSERT INTO likeList(id, s_id, status, reg_date)
+	VALUES(#{id}, #{sId}, 'Y', NOW())
 </insert>
 <delete id="deleteLikeList" parameterType="LikeList">
 	DELETE FROM likeList WHERE id = #{id} AND s_id = #{sId}
@@ -81,9 +89,9 @@
 </select>
 
 <!-- 하트 버튼 증가시키는 쿼리 -->
-<update id="plusHeart" parameterType="int">
+<!-- <update id="plusHeart" parameterType="int">
 	UPDATE shop SET heart = heart + 1 WHERE s_id = #{sId}
-</update>
+</update> -->
 <select id="getHeartCount" parameterType="int" resultType="int">
 	SELECT heart FROM shop WHERE s_id = #{sId}
 </select>
