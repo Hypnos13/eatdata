@@ -57,12 +57,27 @@ public class ShopService {
 	public List<Menu> getAllMenus() {
 		return shopMapper.getAllMenus();
 	}
+<<<<<<< HEAD
 	
 	// 메뉴 리스트
 	public List<Menu> getMenusByShopId(int sId) {
 		return shopMapper.getMenusByShopId(sId);
 	}
 	
+=======
+	//category 파라미터 추가
+    public List<Menu> getMenusByShopId(int sId, String category) {
+        return shopMapper.getMenusByShopId(sId, category);
+    }
+    //카테고리 목록 조회 서비스 추가
+    public List<String> getMenuCategoriesByShopId(int sId) {
+        return shopMapper.getMenuCategoriesByShopId(sId);
+    }
+	// 메뉴 상태 업데이트
+	public void updateMenuStatus(int mId, String status) {
+		shopMapper.updateMenuStatus(mId, status);
+	}
+>>>>>>> Yong
 	// 특정 메뉴 상세 조회(옵션 포함)
 	public Menu getMenuDetail(int mId) {
 	    Menu menu = shopMapper.getMenuById(mId); // 1. 메뉴 기본 정보 로드

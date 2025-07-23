@@ -20,6 +20,7 @@ public class Menu {
 	private int liked;
 	private Timestamp regDate;
 	private Timestamp modiDate;
+	private String status;
 
 	private List<MenuOption> options;
 
