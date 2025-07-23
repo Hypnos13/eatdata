@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -193,42 +194,60 @@ public class ShopController {
 	// 영업시간 페이지
 	@GetMapping("/shopOpenTime")
 	public String shopOpenTime(
-	    @RequestParam("s_id") Integer sId,
-	    Model model,
-	    @SessionAttribute(name = "loginId", required = false) String loginId,
-	    @ModelAttribute("message") String message
+	        @RequestParam("s_id") Integer sId,
+	        Model model,
+	        @SessionAttribute(name="loginId", required=false) String loginId,
+	        @ModelAttribute("message") String message
 	) {
 	    if (loginId == null) return "redirect:/login";
+
 	    Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
 	    if (shop == null) {
 	        model.addAttribute("message", "가게를 찾을 수 없습니다.");
 	        return "shop/errorPage";
 	    }
 
-	    List<String[]> openTimeListRaw = shopService.getOpenTimeList(shop);
-	    while (openTimeListRaw.size() < 7) openTimeListRaw.add(new String[]{"", ""});
+	    // 1) raw 가져오기
+	    List<String[]> raw = shopService.getOpenTimeList(shop);
+	    while (raw.size() < 7) raw.add(new String[]{"-", ""});
 
-	    List<String> openTimeList = new ArrayList<>();
-	    List<String> closeTimeList = new ArrayList<>();
-	    for (String[] times : openTimeListRaw) {
-	        openTimeList.add(times.length > 0 ? times[0] : "");
-	        closeTimeList.add(times.length > 1 ? times[1] : "");
+	    // 2) 파싱
+	    List<String> oH = new ArrayList<>(), oM = new ArrayList<>();
+	    List<String> cH = new ArrayList<>(), cM = new ArrayList<>();
+	    List<String> isOpenList = new ArrayList<>();
+
+	    for (String[] t : raw) {
+	        String open = t[0], close = t[1];
+	        boolean closed = (open == null) || open.equals("휴무") || open.equals("-") || open.isBlank();
+
+	        if (closed) {
+	            oH.add(""); oM.add("");
+	            cH.add(""); cM.add("");
+	            isOpenList.add("0");
+	        } else {
+	            oH.add(open.substring(0,2));
+	            oM.add(open.substring(3,5));
+	            cH.add(close.substring(0,2));
+	            cM.add(close.substring(3,5));
+	            isOpenList.add("1");
+	        }
 	    }
 
-	    List<String> daysOfWeek = Arrays.asList("월", "화", "수", "목", "금", "토", "일");
-
-	    List<String> offDayList = new ArrayList<>();
-	    if (shop.getOffDay() != null && !shop.getOffDay().isBlank()) {
-	        offDayList.addAll(Arrays.asList(shop.getOffDay().split(",")));
-	    }
-	    while (offDayList.size() < 7) offDayList.add("0");
+	    // 3) 나머지
+	    List<String> daysOfWeek = Arrays.asList("월","화","수","목","금","토","일");
 
 	    model.addAttribute("daysOfWeek", daysOfWeek);
 	    model.addAttribute("shop", shop);
-	    model.addAttribute("openTimeList", openTimeList);
-	    model.addAttribute("closeTimeList", closeTimeList);
-	    model.addAttribute("offDayList", offDayList);
-	    if (message != null && !message.isBlank()) model.addAttribute("message", message);
+	    // 이전 리스트들은 삭제!
+	    model.addAttribute("oH", oH);
+	    model.addAttribute("oM", oM);
+	    model.addAttribute("cH", cH);
+	    model.addAttribute("cM", cM);
+	    model.addAttribute("isOpenList", isOpenList);
+
+	    if (message != null && !message.isBlank()) {
+	        model.addAttribute("message", message);
+	    }
 
 	    return "shop/shopOpenTime";
 	}
@@ -236,50 +255,70 @@ public class ShopController {
 	// 영업시간 업데이트
 	@PostMapping("/shopOpenTimeUpdate")
 	public String shopOpenTimeUpdate(
-	    @RequestParam("s_id") Integer sId,
-	    @RequestParam("openHour") String[] openHour,
-	    @RequestParam("openMin") String[] openMin,
-	    @RequestParam("closeHour") String[] closeHour,
-	    @RequestParam("closeMin") String[] closeMin,
-	    @RequestParam(value="isOpen", required=false) String[] isOpen,
-	    @SessionAttribute(name = "loginId", required = false) String loginId,
-	    RedirectAttributes redirectAttributes
-	) {
+	        @RequestParam("s_id") Integer sId,
+	        @RequestParam("openHour") String[] openHour,
+	        @RequestParam("openMin") String[] openMin,
+	        @RequestParam("closeHour") String[] closeHour,
+	        @RequestParam("closeMin") String[] closeMin,
+	        @RequestParam MultiValueMap<String,String> isOpenMap,
+	        @SessionAttribute(name="loginId", required=false) String loginId,
+	        RedirectAttributes redirectAttributes) {
+
 	    if (loginId == null) return "redirect:/login";
 
-	    StringBuilder offDayBuilder = new StringBuilder();
-	    StringBuilder opTimeBuilder = new StringBuilder();
+	    log.info("len openHour={}, openMin={}, closeHour={}, closeMin={}",
+	            openHour.length, openMin.length, closeHour.length, closeMin.length);
 
-	    for (int i = 0; i < openHour.length; i++) {
-	        final int idx = i;  // 람다 내에서 사용할 변수
-	        boolean closed = (isOpen == null || Arrays.stream(isOpen).noneMatch(v -> v.equals(String.valueOf(idx))));
+	    StringBuilder offDay = new StringBuilder();
+	    StringBuilder opTime = new StringBuilder();
+
+	    for (int i = 0; i < 7; i++) {
+	        List<String> vals = isOpenMap.get("isOpen[" + i + "]");
+	        String flag = (vals != null && !vals.isEmpty()) ? vals.get(vals.size()-1) : "0";
+	        boolean closed = !"1".equals(flag);
+
 	        if (closed) {
-	            offDayBuilder.append(i).append(",");
-	            opTimeBuilder.append("-,").append("-;");
+	            offDay.append(i).append(',');
+	            opTime.append("-,").append("-;");
 	        } else {
-	            String open = openHour[i] + ":" + openMin[i];
-	            String close = closeHour[i] + ":" + closeMin[i];
-	            opTimeBuilder.append(open).append(",").append(close).append(";");
+	            String oh = val(openHour,  i, "");
+	            String om = val(openMin,   i, "");
+	            String ch = val(closeHour, i, "");
+	            String cm = val(closeMin,  i, "");
+
+	            // 값이 비어있으면 휴무로 처리하거나 예외 처리
+	            if (oh.isBlank() || om.isBlank() || ch.isBlank() || cm.isBlank()) {
+	                offDay.append(i).append(',');
+	                opTime.append("-,").append("-;");
+	            } else {
+	                opTime.append(oh).append(':').append(om)
+	                      .append(',')
+	                      .append(ch).append(':').append(cm)
+	                      .append(';');
+	            }
 	        }
 	    }
-	    String opTime = opTimeBuilder.toString();
-	    if (opTime.endsWith(";")) opTime = opTime.substring(0, opTime.length() - 1);
-	    String offDay = offDayBuilder.toString();
-	    if (offDay.endsWith(",")) offDay = offDay.substring(0, offDay.length() - 1);
+	    
+	    if (opTime.length() > 0) opTime.setLength(opTime.length()-1);
+	    if (offDay.length() > 0) offDay.setLength(offDay.length()-1);
 
 	    Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
 	    if (shop == null) {
 	        redirectAttributes.addFlashAttribute("message", "가게를 찾을 수 없습니다.");
 	        return "redirect:/shopOpenTime?s_id=" + sId;
 	    }
-	    shop.setOpTime(opTime);
-	    shop.setOffDay(offDay);
+	    shop.setOpTime(opTime.toString());
+	    shop.setOffDay(offDay.toString());
 	    shopService.updateShopOpenTime(shop);
 
 	    redirectAttributes.addFlashAttribute("message", "영업시간 정보가 저장되었습니다.");
 	    return "redirect:/shopOpenTime?s_id=" + sId;
 	}
-
+	
+	/** 배열 범위 체크해서 기본값 리턴 */
+	private String val(String[] arr, int idx, String def) {
+	    return (arr != null && idx < arr.length && arr[idx] != null) ? arr[idx] : def;
+	}
 	
 	// 가게 운영상태 변경 요청
 	@PostMapping("/shop/statusUpdate")

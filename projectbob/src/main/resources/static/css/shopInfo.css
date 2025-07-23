@@ -33,7 +33,10 @@ body {
   .d-flex.flex-row { flex-direction: column; gap: 14px; }
 }
 
-
+.disabled-look {
+  opacity: .5;
+  pointer-events: none;
+}
 
 /* ===== 본문 카드 ===== */
 .content-card {

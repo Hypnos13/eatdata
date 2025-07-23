@@ -222,42 +222,45 @@ $(function() {
 
 
 // ----- 영업시간 관리 (휴무/전체휴무 토글 등) -----
-$(function(){
-  // 전체휴무 체크박스 변경
-  $(".allDay-check").on("change", function() {
-    var $tr = $(this).closest('tr');
-    if ($(this).is(":checked")) {
-      $tr.find("select[name^='openHour']").val("00").prop("disabled", true);
-      $tr.find("select[name^='openMin']").val("00").prop("disabled", true);
-      $tr.find("select[name^='closeHour']").val("23").prop("disabled", true);
-      $tr.find("select[name^='closeMin']").val("59").prop("disabled", true);
-    } else {
-      $tr.find("select").prop("disabled", false);
+$(function () {
+
+  // 전체휴무 체크박스
+  $(".allDay-check").on("change", function () {
+    const $tr = $(this).closest("tr");
+    if (this.checked) {
+      $tr.find("select[name^='openHour']").val("00");
+      $tr.find("select[name^='openMin']").val("00");
+      $tr.find("select[name^='closeHour']").val("23");
+      $tr.find("select[name^='closeMin']").val("59");
     }
+    // disabled 절대 쓰지 않음
   });
 
-  // 요일별 휴무/영업 토글 스위치 + 라벨 처리
-  $(".switch input[type='checkbox'][name^='isOpen']").each(function() {
-    updateDayRow($(this));
-  });
-  $(".switch input[type='checkbox'][name^='isOpen']").on("change", function() {
-    updateDayRow($(this));
-  });
+  // 휴무/영업 스위치
+  const updateDayRow = ($chk) => {
+    const $tr = $chk.closest("tr");
+    const idx = $chk.attr("id")
+      ? $chk.attr("id").replace("isOpen", "")
+      : $chk.attr("name").match(/\[(\d+)\]/)[1];
+    const $label = $("#openLabel" + idx);
+    const on = $chk.is(":checked");
 
-  // 요일별 휴무/영업 토글 스위치 동작 정의
-  function updateDayRow($chk) {
-    var $tr = $chk.closest('tr');
-    var idx = $chk.attr('id') ? $chk.attr('id').replace('isOpen', '') : $chk.attr('name').match(/\[(\d+)\]/)[1];
-    var $label = $('#openLabel' + idx);
+    // 값 전송은 그대로, UI만 막기
+    $tr.find("select").toggleClass("disabled-look", !on);
+    $tr.find(".allDay-check").prop("disabled", !on);
 
-    if (!$chk.is(":checked")) {
-      $tr.find("select").prop("disabled", true);
-      $tr.find(".allDay-check").prop("disabled", true);
-      $label.text("휴무").removeClass("bg-success").addClass("bg-secondary");
-    } else {
-      $tr.find("select").prop("disabled", false);
-      $tr.find(".allDay-check").prop("disabled", false);
-      $label.text("영업중").removeClass("bg-secondary").addClass("bg-success");
-    }
-  }
+    $label
+      .text(on ? "영업중" : "휴무")
+      .toggleClass("bg-success", on)
+      .toggleClass("bg-secondary", !on);
+  };
+
+  $(".switch input[type='checkbox'][name^='isOpen']")
+    .each(function () { updateDayRow($(this)); })
+    .on("change", function () { updateDayRow($(this)); });
+
+  // 혹시라도 다른 스크립트가 disabled 걸면 제출 전에 해제
+  $("#openTimeForm").on("submit", function () {
+    $(this).find("select:disabled").prop("disabled", false);
+  });
 });
