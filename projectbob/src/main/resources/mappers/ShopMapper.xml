@@ -25,28 +25,18 @@
        <result property="modiDate" column="modi_date"/>
        <result property="status" column="status"/>
    </resultMap>
+	 <!-- ===== Menu ===== -->
+    <insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
+       INSERT INTO menu(s_id, category, name, price, m_info, m_picture_url, reg_date, modi_date)
+       VALUES(#{sId}, #{category}, #{name}, #{price}, #{mInfo}, #{mPictureUrl}, SYSDATE(), SYSDATE())
+    </insert>
 
-   <select id="getAllMenus" resultMap="menuResultMap">
+	<select id="getAllMenus" resultMap="menuResultMap">
        SELECT
            m_id, s_id, category, name, price, m_info, m_picture_url, liked, reg_date, modi_date
        FROM menu
        ORDER BY m_id DESC
    </select>
-
-	<insert id="insertShop" parameterType="Shop" useGeneratedKeys="true" keyProperty="sId">
-		INSERT INTO shop(id, name, phone, zipcode, address1, address2, owner, s_number, reg_date)
-		VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{sNumber}, SYSDATE())
-	</insert>
-
-	<select id="shopList" resultType="Shop">
-		SELECT * From shop
-	</select>
-
-
-	<insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
-       INSERT INTO menu(s_id, category, name, price, m_info, m_picture_url, reg_date, modi_date)
-       VALUES(#{sId}, #{category}, #{name}, #{price}, #{mInfo}, #{mPictureUrl}, SYSDATE(), SYSDATE())
-    </insert>
 
 	<select id="getMenuById" parameterType="int" resultMap="menuResultMap">
         SELECT m_id, s_id, category, name, price, m_info,
@@ -64,7 +54,16 @@
 	<delete id="deleteMenu" parameterType="int">
         DELETE FROM menu WHERE m_id = #{mId}
     </delete>
-
+    
+    <select id="getMenusByShopId" parameterType="int" resultMap="menuResultMap">
+    SELECT 
+        m_id, s_id, category, name, price, m_info, m_picture_url, liked, reg_date, modi_date
+    FROM menu
+    WHERE s_id = #{sId}
+    ORDER BY category, name
+	</select>
+    
+	<!-- ===== Menu Option ===== -->
 	<insert id="insertMenuOption" parameterType="MenuOption">
         INSERT INTO menu_option(m_id, m_option, content, price, reg_date, status)
         VALUES(#{mId}, #{mOption}, #{content}, #{price}, SYSDATE(), #{status})
@@ -93,16 +92,17 @@
         DELETE FROM menu_option WHERE m_id = #{mId}
   </delete>
     
-  <select id="getMenusByShopId" parameterType="int" resultMap="menuResultMap">
-    SELECT 
-        m_id, s_id, category, name, price, m_info, m_picture_url, liked, reg_date, modi_date
-    FROM menu
-    WHERE s_id = #{sId}
-    ORDER BY category, name
-	</select>
-
-	
-	<!-- 가게정보 불러오기 -->
+	<!-- ===== Shop ===== -->
+	<insert id="insertShop" parameterType="com.projectbob.domain.Shop" useGeneratedKeys="true" keyProperty="sId">
+        INSERT INTO shop(id, name, phone, zipcode, address1, address2, owner, s_number, reg_date)
+        VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{sNumber}, SYSDATE())
+    </insert>
+    
+	<select id="shopList" resultType="com.projectbob.domain.Shop">
+        SELECT * FROM shop
+    </select>
+    
+    <!-- 가게정보 불러오기 -->
 	<select id="findByOwnerId" resultType="com.projectbob.domain.Shop">
 	    SELECT *
 	    FROM shop
@@ -116,29 +116,34 @@
 	    WHERE id = #{ownerId}
 	    ORDER BY reg_date DESC
 	</select>
-	
+   
 	<!-- 다수 가게에서 현재 선택한 가게고정 -->
 	<select id="findByShopIdAndOwnerId" resultType="com.projectbob.domain.Shop">
 	    SELECT * FROM shop WHERE s_id = #{sId} AND id = #{ownerId}
 	</select>
 
+	<!-- 메뉴 컨트롤러에 shop 모델 추가 -->
+	<select id="findBySId" resultType="com.projectbob.domain.Shop">
+	    SELECT * FROM shop WHERE s_id = #{sId}
+	</select>
+	
 	<!-- 기본정보 수정 -->
 	<update id="updateShopBasicInfo" parameterType="com.projectbob.domain.Shop">
-	  UPDATE shop
-	  SET name = #{name},
-	      phone = #{phone},
-	      zipcode = #{zipcode},
-	      address1 = #{address1},
-	      address2 = #{address2},
-	      owner = #{owner},
-	      s_number = #{sNumber},
-	      category = #{category},
-	      info = #{info},
-	      notice = #{notice},
-	      s_info = #{sInfo},
-	      modi_date = #{modiDate}
-	  WHERE s_id = #{sId}
-	</update>
+        UPDATE shop
+        SET name     = #{name},
+            phone    = #{phone},
+            zipcode  = #{zipcode},
+            address1 = #{address1},
+            address2 = #{address2},
+            owner    = #{owner},
+            s_number = #{sNumber},
+            category = #{category},
+            info     = #{info},
+            notice   = #{notice},
+            s_info   = #{sInfo},
+            modi_date= #{modiDate}
+        WHERE s_id = #{sId}
+    </update>
 	
 	<!-- 가게 상태 업데이트 -->
 	<update id="updateStatus">
@@ -147,8 +152,11 @@
 	    WHERE s_id = #{sId}
 	</update>
 	
-	<!-- 메뉴 컨트롤러에 shop 모델 추가 -->
-	<select id="findBySId" resultType="com.projectbob.domain.Shop">
-	    SELECT * FROM shop WHERE s_id = #{sId}
-	</select>
+	<!-- 영업시간 업데이트 -->
+	<update id="updateShopOpenTime" parameterType="com.projectbob.domain.Shop">
+	    UPDATE shop
+	    SET op_time = #{opTime},
+	        off_day = #{offDay}
+	    WHERE s_id = #{sId}
+	</update>
 </mapper>	

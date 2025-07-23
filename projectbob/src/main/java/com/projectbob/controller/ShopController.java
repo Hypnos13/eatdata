@@ -18,6 +18,7 @@ import com.projectbob.domain.*;
 import com.projectbob.service.*;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
@@ -77,248 +78,273 @@ public class ShopController {
 		return "redirect:shopMain";
 	}
 	
-	@GetMapping("/shopMain")
-	public String shopMain(Model model, @SessionAttribute(name = "loginId", required = false) String loginId) {
-	    boolean hasShop = false;
-	    boolean isLogin = (loginId != null);
-	    List<Shop> shopListMain = new ArrayList<>();
-	    Shop shop = null;
-	    if (isLogin) {
-	        shopListMain = shopService.findShopListByOwnerId(loginId);
-	        hasShop = (shopListMain != null && !shopListMain.isEmpty());
-	    }
-	    model.addAttribute("hasShop", hasShop);
-	    model.addAttribute("isLogin", isLogin);
-	    model.addAttribute("shopListMain", shopListMain);
-	    model.addAttribute("shop", shop);
-	    return "shop/shopMain";
-	}
-	
-	@GetMapping("/shopJoinForm")
-	public String shopJoinForm(Model model ) {
-		model.addAttribute("shop", new Shop());
-		return "shop/shopJoinForm";
-	}
-	
-	@GetMapping("/shopInfo")
-	public String shopInfo() {
-	    return "shop/shopInfo";
-	}
-	
-	//기본정보 뷰페이지
-	@GetMapping("/shopBasicView")
-	public String shopBasicView(
-	    @RequestParam("s_id") Integer sId,
-	    @SessionAttribute(name = "loginId", required = false) String loginId,
-	    Model model) 
-	{
-	    if (loginId == null) return "redirect:/login";
+	/* ----------------------- 메인 ----------------------- */
+    @GetMapping("/shopMain")
+    public String shopMain(@RequestParam(value = "s_id", required = false) Integer sId,
+                           @SessionAttribute(name = "loginId", required = false) String loginId,
+                           HttpSession session,
+                           Model model) {
 
-	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+        boolean isLogin = (loginId != null);
+        List<Shop> shopListMain = isLogin ? shopService.findShopListByOwnerId(loginId) : Collections.emptyList();
+        boolean hasShop = !shopListMain.isEmpty();
+        Shop currentShop = hasShop ? resolveCurrentShop(sId, loginId, session, shopListMain) : null;
 
-	    if (currentShop == null) {
-	        model.addAttribute("errorMessage", "가게 정보를 찾을 수 없습니다.");
-	        return "redirect:/shopMain";  // 또는 에러용 뷰
-	    }
+        model.addAttribute("isLogin", isLogin);
+        model.addAttribute("hasShop", hasShop);
+        model.addAttribute("shopListMain", shopListMain);
+        model.addAttribute("currentShop", currentShop);
+        model.addAttribute("shopCnt", shopListMain.size());
+        model.addAttribute("selectedSid", (currentShop != null) ? currentShop.getSId() : null);
 
-	    model.addAttribute("shop", currentShop);
-	    model.addAttribute("currentShop", currentShop);
-	    return "shop/shopBasicView";
-	}
+        return "shop/shopMain";
+    }
+
+    /** 선택 가게 세션 저장 및 반환 */
+    private Shop resolveCurrentShop(Integer sId,
+                                    String loginId,
+                                    HttpSession session,
+                                    List<Shop> shopList) {
+        if (loginId == null || shopList == null || shopList.isEmpty()) return null;
+
+        if (sId != null) { // 1) 요청 파라미터 우선
+            session.setAttribute("currentSId", sId);
+        }
+
+        Integer cur = (Integer) session.getAttribute("currentSId");
+        if (cur != null) {
+            for (Shop s : shopList) {
+                if (s.getSId() == cur) {   // <-- 여기!
+                    return s;
+                }
+            }
+        }
+        // 3) 기본값: 첫 번째
+        Shop first = shopList.get(0);
+        session.setAttribute("currentSId", first.getSId());
+        return first;
+    }
+
+    /* 현재 선택 가게 변경용 */
+    @GetMapping("/selectShop")
+    public String selectShop(@RequestParam("s_id") Integer sId,
+                             @SessionAttribute(name = "loginId", required = false) String loginId,
+                             HttpSession session,
+                             @RequestHeader(value = "Referer", required = false) String referer) {
+        if (loginId == null) return "redirect:/login";
+        Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
+        if (shop != null) session.setAttribute("currentSId", sId);
+        return "redirect:" + (referer != null ? referer : "/shopMain");
+    }
+	
+    /* ----------------------- 가게 가입/안내 ----------------------- */
+    @GetMapping("/shopJoinForm")
+    public String shopJoinForm(Model model) {
+        model.addAttribute("shop", new Shop());
+        return "shop/shopJoinForm";
+    }
+
+    @GetMapping("/shopInfo")
+    public String shopInfo() {
+        return "shop/shopInfo";
+    }
+	
+    /* ----------------------- 기본정보 뷰/수정 ----------------------- */
+    @GetMapping("/shopBasicView")
+    public String shopBasicView(@RequestParam(value = "s_id", required = false) Integer sId,
+                                @SessionAttribute(name = "loginId", required = false) String loginId,
+                                HttpSession session,
+                                Model model) {
+        if (loginId == null) return "redirect:/login";
+
+        List<Shop> shopList = shopService.findShopListByOwnerId(loginId);
+        Shop currentShop = resolveCurrentShop(sId, loginId, session, shopList);
+        if (currentShop == null) {
+            model.addAttribute("errorMessage", "가게 정보를 찾을 수 없습니다.");
+            return "redirect:/shopMain";
+        }
+
+        model.addAttribute("shop", currentShop);
+        model.addAttribute("currentShop", currentShop);
+        return "shop/shopBasicView";
+    }
+
 	
 	// 기본설정 수정(폼) 페이지
-	@GetMapping("/shopBasicSet")
-	public String shopBasicSet(@RequestParam("s_id") Integer sId,
-	                           @SessionAttribute(name = "loginId", required = false) String loginId,
-	                           Model model) {
-	    if (loginId == null) return "redirect:/login";
-	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
-	    model.addAttribute("shop", currentShop);
-	    return "shop/shopBasicSet";
-	}
+    @GetMapping("/shopBasicSet")
+    public String shopBasicSet(@RequestParam(value = "s_id", required = false) Integer sId,
+                               @SessionAttribute(name = "loginId", required = false) String loginId,
+                               HttpSession session,
+                               Model model) {
+        if (loginId == null) return "redirect:/login";
+
+        List<Shop> shopList = shopService.findShopListByOwnerId(loginId);
+        Shop currentShop = resolveCurrentShop(sId, loginId, session, shopList);
+        if (currentShop == null) return "redirect:/shopMain";
+
+        model.addAttribute("shop", currentShop);
+        return "shop/shopBasicSet";
+    }
 	
 	//기본정보 수정 로직
-		@PostMapping("/shop/updateBasic")
-		public String updateBasicInfo(@ModelAttribute Shop shop, Model model) {
-		    // 수정일자 갱신
-		    shop.setModiDate(new Timestamp(System.currentTimeMillis()));
-		    
-		    // DB 업데이트
-		    shopService.updateShopBasicInfo(shop);
-
-		    // redirect or model 추가
-		    return "redirect:/shopBasicView?s_id=" + shop.getSId();
-		}
+    @PostMapping("/shop/updateBasic")
+    public String updateBasicInfo(@ModelAttribute Shop shop) {
+        shop.setModiDate(new Timestamp(System.currentTimeMillis()));
+        shopService.updateShopBasicInfo(shop);
+        return "redirect:/shopBasicView?s_id=" + shop.getSId();
+    }
 	
-	@GetMapping("/shopListMain")
-	public String shopListMain(
-	        Model model,
-	        @SessionAttribute(name = "loginId", required = false) String loginId,
-	        @RequestParam(name = "s_id", required = false) Integer sId) {
+    /* ----------------------- 내 가게 리스트 ----------------------- */
+    @GetMapping("/shopListMain")
+    public String shopListMain(Model model,
+                               @SessionAttribute(name = "loginId", required = false) String loginId,
+                               @RequestParam(value = "s_id", required = false) Integer sId,
+                               HttpSession session) {
+        if (loginId == null) return "redirect:/login";
 
-	    if (loginId == null) return "redirect:/login";
-	    List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+        List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+        if (shopListMain.isEmpty()) return "shop/shopInfo";
 
-	    if (shopListMain == null || shopListMain.isEmpty()) {
-	        return "shop/shopInfo"; // 가게 없으면 안내페이지로 이동
-	    }
+        Shop currentShop = resolveCurrentShop(sId, loginId, session, shopListMain);
 
-	    // ★ 현재 선택된 가게 찾기: sId로 조회, 없으면 첫번째
-	    Shop shop = null;
-	    if (sId != null) {
-	        shop = shopListMain.stream()
-	                .filter(s -> s.getSId() == sId)
-	                .findFirst()
-	                .orElse(shopListMain.get(0)); // 못찾으면 첫 번째
-	    } else {
-	        shop = shopListMain.get(0);
-	    }
-
-	    model.addAttribute("shopListMain", shopListMain);
-	    model.addAttribute("shop", shop);
-	    model.addAttribute("currentShop", shop);
-
-	    return "shop/shopListMain";
-	}
+        model.addAttribute("shopListMain", shopListMain);
+        model.addAttribute("shop", currentShop);
+        model.addAttribute("currentShop", currentShop);
+        return "shop/shopListMain";
+    }
 	
-	//가게 상태 업데이트
-	@PostMapping("/shop/updateStatus")
-	@ResponseBody
-	public String updateShopStatus(@RequestBody Map<String, Object> param) {
-	    Integer sId = Integer.parseInt(param.get("sId").toString());
-	    String status = param.get("status").toString();
-	    shopService.updateStatus(sId, status); // 실제 update 쿼리 실행
-	    return "ok";
-	}
+    /* ----------------------- 영업 상태 ----------------------- */
+    @PostMapping("/shop/updateStatus")
+    @ResponseBody
+    public String updateShopStatusAjax(@RequestBody Map<String,Object> param,
+                                       @SessionAttribute(name="loginId", required=false) String loginId){
+        if(loginId == null) return "NOT_LOGIN";
+        Integer sId = Integer.parseInt(param.get("sId").toString());
+        String status = param.get("status").toString();
+        shopService.updateShopStatus(sId, status);
+        return "OK";
+    }
 	
-	// 영업시간 페이지
-	@GetMapping("/shopOpenTime")
-	public String shopOpenTime(
-	        @RequestParam("s_id") Integer sId,
-	        Model model,
-	        @SessionAttribute(name="loginId", required=false) String loginId,
-	        @ModelAttribute("message") String message
-	) {
-	    if (loginId == null) return "redirect:/login";
+    /* ----------------------- 영업시간 ----------------------- */
+    @GetMapping("/shopOpenTime")
+    public String shopOpenTime(@RequestParam(value = "s_id", required = false) Integer sId,
+                               @SessionAttribute(name = "loginId", required = false) String loginId,
+                               HttpSession session,
+                               @ModelAttribute("message") String message,
+                               Model model) {
 
-	    Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
-	    if (shop == null) {
-	        model.addAttribute("message", "가게를 찾을 수 없습니다.");
-	        return "shop/errorPage";
-	    }
+        if (loginId == null) return "redirect:/login";
+        List<Shop> shopList = shopService.findShopListByOwnerId(loginId);
+        Shop shop = resolveCurrentShop(sId, loginId, session, shopList);
+        if (shop == null) {
+            model.addAttribute("message", "가게를 찾을 수 없습니다.");
+            return "shop/errorPage";
+        }
 
-	    // 1) raw 가져오기
-	    List<String[]> raw = shopService.getOpenTimeList(shop);
-	    while (raw.size() < 7) raw.add(new String[]{"-", ""});
+        // raw
+        List<String[]> raw = shopService.getOpenTimeList(shop);
+        while (raw.size() < 7) raw.add(new String[]{"-", ""});
 
-	    // 2) 파싱
-	    List<String> oH = new ArrayList<>(), oM = new ArrayList<>();
-	    List<String> cH = new ArrayList<>(), cM = new ArrayList<>();
-	    List<String> isOpenList = new ArrayList<>();
+        List<String> oH = new ArrayList<>(), oM = new ArrayList<>();
+        List<String> cH = new ArrayList<>(), cM = new ArrayList<>();
+        List<String> isOpenList = new ArrayList<>();
 
-	    for (String[] t : raw) {
-	        String open = t[0], close = t[1];
-	        boolean closed = (open == null) || open.equals("휴무") || open.equals("-") || open.isBlank();
+        for (String[] t : raw) {
+            String open = t[0], close = t[1];
+            boolean closed = (open == null) || open.equals("휴무") || open.equals("-") || open.isBlank();
 
-	        if (closed) {
-	            oH.add(""); oM.add("");
-	            cH.add(""); cM.add("");
-	            isOpenList.add("0");
-	        } else {
-	            oH.add(open.substring(0,2));
-	            oM.add(open.substring(3,5));
-	            cH.add(close.substring(0,2));
-	            cM.add(close.substring(3,5));
-	            isOpenList.add("1");
-	        }
-	    }
+            if (closed) {
+                oH.add(""); oM.add("");
+                cH.add(""); cM.add("");
+                isOpenList.add("0");
+            } else {
+                oH.add(open.substring(0, 2));
+                oM.add(open.substring(3, 5));
+                cH.add(close.substring(0, 2));
+                cM.add(close.substring(3, 5));
+                isOpenList.add("1");
+            }
+        }
 
-	    // 3) 나머지
-	    List<String> daysOfWeek = Arrays.asList("월","화","수","목","금","토","일");
+        model.addAttribute("daysOfWeek", Arrays.asList("월", "화", "수", "목", "금", "토", "일"));
+        model.addAttribute("shop", shop);
+        model.addAttribute("oH", oH);
+        model.addAttribute("oM", oM);
+        model.addAttribute("cH", cH);
+        model.addAttribute("cM", cM);
+        model.addAttribute("isOpenList", isOpenList);
+        if (message != null && !message.isBlank()) model.addAttribute("message", message);
 
-	    model.addAttribute("daysOfWeek", daysOfWeek);
-	    model.addAttribute("shop", shop);
-	    // 이전 리스트들은 삭제!
-	    model.addAttribute("oH", oH);
-	    model.addAttribute("oM", oM);
-	    model.addAttribute("cH", cH);
-	    model.addAttribute("cM", cM);
-	    model.addAttribute("isOpenList", isOpenList);
-
-	    if (message != null && !message.isBlank()) {
-	        model.addAttribute("message", message);
-	    }
-
-	    return "shop/shopOpenTime";
-	}
+        return "shop/shopOpenTime";
+    }
 
 	// 영업시간 업데이트
-	@PostMapping("/shopOpenTimeUpdate")
-	public String shopOpenTimeUpdate(
-	        @RequestParam("s_id") Integer sId,
-	        @RequestParam("openHour") String[] openHour,
-	        @RequestParam("openMin") String[] openMin,
-	        @RequestParam("closeHour") String[] closeHour,
-	        @RequestParam("closeMin") String[] closeMin,
-	        @RequestParam MultiValueMap<String,String> isOpenMap,
-	        @SessionAttribute(name="loginId", required=false) String loginId,
-	        RedirectAttributes redirectAttributes) {
+    @PostMapping("/shopOpenTimeUpdate")
+    public String shopOpenTimeUpdate(@RequestParam(value = "s_id", required = false) Integer sId,
+                                     @RequestParam("openHour") String[] openHour,
+                                     @RequestParam("openMin") String[] openMin,
+                                     @RequestParam("closeHour") String[] closeHour,
+                                     @RequestParam("closeMin") String[] closeMin,
+                                     @RequestParam MultiValueMap<String, String> isOpenMap,
+                                     @SessionAttribute(name = "loginId", required = false) String loginId,
+                                     HttpSession session,
+                                     RedirectAttributes redirectAttributes) {
 
-	    if (loginId == null) return "redirect:/login";
+        if (loginId == null) return "redirect:/login";
+        if (sId == null) {
+            sId = (Integer) session.getAttribute("currentSId");
+        }
 
-	    log.info("len openHour={}, openMin={}, closeHour={}, closeMin={}",
-	            openHour.length, openMin.length, closeHour.length, closeMin.length);
+        log.info("len openHour={}, openMin={}, closeHour={}, closeMin={}",
+                openHour.length, openMin.length, closeHour.length, closeMin.length);
 
-	    StringBuilder offDay = new StringBuilder();
-	    StringBuilder opTime = new StringBuilder();
+        StringBuilder offDay = new StringBuilder();
+        StringBuilder opTime = new StringBuilder();
 
-	    for (int i = 0; i < 7; i++) {
-	        List<String> vals = isOpenMap.get("isOpen[" + i + "]");
-	        String flag = (vals != null && !vals.isEmpty()) ? vals.get(vals.size()-1) : "0";
-	        boolean closed = !"1".equals(flag);
+        for (int i = 0; i < 7; i++) {
+            List<String> vals = isOpenMap.get("isOpen[" + i + "]");
+            String flag = (vals != null && !vals.isEmpty()) ? vals.get(vals.size() - 1) : "0";
+            boolean closed = !"1".equals(flag);
 
-	        if (closed) {
-	            offDay.append(i).append(',');
-	            opTime.append("-,").append("-;");
-	        } else {
-	            String oh = val(openHour,  i, "");
-	            String om = val(openMin,   i, "");
-	            String ch = val(closeHour, i, "");
-	            String cm = val(closeMin,  i, "");
+            if (closed) {
+                offDay.append(i).append(',');
+                opTime.append("-,").append("-;");
+            } else {
+                String oh = val(openHour, i, "");
+                String om = val(openMin, i, "");
+                String ch = val(closeHour, i, "");
+                String cm = val(closeMin, i, "");
 
-	            // 값이 비어있으면 휴무로 처리하거나 예외 처리
-	            if (oh.isBlank() || om.isBlank() || ch.isBlank() || cm.isBlank()) {
-	                offDay.append(i).append(',');
-	                opTime.append("-,").append("-;");
-	            } else {
-	                opTime.append(oh).append(':').append(om)
-	                      .append(',')
-	                      .append(ch).append(':').append(cm)
-	                      .append(';');
-	            }
-	        }
-	    }
-	    
-	    if (opTime.length() > 0) opTime.setLength(opTime.length()-1);
-	    if (offDay.length() > 0) offDay.setLength(offDay.length()-1);
+                if (oh.isBlank() || om.isBlank() || ch.isBlank() || cm.isBlank()) {
+                    offDay.append(i).append(',');
+                    opTime.append("-,").append("-;");
+                } else {
+                    opTime.append(oh).append(':').append(om).append(',')
+                          .append(ch).append(':').append(cm).append(';');
+                }
+            }
+        }
 
-	    Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
-	    if (shop == null) {
-	        redirectAttributes.addFlashAttribute("message", "가게를 찾을 수 없습니다.");
-	        return "redirect:/shopOpenTime?s_id=" + sId;
-	    }
-	    shop.setOpTime(opTime.toString());
-	    shop.setOffDay(offDay.toString());
-	    shopService.updateShopOpenTime(shop);
+        if (opTime.length() > 0) opTime.setLength(opTime.length() - 1);
+        if (offDay.length() > 0) offDay.setLength(offDay.length() - 1);
 
-	    redirectAttributes.addFlashAttribute("message", "영업시간 정보가 저장되었습니다.");
-	    return "redirect:/shopOpenTime?s_id=" + sId;
-	}
+        Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
+        if (shop == null) {
+            redirectAttributes.addFlashAttribute("message", "가게를 찾을 수 없습니다.");
+            return "redirect:/shopOpenTime?s_id=" + sId;
+        }
+        shop.setOpTime(opTime.toString());
+        shop.setOffDay(offDay.toString());
+        shopService.updateShopOpenTime(shop);
+
+        redirectAttributes.addFlashAttribute("message", "영업시간 정보가 저장되었습니다.");
+        return "redirect:/shopOpenTime?s_id=" + sId;
+    }
 	
-	/** 배열 범위 체크해서 기본값 리턴 */
-	private String val(String[] arr, int idx, String def) {
-	    return (arr != null && idx < arr.length && arr[idx] != null) ? arr[idx] : def;
-	}
+    /** 배열 방어 */
+    private String val(String[] arr, int idx, String def) {
+        return (arr != null && idx < arr.length && arr[idx] != null) ? arr[idx] : def;
+    }
 	
 	// 가게 운영상태 변경 요청
 	@PostMapping("/shop/statusUpdate")
@@ -349,22 +375,22 @@ public class ShopController {
 	    return "shop/shopStatus"; 
 	}
 
-	@ControllerAdvice
-	public class GlobalModelAdvice {
+	/* ----------------------- 전역 타이틀 ----------------------- */
+    @ControllerAdvice
+    public static class GlobalModelAdvice {
+        @ModelAttribute
+        public void addGlobalAttributes(Model model, jakarta.servlet.http.HttpServletRequest request) {
+            String uri = request.getRequestURI();
+            String pageTitle = "";
+            if (uri.contains("shopBasic")) pageTitle = "기본설정";
+            else if (uri.contains("shopOpenTime")) pageTitle = "영업시간";
+            else if (uri.contains("shopStatus")) pageTitle = "영업상태";
+            else if (uri.contains("menu")) pageTitle = "메뉴관리";
 
-	    @ModelAttribute
-	    public void addGlobalAttributes(Model model, HttpServletRequest request) {
-	        // 현재 경로(페이지)별로 다르게 텍스트 지정 가능
-	        String uri = request.getRequestURI();
-	        String pageTitle = "";
-	        if (uri.contains("shopBasic")) pageTitle = "기본설정";
-	        else if (uri.contains("shopOpenTime")) pageTitle = "영업시간";
-	        else if (uri.contains("shopStatus")) pageTitle = "영업상태";
-	        else if (uri.contains("menu")) pageTitle = "메뉴관리";
-
-	        model.addAttribute("pageTitle", pageTitle);
-	    }
-	}
+            model.addAttribute("pageTitle", pageTitle);
+        }
+    }
+		
 }
 
 

@@ -13,7 +13,7 @@ CREATE TABLE `shop` (
   `s_pictureURL` varchar(500)	NULL,
 	`rating`	decimal(2,1) NULL DEFAULT 0.0,
 	`heart`	int(5)	NULL	DEFAULT 0,
-	`op_time`	varchar(50)	NULL,
+	`op_time`	varchar(100)	NULL,
 	`off_day`	varchar(50)	NULL,
 	`min_price`	varchar(50)	NULL,
 	`s_licenseURL`	varchar(500)	NULL,
@@ -53,7 +53,6 @@ INSERT INTO shop (
   '이영희', 1234554321, '분식', 3.8, 2, '10:30~22:00', '월요일', '8000',
   '/img/lic2.jpg', '/img/cert2.jpg', 'Y', '배달전용', '리뉴얼 오픈', '이벤트 없음', NOW()
 );
-
 select * from shop;
 commit;
 
