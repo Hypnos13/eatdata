@@ -28,7 +28,7 @@ public interface BobMapper {
 	public List<Menu> getMenuListByShopId(int sId); 	
 	
 	// 메뉴옵션 선택하는 모달창에서 사용
-	public List<MenuOption> getMenuOptionsByMenuId(int mId);		
+	public List<MenuOption> getMenuOptionsByMenuId(@Param("mId")int mId);		
 	public List<String> getMenuCategoriesByShopId(int sId);
 	
 	// 가게 번호에 해당하는 리뷰리스트에 사용

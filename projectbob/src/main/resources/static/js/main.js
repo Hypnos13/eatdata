@@ -13,16 +13,11 @@ let selectedOptionIds = [];
 // ==============================
 
 
-$(document).on("click", ".shop-item", function () {
-  selectedShopId = $(this).data("shop-id");
-  console.log("selectedShopId:", selectedShopId);
-});
-
 $(document).on("click", ".menu-card", function () {
-  selectedMenuId = $(this).data("id");
+  selectedMenuId = parseInt($(this).data("id"));
   selectedMenuName = $(this).data("name");
 	selectedShopId = parseInt($(this).data("shop-id"));
-  selectedMenuPrice = $(this).data("price");
+  selectedMenuPrice = parseInt($(this).data("price"));
 
   const menuImage = "https://i.imgur.com/Sg4b61a.png"; // 실제 이미지 경로로 변경 가능
   const menuInfo = "";
@@ -39,7 +34,7 @@ $(document).on("click", ".menu-card", function () {
 	console.log("타입 확인:", typeof selectedMenuId);
   $.ajax({
     url: "/ajax/menu/options",
-    data: { mId: selectedMenuId },
+    data: { mId: selectedMenuId , sId: selectedShopId},
     success: function (options) {
 			console.log("받은 옵션 데이터:", options);
       // 기존 options 배열은 MenuOption 도메인 객체 리스트임
@@ -112,6 +107,7 @@ $(document).on("click", "#btnAddExtras", function () {
 				moId:moId,
 				quantity : quantity,
 				id: userId,
+				sId:selectedShopId,
 			});
 		});
 	}else {
@@ -120,6 +116,7 @@ $(document).on("click", "#btnAddExtras", function () {
 			moId: null,
 			quantity: quantity,
 			id: userId,
+			sId:selectedShopId,
 		});
 	}
 	

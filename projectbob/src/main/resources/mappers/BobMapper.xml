@@ -60,7 +60,8 @@
 	SELECT
 	*
 	FROM menu_option
-	WHERE m_id = #{mId} ORDER BY price
+	WHERE m_id = #{mId}
+	 ORDER BY price
 </select>
 <select id="getMenuCategoriesByShopId" resultType="java.lang.String">
 	SELECT DISTINCT category FROM menu

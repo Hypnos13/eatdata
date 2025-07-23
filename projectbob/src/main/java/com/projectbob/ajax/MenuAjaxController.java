@@ -37,7 +37,7 @@ public class MenuAjaxController {
 	
 	// 메뉴 옵션 목록
 	@GetMapping("/ajax/menu/options")
-	public List<MenuOption> getMenuOptions(@RequestParam("mId") int mId){
+	public List<MenuOption> getMenuOptions(@RequestParam int mId ,@RequestParam int sId){
 		log.info("MenuAjaxController: getMenuOptions() called, mId={}", mId);
 		return bobService.getMenuOptionsByMenuId(mId);
 	}
