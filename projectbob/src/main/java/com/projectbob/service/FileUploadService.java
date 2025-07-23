@@ -37,7 +37,7 @@ public class FileUploadService {
 		Path targetLocation = uploadPath.resolve(savedFilename);
 		Files.copy(file.getInputStream(), targetLocation);
 		
-		return "/images/"+subDirectory+savedFilename;
+		return "/images/" + subDirectory + "/" + savedFilename;
 	}
 	
 	public String getUploadBaseDir() {

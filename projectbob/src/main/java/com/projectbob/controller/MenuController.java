@@ -56,7 +56,7 @@ public class MenuController {
 	        return "redirect:/shop/menuRegisterForm";
 	    }
 	    // 
-	    return "redirect:/shop/menuList";
+	    return "redirect:/shop/menuList?s_id=" + menu.getSId();
 	}
 	// 메뉴 목록 페이지(전체 메뉴)
 	@GetMapping("/menuList")
@@ -119,26 +119,22 @@ public class MenuController {
 			reAttrs.addFlashAttribute("errorMessage", "메뉴 정보 수정에 실패했습니다.(파일 오류)");
 			return "redirect:/shop/menuUpdateForm?mId=" + menu.getMId();
 		}
-		return "redirect:/shop/menuList";
+		return "redirect:/shop/menuList?s_id=" + menu.getSId();
 	}
 	// 메뉴 삭제 처리
 	@PostMapping("/deleteMenu")
 	public String deleteMenu(@RequestParam("mId") int mId, 
-	                         @SessionAttribute(name = "loginId", required = false) String loginId, 
+	                         @RequestParam("sId") int sId, 
 	                         RedirectAttributes reAttrs) {
-	    if (loginId == null) return "redirect:/login"; // 로그인 체크
-
 	    try {
-	        // 1. 서비스에 권한 확인 로직 추가
-	        shopService.deleteMenuWithAuthorization(mId, loginId); 
+	        // shopService.deleteMenuWithAuthorization(mId, loginId);
+	        shopService.deleteMenu(mId); 
 	        reAttrs.addFlashAttribute("message", "메뉴가 정상적으로 삭제되었습니다.");
-	    } catch (SecurityException e) {
-	        reAttrs.addFlashAttribute("errorMessage", "권한이 없습니다.");
 	    } catch (Exception e) {
 	        log.error("메뉴 삭제 실패: " + e.getMessage(), e);
 	        reAttrs.addFlashAttribute("errorMessage", "메뉴 삭제에 실패했습니다.");
 	    }
-	    return "redirect:/shop/menuList";
+	    return "redirect:/shop/menuList?s_id=" + sId;
 	}
 	
 }

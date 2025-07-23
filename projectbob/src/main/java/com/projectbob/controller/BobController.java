@@ -2,6 +2,7 @@ package com.projectbob.controller;
 
 import org.springframework.beans.factory.annotation.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
@@ -18,7 +20,11 @@ public class BobController {
 
     private final LoginController loginController;
 	
-	@Autowired private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
+	@Autowired 
+	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
+	@Autowired
+	private LoginService loginService;
+	
 	
     BobController(LoginController loginController) {
         this.loginController = loginController;
@@ -29,13 +35,7 @@ public class BobController {
 		return "views/main";
 	}
 	 
-	@GetMapping("/menu")
-	public String menu() {
-		return "views/menudetail";
-	}
-	/*
-	 * @GetMapping("/pay") public String pay() { return "views/pay"; }
-	 */
+
 	
 	@GetMapping("/end")
 	public String completed() {
@@ -51,40 +51,57 @@ public class BobController {
 	  if (keyword == null || "null".equals(keyword)) keyword = "";
 		if(category == null) category = "전체보기";
 		 log.info("category = {}", category);
+		 List<Shop> shopList = bobService.shopList(category,keyword);
+		  		  
+		  for (Shop shop : shopList) {
+		      log.info("Shop in sList: sId={}, name={}", shop.getSId(), shop.getName());
+		  }
 	  model.addAttribute("sList",bobService.shopList(category,keyword));
 	  model.addAttribute("selectedCategory", category);
 	  model.addAttribute("userAddress", address);
 	  	return "views/shopList"; 
 	  }
 
-//	  @GetMapping("/shopList")
-//	  public String shopList(@RequestParam(name="category", defaultValue="전체보기") String category, Model model) {
-//	      model.addAttribute("selectedCategory", category);
-//		  log.info("BobController: shopList() called"); 
-//		  model.addAttribute("sList",bobService.shopList()); 
-//	      return "views/shopList"; 
-
 
 	  	// 가게 상세보기 메서드		
 		  @GetMapping("/MenuDetail") 
 		  public String getMenuDetail(Model model,		  
-		  @RequestParam("sId") int sId) {
+		  @RequestParam("sId") int sId,
+		  HttpSession session) {
 		  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", sId); // 가게 정보 가져오기
+		  
 		  Shop shop = bobService.getShopDetail(sId);
+		  
+		  if (shop != null) {
+		      log.info("BobController: getMenuDetail - Retrieved shop sId: {}", shop.getSId());
+		  } else {
+		      log.warn("BobController: getMenuDetail - No shop found for sId: {}", sId);
+		  }
+		  
 		  List<Menu> menuList = bobService.getMenuListByShopId(sId);
 		  model.addAttribute("shop", shop);
 		  model.addAttribute("menuList", menuList);
 		  
-		  List<Review> reviewList = bobService.reviewList(sId);
+		  List<Review> reviewList = bobService.getReviewList(sId);
 		  model.addAttribute("reviewList", reviewList);
 		  
-		 //model.addAttribute("member", member);
+		  String loginId = (String) session.getAttribute("loginId");
+		  Member member = null;
+		  if(loginId != null) {
+			  member = loginService.getMember(loginId);
+		  }
+		 model.addAttribute("member", member);
 		  
 		  double reviewAvg = 0.0;
 		  if (!reviewList.isEmpty()) {
 			  reviewAvg = reviewList.stream().mapToInt(Review::getRating).average().orElse(0.0);			  
 		  }
 		  model.addAttribute("reviewAvg", reviewAvg);
+		  
+		  model.addAttribute("now", System.currentTimeMillis());
+		  		  
+		 Map<Integer, ReviewReply> reviewReplyMap = bobService.getReviewReplyMap(sId);
+		 model.addAttribute("reviewReplyMap", reviewReplyMap);
 		  
 		  return "views/MenuDetail"; 
 		  }

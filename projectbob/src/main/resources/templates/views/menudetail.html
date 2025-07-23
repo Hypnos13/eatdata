@@ -23,7 +23,7 @@
 	<div layout:fragment="content">
 
 		<div class="container mt-4">
-			<div class="row">
+			<div class="row" id="global-content">
 				<!-- 왼쪽: 메뉴 영역 -->
 				<div class="col-md-8">
 				
@@ -31,8 +31,17 @@
 						<img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
 						<div class="ms-3">
 							<h5 class="mb-0">[[ ${shop.name} ]] - [[ ${shop.address1} ]]</h5>
-							<small>★ [[${shop.rating}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원 / 가게 찜 [[${shop.heart}]]</small>
+							<small>★ [[${shop.rating}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원</small>
 						</div>
+						
+						<!-- 찜버튼 -->
+							<div class="ms-auto">									
+								<button type="button" id="btnLikeList" class="btn btn-outline-danger">
+								<i class="bi bi-bag-heart-fill me-1"></i>
+								<span id="likeText">찜</span>									
+								</button>
+							</div>
+						
 					</div>
 
 					<!-- 탭 메뉴 -->
@@ -89,9 +98,9 @@
 								<h2 class="fw-bold me-3" th:text="${#numbers.formatDecimal(reviewAvg, 1, 1)}">4.9</h2>
 													
 							</div>
-							<!-- 찜버튼 -->
+							<!-- 하트버튼 -->
 							<div class="d-flex align-items-center">						
-							<span>가게 찜하기</span>		
+							<span>가게 좋아요</span>		
 								<button type="button" id="btnHeart" class="btn btn-outline-danger btn-sm px-2 py-0"
 														th:data-sid="${shop.sId}">
 								<span class="me-1" id="heartCount" th:text="${shop.heart}">0</span>
@@ -112,17 +121,30 @@
 						</div>
 						</div>
 						<!-- 댓글 헤더 영역 -->						
+			<div id="reviewFormOriginalContainer">
 						<!-- 댓글 쓰기 폼 -->
-					<div class="row my-3 d-none" id="reviewForm">
+					<div class="row my-3 d-none" id="reviewForm" th:if="${member != null}">
 						<div class="col">
 							<form name="reviewWriteForm" id="reviewWriteForm" enctype="multipart/form-data">
 								<input type="hidden" name="sId" th:value="${shop.sId}">
-						<!-- 	<input type="hidden" name="id" th:value="${member.id}"> -->						
+						  	<input type="hidden" name="id" th:value="${member?.id}">
+						  	<input type="hidden" id="loginId" th:value="${member != null ? member.id : ''}">
+						  	<input type="hidden" id="reviewFormMode" value="댓글쓰기">
+						  	<input type="hidden" id="shopOwnerId" th:value="${shop.id}">
+						  	<!-- <input type="hidden" name="mId" th:value="${menu.mId}"> -->			
 								<div class="row bg-light my-3 p-3 border">
 									<div class="col">
 										<div class="row">
 											<div class="col text-center">
 											
+											<!-- 메뉴 선택 -->
+						<div class="mb-2">
+							<label class="form-label">메뉴 선택</label>
+							<select name="mId" class="form-select" required>
+								<option value="">메뉴를 선택하세요</option>
+								<option th:each="menu : ${menuList}" th:value="${menu.mId}" th:text="${menu.name}"></option>
+							</select>
+						</div>
 											<!-- 별점 영역 -->
 						<div class="mb-2">
 							<label class="form-label">별점</label>
@@ -137,19 +159,19 @@
 						<!-- 사진 -->
 						<div class="mb-2">
 							<label for="rPicture" class="form-label">사진 첨부</label>
-							<input type="file" name="rPicture" id="rPicture" accept="image/*" class="form-control">
+							<input type="file" name="reviewUploadFile" id="rPicture" accept="image*" class="form-control">
 							<!-- 썸네일 -->
-							<img id="imgPreview" style="disply:none; max-width:100px; margin-top:8px;">
+							<img id="imgPreview" style="display:none; max-width:100px; margin-top:8px;">
 						</div>
 												
 											</div>
 										</div>
 										<div class="row my-3">
 											<div class="col-md-10">
-												<textarea name="reviewContent" id="reviewContent" class="form-control" rows="4"></textarea>												
+												<textarea name="content" id="reviewContent" class="form-control" rows="4"></textarea>												
 											</div>
 											<div class="col-md">
-												<input type="submit" value="댓글쓰기" class="btn btn-success h-100 w-100" id="reviewWriteButton">
+												<input type="submit" value="댓글쓰기" class="btn btn-success h-100 w-100" id="reviewSubmitButton">
 											</div>
 										</div>
 									</div>
@@ -157,21 +179,23 @@
 							</form>
 						</div>
 					</div>
-						
+		</div>
+		
 						<!-- 리뷰 리스트 -->
-						<div th:if="${not #lists.isEmpty(reviewList)}">
-							<div th:each="review : ${reviewList}" class="border-bottom pb-3 mb-3">
+						<!-- <div id="reviewList" th:if="${not #lists.isEmpty(reviewList)}"> -->
+						<div id="reviewList">
+							<div th:each="review : ${reviewList}" class="reviewRow border-bottom pb-3 mb-3">
 								<div class="d-flex align-items-center mb-1">
 									<span class="fw-bold" th:text="${#strings.substring(review.id,0,2) + '**님'}">ad**님</span>
 									<span class="text-muted small ms-2" th:text="${#dates.format(review.regDate, 'yyyy-MM-dd')}">날짜</span>
 									<div class="ms-auto">
-									<button class="modifyReview btn btn-outline-success btn-sm" th:data-no="${review.rNo}">
+									<button th:if="${member != null and review.id == member.id}" class="modifyReview btn btn-outline-success btn-sm" th:data-no="${review.rNo}">
 										<i class="bi bi-journal-text">수정</i>									
 									</button>
-									<button class="deleteReview btn btn-outline-warning btn-sm" th:data-no="${review.rNo}">
+									<button th:if="${member != null and review.id == member.id }" class="deleteReview btn btn-outline-dark btn-sm" th:data-no="${review.rNo}" th:data-sid="${review.sId}">
 										<i class="bi bi-trash">삭제</i>
 									</button>
-									<button class="btn btn-outline-danger btn-sm" th:onclick="reportReview('${review.rNo}')">
+									<button th:unless="${member != null and review.id == member.id}" class="btn btn-outline-danger btn-sm" th:onclick="reportReview('${review.rNo}')">
 										<i class="bi bi-telephone-outbound">신고</i>
 									</button>
 									</div>
@@ -186,7 +210,7 @@
 								</div>
 								<!-- 리뷰 사진  -->
 								<div th:if="${review.rPicture != null}">
-									<img th:src="@{'/images/review/' + ${review.rPicture}}" alt="리뷰사진" 
+									<img th:src="@{'/images/review/' + ${review.rPicture} + '?t=' + ${now}}" alt="리뷰사진" 
 													style="max-width:200px;" class="rounded shadow-sm mb-2" />
 								</div>
 								<!-- 메뉴 설명 -->
@@ -194,11 +218,56 @@
 									<span th:text="${review.menuName}">싹싹김치</span>
 								</div>
 								<!-- 리뷰 내용 -->
-								<div th:text="${review.content}">good day</div>
-							</div>
+								<div class = "review-content" th:text="${review.content}">good day</div>
+								<!-- 대댓글(사장님 전용) -->
+								<div th:if="${reviewReplyMap[review.rNo] != null}" class="mt-3">
+									<div class="card p-2 bg-light border-info" style="border-left:4px solid #3498db;">
+										<div class="d-flex align-items-center mb-1">
+											<span class="fw-bold text-primary">
+												<i class="bi bi-person-badge"></i>사장님
+											</span>
+											<span class="text-muted small ms-2" th:text="${#dates.format(reviewReplyMap[review.rNo].regDate, 'yyyy-MM-dd HH:mm')}">날짜</span>
+											<div class="ms-auto" th:if="${member != null and member.id == shop.id}">
+												<button type="button" class="btn btn-outline-primary btn-sm px-3 modifyReviewReply"
+																	th:data-rrno="${reviewReplyMap[review.rNo].rrNo}" th:data-rno="${review.rNo}"
+																	th:data-content="${reviewReplyMap[review.rNo].content}">수정</button>
+												<button type="button" class="btn btn-outline-danger btn-sm px-3 deleteReviewReply"
+																	th:data-rrno="${reviewReplyMap[review.rNo].rrNo}" th:data-rno="${review.rNo}" th:data-sid="${shop.sId}">삭제</button>
+											</div>										
+										</div>
+										<div th:text="${reviewReplyMap[review.rNo].content}" class="ms-3"></div>
+									</div>
+								</div>
+								<div th:if="${member != null and member.id == shop.id and reviewReplyMap[review.rNo] == null}" class="mt-2 text-end">
+									<button type="button" class="btn btn-outline-primary btn-sm px-2 py-0 review-reply-btn" th:data-review-no="${review.rNo}">
+										<i class="bi bi-person-badge"></i>사장님 댓글쓰기
+									</button>
+								</div>
+								<!-- 사장님 댓글쓰기 폼 -->
+								<div class="reviewReplyForm d-none p-3 rounded shadow-sm" style="background:#f8fafc;">
+									<form class="review-reply-form">
+										<input type="hidden" name="rNo" th:value="${review.rNo}">
+										<input type="hidden" name="sId" th:value="${shop.sId}">
+										<input type="hidden" name="rrNo" th:value="${reviewReplyMap[review.rNo].rrNo}" th:if="${reviewReplyMap[review.rNo] != null}">
+										<div class="mb-2">
+											<textarea name="content" class="form-control fs-5 py-3" rows="3" maxlength="250"
+													placeholder="사장님 댓글을 입력하세요" style="resize: none;"></textarea>																				
+										</div>
+										<div class="text-end">
+											<th:block th:if="${member != null and member.id == shop.id}">
+												<button class="btn btn-success px-4 me-1 review-reply-submit-btn" type="submit">등록</button>
+												<button type="button" class="btn btn-outline-primary px-4 me-1 modifyReviewReply">수정</button>
+												<button type="button" class="btn btn-outline-danger px-4 deleteReviewReply" th:attr="data-rrno=${reviewReplyMap[review.rNo].rrNo}" th:if="${reviewReplyMap[review.rNo] != null}" th:data-sid="${shop.sId}">삭제</button>
+											</th:block>
+										</div>
+									</form>
+								</div>
+							</div><!-- 리뷰리스트 끝 -->
 						</div>
 						<!-- 리뷰 없을때 -->
-						<div th:unless="${not #lists.isEmpty(reviewList)}" class="text-center text-muted p-5">
+						<!-- <div th:unless="${not #lists.isEmpty(reviewList)}" class="text-center text-muted p-5"> -->
+						<div id="noReview" th:style="${not #lists.isEmpty(reviewList)} ? 'display:none;' : 'display:block;'" 
+									class="text-center text-muted p-5">
 							no 리뷰~
 						</div>									
 					

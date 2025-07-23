@@ -15,19 +15,16 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Review {
+public class ReviewReply {
+	private int rrNo;
+	@JsonProperty("rNo")
 	private int rNo;
-	private String id;
-	@JsonProperty("s_id")
+	@JsonProperty("sId")
 	private int sId;
-	private int mId;
+	private String id;
 	private String content;
-	private int rating;
-	private String rPicture;
-	private int liked;
 	private Timestamp regDate;
 	private Timestamp modiDate;
 	private String status;
-	
-	private String menuName;
+
 }

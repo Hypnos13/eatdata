@@ -5,9 +5,11 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.projectbob.domain.LikeList;
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Review;
+import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 
 @Mapper
@@ -24,16 +26,52 @@ public interface BobMapper {
 	public List<String> getMenuCategoriesByShopId(int sId);
 	
 	// 가게 번호에 해당하는 리뷰리스트에 사용
-	public List<Review> reviewList(int sId);
+	//public List<Review> reviewList(int sId);
+	public List<Review> getReviewList(int sId);
 
 	
 	// shop 하트 증가	
 		int plusHeart(int sId);
 		Integer getHeartCount(int sId);
 		
+	// 찜
+	public int countLikeList(LikeList likeList);
+	
+	// 찜 추가
+	public int addLikeList(LikeList likeList);
+	
+	// 찜 삭제
+	public int deleteLikeList(LikeList likeList);
+	
+	// 가게 찜 수
+	public int shopCountLike(@Param("sId") int sId);
+		
 	// 댓글을 DB에 등록하는 메서드
 	public void addReview(Review review);
 	
+	//댓글 수정하는 메서드
+	public void updateReview(Review review);
+	
+	//댓글 삭제하는 메서드
+	public void deleteReview(int rNo);
+	
+	// 댓글에 달린 대댓글 가져오기 메서드
+	public ReviewReply reviewreplyList(@Param("rNo") int rNo);
+	
+	// 대댓글 DB에 등록하는 메서드
+	public void addReviewReply(ReviewReply reviewreply);
+	
+	// 가게 전체 대댓글
+	public List<ReviewReply> getReviewReplyList(@Param("sId") int sId);
+	
+	// 대댓글 수정
+	public void updateReviewReply(ReviewReply reviewreply);
+	
+	// 대댓글 삭제
+	public void deleteReviewReply(@Param("rrNo") int rrNo);
+	
+	// 대댓글 개수조회
+	public int countReviewReply(@Param("rNo") int rNo);
 
 }
 

@@ -36,6 +36,7 @@ dependencies {
 	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 
+
 // --- 메일 연동 ---	
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 // --- 문자 연동 ---
