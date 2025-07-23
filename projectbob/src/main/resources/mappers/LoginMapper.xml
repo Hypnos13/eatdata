@@ -69,6 +69,11 @@
 	WHERE id = #{id}
 </update>
 
+<select id="getMyAddress">
+	SELECT * 
+	FROM addressbook
+	WHERE id = #{id}
+</select>
 </mapper>	
 
 

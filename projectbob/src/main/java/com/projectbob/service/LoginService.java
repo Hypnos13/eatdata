@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.Member;
 import com.projectbob.mapper.LoginMapper;
 
@@ -83,5 +84,10 @@ public class LoginService {
 	public void updateIsuse(String id, String isuse){
 		
 		loginMapper.updateIsuse(id, isuse);
+	}
+	
+	public List<Addressbook> getMyAddress(String id){
+		List<Addressbook> address = loginMapper.getMyAddress(id);
+		return address;
 	}
 }

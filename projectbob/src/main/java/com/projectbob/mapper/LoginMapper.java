@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.Member;
 
 @Mapper
@@ -18,4 +19,5 @@ public interface LoginMapper {
 	String searchPassword(@Param("id") String id, @Param("name") String name, @Param("email") String email, @Param("phone") String phone, @Param("receive") String receive);
 	List<Member> userList(@Param("division") String division, @Param("keyword") String keyword );
 	void updateIsuse(@Param("id") String id, @Param("isuse") String isuse);
+	List<Addressbook> getMyAddress(String id);
 }
