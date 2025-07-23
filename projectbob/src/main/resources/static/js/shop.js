@@ -84,6 +84,7 @@ function findZipcode() {
 				$("#zipcode").val(data.zonecode);
 				$("#address1").val(addr);
 				$("#address2").focus();
+				showMap(addr); // 지도 AIP 때문에 한줄 추가함
     	}
 	}).open();
 }
@@ -113,3 +114,89 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// ---------- [출력/뷰(shopBasicView) 페이지 전용 지도 표시 코드] ----------
+$(function() {
+    var $map = $("#shop-map");
+    var $addr1 = $("#address1");
+    var $addr2 = $("#address2");
+    if ($map.length && $addr1.length && !$addr1.is("input")) {
+        var addr = $addr1.text().trim();
+        var addr2 = ($addr2.length && !$addr2.is("input")) ? $addr2.text().trim() : '';
+        if (addr2) addr += " " + addr2;
+        //console.log("지도에 넘기는 주소:", addr); // ★이 줄 추가
+        setTimeout(function() {
+            if (addr && window.kakao && kakao.maps) {
+                shopViewShowMap(addr);
+            } else {
+                console.log("카카오맵 준비 안됨 또는 주소 없음");
+            }
+        }, 300);
+    }
+});
+
+// 뷰 페이지 전용 지도 함수 (폼에서 사용하는 showMap과 이름 다름)
+function shopViewShowMap(address) {
+    /*
+	alert("지도 함수 실행됨! 주소: " + address); // 진짜 함수 실행되는지 체크
+    if (!(window.kakao && kakao.maps && kakao.maps.services)) {
+        alert("카카오맵 라이브러리 없음");
+        return;
+    }*/
+    var mapContainer = document.getElementById('shop-map');
+    var mapOption = {
+        center: new kakao.maps.LatLng(37.566826, 126.9786567),
+        level: 3
+    };
+    var map = new kakao.maps.Map(mapContainer, mapOption);
+    var geocoder = new kakao.maps.services.Geocoder();
+    geocoder.addressSearch(address, function(result, status) {
+        console.log("addressSearch status:", status, result); // ★이 줄 중요!
+        if (status === kakao.maps.services.Status.OK) {
+            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+            var marker = new kakao.maps.Marker({
+                map: map,
+                position: coords
+            });
+            map.setCenter(coords);
+        } else {
+            alert("카카오맵 주소 검색 실패! status: " + status);
+        }
+    });
+}
+
+// ---------- [수정/입력(shopBasicSet) 폼 전용 지도 표시 코드] ----------
+$(function() {
+    // 1. 페이지 로드시 초기 지도 표시 (입력폼은 input이니까 .val())
+    var addr = $("#address1").val() || "";
+    var addr2 = $("#address2").val() || "";
+    if (addr) showMap(addr + " " + addr2);
+
+    // 2. 주소 입력/변경 시 지도 즉시 갱신
+    $("#address1, #address2").on("input", function() {
+        var a1 = $("#address1").val() || "";
+        var a2 = $("#address2").val() || "";
+        if (a1) showMap(a1 + " " + a2);
+    });
+});
+
+// 폼 전용 지도 표시 함수
+function showMap(address) {
+    if (!(window.kakao && kakao.maps && kakao.maps.services)) return;
+    var mapContainer = document.getElementById('shop-map');
+    var mapOption = {
+        center: new kakao.maps.LatLng(37.566826, 126.9786567),
+        level: 3
+    };
+    var map = new kakao.maps.Map(mapContainer, mapOption);
+    var geocoder = new kakao.maps.services.Geocoder();
+    geocoder.addressSearch(address, function(result, status) {
+        if (status === kakao.maps.services.Status.OK) {
+            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+            var marker = new kakao.maps.Marker({
+                map: map,
+                position: coords
+            });
+            map.setCenter(coords);
+        }
+    });
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{js/login.js}"></script>
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<link th:href="@{/css/login.css}" rel="stylesheet" />
+<div class="container">
+	  <h1>내 정보 수정</h1>
+	  <div class="col-9 d-flex justify-content-end mb-2">
+	    <form method="post" action="deleteNaverMember">
+	      <input type="hidden" name="userId" th:value="${Member.id}" />
+	      <input type="submit" id="btnUnsubscript" value="탈퇴하기">
+	    </form>
+	  </div>
+	
+	<Form name="updateNaverMemberForm" id="updateNaverMemberForm" method="post" action="updateNaverMember">
+		<input class="form-control" name="id" id="id" type="hidden" th:value="${Member.id}" readonly>
+		<div class="row my-2">
+			<div class="col-4 text-end">
+				<label for="email">*이메일 :</label> 
+			</div>
+			<div class="col-5">
+				<input type="email" class="form-control" name="email" id="email" th:value="${Member.email}" readonly>
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-4 text-end">
+				<label for="name">*이름 :</label> 
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="name" id="name" type="text" th:value="${Member.name}" readonly>
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-4 text-end">
+				<label for="nickname">별명 :</label>
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="nickname" id="nickname" type="text" th:value="${Member.nickname}">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-4 text-end">
+				<label for="birthday">*생년월일 :</label> 
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="birthday" id="birthday" type="text" th:value="${Member.birthday}" readonly>
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-4 text-end">
+				<label for="address1">*주소 :</label> 
+			</div>
+			<div class="col-4">
+				<input class="form-control" name="address1" id="address1" th:value="${Member.address1}" readonly>
+			</div>
+			<div class="col-1">
+				<input class="form-control btn btn-success" id="btnAdress" value="주소 찾기">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-4 text-end">
+				<label for="address2">*상세주소 :</label>  
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="address2" id="address2" type="text" th:value="${Member.address2}" placeholder="상세 주소를 입력해주세요">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-4 text-end">
+				<label for="phone">*연락처 :</label> 
+			</div>
+			<div class="col-4">
+				<input type="hidden" class="form-control" name="oldPhone" id="oldPhone" th:value="${Member.phone}">
+				<input type="text" class="form-control" name="phone" id="phone" th:value="${Member.phone}" placeholder="연락처를 입력해주세요. (ex.010-1234-5678)">
+			</div>
+			<div class="col-1">
+				<input type="button" id="btn-phoneCertify" value="인증하기">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-10 text-end">
+				<div class="text-danger text-center" id="phoneInfo"></div>
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-4 text-end">
+				<label for="point">내포인트 :</label> 
+			</div>
+			<div class="col-5">
+				<input type="text" class="form-control" name="point" id="point" th:value="${Member.point}" readonly>
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-6 mx-auto">
+				<input type="submit" class="form-control btn btn-success" value="수정하기">
+			</div>
+		</div>
+	</Form>
+</div>	
+</th:block>
+</html>

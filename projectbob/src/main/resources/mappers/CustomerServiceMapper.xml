@@ -51,24 +51,24 @@
 </delete>
 
 <insert id="writeNotice" parameterType="NoticeBoard">
-	INSERT INTO noticeboard(title, content, startday, endday, disivion, reg_date, modi_date)
-	VALUES (#{title}, #{content}, #{startDay}, #{endDay}, #{disivion}, SYSDATE(), SYSDATE())
+	INSERT INTO noticeboard(title, content, startday, endday, division, reg_date, modi_date)
+	VALUES (#{title}, #{content}, #{startDay}, #{endDay}, #{division}, SYSDATE(), SYSDATE())
 </insert>
 
 <select id="noticeList" resultType="NoticeBoard">
 	SELECT *
 	FROM noticeboard
 	<where>
-		<if test = "userDisivion == 'client'">
-			disivion in ('all', 'client')
+		<if test = "userDivision == 'client'">
+			division in ('all', 'client')
 			AND SYSDATE() BETWEEN startday AND endday
 		</if>
-		<if test = "userDisivion == 'owner'">
-			disivion in ('all', 'owner')
+		<if test = "userDivision == 'owner'">
+			division in ('all', 'owner')
 			AND SYSDATE() BETWEEN startday AND endday
 		</if>
-		<if test = "userDisivion == 'master'">
-			disivion in ('all', 'client' ,'owner', 'none')
+		<if test = "userDivision == 'master'">
+			division in ('all', 'client' ,'owner', 'none')
 		</if>
 	</where>
 	ORDER BY startDay DESC , no DESC
@@ -82,7 +82,7 @@
 
 <update id="updateNotice" parameterType="noticeBoard">
 	UPDATE noticeboard
-	SET title = #{title}, content = #{content}, startday = #{startDay}, endday = #{endDay}, disivion = #{disivion}, modi_date = SYSDATE()
+	SET title = #{title}, content = #{content}, startday = #{startDay}, endday = #{endDay}, division = #{division}, modi_date = SYSDATE()
 	WHERE no = #{no}
 </update>
 
@@ -112,7 +112,18 @@
 	SET category = #{category} , status = #{status} , modi_date = SYSDATE()
 	WHERE s_id = #{sId}
 </update>
-</mapper>	
 
+<insert id="insertChatMessage" parameterType="chatMessage">
+	INSERT INTO chat_messages (id, role, message, reg_date, modi_date) 
+	VALUES (#{id}, #{role}, #{message}, SYSDATE(), SYSDATE())
+</insert>
+
+<select id="getChatMessage" resultType="ChatMessage">
+	SELECT *
+	FROM  chat_messages
+	WHERE id = #{id}
+	ORDER BY reg_date ASC
+</select>
+</mapper>	
 
 

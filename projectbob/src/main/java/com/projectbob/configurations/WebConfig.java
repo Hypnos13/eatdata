@@ -2,6 +2,7 @@ package com.projectbob.configurations;
 
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -15,5 +16,7 @@ public class WebConfig implements WebMvcConfigurer{
 		registry.addViewController("/writeFAQForm").setViewName("admin/writeFAQForm");
 		registry.addViewController("/writeNoticeForm").setViewName("admin/writeNoticeForm");
 		registry.addViewController("/shopJoinForm").setViewName("shop/shopJoinForm");
+		registry.addViewController("/login/naver/callback").setViewName("members/naverCallback");
 	}
+	
 }

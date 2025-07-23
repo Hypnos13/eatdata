@@ -2,17 +2,27 @@ package com.projectbob.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.SecureRandom;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
 
 import com.projectbob.domain.Member;
 import com.projectbob.service.LoginService;
@@ -86,8 +96,8 @@ public class LoginController {
 		session.setAttribute("isLogin", true);
 		session.setAttribute("loginId", id);
 		session.setAttribute("loginNickname", member.getNickname());
-		session.setAttribute("loginDisivion", member.getDisivion());
-		if(member.getDisivion().equals("owner")){
+		session.setAttribute("loginDivision", member.getDivision());
+		if(member.getDivision().equals("owner")){
 			return "redirect:/shopMain";
 		}
 		
@@ -224,6 +234,11 @@ public class LoginController {
 		
 		model.addAttribute("Member", loginService.getMember(id));
 		
+		if(id.substring(0, 2).equals("N_") || id.substring(0, 2).equals("K_")) {
+			return "members/updateNaverMemberships";
+		}
+		
+		
 		return "members/updateMemberships";
 	}
 	
@@ -247,7 +262,7 @@ public class LoginController {
 		loginService.updateMember(member);
 		session.setAttribute("loginNickname", member.getNickname());
 		
-		if(session.getAttribute("loginDisivion").equals("owner")) {
+		if(session.getAttribute("loginDivision").equals("owner")) {
 			return "redirect:/shopMain";
 		}
 		
@@ -258,7 +273,7 @@ public class LoginController {
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
 		String path = "";
-		if(session.getAttribute("loginDisivion").equals("owner")) {
+		if(session.getAttribute("loginDivision").equals("owner")) {
 			path = "redirect:/shopMain";
 		}else {
 			path = "redirect:/main";
@@ -293,12 +308,12 @@ public class LoginController {
 	
 	// 관리자권한 - 사용자관리
 	@GetMapping("/userList")
-	public String userList(Model model, @RequestParam(name = "disivion", defaultValue = "") String disivion, @RequestParam(name="keyword", defaultValue = "") String keyword) {
+	public String userList(Model model, @RequestParam(name = "division", defaultValue = "") String division, @RequestParam(name="keyword", defaultValue = "") String keyword) {
 		
-		List<Member> userList = loginService.userList(disivion, keyword);
+		List<Member> userList = loginService.userList(division, keyword);
 		model.addAttribute("userList", userList);
-		if(disivion != "") {
-			model.addAttribute("disivion", disivion);
+		if(division != "") {
+			model.addAttribute("division", division);
 		}
 		
 		return "admin/userList";
@@ -309,9 +324,9 @@ public class LoginController {
 	public String updateIsuse(Model model, @RequestParam("id") String id, @RequestParam("isuse") String isuse, HttpSession session, HttpServletResponse response)
 			throws ServletException, IOException{
 		
-		String loginDisivion = (String) session.getAttribute("loginDisivion");
+		String loginDivision = (String) session.getAttribute("loginDivision");
 		
-		if(loginDisivion.equals("master")) {
+		if(loginDivision.equals("master")) {
 			loginService.updateIsuse(id, isuse);
 		}
 		
@@ -325,5 +340,233 @@ public class LoginController {
 		return null;
 	}
 	
+	// 네이버 로그인 시
+	@GetMapping("/naverLogin")
+	public String naverLogin(Model model,@RequestParam("name") String name, @RequestParam("nickname")String nickname, @RequestParam("email") String email, HttpSession session){
+		
+		String id  = "N_"+email.substring(0, email.indexOf("@"));
+		
+		// DB에 가입되어있는지 확인
+		int login = loginService.login(id, "");
+		
+		if(login == -1) {  // 없으면 추가 
+			
+			Member member = new Member();
+			member.setId(id);
+			member.setPass("naver0000");
+			member.setName(name);
+			member.setNickname(nickname);
+			member.setEmail(email);
+			member.setBirthday("");
+			member.setAddress1("");
+			member.setAddress2("");
+			member.setPhone("");
+			member.setDivision("client");
+			
+			model.addAttribute("Member", member);
+			
+			return "members/joinNaverMembership";
+			
+		}
+			
+			Member member = loginService.getMember(id);
+			
+			session.setAttribute("isLogin", true);
+			session.setAttribute("loginId", id);
+			session.setAttribute("loginNickname", member.getNickname());
+			session.setAttribute("loginDivision", member.getDivision());
+		
+		
+		return "redirect:/main";
+	}
 	
+	
+	//처음 네이버 로그인시
+	@PostMapping("/naverJoin")
+	public String naverLogin(Model model, Member member, HttpSession session){
+		
+		member.setDivision("client");
+		
+		loginService.joinMember(member);
+		
+		member = loginService.getMember(member.getId());
+		
+		session.setAttribute("isLogin", true);
+		session.setAttribute("loginId", member.getId());
+		session.setAttribute("loginNickname", member.getNickname());
+		session.setAttribute("loginDivision", member.getDivision());
+		
+		return "redirect:/main";
+	}
+	
+	//네이버 로그인 시 수정
+	@PostMapping("/updateNaverMember")
+	public String updateNaverMember(Model model, Member member, HttpSession session){
+		
+		member.setPass("0");
+		
+		loginService.updateMember(member);
+		session.setAttribute("loginNickname", member.getNickname());
+		
+		return "redirect:/main";
+	}
+	
+	
+	// 네이버 아이디 회원 탈퇴
+	@PostMapping("/deleteNaverMember")
+	public String deleteNaverMember( @RequestParam("userId") String id, HttpSession session) {
+		
+		String pass = "0";
+		
+		loginService.deleteMember(id, pass);
+		
+		session.invalidate();
+			
+		return "members/login";
+	}
+	
+	// 카카오 아이디 연동
+	@GetMapping("/kakao")
+	public String kakaoLogin(Model model, @RequestParam("code") String code, HttpSession session) {
+		
+		RestTemplate rt = new RestTemplate();
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		
+		 MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		 params.add("grant_type", "authorization_code");
+		 params.add("client_id", "a6ce69b235d3336723f4b86140c8a301");
+		 params.add("redirect_uri", "http://localhost:8080/kakao");
+		 params.add("code", code);
+		
+		 HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(params, headers);
+		 ResponseEntity<Map> tokenResponse = rt.postForEntity("https://kauth.kakao.com/oauth/token", tokenRequest, Map.class);
+		 
+		 String accessToken = (String) tokenResponse.getBody().get("access_token");
+		 
+		 HttpHeaders profileHeaders = new HttpHeaders();
+		 profileHeaders.setBearerAuth(accessToken);
+		 HttpEntity<?> profileRequest = new HttpEntity<>(profileHeaders);
+		 
+		 ResponseEntity<Map> profileResponse = rt.exchange("https://kapi.kakao.com/v2/user/me", HttpMethod.GET, profileRequest, Map.class);
+		 
+		 Map<String, Object> kakaoAccount = (Map<String, Object>) profileResponse.getBody().get("kakao_account");
+		 String email = (String) kakaoAccount.get("email");
+		 
+		 Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+		 String nickname = (String) profile.get("nickname");
+		 
+		 System.out.println("이메일: " + email);
+		 System.out.println("별명: " + nickname);
+		 
+		 String id  = "K_"+email.substring(0, email.indexOf("@"));
+			
+			// DB에 가입되어있는지 확인
+			int login = loginService.login(id, "");
+			
+			if(login == -1) {  // 없으면 추가 
+				
+				Member member = new Member();
+				member.setId(id);
+				member.setPass("Kakao0000");
+				member.setName(nickname);
+				member.setNickname(nickname);
+				member.setEmail(email);
+				member.setBirthday("");
+				member.setAddress1("");
+				member.setAddress2("");
+				member.setPhone("");
+				member.setDivision("client");
+				
+				model.addAttribute("Member", member);
+				
+				return "members/joinNaverMembership";
+				
+			}
+				
+				Member member = loginService.getMember(id);
+				
+				session.setAttribute("isLogin", true);
+				session.setAttribute("loginId", id);
+				session.setAttribute("loginNickname", member.getNickname());
+				session.setAttribute("loginDivision", member.getDivision());
+			
+			
+		  return "redirect:/main";
+	}
+	
+	// 인증번호 창 띄우기
+	@GetMapping("/phoneCertify")
+	public String phoneCertifyPop(Model model, @RequestParam("phone") String phone, HttpSession session, HttpServletResponse response) throws ServletException, IOException{
+		
+		
+		String code = (String) session.getAttribute("code") ;
+		
+		if(code == null) {
+			SecureRandom random = new SecureRandom();
+			StringBuilder sb = new StringBuilder();
+			
+			for(int i = 0 ; i < 6 ; i++) {	sb.append(random.nextInt(10)); }
+			
+			code = sb.toString();
+			session.setAttribute("code", code);
+			
+		/*
+			Message m = new Message();
+			m.setFrom("01042273840");
+			m.setTo(phone.replace("-", ""));
+			m.setText("인증번호는 " +code+" 입니다.");
+			
+			SingleMessageSentResponse res =  MESSAGE_SERVICE.sendOne(new SingleMessageSendingRequest(m));
+			
+		*/
+			
+			response.setContentType("text/html; charset=utf-8");
+			PrintWriter out = response.getWriter();
+			
+			out.print("<script>");
+			out.print(" alert('인증번호가 전송 되었습니다.');");
+			out.print("</script>");
+			
+		}
+			System.out.println("코드 : " + code);
+		
+			model.addAttribute("phone", phone);	
+		
+		return "members/phoneCertify";
+	}
+	
+	// 인증번호 확인
+	@PostMapping("/certifyNumber")
+	public String certifyNumber(@RequestParam("certifyNumber") String certifyNumber, @RequestParam("phone") String phone, HttpSession session , HttpServletResponse response)
+			throws ServletException, IOException{
+		
+		String code = (String) session.getAttribute("code");
+		
+		response.setContentType("text/html; charset=utf-8");
+		PrintWriter out = response.getWriter();
+		
+		if(code.equals(certifyNumber)) {
+			session.removeAttribute("code");
+			
+			out.print("<script>");
+			out.print(" alert('인증이 완료되었습니다.');");
+			out.print("let btn = window.opener.document.getElementById(\"btn-phoneCertify\");");
+			out.print("btn.disabled = true;");
+			out.print("btn.value = '인증완료';");
+			out.print("btn.style.backgroundColor = '#94a3b8';");
+			out.print("btn.style.color = '#ffffff';");
+			out.print("window.opener.document.getElementById(\"phone\").readOnly = true;");
+			out.print("window.close();");
+			out.print("</script>");
+		}else {
+			out.print("<script>");
+			out.print(" alert('인증번호가 일치하지 않습니다');");
+			out.print(" history.back();");
+			out.print("</script>");
+		}
+		
+		return null;	
+	}
 }

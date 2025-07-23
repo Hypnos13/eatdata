@@ -2,6 +2,7 @@ package com.projectbob.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.http.HttpResponse;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
@@ -12,7 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.projectbob.domain.ChatMessage;
 import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.NoticeBoard;
 import com.projectbob.domain.Shop;
@@ -78,7 +81,7 @@ public class CustomerServiceController {
 	@GetMapping("/noticeList")
 	public String noticeList(Model model, NoticeBoard noticeBoard  , HttpSession session, @RequestParam(name ="from", defaultValue = "client") String from) {
 		
-		String userDv = (String) session.getAttribute("loginDisivion");
+		String userDv = (String) session.getAttribute("loginDivision");
 		if(userDv == null) { userDv="client";}
 		
 		List<NoticeBoard> notice =  csService.noticeList(userDv);
@@ -175,5 +178,68 @@ public class CustomerServiceController {
 		out.println("</script>");
 		
 		return null;
+	}
+	
+	//챗봇에게 질문 보내기
+	@PostMapping("/send")
+	public String sendMessage(RedirectAttributes rda, ChatMessage chatMessage){
+		
+		chatMessage.setRole("user");
+		csService.insertChatMessage(chatMessage);
+		
+		String response = csService.chatCounselor(chatMessage.getMessage());
+		
+		chatMessage.setRole("bot");
+		chatMessage.setMessage(response);
+		csService.insertChatMessage(chatMessage);
+		
+		rda.addAttribute("id", chatMessage.getId());
+		
+		return "redirect:/chatForm";
+	}
+	
+	//챗봇에게 과거 대화내역
+	@PostMapping("/chatHistory")
+	public String chatHistory(Model model, @RequestParam("id") String id, @RequestParam("message") String message ){
+			
+		List<ChatMessage> messages = csService.getChatMessage(id);
+		model.addAttribute("messages", messages);
+			
+		return "admin/chatBot";
+	}
+	
+	//챗봇 대화 창으로 이동
+	@GetMapping("/chatForm")
+	public String chatForm(Model model, HttpSession session, HttpServletResponse response, @RequestParam(name="id",required = false) String id) throws ServletException, IOException {
+		
+		Boolean isLogin = (Boolean) session.getAttribute("isLogin");
+		
+		if(isLogin ==null || !isLogin) {
+			response.setContentType("text/html; charset=utf-8");
+			PrintWriter out = response.getWriter();
+			out.println("<script>");
+			out.println("	alert('로그인 후 이용 가능합니다.');");
+			out.println("	history.back();");
+			out.println("</script>");
+			return null;
+		}
+		
+		if(id == null) {
+			id = (String) session.getAttribute("loginId");
+		}
+		
+		List<ChatMessage> messages = csService.getChatMessage(id);
+		
+		if(messages == null || messages.isEmpty()){
+			ChatMessage greet = new ChatMessage();
+			greet.setRole("bot");
+			greet.setMessage("안녕하세요! 무엇을 도와드릴까요?");
+			messages = List.of(greet);
+		}
+		
+		model.addAttribute("messages", messages);
+		model.addAttribute("id", id);
+			
+		return "admin/chatBot";
 	}
 }

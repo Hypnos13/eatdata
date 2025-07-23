@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{/js/login.js}"></script>
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<link th:href="@{/css/login.css}" rel="stylesheet" />
+<div class ="container">
+	<h1>사이트 이용을 위해 입력해주세요.</h1>
+	<Form name="naverJoinForm" id="naverJoinForm" method="post" action="naverJoin">
+		<div class="row my-2">
+			<div class="col-5">
+				<input class="form-control" name="id" id="id" type="hidden" th:value="${Member.id}" readonly>
+				<input class="form-control" name="pass" id="pass" type="hidden" th:value="0000" readonly>
+				<input class="form-control" name="name" id="name" type="hidden" th:value="${Member.name}" readonly>
+				<input class="form-control" name="nickname" id="nickname" type="hidden" th:value="${Member.nickname}" readonly>
+				<input type="hidden" class="form-control" name="email" id="email" th:value="${Member.email}"readonly>
+			</div>
+		</div>
+		<div class="row my-3">
+			<div class="col-4 text-end"> 
+				<label for="birthday">*생년월일 :</label>	 
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="birthday" id="birthday" type="text" value="">
+			</div>
+		</div>
+		<div class="col-10 text-end">
+				<div class="text-danger text-center" id="birthdayInfo"></div>
+		</div>
+		<div class="row my-3">
+			<div class="col-4 text-end">
+				<label for="address1">*주소 :</label>	
+			</div>
+			<div class="col-4">
+				<input class="form-control" name="address1" id="address1" value="" readonly>
+			</div>
+			<div class="col-1">
+				<input class="form-control btn btn-success" id="btnAdress" value="주소 찾기">
+			</div>
+		</div>
+		<div class="row my-3">
+			<div class="col-4 text-end">
+				<label for="address2">*상세주소 :</label>	 
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="address2" id="address2" type="text" value="" placeholder="상세 주소를 입력해주세요">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-10 text-end">
+				<div class="text-danger text-center" id="address1Info"></div>
+			</div>
+		</div>
+		<div class="row my-3">
+			<div class="col-4 text-end">
+				<label for="phone">*연락처 :</label> 
+			</div>
+			<div class="col-4">
+				<input type="text" class="form-control" name="phone" id="phone" value="" placeholder="연락처를 입력해주세요. (ex.010-1234-5678)">
+			</div>
+			<div class="col-1">
+				<input type="button" id="btn-phoneCertify" value="인증하기">
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-10 text-end">
+				<div class="text-danger text-center" id="phoneInfo"></div>
+			</div>
+		</div>
+		<div class="row mt-4">
+			<div class="col-6 mx-auto">
+				<input type="submit" class="form-control btn btn-success" value="입력완료">
+			</div>
+		</div>
+	</Form>
+</div>	
+</th:block>
+</html>
