@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layouts/shop_layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>가게 운영상태</title>
+    <link rel="stylesheet" href="/css/shopInfo.css">
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="content-card">
+    <h2 class="fw-bold text-center mb-4">영업상태</h2>
+    <table class="table table-bordered align-middle shop-status-table">
+      <thead>
+        <tr>
+          <th>가게 ID</th>
+          <th>가게명</th>
+          <th>상태</th>
+          <th>ON/OFF</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="shop : ${shopList}">
+          <td th:text="${shop.sId}"></td>
+          <td th:text="${shop.name}"></td>
+          <td>
+            <span th:if="${shop.status == 'Y'}" class="badge bg-success">영업중</span>
+            <span th:if="${shop.status != 'Y'}" class="badge bg-secondary">휴업</span>
+          </td>
+          <td>
+            <label class="switch">
+              <input type="checkbox" th:checked="${shop.status == 'Y'}" th:data-sid="${shop.sId}">
+              <span class="slider"></span>
+            </label>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="mt-3 text-danger" th:if="${message}" th:text="${message}"></div>
+  </div>
+</div>
+<script src="/js/shop.js"></script>
+</body>
+</html>

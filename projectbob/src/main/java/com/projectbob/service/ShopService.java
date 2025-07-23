@@ -24,21 +24,7 @@ public class ShopService {
 	@Autowired
 	private FileUploadService fileUploadService;
 	
-	//가게 등록
-	public void insertShop(Shop shop) {
-		shopMapper.insertShop(shop);
-	}
-	
-	//가게 리스트
-	public List<Shop> shopList() {
-		return shopMapper.shopList();
-	}
-	
-	// 메뉴 리스트
-	public List<Menu> getMenusByShopId(int sId) {
-        return shopMapper.getMenusByShopId(sId);
-    }
-
+    /* ---------- Menu ---------- */
 	// 메뉴 등록
 	@Transactional
 	public void insertMenu(Menu menu, MultipartFile mPicture) throws IOException {
@@ -66,10 +52,17 @@ public class ShopService {
 			}
 		}
 	}
+	
 	//모든 메뉴 목록 조회
 	public List<Menu> getAllMenus() {
 		return shopMapper.getAllMenus();
 	}
+	
+	// 메뉴 리스트
+	public List<Menu> getMenusByShopId(int sId) {
+		return shopMapper.getMenusByShopId(sId);
+	}
+	
 	// 특정 메뉴 상세 조회(옵션 포함)
 	public Menu getMenuDetail(int mId) {
 	    Menu menu = shopMapper.getMenuById(mId); // 1. 메뉴 기본 정보 로드
@@ -180,10 +173,21 @@ public class ShopService {
 		return fileUploadService.getUploadBaseDir() + File.separator + relativePath.replace("/", File.separator);
 	}
 
+	/* ---------- Shop ---------- */
+	//가게 등록
+	public void insertShop(Shop shop) {
+		shopMapper.insertShop(shop);
+	}
+	
+	//가게 리스트
+	public List<Shop> shopList() {
+		return shopMapper.shopList();
+	}
+	
 	//가게 정보 불러오기
 	public Shop findByOwnerId(String ownerId) {
 	    return shopMapper.findByOwnerId(ownerId);
-	}
+	}	
 	
 	//가게 유무 판단해서 보여주기
 	public List<Shop> findShopListByOwnerId(String ownerId) {
@@ -200,6 +204,11 @@ public class ShopService {
 	    return shop;
 	}
 	
+	//메뉴 컨트롤러 shop 모델 추가
+	public Shop findBySId(int sId) {
+	    return shopMapper.findBySId(sId);
+	}
+	
 	//기본정보 수정
 	public void updateShopBasicInfo(Shop shop) {
 	    // 업데이트 후 로그
@@ -207,26 +216,54 @@ public class ShopService {
 	    log.info("업데이트 결과: {}", result);
 	}
 	
+	// 가게 운영상태 변경 요청
+	public void updateShopStatus(Integer sId, String status) {
+	    shopMapper.updateShopStatus(sId, status);
+	}
+	
+	//영업시간 정보
 	public List<String[]> getOpenTimeList(Shop shop) {
 	    String opTime = shop.getOpTime();
 	    List<String[]> result = new ArrayList<>();
 	    if (opTime == null || opTime.isBlank()) {
-	        for (int i = 0; i < 7; i++) result.add(new String[] {"-", "-"});
+	        for (int i = 0; i < 7; i++) result.add(new String[]{"-", "-"});
 	        return result;
 	    }
-	    String[] arr = opTime.split(",");
+	    String[] arr = opTime.split(";");
 	    for (String s : arr) {
-	        if (s.equals("휴무") || s.isBlank()) {
-	            result.add(new String[] {"휴무", ""});
+	        s = s.trim();
+	        if (s.equals("-,-") || s.isBlank()) {
+	            result.add(new String[]{"휴무", ""});
 	        } else {
-	            String[] t = s.split("-");
-	            if (t.length == 2) result.add(new String[] {t[0], t[1]});
-	            else result.add(new String[] {"-", "-"});
+	            String[] t = s.split(",");
+	            if (t.length == 2) result.add(new String[]{t[0].trim(), t[1].trim()});
+	            else result.add(new String[]{"-", "-"});
 	        }
 	    }
-	    while (result.size() < 7) result.add(new String[] {"-", "-"});
+	    while (result.size() < 7) result.add(new String[]{"-", "-"});
 	    return result;
 
+	}
+	
+	//영업시간 업데이트
+	public void updateShopOpenTime(Shop shop) {
+	    shopMapper.updateShopOpenTime(shop);
+	}
+	
+	//텍스트라인 헬퍼
+	public List<String> buildOpenTextLines(Shop shop) {
+	    List<String[]> list = getOpenTimeList(shop);
+	    String[] days = {"월","화","수","목","금","토","일"};
+	    List<String> lines = new ArrayList<>();
+	    for (int i=0;i<7;i++) {
+	        String[] t = list.get(i);
+	        if ("휴무".equals(t[0])) {
+	            lines.add(days[i] + "요일 : 휴무");
+	        } else {
+	            lines.add(days[i] + "요일 : " + t[0] + " ~ " + t[1]);
+	        }
+	    }
+	    return lines;
 	}
 	
 }
