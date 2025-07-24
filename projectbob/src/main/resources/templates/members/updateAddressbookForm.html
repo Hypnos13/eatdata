@@ -7,13 +7,14 @@
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <link th:href="@{/css/login.css}" rel="stylesheet" />
 	
-	<form name = "addAddressForm" id = "addAddressForm" method = "post" action="addAddress">
+	<form name = "updateAddressForm" id = "updateAddressForm" method = "post" action="updateAddress">
+		<input type="hidden" id="no" name="no" th:value="${addressbook.no}">
 		<div class="row mt-5">
 			<div class="col-4 text-end">
 				<label for="address2">장소명 :   </label> 	
 			</div>
 			<div class="col-5">
-				<input class="form-control" name="aName" id="aName" type="text" placeholder="ex)우리집, 직장">
+				<input class="form-control" name="aName" id="aName" type="text" th:value="${addressbook.aName}" placeholder="ex)우리집, 직장">
 			</div>
 		</div>
 		<div class="row my-2 text-center">
@@ -26,7 +27,7 @@
 				<label for="address1">*주소 :  </label> 
 			</div>
 			<div class="col-4">	
-				<input class="form-control" name="address1" id="address1" type="text" placeholder="주소 찾기를 눌러주세요" readonly="true">
+				<input class="form-control" name="address1" id="address1" type="text" th:value="${addressbook.address1}" placeholder="주소 찾기를 눌러주세요" readonly="true">
 			</div>
 			<div class="col-1">
 				<input class="form-control" id="btnAdress" value="주소 찾기">
@@ -42,12 +43,12 @@
 				<label for="address2">상세주소 :   </label> 	
 			</div>
 			<div class="col-5">
-				<input class="form-control" name="address2" id="address2" type="text" placeholder="상세 주소를 입력해주세요">
+				<input class="form-control" name="address2" id="address2" type="text" th:value="${addressbook.address2}" placeholder="상세 주소를 입력해주세요">
 			</div>
 		</div>
 		<div class="row my-5 justify-content-center">
 			<div class="col-4">
-				<input id="address1" type="submit" value="저장">
+				<input type="submit" value="저장">
 			</div>
 		</div>
 	</form>

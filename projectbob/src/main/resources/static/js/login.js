@@ -522,36 +522,30 @@ function CheckPhone(){
 	}
 }
 
-// 타이머 시작
-function startTimer(duration) {
-        let time = duration;
-        interval = setInterval(function () {
-            const min = String(Math.floor(time / 60)).padStart(2, '0');
-            const sec = String(time % 60).padStart(2, '0');
-            $(".timer").text(`${min}:${sec}`);
+// 주소 목록 - 수정 버튼 누를 때
+function toggleMenu(button) {
+	
+	const $menu = $(button).siblings('.dropdown-menu-custom');
+	 
+	 const isOpen = !$menu.hasClass('d-none');
 
-            if (time <= 0) {
-                clearInterval(interval);
-                $(".timer").text("만료됨");
-                $("#btn-phoneCheck").val("재인증 요청").removeClass("btn-success").addClass("btn-warning");
-                sessionStorage.removeItem("phoneAuthEnd");
-            }
+	 // 모든 메뉴 닫기
+	 $('.dropdown-menu-custom').addClass('d-none');
 
-            time--;
-        }, 1000);
-}
-
-// 타이머 체크
-function checkAndStartTimer() {
-        const endTime = sessionStorage.getItem("phoneAuthEnd");
-        if (endTime) {
-            const remainSec = Math.floor((new Date(endTime) - new Date()) / 1000);
-            if (remainSec > 0) {
-                startTimer(remainSec);
-            }else{
-                $(".timer").text("만료됨");
-                $("#btn-phoneCheck").val("재인증 요청").removeClass("btn-success").addClass("btn-warning");
-                sessionStorage.removeItem("phoneAuthEnd");
-            }
-        }
+	 // 현재 클릭한 버튼이 열려있지 않으면 열기
+	 if (!isOpen) {
+	   $menu.removeClass('d-none');
+	   
+	   // 외부 클릭 시 닫기
+	   $(document).off('click.dropdownClose').on('click.dropdownClose', function(e) {
+	     if (!$(button).is(e.target) && $(button).has(e.target).length === 0 &&
+	         !$menu.is(e.target) && $menu.has(e.target).length === 0) {
+	       $menu.addClass('d-none');
+	       $(document).off('click.dropdownClose');
+	     }
+	   });
+	 } else {
+	   // 이미 열려있던 버튼을 다시 누르면 닫기
+	   $menu.addClass('d-none');
+	 }
 }
