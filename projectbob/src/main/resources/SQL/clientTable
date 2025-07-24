@@ -16,27 +16,24 @@ CREATE TABLE client (
 	isuse varchar(2) NOT NULL DEFAULT 'Y'
 );
 
+-- owner01 (가게 2개 소유)
+INSERT INTO client (id, pass, name, nickname, birthday, address1, address2, email, phone, division, reg_date, modi_date)
+VALUES (
+  'owner01', '1234', '홍길동', '길동이', '19900101', '서울 관악구 관악로 1', '서울대입구역 2번출구', 'owner01@email.com', '010-1234-0001', 'owner', NOW(), NOW()
+);
+
+-- owner02 (가게 1개 소유)
+INSERT INTO client (id, pass, name, nickname, birthday, address1, address2, email, phone, division, reg_date, modi_date)
+VALUES (
+  'owner02', '1234', '이순신', '순신이', '19851215', '서울 관악구 관악로 2', '서울대입구역 3번출구', 'owner02@email.com', '010-1234-0002', 'owner', NOW(), NOW()
+);
+
+-- owner03 (가게 없음)
+INSERT INTO client (id, pass, name, nickname, birthday, address1, address2, email, phone, division, reg_date, modi_date)
+VALUES (
+  'owner03', '1234', '강감찬', '감찬이', '19981230', '서울 관악구 관악로 3', '서울대입구역 1번출구', 'owner03@email.com', '010-1234-0003', 'owner', NOW(), NOW()
+);
 select * from client;
 
-INSERT INTO client (
-  id, pass, name, nickname, birthday,
-  address1, address2, email, phone, point,
-  disivion, reg_date, modi_date, isuse
-) VALUES (
-  'owner01',
-  '1234',  -- (임의의 bcrypt 해시 예시)
-  '홍길동',
-  '길동이',
-  '19991212',
-  '서울특별시 강남구 테헤란로 123',
-  '101동 1001호',
-  'testuser01@email.com',
-  '01012345678',
-  1000,
-  'owner',
-  NOW(),
-  NOW(),
-  'Y'
-);
 
 commit;

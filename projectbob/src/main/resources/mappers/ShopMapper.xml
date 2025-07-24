@@ -161,8 +161,6 @@
             s_number = #{sNumber},
             category = #{category},
             info     = #{info},
-            notice   = #{notice},
-            s_info   = #{sInfo},
             modi_date= #{modiDate}
         WHERE s_id = #{sId}
     </update>
@@ -181,4 +179,20 @@
 	        off_day = #{offDay}
 	    WHERE s_id = #{sId}
 	</update>
+	
+	<!-- 사장님 공지사항/가게정보 업데이트 -->
+	<update id="updateShopNotice" parameterType="map">
+	  UPDATE shop
+	  SET notice    = #{notice},
+	      modi_date = SYSDATE()
+	  WHERE s_id = #{sId}
+	</update>
+	
+	<update id="updateShopInfo" parameterType="map">
+	  UPDATE shop
+	  SET s_info    = #{sInfo},
+	      modi_date = SYSDATE()
+	  WHERE s_id = #{sId}
+	</update>
+
 </mapper>	

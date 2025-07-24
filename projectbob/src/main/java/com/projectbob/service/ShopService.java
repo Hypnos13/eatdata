@@ -1,6 +1,7 @@
 package com.projectbob.service;
 
 import java.io.*;
+import java.sql.Timestamp;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.*;
@@ -299,4 +300,15 @@ public class ShopService {
 	    return lines;
 	}
 	
+	// 사장님 공지 & 정보 업데이트
+	@Transactional
+    public void updateShopNotice(Integer sId, String notice) {
+        shopMapper.updateShopNotice(sId, notice);
+    }
+
+    @Transactional
+    public void updateShopInfo(Integer sId, String sInfo) {
+        shopMapper.updateShopInfo(sId, sInfo);
+    }
+    
 }

@@ -369,6 +369,58 @@ public class ShopController {
 	    }
 	    return "shop/shopStatus"; 
 	}
+	
+	// ── 사장님 공지 보기 ─────────────────────────────
+    @GetMapping("/shopNotice")
+    public String showNotice(
+            @RequestParam("s_id") Integer sId,
+            @SessionAttribute(name = "loginId", required = false) String loginId,
+            HttpSession session,
+            Model model) {
+        if (loginId == null) {
+            return "redirect:/login";
+        }
+        // 소유권 체크
+        Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
+        if (shop == null) {
+            model.addAttribute("errorMessage", "권한이 없거나 가게를 찾을 수 없습니다.");
+            return "shop/errorPage";
+        }
+        model.addAttribute("shop", shop);
+        return "shop/shopNotice";
+    }
+
+    // ── 사장님 공지 & 가게소개 저장 ─────────────────────────────
+    @PostMapping("/shopNotice")
+    public String updateNotice(
+            @RequestParam("s_id") Integer sId,
+            @RequestParam(value = "notice", required = false) String notice,
+            @RequestParam(value = "s_info", required = false) String sInfo,
+            @RequestParam("action") String action,
+            @SessionAttribute(name = "loginId", required = false) String loginId,
+            RedirectAttributes ra) {
+
+        if (loginId == null) {
+            return "redirect:/login";
+        }
+
+        // 권한 확인
+        Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
+        if (shop == null) {
+            ra.addFlashAttribute("errorMessage", "권한이 없거나 가게를 찾을 수 없습니다.");
+            return "redirect:/shopNotice?s_id=" + sId;
+        }
+
+        if ("notice".equals(action)) {
+            shopService.updateShopNotice(sId, notice);
+            ra.addFlashAttribute("message", "공지사항이 저장되었습니다.");
+        } else if ("info".equals(action)) {
+            shopService.updateShopInfo(sId, sInfo);
+            ra.addFlashAttribute("message", "가게소개가 저장되었습니다.");
+        }
+
+        return "redirect:/shopNotice?s_id=" + sId;
+    }
 
 	/* ----------------------- 전역 타이틀 ----------------------- */
     @ControllerAdvice
@@ -381,6 +433,7 @@ public class ShopController {
             else if (uri.contains("shopOpenTime")) pageTitle = "영업시간";
             else if (uri.contains("shopStatus")) pageTitle = "영업상태";
             else if (uri.contains("menu")) pageTitle = "메뉴관리";
+            else if (uri.contains("shopNotice")) pageTitle = "사장님 공지";
 
             model.addAttribute("pageTitle", pageTitle);
         }

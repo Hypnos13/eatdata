@@ -105,7 +105,12 @@
 			    기본설정
 			  </a>
 			</li>
-	        <li><a href="#" class="sidebar-sub-link">사장님 공지</a></li>
+			<li th:if="${currentShop != null}">
+			  <a class="sidebar-sub-link"
+			     th:href="@{/shopNotice(s_id=${currentShop.sId})}">
+			    사장님 공지
+			  </a>
+			</li>
 	      </ul>
 	    </div>
 	  </div>
