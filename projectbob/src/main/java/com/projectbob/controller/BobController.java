@@ -85,6 +85,18 @@ public class BobController {
 		    List<Cart> cartList = bobService.getCartByUser(userId, guestId);
 
 		    model.addAttribute("cartList", cartList);
+		    
+		    int totalQuantity = 0;
+		    int totalPrice = 0;
+		    if (cartList != null) {
+		        for (Cart c : cartList) {
+		            int optionPrice = (c.getOptionPrice() != null) ? c.getOptionPrice() : 0;
+		            totalQuantity += c.getQuantity();
+		            totalPrice += (c.getMenuPrice() + optionPrice) * c.getQuantity();
+		        }
+		    }
+		    model.addAttribute("totalQuantity", totalQuantity);
+		    model.addAttribute("totalPrice", totalPrice);
 		  
 		  return "views/MenuDetail"; 
 		  }

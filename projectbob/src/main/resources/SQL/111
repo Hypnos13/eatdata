@@ -240,3 +240,147 @@ insert into review (id,s_id,m_id,content,rating,status) values('admin',1,1,'리�
 insert into review (id,s_id,m_id,content,rating,status) values('admin',1,1,'리뷰 내용3~',4,'상태');
 
 commit;
+--------------------------------------------------------------------------------------------------------------
+나중에 지울지도 
+
+select * from shop;
+select * from menu;
+select * from menu_option;
+select * from client;
+
+-- 테이블 삭제
+DROP TABLE IF EXISTS menu_option;
+DROP TABLE IF EXISTS menu;
+DROP TABLE IF EXISTS shop;
+
+select * from shop;
+-- 1. shop 테이블 생성
+CREATE TABLE shop (
+    s_id INT AUTO_INCREMENT PRIMARY KEY,
+    id VARCHAR(20) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    phone VARCHAR(13) NOT NULL,
+    zipcode VARCHAR(10) NOT NULL,
+    address1 VARCHAR(100) NOT NULL,
+    address2 VARCHAR(80) NOT NULL,
+    owner VARCHAR(20) NOT NULL,
+    s_number VARCHAR(11) NOT NULL,
+    category VARCHAR(50),
+    s_pictureURL VARCHAR(500),
+    rating DECIMAL(2,1) DEFAULT 0.0,
+    heart INT DEFAULT 0,
+    op_time VARCHAR(50),
+    off_day VARCHAR(50),
+    min_price VARCHAR(50),
+    s_licenseURL VARCHAR(500),
+    s_certURL VARCHAR(500),
+    status VARCHAR(50) DEFAULT 'N',
+    info VARCHAR(100),
+    notice VARCHAR(250),
+    s_info VARCHAR(200),
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+select * from menu;
+-- 2. menu 테이블 생성
+CREATE TABLE menu (
+    m_id INT AUTO_INCREMENT PRIMARY KEY,
+    s_id INT NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    price INT NOT NULL,
+    m_info TEXT,
+    m_picture_url VARCHAR(500),
+    liked INT DEFAULT 0,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (s_id) REFERENCES shop(s_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+select * from menu_option;
+-- 3. menu_option 테이블 생성
+CREATE TABLE menu_option (
+    mo_id INT AUTO_INCREMENT PRIMARY KEY,
+    m_id INT NOT NULL,
+    m_option VARCHAR(100) NOT NULL,
+    content VARCHAR(100) NOT NULL,
+    price INT DEFAULT 0,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'active',
+    FOREIGN KEY (m_id) REFERENCES menu(m_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- 샘플 데이터 삽입 (shop)
+INSERT INTO shop (
+  id, name, phone, zipcode, address1, address2, owner, s_number,
+  category, rating, heart, op_time, off_day, min_price,
+  s_licenseURL, s_certURL, status, info, notice, s_info
+) VALUES (
+  'owner01', '보글보글김밥', '010-1234-5678', '12345', '서울특별시 강남구 테헤란로 101', '1층 101호',
+  '김철수', '1234567890', '한식', 4.2, 5, '09:00~21:00', '일요일', '12000',
+  '/img/lic1.jpg', '/img/cert1.jpg', '정상', '포장가능', '오픈기념 이벤트 중', '신메뉴 출시 예정'
+);
+
+-- 샘플 데이터 삽입 (menu)
+INSERT INTO menu (
+  s_id, category, name, price, m_info, m_picture_url
+) VALUES (
+  1, '피자', '치즈피자', 13000, '자연 치즈가 듬뿍 토핑된 기본적인 치즈 피자',
+  '/images/menu/86cb1ea8-5636-4540-a057-ffe5484b08a0.png'
+);
+
+-- 샘플 데이터 삽입 (menu_option)
+INSERT INTO menu_option (
+  m_id, m_option, content, price
+) VALUES (
+  1, '사이즈', '라지', 3000
+);
+
+select * from cart;
+DROP TABLE IF EXISTS cart;
+
+CREATE TABLE IF NOT EXISTS cart (
+    ca_id INT AUTO_INCREMENT PRIMARY KEY,             -- 카트 ID (각 카트 항목을 고유하게 식별)
+    ca_pid INT NULL,                                  -- 부모 카트 ID (같은 테이블 내의 다른 ca_id를 참조, 그룹화에 사용될 수 있음)
+    m_id INT NOT NULL,                                -- 메뉴 ID
+    mo_id INT NULL,                                   -- 메뉴 옵션 ID (NULL 허용)
+    id VARCHAR(20) NULL,                              -- 회원 ID (비회원 가능)
+    guest_id VARCHAR(50) NULL,                        -- 비회원 ID
+    s_id INT NOT NULL,                                -- 가게 ID
+    quantity INT NOT NULL,                            -- 수량
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     -- 등록일
+    modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,                  -- 수정일
+    status VARCHAR(50) NOT NULL DEFAULT '일반',       -- 상태 (일반 / 주문완료 등)
+    total_price INT NOT NULL,                         -- 총 가격
+
+    -- 외래 키 제약조건
+    CONSTRAINT fk_cart_m_id FOREIGN KEY (m_id)
+        REFERENCES menu(m_id) ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_cart_mo_id FOREIGN KEY (mo_id)
+        REFERENCES menu_option(mo_id) ON DELETE SET NULL ON UPDATE CASCADE,
+
+    CONSTRAINT fk_cart_id FOREIGN KEY (id)
+        REFERENCES client(id) ON DELETE SET NULL ON UPDATE CASCADE,
+
+    CONSTRAINT fk_cart_s_id FOREIGN KEY (s_id)
+        REFERENCES shop(s_id) ON DELETE CASCADE ON UPDATE CASCADE,
+
+    -- ca_pid를 ca_id에 대한 외래 키로 추가 (자기 참조)
+    CONSTRAINT fk_cart_ca_pid FOREIGN KEY (ca_pid)
+        REFERENCES cart(ca_id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO cart (m_id, mo_id, guest_id, s_id, quantity, total_price, reg_date)
+VALUES
+  (13, 19, 'user01', 4, 1, 13000 + 4900, NOW()),  -- 메뉴 13 + mo_id 19 (사이즈업 라지)
+  (13, 20, 'user01', 4, 1, 13000 + 3000, NOW()),  -- 메뉴 13 + mo_id 20 (치즈 토핑 추가 80g)
+  (15, 25, 'user01', 4, 2, 14500 + 4900, NOW());  -- 메뉴 15 + mo_id 25 (사이즈업 L), 수량 2개
+
+commit;
+--------------------------------------------------------------------------------------------------------------

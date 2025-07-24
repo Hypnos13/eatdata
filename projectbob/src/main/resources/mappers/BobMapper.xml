@@ -4,22 +4,95 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
-<delete id="deleteByUserId" parameterType="string">
-    DELETE FROM cart WHERE id = #{userId}
-</delete>
 
-<delete id="deleteByGuestId" parameterType="string">
-    DELETE FROM cart WHERE guest_id = #{guestId}
-</delete>
+    <!-- 장바구니 항목 수량 업데이트 -->
+    <update id="updateCartItemQuantity" parameterType="map">
+        UPDATE cart
+        SET
+            quantity = #{quantity},
+            total_price = #{totalPrice}
+        WHERE
+            ca_id = #{caId}
+            AND (
+                <if test="userId != null and userId.trim() != ''">
+                    id = #{userId}
+                </if>
+                <if test="guestId != null and guestId.trim() != ''">
+                    <if test="userId != null and userId.trim() != ''">
+                        OR
+                    </if>
+                    guest_id = #{guestId}
+                </if>
+            )
+    </update>
+
+  <!-- 사용자 또는 비회원의 모든 장바구니 항목 삭제 -->
+    <delete id="deleteAllCartItemsByUserOrGuest" parameterType="map">
+        DELETE FROM cart
+        <where>
+            <if test="userId != null and userId.trim() != ''">
+                id = #{userId}
+            </if>
+            <if test="guestId != null and guestId.trim() != ''">
+                <if test="userId != null and userId.trim() != ''">
+                    OR
+                </if>
+                guest_id = #{guestId}
+            </if>
+        </where>
+    </delete>
+
+
+<!-- 장바구니 개별 항목 삭제 (메인 메뉴 항목과 그에 연결된 모든 옵션 삭제) -->
+    <delete id="deleteCartItemAndOptions" parameterType="map">
+        DELETE FROM cart
+        WHERE
+            ca_id = #{caId} OR ca_pid = #{caId}
+            AND (
+                <if test="userId != null and userId.trim() != ''">
+                    id = #{userId}
+                </if>
+                <if test="guestId != null and guestId.trim() != ''">
+                    <if test="userId != null and userId.trim() != ''">
+                        OR
+                    </if>
+                    guest_id = #{guestId}
+                </if>
+            )
+    </delete>
+
+
+ <resultMap id="CartDetailResultMap" type="com.projectbob.domain.Cart">
+        <id property="caId" column="ca_id"/>
+        <result property="caPid" column="ca_pid"/>
+        <result property="mId" column="m_id"/>
+        <result property="moId" column="mo_id"/>
+        <result property="id" column="id"/>
+        <result property="guestId" column="guest_id"/>
+        <result property="sId" column="s_id"/>
+        <result property="quantity" column="quantity"/>
+        <result property="regDate" column="reg_date"/>
+        <result property="modiDate" column="modi_date"/>
+        <result property="status" column="status"/>
+        <result property="totalPrice" column="total_price"/>
+        <!-- 조인하여 가져오는 필드들 -->
+        <result property="menuName" column="menuName"/>
+        <result property="menuPrice" column="menuPrice"/>
+        <result property="optionName" column="optionName"/>
+        <result property="optionPrice" column="optionPrice"/>
+    </resultMap>
 
 <insert id="insertCart" parameterType="com.projectbob.domain.Cart" useGeneratedKeys="true" keyProperty="caId">
-  INSERT INTO cart (m_id, mo_id, id, guest_id, s_id, quantity, total_price, reg_date)
-  VALUES (#{mId}, #{moId}, #{id}, #{guestId}, #{sId}, #{quantity}, #{totalPrice}, NOW())
+  INSERT INTO cart (m_id, mo_id, id, guest_id, s_id, quantity, total_price, reg_date, ca_pid)
+  VALUES (#{mId}, #{moId}, #{id}, #{guestId}, #{sId}, #{quantity}, #{totalPrice}, NOW(), #{caPid})
 </insert>
 
+<!-- 사용자 또는 비회원 ID로 모든 장바구니 항목 조회 (메인 메뉴 및 옵션 포함) -->
+<!-- ca_pid 컬럼도 함께 조회합니다. -->
 <select id="selectCartByUserOrGuest" resultMap="CartDetailResultMap" parameterType="map">
   SELECT
     c.ca_id,
+    c.ca_pid,    <!-- ca_pid 컬럼 추가 -->
     c.m_id,
     c.mo_id,
     c.id,
@@ -36,11 +109,11 @@
   INNER JOIN menu m ON c.m_id = m.m_id
   LEFT JOIN menu_option mo ON c.mo_id = mo.mo_id
   <where>
-    <if test="userId != null">
+    <if test="userId != null and userId.trim() != ''">
       c.id = #{userId}
     </if>
-    <if test="guestId != null">
-      <if test="userId != null">
+    <if test="guestId != null and guestId.trim() != ''">
+      <if test="userId != null and userId.trim() != ''">
         OR
       </if>
       c.guest_id = #{guestId}
@@ -48,23 +121,44 @@
   </where>
 </select>
 
-<resultMap id="CartDetailResultMap" type="com.projectbob.domain.Cart">
-  <id property="caId" column="ca_id" />
-  <result property="mId" column="m_id" />
-  <result property="moId" column="mo_id" />
-  <result property="id" column="id" />
-  <result property="guestId" column="guest_id" />
-  <result property="sId" column="s_id" />
-  <result property="quantity" column="quantity" />
-  <result property="status" column="status" />
-  <result property="totalPrice" column="total_price" />
+<!-- 사용자 또는 비회원 ID로 메인 메뉴 장바구니 항목만 조회 (ca_pid가 NULL인 항목) -->
+<!-- 이 쿼리는 메인 메뉴 항목만 필터링하여 가져올 때 사용됩니다. -->
+<select id="selectMainCartItemsByUserOrGuest" resultMap="CartDetailResultMap" parameterType="map">
+  SELECT
+    c.ca_id,
+    c.ca_pid,
+    c.m_id,
+    c.mo_id,
+    c.id,
+    c.guest_id,
+    c.s_id,
+    c.quantity,
+    c.status,
+    c.total_price,
+    m.name AS menuName,
+    m.price AS menuPrice,
+    mo.content AS optionName,
+    mo.price AS optionPrice
+  FROM cart c
+  INNER JOIN menu m ON c.m_id = m.m_id
+  LEFT JOIN menu_option mo ON c.mo_id = mo.mo_id
+  <where>
+    c.ca_pid IS NULL <!-- ca_pid가 NULL인 항목만 선택 = 메인 메뉴 항목 -->
+    AND (
+      <if test="userId != null and userId.trim() != ''">
+        c.id = #{userId}
+      </if>
+      <if test="guestId != null and guestId.trim() != ''">
+        <if test="userId != null and userId.trim() != ''">
+          OR
+        </if>
+        c.guest_id = #{guestId}
+      </if>
+    )
+  </where>
+</select>
 
-  <!-- 🟢 추가 정보 매핑 (Cart 클래스에 추가한 필드) -->
-  <result property="menuName" column="menuName" />
-  <result property="menuPrice" column="menuPrice" />
-  <result property="optionName" column="optionName" />
-  <result property="optionPrice" column="optionPrice" />
-</resultMap>
+
 
 <!-- 댓글 추가 맵핑 구문 -->
 <insert id="addReview" parameterType="Review">
