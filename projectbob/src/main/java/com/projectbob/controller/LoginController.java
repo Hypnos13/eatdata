@@ -595,4 +595,49 @@ public class LoginController {
 	 return "members/myAddressbook";			  
 	}
 	
+	// 주소 관리 - 주소 등록
+	@PostMapping("/addAddress")
+	public String addAddress(Model model,Addressbook addressbook ,HttpSession session){
+				
+		String id = (String)session.getAttribute("loginId");
+		addressbook.setId(id);
+		
+		loginService.addAddress(addressbook);
+			  
+		return "redirect:myAddressbook";			  
+	}
+	
+	// 주소 관리 - 주소 수정 폼
+	@GetMapping("/updateAddressbookform")
+	public String updateAddressbookform(Model model, @RequestParam("no") int no){
+		
+		Addressbook addressbook = loginService.getAddress(no);
+		model.addAttribute("addressbook", addressbook);
+			  
+		return "members/updateAddressbookForm";			  
+	}
+	
+	// 주소 관리 - 주소 수정
+	@PostMapping("/updateAddress")
+	public String updateAddress(Model model,Addressbook addressbook ,HttpSession session){
+				
+		String id = (String)session.getAttribute("loginId");
+		addressbook.setId(id);
+		
+		loginService.updateAddress(addressbook);
+			  
+		return "redirect:myAddressbook";			  
+	}
+	
+	// 주소 관리 - 주소 삭제
+	@PostMapping("/deleteAddressbook")
+	public String deleteAddressbook( @RequestParam("no") int no, HttpSession session){
+				
+		String id = (String)session.getAttribute("loginId");
+		
+		loginService.deleteAddress(id, no);
+			  
+		return "redirect:myAddressbook";			  
+	}
+		
 }

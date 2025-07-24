@@ -267,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // 찜하기 하트
-$(function(){
+/*$(function(){
 	
 	$("#btnHeart").click(function(){
 		let sId = $(this).data("sid") || $("input[name='sId']").val();
@@ -291,23 +291,47 @@ $(function(){
 		});
 	});
 });
-
+*/
 
 //찜하기~
 $(function(){
 	$('#btnLikeList').click(function(){
-		const $btn = $(this);
-		const isLiked = $btn.hasClass('liked');
-		
-		if(!isLiked){
-			$btn.addClass('liked');
-			$('#likeText').text('찜취소');
-			alert('찜!');
-		} else {
-			$btn.removeClass('liked');
-			$('#likeText').text('찜');
-			alert('찜 해제!');
+		const loginId = $('#loginId').val();
+		if (!loginId){
+			alert('로그인 후 이용가능함');
+			return;
 		}
+		
+		const $btn = $(this);	
+		const sId = $btn.data('sid');
+		console.log('trying to like shop:', sId);
+		const dto = { id: loginId, sId: sId};
+		
+		$.ajax({
+			url: '/like.ajax',
+			type: 'POST',
+			contentType: 'application/json; charset=UTF-8',
+			dataType:'json',
+			data: JSON.stringify(dto),
+			success(res){
+		if(res.liked){
+			$btn.addClass('btn-danger liked').removeClass('btn-outline-secondary');
+			$('#likeText').text('찜');
+			alert('찜!💖');
+		} else {
+			$btn.removeClass('btn-danger liked').addClass('btn-outline-secondary');
+			$('#likeText').text('찜하기');
+			alert('찜 해제!💔');
+			}
+			$('#likeCount').text(res.heartCount != null ?  res.heartCount : 0);
+				
+			
+		},
+		error(xhr, status, error){
+			console.error(error);
+			alert('찜 처리 오류');
+		}
+		});
 	});
 });
 

@@ -59,13 +59,8 @@ public class MenuAjaxController {
 	
 	// 찜 버튼
 	@PostMapping("/like.ajax")
-	public Map<String, Object> toggleLike(@RequestBody LikeList likeList){
-		boolean liked = bobService.toggleLike(likeList);
-		int totalLikes = bobService.shopCountLike(likeList.getSId());
-		return Map.of(
-				"liked", liked,
-				"heartCount", bobService.countLikeList(likeList)
-				);
+	public Map<String, Object> toggleLike(@RequestBody LikeList likeList){		
+		return bobService.toggleLike(likeList);
 				
 	}
 		
