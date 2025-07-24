@@ -32,13 +32,18 @@ public interface ShopMapper {
 	void updateShopOpenTime(Shop shop);
 	Shop findByShopIdAndOwnerIdShop(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
 	
-	
 	@Update("UPDATE shop SET status = #{status} WHERE s_id = #{sId}")
 	void updateShopStatus(@Param("sId") Integer sId, @Param("status") String status);
 	
 	//메뉴 컨트롤러에 shop 모델 추가
 	Shop findBySId(int sId);
-	
+
+    //공지/정보 업데이트
+    int updateShopNotice(@Param("sId") Integer sId, @Param("notice") String notice);
+
+    int updateShopInfo(@Param("sId") Integer sId, @Param("sInfo") String sInfo);
+
+
 	/* === Menu === */
 	// 메뉴 관련 메서드
     void insertMenu(Menu menu);                  // 메뉴 등록
