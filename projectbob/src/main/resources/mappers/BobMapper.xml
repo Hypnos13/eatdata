@@ -164,6 +164,4 @@
 	ORDER BY s_id DESC
 </select>
 
-
-
 </mapper>

@@ -1,10 +1,16 @@
 <!-- templates/fragments/shopHeader.html -->
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <header th:fragment="shopHeader" class="header">
-    <a href="/shopMain" class="logo">Project BoB</a>
+    <div class="d-flex align-items-center">
+        <a href="/shopMain" class="logo">Project BoB</a>
+        <a href="/shopListMain" class="header-home-link ms-3 fw-semibold">
+	        서비스 홈
+	    </a>
+        <span class="ms-3 fw-semibold page-title-text">
+            <span th:text="${pageTitle}">현재 페이지명</span>
+        </span>
+    </div>
     <nav>
-        <a href="#benefits">서비스 소개</a>
-        <a href="#process">입점 안내</a>
         <th:block th:if="${session.isLogin}">
 	      <a class="me-2 fw-bold">[[${session.loginNickname}]] 님 어서오세요.</a>
 	      <a href="logout" class="btn-login">로그아웃</a>

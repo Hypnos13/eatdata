@@ -108,7 +108,7 @@ public class CustomerServiceService {
 	
 	public String chatCounselor(String message) {
 		
-		String apiKey = "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";
+		String apiKey = "API 키";
 		
 		RestTemplate restTemplate = new RestTemplate();
 		

@@ -9,6 +9,7 @@ import com.projectbob.domain.*;
 @Mapper
 public interface ShopMapper {
 	
+	/* === Shop === */
 	//가게 등록
 	public void insertShop(Shop shop);
 	
@@ -18,7 +19,27 @@ public interface ShopMapper {
 	//가게 정보
 	public Shop findByOwnerId(String ownerId);
 	
-
+	//가게 유무 확인후 보여주기
+	public List<Shop> findShopListByOwnerId(String ownerId);
+	
+	//다수가게에서 선택가게 고정
+	public Shop findByShopIdAndOwnerId(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
+	
+	//기본정보 수정
+	public int updateShopBasicInfo(Shop shop);
+	
+	// 영업시간/휴무 정보만 업데이트
+	void updateShopOpenTime(Shop shop);
+	Shop findByShopIdAndOwnerIdShop(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
+	
+	
+	@Update("UPDATE shop SET status = #{status} WHERE s_id = #{sId}")
+	void updateShopStatus(@Param("sId") Integer sId, @Param("status") String status);
+	
+	//메뉴 컨트롤러에 shop 모델 추가
+	Shop findBySId(int sId);
+	
+	/* === Menu === */
 	// 메뉴 관련 메서드
     void insertMenu(Menu menu);                  // 메뉴 등록
     List<Menu> getAllMenus();                    // 모든 메뉴 목록 조회 (간단한 정보)
@@ -26,22 +47,17 @@ public interface ShopMapper {
     void updateMenu(Menu menu);                  // 메뉴 정보 수정
     void deleteMenu(int mId);                    // 메뉴 삭제
     List<Menu> getMenusByShopId(int sId);		 // ID에 따른 메뉴 리스트 조회
+    void updateMenuStatus(@Param("mId") int mId, @Param("status") String status); // 메뉴상태 업데이트
 
+    /* === Menu Option === */
     // 메뉴 옵션 관련 메서드
     void insertMenuOption(MenuOption menuOption);        // 메뉴 옵션 등록
     List<MenuOption> getMenuOptionsByMenuId(int mId);    // 특정 메뉴의 옵션 목록 조회
     void updateMenuOption(MenuOption menuOption);        // 메뉴 옵션 수정
     void deleteMenuOption(int moId);                     // 특정 메뉴 옵션 삭제
     void deleteMenuOptionsByMenuId(int mId);             // 특정 메뉴의 모든 옵션 삭제 (메뉴 삭제 시 호출)
+    List<Menu> getMenusByShopId(@Param("sId") int sId, @Param("category") String category);
+    List<String> getMenuCategoriesByShopId(int sId); //카테고리 목록 조회를 위한 메서드 추가
 	
-
-	//가게 유무 확인후 보여주기
-	public List<Shop> findShopListByOwnerId(String ownerId);
-	
-	//다수가게에서 선택가게 고정
-	public Shop findByShopIdAndOwnerId(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
-
-	//기본정보 수정
-	public int updateShopBasicInfo(Shop shop);
 
 }

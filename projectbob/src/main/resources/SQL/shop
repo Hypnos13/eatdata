@@ -1,3 +1,4 @@
+drop table shop;
 CREATE TABLE `shop` (
 	`s_id`	INTEGER AUTO_INCREMENT PRIMARY KEY,
 	`id`	varchar(20)	NOT NULL,
@@ -12,7 +13,7 @@ CREATE TABLE `shop` (
   `s_pictureURL` varchar(500)	NULL,
 	`rating`	decimal(2,1) NULL DEFAULT 0.0,
 	`heart`	int(5)	NULL	DEFAULT 0,
-	`op_time`	varchar(50)	NULL,
+	`op_time`	varchar(100)	NULL,
 	`off_day`	varchar(50)	NULL,
 	`min_price`	varchar(50)	NULL,
 	`s_licenseURL`	varchar(500)	NULL,
@@ -32,7 +33,7 @@ INSERT INTO shop (
 ) VALUES (
   'owner01', '보글보글김밥', '010-1234-5678', '12345', '서울특별시 강남구 테헤란로 101', '1층 101호',
   '김철수', 1234567890, '한식', 4.2, 5, '09:00~21:00', '일요일', '12000',
-  '/img/lic1.jpg', '/img/cert1.jpg', '정상', '포장가능', '오픈기념 이벤트 중', '신메뉴 출시 예정', NOW()
+  '/img/lic1.jpg', '/img/cert1.jpg', 'Y', '포장가능', '오픈기념 이벤트 중', '신메뉴 출시 예정', NOW()
 );
 INSERT INTO shop (
   id, name, phone, zipcode, address1, address2, owner, s_number,
@@ -41,7 +42,7 @@ INSERT INTO shop (
 ) VALUES (
   'owner01', '김밥천국 역삼점', '010-2222-3333', '54321', '서울특별시 강남구 역삼로 200', '2층 201호',
   '김철수', 987654321, '분식', 3.7, 2, '10:00~20:30', '화요일', '10000',
-  '/img/lic2.jpg', '/img/cert2.jpg', '정상', '포장·배달', '이벤트 없음', '대표 메뉴: 참치김밥', NOW()
+  '/img/lic2.jpg', '/img/cert2.jpg', 'Y', '포장·배달', '이벤트 없음', '대표 메뉴: 참치김밥', NOW()
 );
 INSERT INTO shop (
   id, name, phone, zipcode, address1, address2, owner, s_number,
@@ -50,11 +51,9 @@ INSERT INTO shop (
 ) VALUES (
   'owner02', '행복분식', '010-8765-4321', '54321', '경기도 수원시 영통구 광교로 202', '2층 202호',
   '이영희', 1234554321, '분식', 3.8, 2, '10:30~22:00', '월요일', '8000',
-  '/img/lic2.jpg', '/img/cert2.jpg', '정상', '배달전용', '리뉴얼 오픈', '이벤트 없음', NOW()
+  '/img/lic2.jpg', '/img/cert2.jpg', 'Y', '배달전용', '리뉴얼 오픈', '이벤트 없음', NOW()
 );
-
 select * from shop;
-drop table shop;
 commit;
 
 drop table menu;

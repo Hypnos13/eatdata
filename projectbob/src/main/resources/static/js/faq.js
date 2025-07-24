@@ -1,4 +1,7 @@
 $(function(){
+	// 주소 찾기
+	$("#btnAdress").on("click", findAddress);
+	
 	// FAQ에 유형 버튼 누를 때
 	$(".faq-type").on("click",function(){
 		let from = $("#from").val();
@@ -121,7 +124,91 @@ $(function(){
 			window.location.href="shopManage?searchShop="+searchShop+"&keyword="+keyword;	
 		}
 	});
+	
+	// 주소록 추가
+	$("#addAddressForm").on("submit", function(){
+		if($("#aName").val().length <= 0){
+			$("#aNameInfo").text("장소명을 입력해주세요.");	
+			$("#aName").css("border-color", "#F76159");
+			$("#aName").css("color", "#F76159");	
+			$("#aName").focus();			
+			return false;
+		}else{
+			$("#aNameInfo").text("");
+			$("#aName").css("border-color", "#DEE2E6");
+			$("#aName").css("color", "black");
+		}
+		
+		if($("#address1").val().length <= 0){
+			$("#addressInfo").text("주소입력을 입력해주세요.");	
+			$("#address1").css("border-color", "#F76159");
+			$("#address1").css("color", "#F76159");			
+			return false;
+		}else{
+			$("#addressInfo").text("");
+			$("#address1").css("border-color", "#DEE2E6");
+			$("#address1").css("color", "black");
+		}
+	});
+	
+	// 주소록 수정
+	$("#updateAddressForm").on("submit", function(){
+		if($("#aName").val().length <= 0){
+			$("#aNameInfo").text("장소명을 입력해주세요.");	
+			$("#aName").css("border-color", "#F76159");
+			$("#aName").css("color", "#F76159");	
+			$("#aName").focus();			
+			return false;
+		}else{
+			$("#aNameInfo").text("");
+			$("#aName").css("border-color", "#DEE2E6");
+			$("#aName").css("color", "black");
+		}
+			
+		if($("#address1").val().length <= 0){
+			$("#addressInfo").text("주소입력을 입력해주세요.");	
+			$("#address1").css("border-color", "#F76159");
+			$("#address1").css("color", "#F76159");			
+			return false;
+		}else{
+			$("#addressInfo").text("");
+			$("#address1").css("border-color", "#DEE2E6");
+			$("#address1").css("color", "black");
+		}
+	});
+	
 });
 
+// 주소 찾기 API 연동
+function findAddress() {
+	new daum.Postcode({
+        oncomplete: function(data) {
 
+            var addr = ''; // 주소 변수
+            var extraAddr = ''; // 참고 항목 변수
+         
+            addr = data.roadAddress;			
+
+            if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                extraAddr += data.bname;
+            }
+			
+            if(data.buildingName !== '' && data.apartment === 'Y'){
+                extraAddr += (extraAddr !== '' ? 
+										', ' + data.buildingName : data.buildingName);
+            }
+            
+            if(extraAddr !== ''){
+                extraAddr = ' (' + extraAddr + ')';
+            }
+			
+            addr += extraAddr;
+            
+			$("#address1").val(addr);
+			$("#address2").focus();
+       	}
+	}).open();
 	
+	$("#address1").css("border-color", "#DEE2E6");
+	$("#address1").css("color", "black");
+}
