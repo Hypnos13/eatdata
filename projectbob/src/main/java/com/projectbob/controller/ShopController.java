@@ -2,9 +2,8 @@ package com.projectbob.controller;
 
 import org.springframework.beans.factory.annotation.*;
 
-import java.io.IOException;
 import java.util.*;
-import java.security.Principal;
+import java.io.*;
 import java.sql.Timestamp;
 
 import org.springframework.stereotype.Controller;
@@ -17,8 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
@@ -36,9 +34,9 @@ public class ShopController {
 			@RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 
 			@RequestParam("phone") String phone, @RequestParam("name") String name, 
 			@RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1, 
-			@RequestParam("address2") String address2, Model model ) { //@RequestParam("sLicense") MultipartFile sLicenseFile
+			@RequestParam("address2") String address2, @RequestParam("sLicense") MultipartFile sLicenseFile, Model model ) { 
 		
-		/*String sLicenseUrl = null; // DB에 저장할 사업자등록증 URL
+		String sLicenseUrl = null; // DB에 저장할 사업자등록증 URL
 
         try {
             // 1. 사업자등록증 파일을 FileUploadService를 통해 업로드
@@ -60,7 +58,7 @@ public class ShopController {
             e.printStackTrace();
             model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
             return "/shop/shopJoinForm";
-        */
+        }
 		
         Shop shop = new Shop();
         shop.setId(id);
@@ -71,7 +69,7 @@ public class ShopController {
         shop.setZipcode(zipcode);
         shop.setAddress1(address1);
         shop.setAddress2(address2);
-        //shop.setSLicenseURL(sLicenseUrl);
+        shop.setSLicenseUrl(sLicenseUrl);
         shopService.insertShop(shop);
 
         model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
@@ -143,7 +141,7 @@ public class ShopController {
         model.addAttribute("shop", new Shop());
         return "shop/shopJoinForm";
     }
-
+    
     @GetMapping("/shopInfo")
     public String shopInfo() {
         return "shop/shopInfo";

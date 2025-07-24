@@ -12,6 +12,63 @@
     <script th:src="@{/js/jquery-3.7.1.min.js}"></script>
     <script th:src="@{/js/shop.js}"></script>
     <script th:src="@{/js/menu.js}"></script>
+    <style>
+    /* 전체 폼을 감싸는 컨테이너 스타일 */
+.form-wrapper {
+    max-width: 720px; /* 폼의 최대 너비를 제한하여 너무 커보이지 않게 함 */
+    margin: 0 auto; /* 좌우 마진을 auto로 주어 중앙에 배치 */
+    padding: 40px; /* 내부 여백을 주어 답답하지 않게 함 */
+    border: 1px solid #e0e0e0; /* 연한 회색 테두리 */
+    border-radius: 12px; /* 모서리를 부드럽게 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* 은은한 그림자 효과 */
+    background-color: #fff; /* 배경색 */
+}
+
+/* '가게 정보 입력' 제목 스타일 */
+.form-wrapper h2 {
+    color: #43D091; /* 테마 컬러 적용 */
+    margin-bottom: 30px; /* 제목과 폼 내용 사이의 간격 추가 */
+}
+
+/* Bootstrap의 기본 입력창(.form-control) 스타일 재정의 */
+.form-control:focus {
+    border-color: #43D091; /* 포커스 시 테두리 색상을 테마 컬러로 변경 */
+    box-shadow: 0 0 0 0.25rem rgba(67, 208, 145, 0.25); /* 포커스 시 나타나는 그림자도 테마 컬러에 맞춤 */
+}
+
+/* '입점신청하기' 버튼(.btn-primary) 스타일 재정의 */
+.btn-primary {
+    background-color: #43D091; /* 기본 배경색을 테마 컬러로 */
+    border-color: #43D091; /* 기본 테두리색을 테마 컬러로 */
+    font-weight: bold;
+    width: 100%; /* 버튼 너비를 100%로 채움 */
+    padding: 12px 0; /* 버튼의 상하 여백을 늘려 클릭하기 쉽게 만듦 */
+}
+
+/* '입점신청하기' 버튼에 마우스를 올리거나 클릭했을 때 */
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+    background-color: #36b87a; /* 기존 색보다 살짝 어둡게 */
+    border-color: #36b87a;
+    box-shadow: 0 0 0 0.25rem rgba(67, 208, 145, 0.5); /* 포커스 그림자도 일관성 있게 */
+}
+
+/* '우편번호 찾기' 버튼(.btn-warning) 스타일 재정의 */
+.btn-warning {
+    background-color: #6c757d; /* 회색 계열로 변경하여 메인 버튼과 구분 */
+    border-color: #6c757d;
+    color: white; /* 글자색 흰색 */
+}
+
+.btn-warning:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+/* 라벨 텍스트를 조금 더 두껍게 */
+.form-label {
+    font-weight: 500;
+}
+    </style>
     </head>
 <body>
     <div class="standalone-wrapper">
