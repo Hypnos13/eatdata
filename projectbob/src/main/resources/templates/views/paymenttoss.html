@@ -5,7 +5,7 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="stylesheet" type="text/css" href="/index.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>카카오 포트원 결제연동 샘플</title>
+    <title>토스 포트원 결제연동 샘플</title>
     <script src="https://cdn.portone.io/v2/browser-sdk.js" async defer></script>
   </head>
   <body>
@@ -92,12 +92,15 @@
             const paymentId = randomId()
             const payment = await PortOne.requestPayment({
               storeId: "store-d5e7696b-604a-4b03-a1f7-2637ff538712",
-              channelKey: "channel-key-3a2e28ac-f305-4e9e-add2-1b55f1c6e70c",
+              channelKey: "channel-key-11bfbde5-7c32-4bed-8f91-d5f1a15785f9",
               paymentId,
               orderName: item.name,
               totalAmount: item.price,
               currency: item.currency,
               payMethod: "EASY_PAY",
+               
+                easyPayProvider: "EASY_PAY_PROVIDER_TOSS",
+              
               customData: {
                 item: item.id,
               }

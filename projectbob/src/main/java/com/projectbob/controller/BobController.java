@@ -34,12 +34,15 @@ public class BobController {
 	public String Main() {		
 		return "views/main";
 	}
-	 
-
 	
 	@GetMapping("/end")
 	public String completed() {
 		return "views/completed";
+	}
+	
+	@GetMapping("/ordercheckout")
+	public String ordercheckout() {
+		return "views/ordercheckout";
 	}
 	
 	  @GetMapping("/shopList") 

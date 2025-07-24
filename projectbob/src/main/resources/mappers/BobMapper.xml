@@ -150,18 +150,24 @@
 	WHERE s_id = #{s_id}
 </select>
 
-<!-- 메인에서 버튼 누를때 -->
+<!-- 메인에서 가게 리스트로  -->
 <select id="shopList" resultType="com.projectbob.domain.Shop" parameterType="map">
-	SELECT	*	FROM shop
+	SELECT
+		s.s_id AS sId, s.id AS id, s.name AS name, s.phone AS phone, s.zipcode AS zipcode, 
+		s.address1 AS address1, s.address2 AS address2, s.owner AS owner, 
+		s.s_number AS sNumber, s.category AS category, s.s_pictureURL AS sPicture,
+		COALESCE(ROUND(( SELECT AVG(r.rating) FROM review r WHERE r.s_id = s.s_id
+		), 1), 0.0) AS rating,
+		s.heart AS heart, s.min_price AS minPrice, s.reg_date AS regDate, s.modi_date AS modiDate
+			FROM shop s
 		where 1=1
 		<if test="category != null and category != '전체보기'">
-			AND category = #{category}
+			AND s.category = #{category}
 		</if>
 		<if test="keyword != null and keyword != ''">
-			AND name like concat('%', #{keyword} ,'%')
-		</if>
-	
-	ORDER BY s_id DESC
+			AND s.name LIKE CONCAT('%', #{keyword} ,'%')
+		</if>	
+	ORDER BY s.s_id DESC
 </select>
 
 </mapper>
