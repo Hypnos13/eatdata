@@ -3,20 +3,46 @@
 		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
 		layout:decorate="~{layouts/main_layout}">
 <th:block layout:fragment="content">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{js/login.js}"></script>
+<link th:href="@{/css/login.css}" rel="stylesheet" />
+
 <div class="container my-5">
-	<div class="card shadow-sm mb-4 p-4 text-center">
-		<div class="text-end mb-3">
-			<a href="/addAddressForm" class="btn btn-success">주소 추가</a>
+	<div class="card shadow-sm mb-2 p-3 text-start">
+		<div class="mb-5 d-flex justify-content-between align-items-center">
+			<h4 class="mb-0">✅ 나의 주소록</h4>
+        	<a href="/addAddressForm" class="btn btn-add-address">+ 주소 추가</a>
 		</div>
 		
 		<th:block th:unless="${#lists.isEmpty(addressbook)}">
-			<th:block th:each="address, status: ${addressbook}">
-			<div class="my-2 border">
-				장소명 : [[${address.aName}]]
-				주소 : [[${address.address1}]]
-				상세 주소 : [[${address.address2}]]
-			</div> 
-			</th:block>
+		  <th:block th:each="address, status: ${addressbook}">
+		    <div class="address-card">
+		      <div class="row mb-1">
+		      	<div class="col-6 text-start">
+		      		<a class="addressbook-title">[[${address.aName}]]</a>	
+		      	</div>
+		        <div class="col-6 text-end">
+		        	<div class="dropdown-wrapper">
+			        	<button class="btn btn-update-address" type="button" onclick="toggleMenu(this)">⋯</button>
+			        	<div class="dropdown-menu-custom d-none">
+						    <a class="dropdown-item" th:href="@{/updateAddressbookform(no=${address.no})}">수정</a>
+						    <form th:action="@{/deleteAddressbook}" method="post" style="margin: 0;">
+						      <input type="hidden" name="no" th:value="${address.no}" />
+						      <button type="submit" class="dropdown-item text-danger" style="border: none; background: none;">삭제</button>
+						    </form>
+						 </div>
+					 </div>
+		        </div>													 
+		      </div>
+		      <div class="mb-1">
+		        <strong class="addressbook-title">주소:</strong>
+		        <span class="span-address1">[[${address.address1}]]</span>
+				<th:block th:if="${address.address2 != ''}">
+					<span class="span-address1">[[${address.address2}]]</span>
+				</th:block>
+		      </div>
+		    </div>
+		  </th:block>
 		</th:block>
 		
 		<th:block th:if="${#lists.isEmpty(addressbook)}">

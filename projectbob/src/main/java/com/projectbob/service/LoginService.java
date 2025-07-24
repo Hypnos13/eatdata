@@ -2,6 +2,7 @@ package com.projectbob.service;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,6 @@ public class LoginService {
 	public void joinMember(Member member) {
 		loginMapper.joinMember(member);
 	}
-	
 
 	public int login(String id, String pass) {	
 		int result = -1;  // 아이디가 존재하지 않음
@@ -42,28 +42,20 @@ public class LoginService {
 		return result;
 	}
 	
-	
 	public Member getMember(String id) {
-		Member member = loginMapper.getMember(id);
-		return member;
+		return loginMapper.getMember(id);
 	}
-	
 	
 	public void updateMember(Member member) {
 		loginMapper.updateMember(member);
 	}
 	
-	
 	public void deleteMember(String id, String pass) {
 		loginMapper.deleteMember(id);
 	}
 	
-	
 	public List<String> searchId(String name, String email, String phone, String receive){
-
-		List<String> userIds = loginMapper.searchId(name, email, phone, receive);
-		
-		return userIds;
+		return loginMapper.searchId(name, email, phone, receive);
 	}
 	
 	public String searchPassword(String id, String name, String email, String phone, String receive) {
@@ -76,18 +68,30 @@ public class LoginService {
 	}
 	
 	public List<Member> userList(String division, String keyword){
-		
-		List<Member> userList = loginMapper.userList(division, keyword);
-		return userList;
+		return loginMapper.userList(division, keyword);
 	}
 	
 	public void updateIsuse(String id, String isuse){
-		
 		loginMapper.updateIsuse(id, isuse);
 	}
 	
 	public List<Addressbook> getMyAddress(String id){
-		List<Addressbook> address = loginMapper.getMyAddress(id);
-		return address;
+		return loginMapper.getMyAddress(id);
+	}
+	
+	public void addAddress(Addressbook addressbook) {
+		loginMapper.addAddress(addressbook);
+	}
+	
+	public Addressbook getAddress(int no) {
+		return loginMapper.getAddress(no);
+	}
+	
+	public void updateAddress(Addressbook addressbook) {
+		loginMapper.updateAddress(addressbook);
+	}
+	
+	public void deleteAddress(String id, int no) {
+		loginMapper.deleteAddress(id, no);
 	}
 }
