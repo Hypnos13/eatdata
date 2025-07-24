@@ -115,8 +115,8 @@
 
 	<!-- ===== Shop ===== -->
 	<insert id="insertShop" parameterType="com.projectbob.domain.Shop" useGeneratedKeys="true" keyProperty="sId">
-        INSERT INTO shop(id, name, phone, zipcode, address1, address2, owner, s_number, s_licenseURL, reg_date)
-        VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{sNumber}, #{sLicenseUrl}, SYSDATE())
+        INSERT INTO shop(id, name, phone, zipcode, address1, address2, owner, s_number, s_pictureURL, s_licenseURL, reg_date)
+        VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{sNumber}, #{sPictureUrl}, #{sLicenseUrl}, SYSDATE())
     </insert>
     
 	<select id="shopList" resultType="com.projectbob.domain.Shop">

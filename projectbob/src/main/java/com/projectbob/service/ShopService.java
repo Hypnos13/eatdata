@@ -185,18 +185,29 @@ public class ShopService {
 	}
 	
 	@Transactional
-	public void insertShop(Shop shop, MultipartFile sLicense) throws IOException {
+	public void insertShop(Shop shop, MultipartFile sPicture, MultipartFile sLicense) throws IOException {
 		//이미지 파일 처리
 		if (sLicense != null && !sLicense.isEmpty()) {
 			try {
 				String fileUrl = fileUploadService.uploadFile(sLicense, "shop");
 				shop.setSLicenseUrl(fileUrl);
 			} catch (IllegalArgumentException e) {
-				log.warn("메뉴 등록: 파일 업로드 오류 - "+ e.getMessage());
+				log.warn("메뉴 등록: 라이센스 업로드 오류 - "+ e.getMessage());
 				shop.setSLicenseUrl(null);
 			}
 		} else {
 			shop.setSLicenseUrl(null); //파일이 없을 시 null 로
+		}
+		if (sPicture != null && !sPicture.isEmpty()) {
+			try {
+				String fileUrl = fileUploadService.uploadFile(sPicture, "shop");
+				shop.setSPictureUrl(fileUrl);
+			} catch (IllegalArgumentException e) {
+				log.warn("메뉴 등록: 가게사진 업로드 오류 - "+ e.getMessage());
+				shop.setSPictureUrl(null);
+			}
+		} else {
+			shop.setSPictureUrl(null); //파일이 없을 시 null 로
 		}
 		shopMapper.insertShop(shop);
 	}

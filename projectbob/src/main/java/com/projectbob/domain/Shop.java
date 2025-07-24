@@ -28,7 +28,7 @@ public class Shop {
 	private String offDay;
 	private String minPrice;
 	private String sLicenseUrl;
-	private String sCertURL;
+	private String sCertUrl;
 	private String status;
 	private String info;
 	private String notice;

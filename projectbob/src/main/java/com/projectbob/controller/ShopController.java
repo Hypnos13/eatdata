@@ -34,23 +34,19 @@ public class ShopController {
 			@RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 
 			@RequestParam("phone") String phone, @RequestParam("name") String name, 
 			@RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1, 
-			@RequestParam("address2") String address2, @RequestParam("sLicense") MultipartFile sLicenseFile, Model model ) { 
+			@RequestParam("address2") String address2, @RequestParam("sPicture") MultipartFile sPictureFile, 
+			@RequestParam("sLicense") MultipartFile sLicenseFile, Model model ) { 
 		
-		String sLicenseUrl = null; // DB에 저장할 사업자등록증 URL
+		String sLicenseUrl = null;
+		String sPictureUrl = null;
 
-        try {
-            // 1. 사업자등록증 파일을 FileUploadService를 통해 업로드
-            // "business-licenses/"는 images/ 하위의 폴더
+        try { 
             sLicenseUrl = fileUploadService.uploadFile(sLicenseFile, "business-licenses/");
             System.out.println("사업자등록증 업로드 성공. URL: " + sLicenseUrl);
-
-            // // 2. (선택) 가게 사진도 있다면 동일하게 업로드
-            // String shopImageUrl = null;
-            // if (shopImageFile != null && !shopImageFile.isEmpty()) {
-            //     shopImageUrl = fileUploadService.uploadFile(shopImageFile, "shop-images/"); // 가게 사진 전용 폴더
-            //     System.out.println("가게 사진 업로드 성공. URL: " + shopImageUrl);
-            // }
-
+            if (sPictureFile != null && !sPictureFile.isEmpty()) {
+            	sPictureUrl = fileUploadService.uploadFile(sPictureFile, "shop/");
+            	System.out.println("가게 사진 업로드 성공. URL: " + sPictureUrl);
+            }
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage()); // 파일이 비어있는 경우
             return "/shop/shopJoinForm";
@@ -69,6 +65,7 @@ public class ShopController {
         shop.setZipcode(zipcode);
         shop.setAddress1(address1);
         shop.setAddress2(address2);
+        shop.setSPictureUrl(sPictureUrl);
         shop.setSLicenseUrl(sLicenseUrl);
         shopService.insertShop(shop);
 
