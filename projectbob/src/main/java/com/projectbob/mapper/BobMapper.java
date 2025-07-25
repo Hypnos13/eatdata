@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import com.projectbob.domain.LikeList;
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
+import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
 import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
@@ -49,6 +50,9 @@ public interface BobMapper {
 	// 찜 추가 시 shop.heart + 1 , - 1
 	public int incrementHeart(@Param("sId") int sId);
 	public int decrementHeart(@Param("sId") int sId);
+	
+	// 내가 찜한 가게 목록
+	public List<Integer> getLikeShopList(String userId);
 		
 	// 댓글을 DB에 등록하는 메서드
 	public void addReview(Review review);
@@ -76,6 +80,9 @@ public interface BobMapper {
 	
 	// 대댓글 개수조회
 	public int countReviewReply(@Param("rNo") int rNo);
+	
+	// 주문 번호에 해당하는 주문 레코드를 DB에서 가져오기
+	public Orders selectOrderId(@Param("orderId") int orderId);
 
 }
 

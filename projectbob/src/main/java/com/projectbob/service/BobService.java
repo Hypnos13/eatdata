@@ -10,11 +10,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.projectbob.domain.LikeList;
+import com.projectbob.domain.Member;
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
+import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
 import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
+import com.projectbob.dto.NewOrder;
 import com.projectbob.mapper.BobMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,9 @@ public class BobService{
 	// DB작업에 필요한 BobMapper 객체 의존성 주입 설정
 	@Autowired
 	private BobMapper bobMapper;
+	
+	@Autowired
+	private LoginService loginService;
 	
 
 	//가게 검색하기
@@ -131,6 +137,11 @@ public class BobService{
 				);
 	}
 	
+	// 내가 찜한 가게 목록
+	public List<Integer> getLikeShopList(String userId){
+		return bobMapper.getLikeShopList(userId);
+	}
+	
 	
 	// 댓글 등록하는 메서드
 	public void addReview(Review review) {
@@ -184,6 +195,17 @@ public class BobService{
 	}
 	
 	
+	// 결제정보 가져오기
+	/*
+	 * public NewOrder getNewOrder(int orderId) { Orders o =
+	 * bobMapper.selectOrderId(orderId); String menuName =
+	 * bobMapper.selectMenuNameByOrderId(orderId); NewOrder dto = NewOrder.builder()
+	 * .orderId(o.getONo()) .shopId(o.getSId()) .menuName(menuName)
+	 * .quantity(o.getQuantity()) .totalPrice(o.getTotalPrice())
+	 * .address(o.getOAddress())
+	 * .phone(loginService.getMember(o.getId()).getPhone()) .request(o.getRequest())
+	 * .status("PENDING") .build(); return dto; }
+	 */
 	
 	
 }

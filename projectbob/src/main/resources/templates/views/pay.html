@@ -13,9 +13,12 @@
 				<div class="col-md-8">
 					<div class="section-title">결제하기</div>
 					<div class="mb-3">
-						<label class="form-label">주소</label> <input type="text"
-							class="form-control" placeholder="서울특별시 동작구 상도동 301-28 푸르주주택" />
-						<input type="text" class="form-control mt-2"
+						<label class="form-label">주소</label>
+						 <input type="text" name="address1" class="form-control"
+						 	th:value="${member != null ? member.address1 : ''}"
+							 placeholder="(필수)주소를 입력하세연" />
+						<input type="text" class="form-control mt-2" name="address2"
+							th:value="${member != null ? member.address2 : ''}"
 							placeholder="(필수) 상세주소 입력" />
 					</div>
 					<div class="mb-3">
@@ -43,7 +46,7 @@
 							<button class="btn btn-outline-success w-100">네이버페이</button>
 						</div>
 						<div class="col-md-6">
-							<button class="btn btn-outline-secondary w-100">스마일페이</button>
+							<button class="btn btn-outline-warning w-100">카카오페이</button>
 						</div>
 					</div>
 					<div class="mt-4">

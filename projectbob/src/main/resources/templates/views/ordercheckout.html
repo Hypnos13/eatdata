@@ -38,6 +38,8 @@
       </tbody>
     </table>
   </div>
+  <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+  <script src="/webjars/stomp-websocket/stomp.min.js"></script>
   
   <script>
     function changeStatus(btn, action) {
@@ -51,6 +53,23 @@
           }
         });
     }
+    
+    const shopId = 0;
+    const orderId = 0;
+    const socket = new SockJS('/ws-orders');
+    const client = Stomp.over(socket);
+    
+    client.connect({}, () => {
+    	client.subscribe(`/topic/orders.${shopId}`, msg => {
+    		const data = JSON.parse(msg.body);
+    		if(data.orderId !== orderId) return;
+    		if(data.status == 'ACCEPT'){
+    			window.location.href = '/end';
+    		} else if(data.status == 'REJECT'){
+    			document.getElementById('status').innerText = '주문이 거절되었습e';
+    		}
+    	});
+    });
   </script>
 </body>
 </html>

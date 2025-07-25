@@ -4,6 +4,8 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.projectbob.dto.NewOrder;
+
 @Service
 public class WebsocketService {
 	
@@ -13,9 +15,9 @@ public class WebsocketService {
 		this.template = template;
 	}
 	
-	@Param shopId
-	public void sendNewOrder(int shopId, NewOrderDto payload) {
-		template.convertAndSend("/topic/orders/" + shopId, payload);
-	}
-
+	
+	/*
+	 * public void sendNewOrder(int shopId, int orderId) { NewOrder msg = new
+	 * NewOrder(orderId); template.convertAndSend("/topic/orders/" + shopId, msg); }
+	 */
 }

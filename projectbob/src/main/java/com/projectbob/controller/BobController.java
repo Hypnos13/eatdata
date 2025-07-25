@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.projectbob.domain.*;
+import com.projectbob.dto.NewOrder;
 import com.projectbob.service.*;
 
 import jakarta.servlet.http.HttpSession;
@@ -49,7 +50,8 @@ public class BobController {
 	  public String shopList(@RequestParam(value="category",required=false,
 			  	defaultValue="전체보기") String category,
 			  @RequestParam(value="keyword", required= false, defaultValue="null")String keyword,
-			  Model model,@RequestParam(value="address", required = false) String address) {
+			  Model model,HttpSession session,
+			  @RequestParam(value="address", required = false) String address) {
 	  log.info("BobController: shopList() called, category={}", category); 
 	  if (keyword == null || "null".equals(keyword)) keyword = "";
 		if(category == null) category = "전체보기";
@@ -62,6 +64,13 @@ public class BobController {
 	  model.addAttribute("sList",bobService.shopList(category,keyword));
 	  model.addAttribute("selectedCategory", category);
 	  model.addAttribute("userAddress", address);
+	  
+	  String loginId = (String) session.getAttribute("loginId");
+	  if(loginId != null) {
+		  List<Integer> likeShopList = bobService.getLikeShopList(loginId);
+		  model.addAttribute("likeShopList", likeShopList);
+	  }
+	  
 	  	return "views/shopList"; 
 	  }
 
@@ -132,12 +141,13 @@ public class BobController {
 		  
 
 		  // menudetail 에서 pay로 
-		  @PostMapping("/pay")
+		  @PostMapping("/pay")		  
 		  public String payPage(
 				  @RequestParam("menuId") Long menuId,
 				  @RequestParam("count") int count,
 				  @RequestParam("optionIds") String optionIds,
 				  @RequestParam("totalPrice") int totalPrice,
+				  HttpSession session,
 				  Model model) {
 			  System.out.println("menuId=" + menuId + " count=" + count + " optionIds=" + optionIds + " totalPrice=" + totalPrice);
 			  model.addAttribute("menuId", menuId);
@@ -145,8 +155,30 @@ public class BobController {
 			  model.addAttribute("optionIds", optionIds);
 			  model.addAttribute("totalPrice", totalPrice);
 			  
+			  String loginId = (String) session.getAttribute("loginId");
+			  if(loginId != null) {
+				  Member member = loginService.getMember(loginId);
+				  model.addAttribute("member", member);
+			  }
+			  
 			  return "views/pay";			  
 		  }
+		  
+			/*
+			 * @PostMapping("/pay") public String doPayment(@ModelAttribute NewOrder form,
+			 * HttpSession session,Model model) {
+			 * 
+			 * int orderId = bobService.createOrder(form);
+			 * WebsocketService.sendNewOrder(form.getShopId(), form.getOrderId());
+			 * 
+			 * model.addAttribute("orderId", orderId); model.addAttribute("shopId",
+			 * form.getShopId());
+			 * 
+			 * return "views/ordercheckout"; }
+			 * 
+			 * @GetMapping("/end") public String completed() { return "views/completed"; }
+			 */
+	
 		  
 
 }

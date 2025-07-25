@@ -127,7 +127,10 @@
 											<p class="card-text text-muted small mb-1">[[${shop.address1}]],
 												[[${shop.address2}]]</p>
 											<p class="card-text text-success fw-semibold mb-0">평점
-												★[[${shop.rating}]]</p>
+												★[[${shop.rating}]]
+													<i class="bi bi-heart-fill text-danger ms-1"
+														th:if="${likeShopList != null and likeShopList.contains(shop.sId)}"></i>
+												</p>
 										</div>
 									</div>
 								</div>

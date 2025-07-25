@@ -2,6 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
+<!-- 주문 번호에 해당하는 주문 레코드를 DB에서 가져오기 -->
+<select id="selectOrderId" parameterType="int" resultType="com.projectbob.domain.Orders">
+	SELECT * FROM orders WHERE o_no = #{orderId}
+</select>
+
 <!-- 대댓글 개수 조회 -->
 <select id="countReviewReply" parameterType="int" resultType="int">
 	SELECT COUNT(*) FROM review_reply WHERE r_no = #{rNo}
@@ -63,6 +68,11 @@
 	INSERT INTO review(id, s_id, m_id, content, rating, r_picture, liked, status, reg_date, modi_date)
 	VALUES(#{id}, #{sId}, #{mId}, #{content}, #{rating}, #{rPicture}, #{liked}, #{status}, SYSDATE(), SYSDATE())
 </insert>
+
+<!-- 내가 찜한 가게 목록 -->
+<select id="getLikeShopList" parameterType="string" resultType="int">
+	SELECT s_id FROM likeList WHERE id = #{id}
+</select>
 
 <!-- 찜 추가 시 shop.heart + 1 -->
 <update id="incrementHeart" parameterType="int">
