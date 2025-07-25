@@ -160,59 +160,7 @@ $(document).ready(function() {
   // userId는 로그인 시 서버에서 직접 window.currentUserId에 할당하는 방식이 더 안정적입니다.
   // 예: <script th:inline="javascript"> window.currentUserId = [[${#authentication.name}]]; </script>
 
-  // 장바구니 내용을 불러오는 함수 호출
-  loadCartItems();
 });
-
-function loadCartItems() {
-  // userId와 guestId 중 유효한 값을 사용하여 장바구니 조회
-  const requestData = {};
-  if (window.currentUserId && window.currentUserId.trim() !== '') {
-    requestData.userId = window.currentUserId;
-  }
-  if (window.currentGuestId && window.currentGuestId.trim() !== '') {
-    requestData.guestId = window.currentGuestId;
-  }
-
-  // userId와 guestId 둘 다 없으면 장바구니 로드 시도 안 함
-  if (Object.keys(requestData).length === 0) {
-    $('#emptyOrderMessage').show();
-    $("#totalOrderPrice").addClass("d-none"); // 총 가격 숨기기
-    $("#orderSummaryInfo").addClass("d-none"); // 배달비 섹션 숨기기
-    return;
-  }
-
-  $.ajax({
-    url: '/cartList', // 컨트롤러의 GET 매핑 경로에 맞게 수정
-    type: 'GET',
-    data: requestData,
-    success: function(response) {
-      if (response.success && response.cartList) {
-        // 서버에서 반환된 guestId를 전역 변수에 업데이트 (새로 생성된 경우)
-        if (response.guestId) {
-            window.currentGuestId = response.guestId;
-            // HTML의 guestInfo data-guest-id 속성도 업데이트 (선택 사항)
-            const guestInfoElem = document.getElementById('guestInfo');
-            if (guestInfoElem) {
-                guestInfoElem.dataset.guestId = response.guestId;
-            }
-        }
-        updateOrderSummary(response.cartList, response.totalPrice);
-      } else {
-        console.error("장바구니 로드 실패:", response.message || "알 수 없는 오류");
-        $('#emptyOrderMessage').show();
-        $("#totalOrderPrice").addClass("d-none"); // 총 가격 숨기기
-        $("#orderSummaryInfo").addClass("d-none"); // 배달비 섹션 숨기기
-      }
-    },
-    error: function(xhr, status, error) {
-      console.error("장바구니 로드 서버 오류:", status, error, xhr.responseText);
-      $('#emptyOrderMessage').show();
-      $("#totalOrderPrice").addClass("d-none"); // 총 가격 숨기기
-      $("#orderSummaryInfo").addClass("d-none"); // 배달비 섹션 숨기기
-    }
-  });
-}
 
 
 // ==============================
@@ -293,12 +241,14 @@ function updateOrderSummary(cartList, totalCartPrice) {
 // ==============================
 // 전체 삭제 버튼 (#btnRemoveAllItems)
 // ==============================
-$("#btnRemoveAllItems").click(function () { // ID 변경
-  if (!confirm("장바구니의 모든 항목을 삭제하시겠습니까?")) { // 사용자 확인 추가
-      return;
+$("#btnRemoveAllItems").click(function () { // "장바구니 전체 삭제" 버튼의 ID
+  // 1. 사용자에게 삭제를 한 번 더 확인합니다.
+  if (!confirm("장바구니의 모든 항목을 삭제하시겠습니까?")) {
+      return; // '취소'를 누르면 함수를 종료합니다.
   }
 
-  // 삭제할 사용자/게스트 ID를 서버에 전달
+  // 2. 서버에 전달할 사용자 ID 또는 게스트 ID를 준비합니다.
+  //    'window.currentUserId'와 'window.currentGuestId'는 페이지 로드 시 전역 변수로 설정되어 있다고 가정합니다.
   const requestData = {};
   if (window.currentUserId && window.currentUserId.trim() !== '') {
     requestData.userId = window.currentUserId;
@@ -307,33 +257,51 @@ $("#btnRemoveAllItems").click(function () { // ID 변경
     requestData.guestId = window.currentGuestId;
   }
 
+  // 3. 삭제할 정보(userId 또는 guestId)가 없으면 알림 후 종료합니다.
   if (Object.keys(requestData).length === 0) {
-      alert("삭제할 장바구니 정보가 없습니다.");
+      alert("삭제할 장바구니 정보가 없습니다. 다시 로그인하거나 페이지를 새로고침해주세요.");
       return;
   }
 
-  $.ajax({
-    url: "/cart/removeAll", // 컨트롤러에 해당 엔드포인트가 필요합니다.
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify(requestData), // 삭제할 사용자/게스트 ID 전달
-    success: function (response) {
-      if (response.success) {
-        console.log("장바구니가 모두 삭제되었습니다.");
-        // 서버에서 다시 받아온 cartList와 totalPrice로 주문표 업데이트
-        updateOrderSummary(response.cartList || [], response.totalPrice || 0);
-        alert("장바구니의 모든 항목이 삭제되었습니다.");
-      } else {
-        console.error("전체 삭제 중 오류 발생:", response.message || "알 수 없는 오류");
-        alert("장바구니 전체 삭제 실패: " + (response.message || "알 수 없는 오류"));
-      }
-    },
-    error: function (xhr, status, error) {
-      console.error("서버 요청 중 오류 발생:", status, error, xhr.responseText);
-      alert("서버 요청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-    }
-  });
-});
+		
+	let sId = null;
+	   const urlParams = new URLSearchParams(window.location.search); // 현재 URL의 쿼리 파라미터를 파싱
+	   if (urlParams.has('sId')) {
+	       sId = urlParams.get('sId'); // 'sId' 파라미터 값 가져오기
+	   }
+
+	   if (sId === null) {
+	       alert("메뉴 상세 페이지로 돌아갈 가게 정보(sId)를 찾을 수 없습니다.");
+	       return; // sId가 없으면 더 이상 진행하지 않음
+	   }
+		 
+  // 4. AJAX 요청을 보냅니다.
+	    // AJAX 요청
+	    $.ajax({
+	        url: "/removeAll",
+	        method: "POST",
+	        contentType: "application/json",
+	        data: JSON.stringify(requestData),
+	        success: function (response) {
+	            if (response.success) {
+	                console.log("장바구니가 모두 삭제되었습니다. 서버 응답:", response);
+	                alert(response.message || "장바구니의 모든 항목이 삭제되었습니다.");
+
+	                // --- sId를 포함하여 /MenuDetail 페이지로 이동 ---
+	                window.location.href = '/MenuDetail?sId=' + sId;
+	                // ---------------------------------------------
+
+	            } else {
+	                console.error("전체 삭제 중 오류 발생:", response.message || "알 수 없는 오류");
+	                alert("장바구니 전체 삭제 실패: " + (response.message || "알 수 없는 오류"));
+	            }
+	        },
+	        error: function (xhr, status, error) {
+	            console.error("서버 요청 중 오류 발생:", status, error, xhr.responseText);
+	            alert("서버 요청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+	        }
+	    });
+	});
 
 // ==============================
 // 개별 항목 수량 조절 및 삭제 (이벤트 위임 사용)

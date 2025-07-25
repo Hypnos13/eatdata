@@ -1,5 +1,6 @@
 package com.projectbob.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,111 +28,120 @@ public class BobService {
 	private BobMapper bobMapper;
 	
 	
-	 /**
-     * 장바구니 개별 항목과 그에 연결된 모든 옵션 항목을 삭제합니다.
-     */
-    @Transactional
-    public List<Cart> deleteCartItem(Integer caId, String userId, String guestId) {
-        // 옵션 항목은 독립적으로 삭제할 수 없다는 비즈니스 로직을 여기서 확인
-        List<Cart> currentCartItems = bobMapper.selectCartByUserOrGuest(userId, guestId);
-        Cart itemToDelete = currentCartItems.stream()
-                                            .filter(item -> item.getCaId() != null && item.getCaId().equals(caId))
-                                            .findFirst()
-                                            .orElse(null);
+	@Transactional
+	public List<Cart> deleteCartItem(Integer caId, String userId, String guestId) {
+	    // 1. 매퍼에 전달할 파라미터 맵 생성
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("userId", userId);
+	    params.put("guestId", guestId);
 
-        if (itemToDelete == null) {
-            throw new IllegalArgumentException("삭제할 장바구니 항목을 찾을 수 없습니다.");
-        }
-        if (itemToDelete.getCaPid() != null) { // ca_pid가 있으면 옵션 항목임
-            throw new IllegalArgumentException("옵션 항목은 단독으로 삭제할 수 없습니다. 메인 메뉴 항목을 삭제해주세요.");
-        }
+	    // 2. 현재 사용자/게스트의 장바구니 항목 조회 (여기서도 Map 사용)
+	    List<Cart> currentCartItems = bobMapper.selectCartByUserOrGuest(params);
 
-        // 메인 메뉴 항목과 그에 연결된 모든 옵션 항목 삭제
-        bobMapper.deleteCartItemAndOptions(caId, userId, guestId);
+	    
+	    Cart itemToDelete = currentCartItems.stream()
+	                                        .filter(item -> caId != null && item.getCaId() != null && item.getCaId().equals(caId))
+	                                        .findFirst()
+	                                        .orElse(null);
 
-        // 삭제 후 업데이트된 전체 장바구니 목록 반환
-        return bobMapper.selectCartByUserOrGuest(userId, guestId);
-    }
+	    if (itemToDelete == null) {
+	        throw new IllegalArgumentException("삭제할 장바구니 항목을 찾을 수 없습니다.");
+	    }
+	    // 옵션 항목은 독립적으로 삭제할 수 없다는 비즈니스 로직 확인
+	    if (itemToDelete.getCaPid() != null) { // ca_pid가 있으면 옵션 항목임
+	        throw new IllegalArgumentException("옵션 항목은 단독으로 삭제할 수 없습니다. 메인 메뉴 항목을 삭제해주세요.");
+	    }
 
+	 
+	    bobMapper.deleteCartItemAndOptions(params);
+
+	    // 5. 삭제 후 업데이트된 전체 장바구니 목록 반환 (여기서도 Map 사용)
+	    return bobMapper.selectCartByUserOrGuest(params);
+	}
     /**
      * 사용자 또는 비회원의 모든 장바구니 항목을 삭제합니다.
    
      */
-    @Transactional
-    public List<Cart> deleteAllCartItems(String userId, String guestId) {
-        bobMapper.deleteAllCartItemsByUserOrGuest(userId, guestId);
-        // 삭제 후 업데이트된 전체 장바구니 목록 반환 (비어있을 가능성 높음)
-        return bobMapper.selectCartByUserOrGuest(userId, guestId);
-    }
+	@Transactional
+	public List<Cart> deleteAllCartItems(String userId, String guestId) {
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("userId", userId);
+	    params.put("guestId", guestId);
+
+	    // Mybatis 매퍼에 Map 형태로 파라미터 전달
+	    bobMapper.deleteAllCartItemsByUserOrGuest(params);
+
+	    return bobMapper.selectCartByUserOrGuest(params);
+	}
 
 	
-	 /**
-     * 장바구니 항목의 수량을 업데이트하고, 해당 항목 및 그 옵션들의 총 가격을 재계산합니다.
-     *
-     */
-    @Transactional
-    public List<Cart> updateCartItemQuantity(Integer caId, Integer newQuantity, String userId, String guestId) {
-        // 1. 해당 메인 메뉴 항목 조회
-        List<Cart> currentCartItems = bobMapper.selectCartByUserOrGuest(userId, guestId);
-        Cart mainItem = currentCartItems.stream()
-                                        .filter(item -> item.getCaId() != null && item.getCaId().equals(caId))
-                                        .findFirst()
-                                        .orElse(null);
+	@Transactional
+	public List<Cart> updateCartItemQuantity(Integer caId, Integer newQuantity, String userId, String guestId) {
+	    Map<String, Object> commonParams = new HashMap<>(); // 공통 파라미터 맵
+	    commonParams.put("userId", userId);
+	    commonParams.put("guestId", guestId);
 
-        if (mainItem == null || mainItem.getMoId() != null) { // 메인 메뉴 항목이 아니면 오류
-            throw new IllegalArgumentException("메인 메뉴 항목만 수량을 변경할 수 있습니다.");
-        }
+	    List<Cart> currentCartItems = bobMapper.selectCartByUserOrGuest(commonParams);
+	    Cart mainItem = currentCartItems.stream()
+	                                    .filter(item -> item.getCaId() != null && item.getCaId().equals(caId))
+	                                    .findFirst()
+	                                    .orElse(null);
 
-        // 2. 메인 메뉴 항목의 새로운 총 가격 계산 및 업데이트
-        Integer newMainMenuTotalPrice = mainItem.getMenuPrice() * newQuantity;
-        bobMapper.updateCartItemQuantity(caId, newQuantity, newMainMenuTotalPrice, userId, guestId);
+	    if (mainItem == null || mainItem.getMoId() != null) { // 메인 메뉴 항목이 아니면 오류
+	        throw new IllegalArgumentException("메인 메뉴 항목만 수량을 변경할 수 있습니다.");
+	    }
 
-        // 3. 해당 메인 메뉴에 연결된 옵션 항목들도 수량 및 총 가격 업데이트
-        List<Cart> optionItems = currentCartItems.stream()
-                                                .filter(item -> item.getCaPid() != null && item.getCaPid().equals(caId))
-                                                .collect(Collectors.toList());
+	    // 2. 메인 메뉴 항목의 새로운 총 가격 계산 및 업데이트 (Map 사용)
+	    Integer newMainMenuTotalPrice = mainItem.getMenuPrice() * newQuantity;
 
-        for (Cart optionItem : optionItems) {
-            Integer newOptionTotalPrice = optionItem.getOptionPrice() * newQuantity;
-            bobMapper.updateCartItemQuantity(optionItem.getCaId(), newQuantity, newOptionTotalPrice, userId, guestId);
-        }
+	    Map<String, Object> updateParams = new HashMap<>(); // 업데이트 전용 파라미터 맵
+	    updateParams.put("caId", caId);
+	    updateParams.put("quantity", newQuantity);
+	    updateParams.put("totalPrice", newMainMenuTotalPrice);
+	    updateParams.put("userId", userId); // userId와 guestId도 포함
+	    updateParams.put("guestId", guestId);
+	    bobMapper.updateCartItemQuantity(updateParams);
 
-        // 4. 업데이트된 전체 장바구니 목록 반환
-        return bobMapper.selectCartByUserOrGuest(userId, guestId);
-    }
+	    // 3. 해당 메인 메뉴에 연결된 옵션 항목들도 수량 및 총 가격 업데이트
+	    List<Cart> optionItems = currentCartItems.stream()
+	                                            .filter(item -> item.getCaPid() != null && item.getCaPid().equals(caId))
+	                                            .collect(Collectors.toList());
+
+	    for (Cart optionItem : optionItems) {
+	        Integer newOptionTotalPrice = optionItem.getOptionPrice() * newQuantity;
+
+	        Map<String, Object> optionUpdateParams = new HashMap<>(); // 옵션 업데이트 전용 맵
+	        optionUpdateParams.put("caId", optionItem.getCaId()); // 옵션의 caId
+	        optionUpdateParams.put("quantity", newQuantity);
+	        optionUpdateParams.put("totalPrice", newOptionTotalPrice);
+	        optionUpdateParams.put("userId", userId); // userId와 guestId도 포함
+	        optionUpdateParams.put("guestId", guestId);
+	        bobMapper.updateCartItemQuantity(optionUpdateParams);
+	    }
+
+	    // 4. 업데이트된 전체 장바구니 목록 반환 (Map 사용)
+	    return bobMapper.selectCartByUserOrGuest(commonParams);
+	}
 	
 	 /**
      * 사용자 또는 비회원 ID로 메인 메뉴 장바구니 항목만 조회합니다.
      */
-    public List<Cart> getMainCartItemsByUser(String userId, String guestId) {
-        return bobMapper.selectMainCartItemsByUserOrGuest(userId, guestId);
-    }
+	public List<Cart> getMainCartItemsByUser(String userId, String guestId) {
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("userId", userId);
+	    params.put("guestId", guestId);
+	    return bobMapper.selectMainCartItemsByUserOrGuest(params); // Map 형태로 파라미터 전달
+	}
 	
 	 /* 사용자 또는 비회원 ID로 모든 장바구니 항목을 조회합니다.
      */
-    public List<Cart> getCartByUser(String userId, String guestId) {
-        List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(userId, guestId);
-
-        // 메인 메뉴 항목들을 찾습니다 (ca_pid가 NULL인 항목)
-        Map<Integer, Cart> mainItemsMap = allCartItems.stream()
-                .filter(item -> item.getCaPid() == null)
-                .collect(Collectors.toMap(Cart::getCaId, item -> item));
-
-        // 각 메인 메뉴 항목에 대해 옵션 가격을 합산하여 itemGroupTotalPrice 설정
-        mainItemsMap.values().forEach(mainItem -> {
-            Integer currentItemGroupTotal = mainItem.getTotalPrice(); // 메인 메뉴 자체의 totalPrice
-            
-            // 해당 메인 메뉴의 ca_id를 부모로 가지는 옵션들을 찾아서 totalPrice를 합산
-            Integer optionsTotal = allCartItems.stream()
-                    .filter(item -> item.getCaPid() != null && item.getCaPid().equals(mainItem.getCaId()))
-                    .mapToInt(Cart::getTotalPrice)
-                    .sum();
-            
-            mainItem.setItemGroupTotalPrice(Integer.valueOf(currentItemGroupTotal + optionsTotal));
-        });
-
-        return allCartItems; // 모든 항목을 반환하되, 메인 메뉴 항목에는 itemGroupTotalPrice가 설정됨
-    }
+	public List<Cart> getCartByUser(String userId, String guestId) {
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("userId", userId);
+	    params.put("guestId", guestId);
+	    List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params); // Map 형태로 파라미터 전달
+	    return allCartItems;
+	}
 	
 	/**
      * 장바구니 항목을 처리하고 DB에 추가합니다.

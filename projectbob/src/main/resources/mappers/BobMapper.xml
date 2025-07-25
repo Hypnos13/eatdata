@@ -45,21 +45,20 @@
 
 <!-- 장바구니 개별 항목 삭제 (메인 메뉴 항목과 그에 연결된 모든 옵션 삭제) -->
     <delete id="deleteCartItemAndOptions" parameterType="map">
-        DELETE FROM cart
-        WHERE
-            ca_id = #{caId} OR ca_pid = #{caId}
-            AND (
-                <if test="userId != null and userId.trim() != ''">
-                    id = #{userId}
-                </if>
-                <if test="guestId != null and guestId.trim() != ''">
-                    <if test="userId != null and userId.trim() != ''">
-                        OR
-                    </if>
-                    guest_id = #{guestId}
-                </if>
-            )
-    </delete>
+	DELETE FROM cart
+	WHERE
+	(ca_id = #{caId} OR ca_pid = #{caId}) AND (
+	<if test="userId != null and userId.trim() != ''">
+		id = #{userId}
+	</if>
+	<if test="guestId != null and guestId.trim() != ''">
+		<if test="userId != null and userId.trim() != ''">
+			OR
+		</if>
+		guest_id = #{guestId}
+	</if>
+	)
+</delete>
 
 
  <resultMap id="CartDetailResultMap" type="com.projectbob.domain.Cart">

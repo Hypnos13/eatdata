@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.projectbob.domain.Cart;
 import com.projectbob.domain.MenuOption;
@@ -221,21 +222,26 @@ public class MenuAjaxController {
                 throw new IllegalArgumentException("삭제할 사용자 또는 게스트 정보가 없습니다.");
             }
 
+            // Perform the actual deletion
             List<Cart> updatedCartList = bobService.deleteAllCartItems(userId, guestId);
+            
+            // Calculate total price from the (now updated/empty) cart list
             int totalPrice = updatedCartList.stream().mapToInt(Cart::getTotalPrice).sum();
 
             result.put("success", true);
-            result.put("cartList", updatedCartList);
-            result.put("totalPrice", totalPrice);
+            result.put("cartList", updatedCartList); // Return the updated (likely empty) cart list
+            result.put("totalPrice", totalPrice);   // Return the new total price (likely 0)
+            result.put("message", "장바구니의 모든 상품이 성공적으로 삭제되었습니다."); // Add a success message
+
         } catch (IllegalArgumentException e) {
             result.put("success", false);
             result.put("message", e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Print stack trace for debugging on the server
             result.put("success", false);
             result.put("message", "전체 장바구니 삭제 중 오류가 발생했습니다: " + e.getMessage());
         }
-        return result;
+        return result; // Returns a JSON response
     }
 
 

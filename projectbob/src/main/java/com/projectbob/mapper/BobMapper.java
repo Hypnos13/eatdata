@@ -1,6 +1,7 @@
 package com.projectbob.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -19,21 +20,19 @@ public interface BobMapper {
      * 장바구니 항목의 수량을 업데이트합니다.
     
      */
-    int updateCartItemQuantity(@Param("caId") Integer caId, @Param("quantity") Integer quantity,
-                               @Param("totalPrice") Integer totalPrice, @Param("userId") String userId,
-                               @Param("guestId") String guestId);
+    int updateCartItemQuantity(Map<String, Object> params);
 
     /**
      * 장바구니 개별 항목과 그에 연결된 모든 옵션 항목을 삭제합니다.
   
      */
-    int deleteCartItemAndOptions(@Param("caId") Integer caId, @Param("userId") String userId, @Param("guestId") String guestId);
+    void deleteCartItemAndOptions(Map<String, Object> params);
 
     /**
      * 사용자 또는 비회원의 모든 장바구니 항목을 삭제합니다.
  
      */
-    int deleteAllCartItemsByUserOrGuest(@Param("userId") String userId, @Param("guestId") String guestId);
+    int deleteAllCartItemsByUserOrGuest(Map<String, Object> params);
     
     /**
      * 장바구니 항목을 DB에 삽입합니다.
@@ -46,14 +45,14 @@ public interface BobMapper {
      * 사용자 ID 또는 비회원 ID로 모든 장바구니 항목을 조회합니다.
      * 메인 메뉴와 옵션 항목을 모두 포함합니다.
      */
-    List<Cart> selectCartByUserOrGuest(@Param("userId") String userId, @Param("guestId") String guestId);
+    List<Cart> selectCartByUserOrGuest(Map<String, Object> params);
     
     
     /**
      * 사용자 ID 또는 비회원 ID로 메인 메뉴 장바구니 항목만 조회합니다.
      * ca_pid가 NULL인 항목(즉, 메인 메뉴)만 반환합니다.
      */
-    List<Cart> selectMainCartItemsByUserOrGuest(@Param("userId") String userId, @Param("guestId") String guestId);
+    List<Cart> selectMainCartItemsByUserOrGuest(Map<String, Object> params);
 
 	public List<Shop> shopList(@Param("category") String category,@Param("keyword") String keyword); //shopList 페이지
 	
