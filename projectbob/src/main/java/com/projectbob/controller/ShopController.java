@@ -1,17 +1,21 @@
 package com.projectbob.controller;
 
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.http.*;
 
 import java.util.*;
 import java.io.*;
+import java.net.URI;
 import java.sql.Timestamp;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
@@ -29,6 +33,33 @@ public class ShopController {
 	@Autowired
 	private FileUploadService fileUploadService;
 	
+	// 식품영양성분DB API 검색
+	@GetMapping("/api/nutrition-search")
+	@ResponseBody
+	public ResponseEntity<?> searchNutritionData(@RequestParam("foodName") String foodName) {
+		String serviceKey = "25HM7lP49D4X9CnOWL0S6Ec9UnBOQh5/T5rfLzXtv7qn0Wzg+grCn9czsAmSwvR1rjdFDY8h3GxkPLoSZeuglA==";
+		String apiUrl = "https://apis.data.go.kr/1471000/FoodNtrCpntDb/getFoodNtrCpntDbInq02";
+		try {
+			URI uri = UriComponentsBuilder.fromUriString(apiUrl)
+					.queryParam("serviceKey", serviceKey)
+					.queryParam("desc_kor", foodName)
+					.queryParam("pageNo", "1")
+					.queryParam("numOfRows", "10")
+					.queryParam("type", "json")
+					.build()
+					.toUri();
+			log.info("식약처 API 요청 URI: {}", uri);
+			RestTemplate restTemplate = new RestTemplate();
+			ResponseEntity<String> resp = restTemplate.getForEntity(uri, String.class);
+			return resp;
+		} catch (Exception e) {
+			log.error("!! 식약처 API 호출 오류", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("{\"error\":\"API 호출 중 오류 발생\"}");
+		}
+	}
+	
+	// 입점 신청
 	@PostMapping("/insertShop")
 	public String insertShop( @RequestParam("id") String id,
 			@RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 

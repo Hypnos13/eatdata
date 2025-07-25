@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/shop_layout}"> <th:block layout:fragment="content">
+      layout:decorate="~{layouts/shop_layout}">
+<th:block layout:fragment="content">
 
     <div class="row my-5" id="global-content">
         <div class="col">
@@ -20,30 +21,52 @@
             <form action="/shop/insertMenu" name="menuRegisterForm" method="post" id="menuRegisterForm"
                   enctype="multipart/form-data" th:object="${menu}">
                 <input type="hidden" name="sId" id="sId" th:field="*{sId}" />
+                
                 <div class="row my-3">
                     <div class="col-8 offset-2">
                         <label for="category" class="form-label">* 카테고리 : </label>
                         <input type="text" class="form-control" name="category" id="category" th:field="*{category}" required>
                     </div>
                 </div>
+                
                 <div class="row my-3">
                     <div class="col-8 offset-2">
                         <label for="name" class="form-label">* 메뉴 이름 : </label>
-                        <input type="text" class="form-control" name="name" id="name" th:field="*{name}" required>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="name" id="name" th:field="*{name}" required>
+                            <button type="button" class="btn btn-info" id="btnSearchNutrition">영양성분 검색</button>
+                        </div>
                     </div>
                 </div>
+
+                <div class="row my-3">
+                    <div class="col-8 offset-2">
+                        <ul class="list-group" id="nutrition-results" style="display: none;"></ul>
+                        <div id="selected-nutrition-info" class="mt-2 p-2 border rounded bg-light" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <input type="hidden" th:field="*{servingSize}" />
+                <input type="hidden" th:field="*{calories}" />
+                <input type="hidden" th:field="*{carbs}" />
+                <input type="hidden" th:field="*{protein}" />
+                <input type="hidden" th:field="*{fat}" />
+                <input type="hidden" th:field="*{sodium}" />
+
                 <div class="row my-3">
                     <div class="col-8 offset-2">
                         <label for="price" class="form-label">* 가격 : </label>
                         <input type="number" class="form-control" name="price" id="price" th:field="*{price}" required>
                     </div>
                 </div>
+                
                 <div class="row my-3">
                     <div class="col-8 offset-2">
                         <label for="mInfo" class="form-label">* 메뉴 설명 : </label>
                         <textarea class="form-control" name="mInfo" id="mInfo" rows="5" th:field="*{mInfo}"></textarea>
                     </div>
                 </div>
+                
                 <div class="row my-3">
                     <div class="col-8 offset-2">
                         <label for="mPicture">* 메뉴 사진 : </label>
@@ -55,7 +78,7 @@
                     <div class="col-8 offset-2">
                         <label class="form-label">메뉴 옵션:</label>
                         <div id="menuOptionsContainer">
-                            </div>
+                        </div>
                         <button type="button" class="btn btn-success mt-2" id="addOptionBtn">옵션 추가</button>
                     </div>
                 </div>
