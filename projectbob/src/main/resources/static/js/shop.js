@@ -90,6 +90,49 @@ function findZipcode() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // ===== 1. 입력 시 하이픈(-) 자동 생성 기능 =====
+    const sNumberInputForFormatting = document.getElementById('sNumber');
+    if (sNumberInputForFormatting) {
+        sNumberInputForFormatting.addEventListener('input', function(event) {
+            let value = event.target.value.replace(/[^0-9]/g, '');
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+
+            let formattedValue = '';
+            if (value.length < 4) {
+                formattedValue = value;
+            } else if (value.length < 6) {
+                formattedValue = value.substring(0, 3) + '-' + value.substring(3);
+            } else {
+                formattedValue = value.substring(0, 3) + '-' + value.substring(3, 5) + '-' + value.substring(5);
+            }
+            event.target.value = formattedValue;
+        });
+    }
+
+    // ===== 2. 폼 제출 시 하이픈(-) 제거 기능 (새로 추가된 부분) =====
+    const shopJoinForm = document.getElementById('shopJoinForm');
+    if (shopJoinForm) {
+        shopJoinForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // 폼 자동 전송 중단
+
+            const sNumberInput = document.getElementById('sNumber');
+            // 사업자등록번호 값에서 하이픈 제거
+            sNumberInput.value = sNumberInput.value.replace(/-/g, '');
+
+            // 다른 전화번호 필드 등도 숫자만 보내고 싶다면 아래처럼 추가 가능
+            // const phoneInput = document.getElementById('phone');
+            // phoneInput.value = phoneInput.value.replace(/-/g, '');
+
+            this.submit(); // 정리된 값으로 폼 전송
+        });
+    }
+
+});
+
+document.addEventListener('DOMContentLoaded', function() {
     const phoneNumberInput = document.getElementById('phone');
 
     if (phoneNumberInput) { // 요소가 존재하는지 확인

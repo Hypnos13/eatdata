@@ -66,27 +66,27 @@
                     </a>
                 </div>
 
-                <!-- ========= 사장님 공지 ========= -->
-                <div class="icon-col">
-                    <a th:if="${#lists.isEmpty(shopListMain)}"
-                       th:href="@{/shopInfo}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
-                        <div class="mains-icon-label">사장님 공지</div>
-                    </a>
-                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
-                       th:href="@{/bossNotice(s_id=${currentShop.sId})}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
-                        <div class="mains-icon-label">사장님 공지</div>
-                    </a>
-                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
-                       th:href="@{/shopListMain}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
-                        <div class="mains-icon-label">사장님 공지</div>
-                    </a>
-                </div>
+				<!-- ========= 사장님 공지 ========= -->
+				<div class="icon-col">
+				  <a th:if="${#lists.isEmpty(shopListMain)}"
+				     th:href="@{/shopInfo}"
+				     class="mains-icon-box login-required">
+				    <i class="bi bi-megaphone"></i>
+				    <div class="mains-icon-label">사장님 공지</div>
+				  </a>
+				  <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+				     th:href="@{/shopNotice(s_id=${currentShop.sId})}"
+				     class="mains-icon-box login-required">
+				    <i class="bi bi-megaphone"></i>
+				    <div class="mains-icon-label">사장님 공지</div>
+				  </a>
+				  <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+				     th:href="@{/shopListMain}"
+				     class="mains-icon-box login-required">
+				    <i class="bi bi-megaphone"></i>
+				    <div class="mains-icon-label">사장님 공지</div>
+				  </a>
+				</div>
 
                 <!-- ========= 영업 시간 ========= -->
                 <div class="icon-col">
@@ -141,7 +141,7 @@
                         <div class="mains-icon-label">메뉴 리스트</div>
                     </a>
                     <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
-                       th:href="@{/menuList(s_id=${currentShop.sId})}"
+                       th:href="@{/shop/menuList(s_id=${currentShop.sId})}"
                        class="mains-icon-box login-required">
                         <div class="mains-icon"><i class="bi bi-card-checklist"></i></div>
                         <div class="mains-icon-label">메뉴 리스트</div>
@@ -163,7 +163,7 @@
                         <div class="mains-icon-label">메뉴 등록</div>
                     </a>
                     <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
-                       th:href="@{/menuRegisterForm(s_id=${currentShop.sId})}"
+                       th:href="@{/shop/menuRegisterForm(s_id=${currentShop.sId})}"
                        class="mains-icon-box login-required">
                         <div class="mains-icon"><i class="bi bi-receipt"></i></div>
                         <div class="mains-icon-label">메뉴 등록</div>
@@ -185,7 +185,7 @@
                         <div class="mains-icon-label">메뉴 관리</div>
                     </a>
                     <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
-                       th:href="@{/menuUpdateForm(s_id=${currentShop.sId})}"
+                       th:href="@{/shop/menuUpdateForm(s_id=${currentShop.sId})}"
                        class="mains-icon-box login-required">
                         <div class="mains-icon"><i class="bi bi-list-task"></i></div>
                         <div class="mains-icon-label">메뉴 관리</div>
@@ -207,7 +207,7 @@
                         <div class="mains-icon-label">메뉴 품절</div>
                     </a>
                     <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
-                       th:href="@{/menuSoldOut(s_id=${currentShop.sId})}"
+                       th:href="@{/shop/menuSoldOut(s_id=${currentShop.sId})}"
                        class="mains-icon-box login-required">
                         <div class="mains-icon"><i class="bi bi-x-circle"></i></div>
                         <div class="mains-icon-label">메뉴 품절</div>

@@ -115,8 +115,8 @@
 
 	<!-- ===== Shop ===== -->
 	<insert id="insertShop" parameterType="com.projectbob.domain.Shop" useGeneratedKeys="true" keyProperty="sId">
-        INSERT INTO shop(id, name, phone, zipcode, address1, address2, owner, s_number, reg_date)
-        VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{sNumber}, SYSDATE())
+        INSERT INTO shop(id, name, phone, zipcode, address1, address2, owner, s_number, s_pictureURL, s_licenseURL, reg_date)
+        VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{sNumber}, #{sPictureUrl}, #{sLicenseUrl}, SYSDATE())
     </insert>
     
 	<select id="shopList" resultType="com.projectbob.domain.Shop">
@@ -161,8 +161,6 @@
             s_number = #{sNumber},
             category = #{category},
             info     = #{info},
-            notice   = #{notice},
-            s_info   = #{sInfo},
             modi_date= #{modiDate}
         WHERE s_id = #{sId}
     </update>
@@ -181,4 +179,20 @@
 	        off_day = #{offDay}
 	    WHERE s_id = #{sId}
 	</update>
+	
+	<!-- 사장님 공지사항/가게정보 업데이트 -->
+	<update id="updateShopNotice" parameterType="map">
+	  UPDATE shop
+	  SET notice    = #{notice},
+	      modi_date = SYSDATE()
+	  WHERE s_id = #{sId}
+	</update>
+	
+	<update id="updateShopInfo" parameterType="map">
+	  UPDATE shop
+	  SET s_info    = #{sInfo},
+	      modi_date = SYSDATE()
+	  WHERE s_id = #{sId}
+	</update>
+
 </mapper>	

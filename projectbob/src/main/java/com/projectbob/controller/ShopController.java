@@ -2,9 +2,8 @@ package com.projectbob.controller;
 
 import org.springframework.beans.factory.annotation.*;
 
-import java.io.IOException;
 import java.util.*;
-import java.security.Principal;
+import java.io.*;
 import java.sql.Timestamp;
 
 import org.springframework.stereotype.Controller;
@@ -17,8 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
@@ -36,23 +34,19 @@ public class ShopController {
 			@RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 
 			@RequestParam("phone") String phone, @RequestParam("name") String name, 
 			@RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1, 
-			@RequestParam("address2") String address2, Model model ) { //@RequestParam("sLicense") MultipartFile sLicenseFile
+			@RequestParam("address2") String address2, @RequestParam("sPicture") MultipartFile sPictureFile, 
+			@RequestParam("sLicense") MultipartFile sLicenseFile, Model model ) { 
 		
-		/*String sLicenseUrl = null; // DB에 저장할 사업자등록증 URL
+		String sLicenseUrl = null;
+		String sPictureUrl = null;
 
-        try {
-            // 1. 사업자등록증 파일을 FileUploadService를 통해 업로드
-            // "business-licenses/"는 images/ 하위의 폴더
+        try { 
             sLicenseUrl = fileUploadService.uploadFile(sLicenseFile, "business-licenses/");
             System.out.println("사업자등록증 업로드 성공. URL: " + sLicenseUrl);
-
-            // // 2. (선택) 가게 사진도 있다면 동일하게 업로드
-            // String shopImageUrl = null;
-            // if (shopImageFile != null && !shopImageFile.isEmpty()) {
-            //     shopImageUrl = fileUploadService.uploadFile(shopImageFile, "shop-images/"); // 가게 사진 전용 폴더
-            //     System.out.println("가게 사진 업로드 성공. URL: " + shopImageUrl);
-            // }
-
+            if (sPictureFile != null && !sPictureFile.isEmpty()) {
+            	sPictureUrl = fileUploadService.uploadFile(sPictureFile, "shop/");
+            	System.out.println("가게 사진 업로드 성공. URL: " + sPictureUrl);
+            }
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage()); // 파일이 비어있는 경우
             return "/shop/shopJoinForm";
@@ -60,7 +54,7 @@ public class ShopController {
             e.printStackTrace();
             model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
             return "/shop/shopJoinForm";
-        */
+        }
 		
         Shop shop = new Shop();
         shop.setId(id);
@@ -71,7 +65,8 @@ public class ShopController {
         shop.setZipcode(zipcode);
         shop.setAddress1(address1);
         shop.setAddress2(address2);
-        //shop.setSLicenseURL(sLicenseUrl);
+        shop.setSPictureUrl(sPictureUrl);
+        shop.setSLicenseUrl(sLicenseUrl);
         shopService.insertShop(shop);
 
         model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
@@ -143,7 +138,7 @@ public class ShopController {
         model.addAttribute("shop", new Shop());
         return "shop/shopJoinForm";
     }
-
+    
     @GetMapping("/shopInfo")
     public String shopInfo() {
         return "shop/shopInfo";
@@ -374,6 +369,58 @@ public class ShopController {
 	    }
 	    return "shop/shopStatus"; 
 	}
+	
+	// ── 사장님 공지 보기 ─────────────────────────────
+    @GetMapping("/shopNotice")
+    public String showNotice(
+            @RequestParam("s_id") Integer sId,
+            @SessionAttribute(name = "loginId", required = false) String loginId,
+            HttpSession session,
+            Model model) {
+        if (loginId == null) {
+            return "redirect:/login";
+        }
+        // 소유권 체크
+        Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
+        if (shop == null) {
+            model.addAttribute("errorMessage", "권한이 없거나 가게를 찾을 수 없습니다.");
+            return "shop/errorPage";
+        }
+        model.addAttribute("shop", shop);
+        return "shop/shopNotice";
+    }
+
+    // ── 사장님 공지 & 가게소개 저장 ─────────────────────────────
+    @PostMapping("/shopNotice")
+    public String updateNotice(
+            @RequestParam("s_id") Integer sId,
+            @RequestParam(value = "notice", required = false) String notice,
+            @RequestParam(value = "s_info", required = false) String sInfo,
+            @RequestParam("action") String action,
+            @SessionAttribute(name = "loginId", required = false) String loginId,
+            RedirectAttributes ra) {
+
+        if (loginId == null) {
+            return "redirect:/login";
+        }
+
+        // 권한 확인
+        Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
+        if (shop == null) {
+            ra.addFlashAttribute("errorMessage", "권한이 없거나 가게를 찾을 수 없습니다.");
+            return "redirect:/shopNotice?s_id=" + sId;
+        }
+
+        if ("notice".equals(action)) {
+            shopService.updateShopNotice(sId, notice);
+            ra.addFlashAttribute("message", "공지사항이 저장되었습니다.");
+        } else if ("info".equals(action)) {
+            shopService.updateShopInfo(sId, sInfo);
+            ra.addFlashAttribute("message", "가게소개가 저장되었습니다.");
+        }
+
+        return "redirect:/shopNotice?s_id=" + sId;
+    }
 
 	/* ----------------------- 전역 타이틀 ----------------------- */
     @ControllerAdvice
@@ -386,6 +433,7 @@ public class ShopController {
             else if (uri.contains("shopOpenTime")) pageTitle = "영업시간";
             else if (uri.contains("shopStatus")) pageTitle = "영업상태";
             else if (uri.contains("menu")) pageTitle = "메뉴관리";
+            else if (uri.contains("shopNotice")) pageTitle = "사장님 공지";
 
             model.addAttribute("pageTitle", pageTitle);
         }

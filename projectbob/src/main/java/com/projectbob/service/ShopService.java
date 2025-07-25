@@ -1,6 +1,7 @@
 package com.projectbob.service;
 
 import java.io.*;
+import java.sql.Timestamp;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.*;
@@ -83,17 +84,7 @@ public class ShopService {
 	    Menu menu = shopMapper.getMenuById(mId); // 1. 메뉴 기본 정보 로드
 	    if (menu != null) {
 	        List<MenuOption> options = shopMapper.getMenuOptionsByMenuId(mId); // 2. 메뉴 옵션 로드
-
-	        // ★★★ 이 지점 (2번 라인 바로 다음)에 브레이크포인트 설정 ★★★
-	        // 이 시점에서 `options` 리스트의 내용을 디버거의 변수 창에서 확인하세요.
-	        // 예를 들어, mId가 7인 메뉴를 불러왔다면, options 리스트에 2개의 MenuOption 객체가 담겨 있어야 합니다.
-	        // 각 MenuOption 객체의 필드(mOption, content, price 등)에 값이 제대로 들어있는지 확인하세요.
-
 	        menu.setOptions(options); // 3. 로드된 옵션을 Menu 객체에 설정
-
-	        // ★★★ 이 지점 (3번 라인 바로 다음)에도 브레이크포인트 설정 ★★★
-	        // 이 시점에서 `menu` 객체 자체를 확인하세요.
-	        // `menu.options` 필드에 방금 로드한 options 리스트가 제대로 설정되어 있는지 확인합니다.
 	    }
 	    return menu;
 	}
@@ -194,6 +185,34 @@ public class ShopService {
 		shopMapper.insertShop(shop);
 	}
 	
+	@Transactional
+	public void insertShop(Shop shop, MultipartFile sPicture, MultipartFile sLicense) throws IOException {
+		//이미지 파일 처리
+		if (sLicense != null && !sLicense.isEmpty()) {
+			try {
+				String fileUrl = fileUploadService.uploadFile(sLicense, "shop");
+				shop.setSLicenseUrl(fileUrl);
+			} catch (IllegalArgumentException e) {
+				log.warn("메뉴 등록: 라이센스 업로드 오류 - "+ e.getMessage());
+				shop.setSLicenseUrl(null);
+			}
+		} else {
+			shop.setSLicenseUrl(null); //파일이 없을 시 null 로
+		}
+		if (sPicture != null && !sPicture.isEmpty()) {
+			try {
+				String fileUrl = fileUploadService.uploadFile(sPicture, "shop");
+				shop.setSPictureUrl(fileUrl);
+			} catch (IllegalArgumentException e) {
+				log.warn("메뉴 등록: 가게사진 업로드 오류 - "+ e.getMessage());
+				shop.setSPictureUrl(null);
+			}
+		} else {
+			shop.setSPictureUrl(null); //파일이 없을 시 null 로
+		}
+		shopMapper.insertShop(shop);
+	}
+	
 	//가게 리스트
 	public List<Shop> shopList() {
 		return shopMapper.shopList();
@@ -281,4 +300,15 @@ public class ShopService {
 	    return lines;
 	}
 	
+	// 사장님 공지 & 정보 업데이트
+	@Transactional
+    public void updateShopNotice(Integer sId, String notice) {
+        shopMapper.updateShopNotice(sId, notice);
+    }
+
+    @Transactional
+    public void updateShopInfo(Integer sId, String sInfo) {
+        shopMapper.updateShopInfo(sId, sInfo);
+    }
+    
 }
