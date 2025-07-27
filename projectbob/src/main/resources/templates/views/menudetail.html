@@ -255,95 +255,63 @@
 				</div>
 
 				<div class="col-12 col-md-4">
-					<div class="card order-summary p-3">
-						<h5 class="card-title mb-3">주문표</h5>
+				    <div class="card order-summary p-3">
+				        <h5 class="card-title mb-3">주문표</h5>
 
-						<div class="order-item-list mb-3">
-							<!-- 장바구니 비어있을 때 메시지 -->
+				        <div class="order-item-list mb-3">
 							<div id="emptyOrderMessage"
-								class="text-muted fst-italic small text-center"
-								th:if="${#lists.isEmpty(cartList)}">주문한 메뉴가 없습니다.</div>
-							<!-- 메인메뉴 반복 (ca_pid가 null인 항목만) -->
-							<!-- 각 메인 메뉴 항목에 고유한 data-ca-id 속성을 추가하여 JS에서 참조할 수 있도록 합니다. -->
-							<div th:each="mainItem : ${cartList}"
-								th:if="${mainItem.caPid == null}"
-								th:data-ca-id="${mainItem.caId}"
-								class="pb-3 mb-3 border-bottom cart-main-item">
+							                 class="text-muted fst-italic small text-center d-none">주문한 메뉴가 없습니다.</div>
+				            
+				            <div th:each="mainItem : ${cartList}"
+				                 th:if="${mainItem.caPid == null}"
+				                 th:data-ca-id="${mainItem.caId}"
+				                 class="pb-3 mb-3 border-bottom cart-main-item">
 
-								<div class="mb-2">
-									<!-- 메인 메뉴 이름 및 가격 -->
-									<div class="fw-bold small mb-1"
-										th:text="|${mainItem.menuName} : ${#numbers.formatInteger(mainItem.menuPrice, 0, 'COMMA')} 원|">
-										메인메뉴명 : 0원</div>
+				                <div class="mb-2">
+				                    <div class="fw-bold small mb-1"
+				                         th:text="|${mainItem.menuName} : ${#numbers.formatInteger(mainItem.totalPrice, 0, 'COMMA')}원|">
+				                        메인메뉴명 : 0원</div>
 
-									<!-- 옵션 반복 출력 -->
-									<!-- 현재 mainItem의 caId를 부모 ca_id로 가지는 옵션만 출력합니다. -->
-									<div th:each="optItem : ${cartList}"
-										th:if="${optItem.caPid != null and optItem.caPid == mainItem.caId}"
-										th:data-ca-id="${optItem.caId}"
-										class="text-muted small ms-3 mb-1 cart-option-item"
-										th:text="|└ 옵션: ${optItem.optionName} (${#numbers.formatInteger(optItem.optionPrice, 0, 'COMMA')}원)|">
-										└ 옵션: 옵션명 (0원)</div>
+				                    <div th:each="optItem : ${cartList}"
+				                         th:if="${optItem.caPid != null and optItem.caPid == mainItem.caId}"
+				                         th:data-ca-id="${optItem.caId}"
+				                         class="text-muted small ms-3 mb-1 cart-option-item"
+				                         th:text="|└ 옵션: ${optItem.optionName} (${#numbers.formatInteger(optItem.totalPrice, 0, 'COMMA')}원)|">
+				                        └ 옵션: 옵션명 (0원)</div>
 
-									<!-- 총 가격 (해당 메인 메뉴 + 옵션들의 합계) -->
-									<!-- 이 totalPrice는 현재 mainItem의 totalPrice를 사용해야 합니다.
-                                         컨트롤러에서 이 값을 정확히 계산하여 넘겨줘야 합니다.
-                                         현재는 각 카트 항목의 total_price가 해당 항목만의 가격이므로,
-                                         여기서는 mainItem.totalPrice를 표시하고,
-                                         전체 장바구니의 총 가격은 아래 '총 결제 금액'에서 표시하는 것이 일반적입니다. -->
-									<div>
-										항목 총 금액: <span
-											th:text="${#numbers.formatInteger(mainItem.itemGroupTotalPrice, 0, 'COMMA')} + '원'">0원</span>
-									</div>
+				                    <div class="d-flex justify-content-between align-items-center mt-2">
+				                        <div class="d-flex align-items-center">
+				                            <button class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-minus"
+				                                    th:data-ca-id="${mainItem.caId}" style="font-size: 0.75rem;">−</button>
+				                            <input type="text"
+				                                   class="form-control form-control-sm mx-1 text-center quantity-input"
+				                                   th:value="${mainItem.quantity}" readonly
+				                                   th:data-ca-id="${mainItem.caId}"
+				                                   style="width: 32px; height: 26px; font-size: 0.75rem; padding: 0;">
+				                            <button class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-plus"
+				                                    th:data-ca-id="${mainItem.caId}" style="font-size: 0.75rem;">+</button>
+				                        </div>
+				                        <button class="btn btn-outline-danger btn-sm py-0 px-2 btn-delete-main-item"
+				                                th:data-ca-id="${mainItem.caId}" style="font-size: 0.75rem;">x</button>
+				                    </div>
+				                </div>
+				            </div>
+				        </div>
 
+				        <div id="totalOrderPrice" class="mb-2 fw-bold">
+				            총 결제 금액: <span
+				                th:text="${#numbers.formatInteger(totalPrice, 0, 'COMMA')} + '원'">0원</span>
+				        </div>
+				        <div id="orderSummaryInfo" class="mb-3"
+				             th:classappend="${#lists.isEmpty(cartList)} ? 'd-none' : ''">
+				            <small class="text-muted d-block mt-1"> (배달비 3,000원 추가) </small>
+				        </div>
 
-									<!-- 수량 조절 및 삭제 버튼 -->
-									<div
-										class="d-flex justify-content-between align-items-center mt-2">
-										<div class="d-flex align-items-center">
-											<button
-												class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-minus"
-												th:data-ca-id="${mainItem.caId}" style="font-size: 0.75rem;">−</button>
-											<input type="text"
-												class="form-control form-control-sm mx-1 text-center quantity-input"
-												th:value="${mainItem.quantity}" readonly
-												th:data-ca-id="${mainItem.caId}"
-												style="width: 32px; height: 26px; font-size: 0.75rem; padding: 0;">
-											<button
-												class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-plus"
-												th:data-ca-id="${mainItem.caId}" style="font-size: 0.75rem;">+</button>
-										</div>
-										<button
-											class="btn btn-outline-danger btn-sm py-0 px-2 btn-delete-main-item"
-											th:data-ca-id="${mainItem.caId}" style="font-size: 0.75rem;">x</button>
-									</div>
-								</div>
-							</div>
-						</div>
+				        <button class="btn btn-danger w-100 btn-sm mb-2" id="btnRemoveAllItems">주문 전체 취소</button>
+				        <button class="btn btn-sm w-100 text-white" type="button"  id="btnOrderNow" style="background-color: #43d091;">주문하기</button>
 
-						<!-- 전체 장바구니 총 결제 금액 표시 -->
-						<div id="totalOrderPrice" class="mb-2 fw-bold"
-							th:if="${not #lists.isEmpty(cartList)}">
-							총 결제 금액: <span
-								th:text="${#numbers.formatInteger(totalPrice, 0, 'COMMA')} + '원'">0원</span>
-						</div>
-
-						<!-- 배달비 멘트만 남김 -->
-						<div id="orderSummaryInfo" class="mb-3"
-							th:classappend="${#lists.isEmpty(cartList)} ? 'd-none' : ''">
-							<small class="text-muted d-block mt-1"> (배달비 3,000원 포함) </small>
-						</div>
-
-						<!-- 버튼 -->
-						<button class="btn btn-danger w-100 btn-sm mb-2"
-							id="btnRemoveAllItems">주문 전체 취소</button>
-						<!-- ID 변경 -->
-						<button class="btn btn-sm w-100 text-white" id="btnOrderNow"
-							style="background-color: #43d091;">주문하기</button>
-
-						<!-- 비회원용 guest ID -->
-						<div id="guestInfo" th:data-guest-id="${session.guestId}"></div>
-					</div>
+				        <div id="guestInfo" th:data-guest-id="${session.guestId}"></div>
+				    </div>
 				</div>
 
 			</div>

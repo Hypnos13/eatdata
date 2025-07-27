@@ -37,6 +37,8 @@ public class Cart {
 	    private Timestamp modiDate; // 수정일
 	    private String status; // 상태 (예: '일반', '주문완료')
 	    private Integer totalPrice; // 이 카트 항목의 총 가격 (메뉴 가격 * 수량 또는 옵션 가격 * 수량)
+	    
+	    private Integer unitPrice;
 
 	    // DB 컬럼에는 직접 매핑되지 않지만, 조회 시 조인하여 가져오거나
 	    // 클라이언트와의 통신(DTO)을 위해 필요한 필드들

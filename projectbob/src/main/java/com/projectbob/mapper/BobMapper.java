@@ -14,7 +14,21 @@ import com.projectbob.domain.Shop;
 
 @Mapper
 public interface BobMapper {
-	
+	  /**
+     * 특정 장바구니 항목(caId)의 상세 정보를 조회합니다.
+     * (메뉴의 m_id와 옵션의 mo_id를 포함)
+     */
+    Cart selectCartItemDetails(Integer caId);
+
+    /**
+     * 특정 메뉴의 기본 가격을 조회합니다.
+     */
+    Integer selectMenuBasePrice(Integer mId);
+
+    /**
+     * 특정 장바구니 메인 항목(caId)에 연결된 모든 옵션들의 기본 가격 합계를 조회합니다.
+     */
+    Integer selectTotalOptionPriceForCartItem(Integer caId);
     
     /**
      * 장바구니 항목의 수량을 업데이트합니다.

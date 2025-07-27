@@ -5,8 +5,45 @@ let selectedShopId = null;
 let currentQuantity = 1; // 'count' 대신 'currentQuantity'로 변수명 변경 (혼동 방지)
 window.currentUserId = null;  // 로그인 시 서버에서 주입 (예: Thymeleaf)
 window.currentGuestId = null; // 서버에서 발급받아 세션에 있으면 가져옴
+let currentCartData = []; 
+let currentTotalPrice = 0;
+let currentTotalQuantity = 0;
 
 const defaultMenuImage = "https://i.imgur.com/Sg4b61a.png";
+
+$('#btnOrderNow').on('click', function() {
+
+    // 서버로 보낼 주문 데이터 객체 구성
+    const orderData = {
+        cartList: currentCartData,       // 현재 장바구니의 모든 아이템 상세 정보
+        totalPrice: currentTotalPrice,   // 장바구니 총 가격
+        totalQuantity: currentTotalQuantity, // 장바구니 총 수량 (메인 메뉴 기준)
+        userId: window.currentUserId,    // 전역 변수 userId 사용
+        guestId: window.currentGuestId,  // 전역 변수 guestId 사용
+        // shopId는 장바구니 아이템이 하나라도 있다면 첫 번째 아이템의 sId를 사용
+        shopId: currentCartData[0] ? currentCartData[0].sId : null
+    };
+
+    // AJAX POST 요청으로 서버에 데이터 전송
+    $.ajax({
+        url: '/payjs', // POST 요청을 보낼 URL
+        type: 'POST', // POST 메소드 사용
+        contentType: 'application/json', // JSON 형식으로 데이터 전송
+        data: JSON.stringify(orderData), // JavaScript 객체를 JSON 문자열로 변환
+        success: function(response, textStatus, xhr) {
+            // 서버가 HTML 페이지를 반환할 것으로 예상됩니다.
+            // 받은 HTML을 현재 페이지의 body에 덮어씌우는 방식으로 처리합니다.
+            document.open();
+            document.write(response);
+            document.close();
+        },
+        error: function(xhr, status, error) {
+            // AJAX 요청 자체에서 오류가 발생한 경우 (네트워크 문제, 서버 응답 없음 등)
+            console.error("주문 처리 AJAX 오류:", status, error, xhr.responseText);
+            alert('주문 처리 중 서버 통신 오류가 발생했습니다.');
+        }
+    });
+});
 
 // ==============================
 // 메뉴카드 클릭 시 모달창 열기 및 옵션 로드
@@ -99,41 +136,69 @@ $(document).on("click", "#btnAddExtras", function () {
     selectedOptionPrices.push(parseInt($(this).data("price")) || 0);
   });
 
-  // 옵션 가격 합산 (단위 가격 합산)
-  const totalOptionUnitPrice = selectedOptionPrices.reduce((a, b) => a + b, 0);
+  const mainMenuCartItem = {
+      mId: selectedMenuId,
+      moIds: null, // 메인 메뉴 항목에는 moIds를 보내지 않습니다.
+      optionPrices: null, // 메인 메뉴 항목에는 optionPrices를 보내지 않습니다.
+                          // 이들은 별도의 옵션 Cart 항목으로 처리됩니다.
+      quantity: quantity,
+      sId: selectedShopId,
+      menuPrice: selectedMenuPrice, // 메인 메뉴의 순수 기본 단가 (13000)
+      // mainMenuCartItem의 unitPrice는 순수 메뉴 단가만 포함합니다.
+      unitPrice: selectedMenuPrice, // 13000
+      // mainMenuCartItem의 totalPrice는 순수 메뉴 단가 * 수량입니다.
+      totalPrice: selectedMenuPrice * quantity, // 13000 * 1 = 13000
+      menuName: selectedMenuName,
+      id: window.currentUserId,
+      guestId: window.currentGuestId
+    };
 
-  // 이 cartItems는 백엔드의 processAndAddCartItems 메서드에서 List<Cart> cartItems 파라미터로 받습니다.
-  // 여기서의 totalPrice는 해당 '메뉴 + 선택된 옵션들' 그룹의 총 가격을 의미합니다.
-  const cartItemsToSend = [{
-    mId: selectedMenuId,
-    moIds: selectedOptionIds.length > 0 ? selectedOptionIds : null,
-    optionPrices: selectedOptionPrices.length > 0 ? selectedOptionPrices : null,
-    quantity: quantity,
-    sId: selectedShopId,
-    menuPrice: selectedMenuPrice, // 메인 메뉴의 단일 가격
-    optionPrice: totalOptionUnitPrice, // 선택된 옵션들의 단일 가격 합계
-    totalPrice: (selectedMenuPrice + totalOptionUnitPrice) * quantity, // 이 그룹의 총 가격
-    menuName: selectedMenuName, // 메인 메뉴 이름
-    id: window.currentUserId, // 전역 변수 userId 사용
-    guestId: window.currentGuestId // 전역 변수 guestId 사용
-  }];
+    // 백엔드로 보낼 최종 장바구니 항목 배열.
+    // 첫 번째 요소는 메인 메뉴 항목입니다.
+    const cartItemsToSend = [mainMenuCartItem];
+
+    // 선택된 옵션들이 있다면, 각 옵션에 대한 별도의 Cart 항목을 배열에 추가합니다.
+    if (selectedOptionIds.length > 0) {
+      for (let i = 0; i < selectedOptionIds.length; i++) {
+        const optionId = selectedOptionIds[i];
+        const optionPrice = selectedOptionPrices[i];
+
+        const optionCartItem = {
+          mId: selectedMenuId, // 어떤 메뉴의 옵션인지 알기 위해 mId 포함
+          moIds: [optionId], // 단일 옵션 ID 배열
+          optionPrices: [optionPrice], // 단일 옵션 가격 배열
+          quantity: quantity, // 옵션도 메인 메뉴와 동일한 수량
+          sId: selectedShopId,
+          menuPrice: 0, // 옵션 항목은 menuPrice가 없습니다.
+          // 옵션의 unitPrice는 해당 옵션의 순수 단가입니다.
+          unitPrice: optionPrice,
+          // 옵션의 totalPrice는 옵션의 순수 단가 * 수량입니다.
+          totalPrice: optionPrice * quantity, // 3000 * 1 = 3000
+          // menuName은 메인 메뉴에만 있습니다.
+          optionName: $(`#option-${optionId}`).siblings('label').text().split('(')[0].trim(), // 옵션명 가져오기
+          id: window.currentUserId,
+          guestId: window.currentGuestId
+        };
+        cartItemsToSend.push(optionCartItem);
+      }
+    }
 
   console.log("장바구니에 담기는 데이터 (프론트엔드에서 전송):", cartItemsToSend);
 
   $.ajax({
     type: "POST",
-    url: "/addCart", // 컨트롤러의 매핑 경로에 맞게 수정
+    url: "/addCart", 
     contentType: "application/json",
     data: JSON.stringify(cartItemsToSend),
     success: function (response) {
       if (response.success && response.cartList) {
         console.log("장바구니에 추가되었습니다.");
-        // 서버에서 반환된 전체 장바구니 목록으로 UI 업데이트
+ 
         updateOrderSummary(response.cartList, response.totalPrice);
 
         const modalEl = document.getElementById("addMenuModal");
         const modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide(); // 모달 닫기
+        modal.hide(); 
       } else {
         console.error("장바구니 추가 실패:", response.message || "알 수 없는 오류");
         alert("장바구니 추가 실패: " + (response.message || "알 수 없는 오류"));
@@ -156,9 +221,7 @@ $(document).ready(function() {
   if (guestInfoElem) {
     window.currentGuestId = guestInfoElem.dataset.guestId;
   }
-
-  // userId는 로그인 시 서버에서 직접 window.currentUserId에 할당하는 방식이 더 안정적입니다.
-  // 예: <script th:inline="javascript"> window.currentUserId = [[${#authentication.name}]]; </script>
+  loadCartItems();
 
 });
 
@@ -169,74 +232,66 @@ $(document).ready(function() {
 // totalCartPrice: 서버에서 계산된 전체 장바구니의 총 가격
 // ==============================
 function updateOrderSummary(cartList, totalCartPrice) {
-  const $orderItemList = $(".order-item-list");
-  const $emptyOrderMessage = $("#emptyOrderMessage");
-  const $totalOrderPriceDisplay = $("#totalOrderPrice"); // HTML에서 ID 변경됨
-  const $orderSummaryInfo = $("#orderSummaryInfo"); // 배달비 멘트 포함 섹션
+    const $orderItemList = $(".order-item-list");
+    const $emptyOrderMessage = $("#emptyOrderMessage");
+    const $orderSummaryInfo = $("#orderSummaryInfo");
 
-  $orderItemList.empty(); // 기존 목록 비우기
+    $orderItemList.empty(); // 기존 목록 비우기
 
-  if (!cartList || cartList.length === 0) {
-    $emptyOrderMessage.text("주문한 메뉴가 없습니다.").removeClass("d-none").show();
-    $orderSummaryInfo.addClass("d-none").hide(); // 배달비 멘트 숨기기
-    $totalOrderPriceDisplay.addClass("d-none").hide(); // 총 결제 금액 숨기기
-    return;
-  }
+    if (!cartList || cartList.length === 0) {
+        $emptyOrderMessage.text("주문한 메뉴가 없습니다.").removeClass("d-none").show();
+        $orderSummaryInfo.addClass("d-none").hide();
+        updateOverallTotalPriceDisplay(0); // 총액도 0으로 설정
+        return;
+    }
 
-  $emptyOrderMessage.addClass("d-none").hide();
-  $orderSummaryInfo.removeClass("d-none").show(); // 배달비 멘트 표시
+    $emptyOrderMessage.addClass("d-none").hide();
+    $orderSummaryInfo.removeClass("d-none").show();
 
-  // 메인 메뉴만 필터링 (ca_pid가 null)
-  const mainMenus = cartList.filter(item => item.caPid == null);
+    // 메인 메뉴만 필터링 (ca_pid가 null)
+    const mainMenus = cartList.filter(item => item.caPid == null);
 
-  mainMenus.forEach(mainItem => {
-    // 해당 메인 메뉴에 딸린 옵션 필터링 (ca_pid가 현재 mainItem의 caId와 일치)
-    const options = cartList.filter(opt => opt.caPid != null && opt.caPid === mainItem.caId);
+    mainMenus.forEach(mainItem => {
+        // 해당 메인 메뉴에 딸린 옵션 필터링
+        const options = cartList.filter(opt => opt.caPid != null && opt.caPid === mainItem.caId);
 
-    // 옵션 HTML 생성
-    let optionHtml = "";
-    options.forEach(opt => {
-      const optName = opt.optionName || "옵션명 없음";
-      const optPrice = opt.totalPrice || 0; // 옵션 항목의 totalPrice는 이미 (옵션단가 * 수량)
-      optionHtml += `
-        <div class="text-muted small ms-3 mb-1" data-ca-id="${opt.caId}">
-          └ 옵션: ${optName} (${optPrice.toLocaleString()}원)
-        </div>
-      `;
-    });
+        let optionHtml = "";
+		options.forEach(opt => {
+		  
+		    const optName = opt.optionName || "옵션명 없음"; // 여기서 정의!
+		    const optPrice = opt.unitPrice || 0; // 옵션 가격은 unitPrice를 사용 (totalPrice는 수량까지 곱해진 값)
+		    optionHtml += `
+		        <div class="text-muted small ms-3 mb-1 cart-option-item" data-ca-id="${opt.caId}">
+		          └ 옵션: ${optName} (+${optPrice.toLocaleString()}원)
+		        </div>
+		    `;
+		});
 
-    const quantity = mainItem.quantity || 0;
-    // 메인 메뉴 항목의 totalPrice는 이미 (메뉴단가 * 수량)으로 계산되어 넘어옴
-    // 여기에 옵션들의 totalPrice를 합산하여 이 '그룹'의 최종 금액을 표시
-    const itemGroupTotal = mainItem.totalPrice + options.reduce((sum, opt) => sum + (opt.totalPrice || 0), 0);
+        const quantity = mainItem.quantity || 0;
+        const menuBasePrice = mainItem.menuPrice || 0; // 메뉴의 순수 단가
+
+		const html = `
+		           <div class="pb-3 mb-3 border-bottom cart-main-item" data-ca-id="${mainItem.caId}">
+		               <div class="mb-2">
+		                   <div class="fw-bold small mb-1">${mainItem.menuName} : ${menuBasePrice.toLocaleString()}원</div>
+		                   ${optionHtml}
+		                   <div class="d-flex justify-content-between align-items-center mt-2">
+		                       <div class="d-flex align-items-center">
+		                           <button class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-minus" data-ca-id="${mainItem.caId}">−</button>
+		                           <input type="text" class="form-control form-control-sm mx-1 text-center quantity-input" value="${quantity}" readonly data-ca-id="${mainItem.caId}" style="width: 32px; height: 26px; font-size: 0.75rem; padding: 0;">
+		                           <button class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-plus" data-ca-id="${mainItem.caId}">+</button>
+		                       </div>
+		                       <button class="btn btn-outline-danger btn-sm py-0 px-2 btn-delete-main-item" data-ca-id="${mainItem.caId}">x</button>
+		                   </div>
+		               </div>
+		           </div>
+		       `;
+		       $orderItemList.append(html);
+		   });
 
 
-    const html = `
-      <div class="pb-3 mb-3 border-bottom cart-main-item" data-ca-id="${mainItem.caId}">
-        <div class="mb-2">
-          <div class="fw-bold small mb-1">${mainItem.menuName} : ${mainItem.menuPrice.toLocaleString()}원</div>
-          ${optionHtml}
-          <div>
-            총 금액: <span class="item-group-total-price">${itemGroupTotal.toLocaleString()}원</span>
-          </div>
-          <div class="d-flex justify-content-between align-items-center mt-2">
-            <div class="d-flex align-items-center">
-              <button class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-minus" data-ca-id="${mainItem.caId}">−</button>
-              <input type="text" class="form-control form-control-sm mx-1 text-center quantity-input" value="${quantity}" readonly data-ca-id="${mainItem.caId}" style="width: 32px; height: 26px; font-size: 0.75rem; padding: 0;">
-              <button class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-plus" data-ca-id="${mainItem.caId}">+</button>
-            </div>
-            <button class="btn btn-outline-danger btn-sm py-0 px-2 btn-delete-main-item" data-ca-id="${mainItem.caId}">x</button>
-          </div>
-        </div>
-      </div>
-    `;
-    $orderItemList.append(html);
-  });
-
-  // 전체 장바구니 총 결제 금액 업데이트
-  $totalOrderPriceDisplay.text(`총 결제 금액: ${totalCartPrice.toLocaleString()}원`).removeClass("d-none").show();
+		   updateOverallTotalPriceDisplay(totalCartPrice);
 }
-
 
 // ==============================
 // 전체 삭제 버튼 (#btnRemoveAllItems)
@@ -286,11 +341,7 @@ $("#btnRemoveAllItems").click(function () { // "장바구니 전체 삭제" 버�
 	            if (response.success) {
 	                console.log("장바구니가 모두 삭제되었습니다. 서버 응답:", response);
 	                alert(response.message || "장바구니의 모든 항목이 삭제되었습니다.");
-
-	                // --- sId를 포함하여 /MenuDetail 페이지로 이동 ---
-	                window.location.href = '/MenuDetail?sId=' + sId;
-	                // ---------------------------------------------
-
+					loadCartItems();
 	            } else {
 	                console.error("전체 삭제 중 오류 발생:", response.message || "알 수 없는 오류");
 	                alert("장바구니 전체 삭제 실패: " + (response.message || "알 수 없는 오류"));
@@ -333,6 +384,7 @@ $(document).on("click", ".btn-delete-main-item", function() {
     }
 });
 
+
 // ==============================
 // 장바구니 항목 수량 업데이트 함수 (AJAX)
 // ==============================
@@ -345,14 +397,15 @@ function updateCartItemQuantity(caId, newQuantity) {
     };
 
     $.ajax({
-        url: "/cart/updateQuantity", // 컨트롤러에 해당 엔드포인트가 필요합니다.
+        url: "/updateQuantity",
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify(requestData),
         success: function(response) {
             if (response.success && response.cartList) {
                 console.log(`카트 항목 ${caId} 수량 ${newQuantity}로 업데이트 성공.`);
-                updateOrderSummary(response.cartList, response.totalPrice);
+				$(`.quantity-input[data-ca-id="${caId}"]`).val(newQuantity);
+                updateOverallTotalPriceDisplay(response.totalPrice);
             } else {
                 console.error("수량 업데이트 실패:", response.message || "알 수 없는 오류");
                 alert("수량 업데이트 실패: " + (response.message || "알 수 없는 오류"));
@@ -381,10 +434,12 @@ function deleteCartItem(caId) {
         contentType: "application/json",
         data: JSON.stringify(requestData),
         success: function(response) {
-            if (response.success && response.cartList) {
+            if (response.success) {
                 console.log(`카트 항목 ${caId} 및 관련 옵션 삭제 성공.`);
-                updateOrderSummary(response.cartList, response.totalPrice);
-                alert("선택된 메뉴 항목이 장바구니에서 삭제되었습니다.");
+                console.log("선택된 메뉴 항목이 장바구니에서 삭제되었습니다.");
+				$(`.cart-main-item[data-ca-id="${caId}"]`).remove();
+				               
+				loadCartItems();  // 장바구니 전체를 다시 로드하여 빈 상태를 정확히 반영
             } else {
                 console.error("항목 삭제 실패:", response.message || "알 수 없는 오류");
                 alert("항목 삭제 실패: " + (response.message || "알 수 없는 오류"));
@@ -397,6 +452,48 @@ function deleteCartItem(caId) {
     });
 }
 
+// ==============================
+// **변경:** 전체 장바구니 UI를 다시 그리지 않고, 총 결제 금액만 업데이트하는 새로운 함수
+// ==============================
+function updateOverallTotalPriceDisplay(totalCartPrice) {
+    const $totalOrderPriceDisplay = $("#totalOrderPrice");
+    $totalOrderPriceDisplay.text(`총 결제 금액: ${totalCartPrice.toLocaleString()}원`).removeClass("d-none").show();
+}
+
+//장바구니 새로고침해주는 함수
+function loadCartItems() {
+    const requestData = {};
+    if (window.currentUserId && window.currentUserId.trim() !== '') {
+        requestData.id = window.currentUserId;
+    } else if (window.currentGuestId && window.currentGuestId.trim() !== '') {
+        requestData.guestId = window.currentGuestId;
+    } else {
+        console.log("사용자/게스트 ID 없음, 빈 장바구니 표시."); 
+        updateOrderSummary([], 0); // 사용자 ID나 게스트 ID가 없으면 즉시 빈 장바구니 표시
+        return;
+    }
+
+    console.log("AJAX 요청 시작: /getCart", requestData); 
+    $.ajax({
+        url: "/getCart",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(requestData),
+        success: function(response) {
+            console.log("AJAX 성공: /getCart 응답:", response); 
+            if (response.success && response.cartList) {
+                updateOrderSummary(response.cartList, response.totalPrice);
+            } else {
+                console.error("장바구니 로드 실패 (서버 응답):", response.message || "알 수 없는 오류");
+                updateOrderSummary([], 0); // 실패 시에도 빈 장바구니 표시
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("AJAX 오류: /getCart", status, error, xhr.responseText); 
+            updateOrderSummary([], 0); // 오류 시에도 빈 장바구니 표시
+        }
+    });
+}
 
 // ==============================
 // 기존 DOMContentLoaded 내 기존 스크립트 (변수명 'count' -> 'currentQuantity' 변경)

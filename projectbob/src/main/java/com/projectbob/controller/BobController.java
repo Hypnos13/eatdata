@@ -61,6 +61,8 @@ public class BobController {
 		  public String getMenuDetail(Model model,HttpSession session,	  
 		  @RequestParam("sId") int sId) {
 		  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", sId); // 가게 정보 가져오기
+		  session.setAttribute("lastShopId", sId);
+		  
 		  Shop shop = bobService.getShopDetail(sId);
 		  List<Menu> menuList = bobService.getMenuListByShopId(sId);
 		  model.addAttribute("shop", shop);
@@ -77,26 +79,20 @@ public class BobController {
 		  }
 		  model.addAttribute("reviewAvg", reviewAvg);
 		  
-		  String userId = null;  // 로그인 회원 아이디 (예: 세션이나 인증에서 가져오기)
-		    // 예시: userId = (String) session.getAttribute("userId");
+		  String userId = (String) session.getAttribute("userId");
 		    String guestId = (String) session.getAttribute("guestId"); // 비회원 guestId
 
-		    // 카트 정보 조회 (회원 or 비회원)
-		    List<Cart> cartList = bobService.getCartByUser(userId, guestId);
+		    CartSummaryDto cartSummary = bobService.getCartByUser(userId, guestId);
 
-		    model.addAttribute("cartList", cartList);
+		  List<Cart> cartList = cartSummary.getCartList();
+		  int totalQuantity = cartSummary.getTotalQuantity();
+		  int totalPrice = cartSummary.getTotalPrice();
 		    
-		    int totalQuantity = 0;
-		    int totalPrice = 0;
-		    if (cartList != null) {
-		        for (Cart c : cartList) {
-		            int optionPrice = (c.getOptionPrice() != null) ? c.getOptionPrice() : 0;
-		            totalQuantity += c.getQuantity();
-		            totalPrice += (c.getMenuPrice() + optionPrice) * c.getQuantity();
-		        }
-		    }
-		    model.addAttribute("totalQuantity", totalQuantity);
-		    model.addAttribute("totalPrice", totalPrice);
+		  model.addAttribute("cartList",cartList);
+		  model.addAttribute("totalQuantity",totalQuantity);
+		  model.addAttribute("totalPrice",totalPrice);
+		  log.info("장바구니 총 수량: {}, 총액: {}", totalQuantity, totalPrice); 
+		 
 		  
 		  return "views/MenuDetail"; 
 		  }
@@ -110,24 +106,42 @@ public class BobController {
 		  
 		  
 
-		  // menudetail 에서 pay로 
-		  @PostMapping("/pay")
-		  public String payPage(
-				  @RequestParam("menuId") Long menuId,
-				  @RequestParam("count") int count,
-				  @RequestParam("optionIds") String optionIds,
-				  @RequestParam("totalPrice") int totalPrice,
-				  Model model) {
-			  System.out.println("menuId=" + menuId + " count=" + count + " optionIds=" + optionIds + " totalPrice=" + totalPrice);
-			  model.addAttribute("menuId", menuId);
-			  model.addAttribute("count", count);
-			  model.addAttribute("optionIds", optionIds);
-			  model.addAttribute("totalPrice", totalPrice);
-			  
-			  return "views/pay";			  
+		  //데이터저장용  임시방편
+		  @GetMapping("/pay")
+		  public String payPageGet(HttpSession session, Model model) {
+		      String userId = (String) session.getAttribute("userId");
+		      String guestId = (String) session.getAttribute("guestId");
+
+		      // 세션 기준 주문 내역 조회
+		      CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
+
+		      // 뷰에 데이터 전달
+		      model.addAttribute("orderSummary", cartSummary);
+		      model.addAttribute("orderedItems", cartSummary.getCartList());
+		      model.addAttribute("finalTotalPrice", cartSummary.getTotalPrice());
+
+		      return "views/pay";
 		  }
 		  
-		  
-	  
+		  //스크립트ajax
+		  @PostMapping("/payjs")
+			public String payJsPage(@RequestBody OrderData orderData, HttpSession session, Model model) {
+			    String userId = (String) session.getAttribute("userId");
+			    String guestId = (String) session.getAttribute("guestId");
+
+			    // 주문 처리 (DB 저장)
+			    bobService.processAndAddCartItems(orderData.getCartList(), userId, guestId);
+
+			    // 처리 후 주문 내역 다시 조회
+			    CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
+
+			    // 뷰에 데이터 전달
+			    model.addAttribute("orderSummary", cartSummary);
+			    model.addAttribute("orderedItems", cartSummary.getCartList());
+			    model.addAttribute("finalTotalPrice", cartSummary.getTotalPrice());
+
+			    // views/pay.jsp (또는 pay.html) 뷰를 그대로 렌더링해서 반환
+			    return "views/pay";
+			}
 		
 }

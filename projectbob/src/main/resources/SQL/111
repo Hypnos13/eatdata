@@ -341,8 +341,6 @@ INSERT INTO menu_option (
 );
 
 select * from cart;
-DROP TABLE IF EXISTS cart;
-
 CREATE TABLE IF NOT EXISTS cart (
     ca_id INT AUTO_INCREMENT PRIMARY KEY,             -- 카트 ID (각 카트 항목을 고유하게 식별)
     ca_pid INT NULL,                                  -- 부모 카트 ID (같은 테이블 내의 다른 ca_id를 참조, 그룹화에 사용될 수 있음)
@@ -373,7 +371,7 @@ CREATE TABLE IF NOT EXISTS cart (
 
     -- ca_pid를 ca_id에 대한 외래 키로 추가 (자기 참조)
     CONSTRAINT fk_cart_ca_pid FOREIGN KEY (ca_pid)
-        REFERENCES cart(ca_id) ON DELETE SET NULL ON UPDATE CASCADE
+        REFERENCES cart(ca_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO cart (m_id, mo_id, guest_id, s_id, quantity, total_price, reg_date)

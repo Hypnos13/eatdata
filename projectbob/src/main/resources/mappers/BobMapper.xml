@@ -6,25 +6,17 @@
 
 
     <!-- 장바구니 항목 수량 업데이트 -->
-    <update id="updateCartItemQuantity" parameterType="map">
-        UPDATE cart
-        SET
-            quantity = #{quantity},
-            total_price = #{totalPrice}
-        WHERE
-            ca_id = #{caId}
-            AND (
-                <if test="userId != null and userId.trim() != ''">
-                    id = #{userId}
-                </if>
-                <if test="guestId != null and guestId.trim() != ''">
-                    <if test="userId != null and userId.trim() != ''">
-                        OR
-                    </if>
-                    guest_id = #{guestId}
-                </if>
-            )
-    </update>
+  <update id="updateCartItemQuantity" parameterType="map">
+    UPDATE cart
+    SET
+        quantity = #{quantity},
+        total_price = #{totalPrice}
+    WHERE ca_id = #{caId}
+    AND (
+        (id = #{userId} AND #{userId} IS NOT NULL) OR
+        (guest_id = #{guestId} AND #{guestId} IS NOT NULL)
+    )
+</update>
 
   <!-- 사용자 또는 비회원의 모든 장바구니 항목 삭제 -->
     <delete id="deleteAllCartItemsByUserOrGuest" parameterType="map">
@@ -88,10 +80,10 @@
 
 <!-- 사용자 또는 비회원 ID로 모든 장바구니 항목 조회 (메인 메뉴 및 옵션 포함) -->
 <!-- ca_pid 컬럼도 함께 조회합니다. -->
-<select id="selectCartByUserOrGuest" resultMap="CartDetailResultMap" parameterType="map">
+<select id="selectCartByUserOrGuest" resultType="com.projectbob.domain.Cart" parameterType="map">
   SELECT
     c.ca_id,
-    c.ca_pid,    <!-- ca_pid 컬럼 추가 -->
+    c.ca_pid,
     c.m_id,
     c.mo_id,
     c.id,
@@ -99,25 +91,14 @@
     c.s_id,
     c.quantity,
     c.status,
-    c.total_price,
-    m.name AS menuName,
-    m.price AS menuPrice,
-    mo.content AS optionName,
-    mo.price AS optionPrice
-  FROM cart c
+    c.total_price,        m.name AS menuName,
+    m.price AS menuPrice, mo.content AS optionName,
+    mo.price AS optionPrice FROM cart c
   INNER JOIN menu m ON c.m_id = m.m_id
   LEFT JOIN menu_option mo ON c.mo_id = mo.mo_id
-  <where>
-    <if test="userId != null and userId.trim() != ''">
-      c.id = #{userId}
-    </if>
-    <if test="guestId != null and guestId.trim() != ''">
-      <if test="userId != null and userId.trim() != ''">
-        OR
-      </if>
-      c.guest_id = #{guestId}
-    </if>
-  </where>
+  WHERE (c.id = #{userId} AND #{userId} IS NOT NULL)
+     OR (c.guest_id = #{guestId} AND #{guestId} IS NOT NULL)
+  ORDER BY c.ca_id ASC
 </select>
 
 <!-- 사용자 또는 비회원 ID로 메인 메뉴 장바구니 항목만 조회 (ca_pid가 NULL인 항목) -->
