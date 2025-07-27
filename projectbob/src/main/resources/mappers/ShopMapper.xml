@@ -161,6 +161,8 @@
             s_number = #{sNumber},
             category = #{category},
             info     = #{info},
+            s_pictureURL  = #{sPictureUrl},
+	        s_licenseURL  = #{sLicenseUrl},
             modi_date= #{modiDate}
         WHERE s_id = #{sId}
     </update>

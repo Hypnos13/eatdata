@@ -183,9 +183,34 @@ public class ShopController {
 	
 	//기본정보 수정 로직
     @PostMapping("/shop/updateBasic")
-    public String updateBasicInfo(@ModelAttribute Shop shop) {
+    public String updateBasicInfo(
+            @ModelAttribute Shop shop,
+            @RequestParam(value="sPicture", required=false) MultipartFile sPictureFile,
+            @RequestParam(value="sLicense", required=false) MultipartFile sLicenseFile,
+            Model model) throws IOException {
+
+        // 1) 파일 업로드 처리
+        try {
+            if (sPictureFile != null && !sPictureFile.isEmpty()) {
+                String picUrl = fileUploadService.uploadFile(sPictureFile, "shop");
+                shop.setSPictureUrl(picUrl);
+            }
+            if (sLicenseFile != null && !sLicenseFile.isEmpty()) {
+                String licUrl = fileUploadService.uploadFile(sLicenseFile, "business-licenses");
+                shop.setSLicenseUrl(licUrl);
+            }
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "shop/shopBasicSet";
+        }
+
+        // 2) 수정 일시 세팅
         shop.setModiDate(new Timestamp(System.currentTimeMillis()));
+
+        // 3) DB 업데이트
         shopService.updateShopBasicInfo(shop);
+
+        // 4) 뷰로 리다이렉트
         return "redirect:/shopBasicView?s_id=" + shop.getSId();
     }
 	

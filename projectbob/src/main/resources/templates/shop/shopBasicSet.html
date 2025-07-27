@@ -29,6 +29,20 @@
                     <input type="text" name="name" class="form-control" th:value="${shop.name}" maxlength="50" required>
                 </div>
             </div>
+			
+			<!-- 가게 사진 프리뷰 & 변경 -->
+			<div class="mb-3 row">
+			    <label class="col-sm-2 col-form-label fw-semibold">가게 사진</label>
+			    <div class="col-sm-10">
+			        <img th:if="${shop.sPictureUrl}"
+			             th:src="@{${shop.sPictureUrl}}"
+			             alt="가게 사진"
+			             style="max-height:80px; display:block; margin-bottom:0.5rem;" />
+			        <input type="file" name="sPicture" class="form-control" />
+			        <div class="form-text">새 파일을 선택하지 않으면 기존 이미지가 유지됩니다.</div>
+			    </div>
+			</div>
+			
             <div class="mb-3 row align-items-center">
                 <label class="col-sm-2 col-form-label fw-semibold">연락처*</label>
                 <div class="col-sm-10">
@@ -67,6 +81,20 @@
                     <input type="text" name="sNumber" class="form-control" th:value="${shop.sNumber}" maxlength="10" required>
                 </div>
             </div>
+			
+			<!-- 사업자등록증 프리뷰 & 변경 -->
+			<div class="mb-3 row">
+			    <label class="col-sm-2 col-form-label fw-semibold">사업자등록증</label>
+			    <div class="col-sm-10">
+			        <img th:if="${shop.sLicenseUrl}"
+			             th:src="@{${shop.sLicenseUrl}}"
+			             alt="사업자등록증"
+			             style="max-height:80px; display:block; margin-bottom:0.5rem;" />
+			        <input type="file" name="sLicense" class="form-control" />
+			        <div class="form-text">새 파일을 선택하지 않으면 기존 등록증이 유지됩니다.</div>
+			    </div>
+			</div>
+			
 			<div class="mb-3 row align-items-start">
 			  <label class="col-sm-2 col-form-label fw-semibold">가게소개 / 원산지</label>
 			  <div class="col-sm-10">
