@@ -1,6 +1,9 @@
 package com.projectbob.controller;
 
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.http.ResponseEntity;
+
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,22 +22,31 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BobController {
 
-    private final LoginController loginController;
+    
+    @Autowired
+	private LoginController loginController;
 	
+	@Autowired
+	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
+	
+<<<<<<< HEAD
 	@Autowired 
 	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	@Autowired
 	private LoginService loginService;
 	
+=======
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 	
-    BobController(LoginController loginController) {
-        this.loginController = loginController;
-    }
 
 	@GetMapping({"/", "/main"})
 	public String Main() {		
 		return "views/main";
 	}
+<<<<<<< HEAD
+=======
+	 
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 	
 	@GetMapping("/end")
 	public String completed() {
@@ -77,10 +89,17 @@ public class BobController {
 
 	  	// 가게 상세보기 메서드		
 		  @GetMapping("/MenuDetail") 
+<<<<<<< HEAD
 		  public String getMenuDetail(Model model,		  
 		  @RequestParam("sId") int sId,
 		  HttpSession session) {
 		  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", sId); // 가게 정보 가져오기
+=======
+		  public String getMenuDetail(Model model,HttpSession session,	  
+		  @RequestParam("sId") int sId) {
+		  log.info("BobController: /MenuDetail 호출. 요청 s_id: {}", sId); // 가게 정보 가져오기
+		  session.setAttribute("lastShopId", sId);
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 		  
 		  Shop shop = bobService.getShopDetail(sId);
 		  
@@ -123,10 +142,27 @@ public class BobController {
 		  }
 		  model.addAttribute("reviewAvg", reviewAvg);
 		  
+<<<<<<< HEAD
 		  model.addAttribute("now", System.currentTimeMillis());
 		  		  
 		 Map<Integer, ReviewReply> reviewReplyMap = bobService.getReviewReplyMap(sId);
 		 model.addAttribute("reviewReplyMap", reviewReplyMap);
+=======
+		  String userId = (String) session.getAttribute("userId");
+		    String guestId = (String) session.getAttribute("guestId"); // 비회원 guestId
+
+		    CartSummaryDto cartSummary = bobService.getCartByUser(userId, guestId);
+
+		  List<Cart> cartList = cartSummary.getCartList();
+		  int totalQuantity = cartSummary.getTotalQuantity();
+		  int totalPrice = cartSummary.getTotalPrice();
+		    
+		  model.addAttribute("cartList",cartList);
+		  model.addAttribute("totalQuantity",totalQuantity);
+		  model.addAttribute("totalPrice",totalPrice);
+		  log.info("장바구니 총 수량: {}, 총액: {}", totalQuantity, totalPrice); 
+		 
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 		  
 		  return "views/MenuDetail"; 
 		  }
@@ -140,6 +176,7 @@ public class BobController {
 		  
 		  
 
+<<<<<<< HEAD
 		  // menudetail 에서 pay로 
 		  @PostMapping("/pay")		  
 		  public String payPage(
@@ -180,5 +217,44 @@ public class BobController {
 			 */
 	
 		  
+=======
+		  //데이터저장용  임시방편
+		  @GetMapping("/pay")
+		  public String payPageGet(HttpSession session, Model model) {
+		      String userId = (String) session.getAttribute("userId");
+		      String guestId = (String) session.getAttribute("guestId");
 
+		      // 세션 기준 주문 내역 조회
+		      CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
+
+		      // 뷰에 데이터 전달
+		      model.addAttribute("orderSummary", cartSummary);
+		      model.addAttribute("orderedItems", cartSummary.getCartList());
+		      model.addAttribute("finalTotalPrice", cartSummary.getTotalPrice());
+
+		      return "views/pay";
+		  }
+		  
+		  //스크립트ajax
+		  @PostMapping("/payjs")
+			public String payJsPage(@RequestBody OrderData orderData, HttpSession session, Model model) {
+			    String userId = (String) session.getAttribute("userId");
+			    String guestId = (String) session.getAttribute("guestId");
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
+
+			    // 주문 처리 (DB 저장)
+			    bobService.processAndAddCartItems(orderData.getCartList(), userId, guestId);
+
+			    // 처리 후 주문 내역 다시 조회
+			    CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
+
+			    // 뷰에 데이터 전달
+			    model.addAttribute("orderSummary", cartSummary);
+			    model.addAttribute("orderedItems", cartSummary.getCartList());
+			    model.addAttribute("finalTotalPrice", cartSummary.getTotalPrice());
+
+			    // views/pay.jsp (또는 pay.html) 뷰를 그대로 렌더링해서 반환
+			    return "views/pay";
+			}
+		
 }
