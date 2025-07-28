@@ -69,6 +69,12 @@
 	WHERE id = #{id}
 </update>
 
+<select id="clientList" resultType="Member">
+	select *
+	from client
+	where division = 'client'
+</select>
+
 </mapper>	
 
 

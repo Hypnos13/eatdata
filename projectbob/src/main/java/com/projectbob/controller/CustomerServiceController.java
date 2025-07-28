@@ -2,7 +2,6 @@ package com.projectbob.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.http.HttpResponse;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
@@ -17,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.ChatMessage;
+import com.projectbob.domain.Coupon;
 import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.Member;
 import com.projectbob.domain.NoticeBoard;
@@ -337,5 +337,98 @@ public class CustomerServiceController {
 		csService.cancleLike(id, sId);
 		
 		return "redirect:likePage";
+	}
+	
+	// 관리자 - 쿠폰관리
+	@GetMapping("/couponManage")
+	public String couponManageList(Model model, @RequestParam(name="searchCoupon", defaultValue = "") String searchCoupon, @RequestParam(name= "keyword", defaultValue = "") String keyword) {
+		
+		List<Coupon> couponList = csService.couponList(searchCoupon, keyword);
+		
+		model.addAttribute("couponList", couponList);
+		
+		return "admin/couponManageList";
+	}
+	
+	// 관리자 - 쿠폰 생성하기 폼
+	@GetMapping("/createCouponForm")
+	public String createCouponForm(Model model) {
+		
+		List<Member> ml = loginService.clientList();
+		
+		model.addAttribute("memberList", ml);
+		
+		return "admin/createCouponForm";
+	}
+	
+	// 관리자 - 쿠폰 생성
+	@PostMapping("/createCoupon")
+	public String createCoupon(Model model, Coupon coupon,@RequestParam("start") Date start, @RequestParam("end") Date end) {
+		
+		Timestamp startDay = new  Timestamp(start.getTime());
+		Timestamp endDay = new  Timestamp(end.getTime());
+		
+		coupon.setRegDate(startDay);
+		coupon.setDelDate(endDay);
+		List<Member> ml = loginService.clientList();
+		if(coupon.getId().equals("전체")) {
+			for (Member m : ml) {
+				coupon.setId(m.getId());
+			    csService.createCoupon(coupon);
+			}
+		}else {
+			csService.createCoupon(coupon);
+		}
+		
+		return "redirect:couponManage";
+	}
+	
+	// 관리자 - 쿠폰 수정
+	@GetMapping("/updateCouponForm")
+	public String updateCouponForm(Model model, @RequestParam("cNo") int cNo) {
+		
+		Coupon cp = csService.getCoupon(cNo);
+		List<Member> ml = loginService.clientList();
+		
+		model.addAttribute("coupon", cp);
+		model.addAttribute("memberList", ml);
+		
+		return "admin/updateCouponForm";
+	}
+	
+	// 관리자 - 쿠폰 삭제
+	@GetMapping("/deleteCoupon")
+	public String deleteCoupon(Model model, @RequestParam("cNo") int cNo) {
+		
+		csService.deleteCoupon(cNo);
+		
+		return "redirect:couponManage";
+	}
+	
+	// 관리자 - 쿠폰 수정
+	@PostMapping("updateCoupon")
+	public String updateCoupon(Model model, Coupon coupon,@RequestParam("start") Date start, @RequestParam("end") Date end) {
+		
+		Timestamp startDay = new  Timestamp(start.getTime());
+		Timestamp endDay = new  Timestamp(end.getTime());
+		
+		coupon.setRegDate(startDay);
+		coupon.setDelDate(endDay);
+		
+		csService.updateCoupon(coupon);
+		
+		return "redirect:couponManage";
+	}
+	
+	// 마이페이지 - 쿠폰관리 myCoupon
+	@GetMapping("/myCoupon")
+	public String myCoupon(Model model, HttpSession session) {
+		
+		String id = (String) session.getAttribute("loginId");
+		
+		List<Coupon> couponList = csService.myCoupon(id);
+		model.addAttribute("couponList", couponList);
+			  
+		return "members/myCoupon";	
 	}
 }

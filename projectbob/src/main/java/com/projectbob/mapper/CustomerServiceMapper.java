@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.ChatMessage;
+import com.projectbob.domain.Coupon;
 import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.LikeList;
 import com.projectbob.domain.NoticeBoard;
@@ -37,4 +38,10 @@ public interface CustomerServiceMapper {
 	List<Shop> getLikeList(String id);
 	void cancleLike(@Param("id") String id, @Param("sId") int sId);
 	void decreaseShopLike(int sId);
+	List<Coupon> couponList(@Param("searchCoupon") String searchCoupon, @Param("keyword") String keyword);
+	void createCoupon(Coupon coupon);
+	Coupon getCoupon(int cNo);
+	void deleteCoupon(int cNo);
+	void updateCoupon(Coupon coupon);
+	List<Coupon> myCoupon(String id);
 }

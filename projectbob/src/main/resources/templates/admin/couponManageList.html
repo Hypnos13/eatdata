@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{js/faq.js}"></script>
+<link th:href="@{css/admin.css}" rel="stylesheet" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<div class ="container">
+	<th:block th:if="${session.loginDivision == 'master'}">
+
+	<div class="row text-center mt-5">
+		<div class="col-2 text-end">
+			<select id="searchCoupon" name="searchCoupon">
+				<option value="id" th:selected="${searchCoupon == 'id'}">받는이</option>
+				<option value="name" th:selected="${searchCoupon == 'name'}">쿠폰명</option>
+			</select>
+		</div>
+		<div class="col-5 text-start">
+			<input type="text" id="couponKeyword" name="keyword">
+		</div>
+		<div class="col-2 text-start">
+			<input type="button" class="btn btn-primary" id="btn_search_coupon" name="btn_search_coupon" value="검색">
+		</div>
+	</div>
+	
+	<div class="row justify-content-end mt-5">
+		<div class="col-2">
+			<button class="btn btn-success" onclick="location.href='createCouponForm'">쿠폰 생성</button>
+		</div>	
+	</div>
+	
+	<div class="row text-center mt-2">
+		<div class="col-10 mx-auto">
+			<th:block th:unless="${#lists.isEmpty(couponList)}">
+				<table class = "table-custom">
+					<thead>
+					<tr><th>받는이</th><th>쿠폰명</th><th>할인가</th><th>최소금액</th><th>시작일</th><th>만료일</th><th>버튼</th></tr>
+					</thead>
+					<th:block th:each="coupon, status: ${couponList}">
+					<tr>
+						<td><span id="id" th:text="${coupon.id}"></span></td>
+						<td><span id="name" th:text="${coupon.name}"></span></td>
+						<td><span id="disPrice" th:text="${coupon.disPrice}"></span></td>
+						<td><span id="minPrice" th:text="${coupon.minPrice}"></span></td>
+						<td><span id="content" th:text="${#dates.format(coupon.regDate,'yyyy-MM-dd')}"></span></td>
+						<td><span id="content" th:text="${#dates.format(coupon.delDate,'yyyy-MM-dd')}"></span></td>
+						<td>
+							<button class="btn btn-success ml-5 btn-coupon-update" th:data-no = "${coupon.cNo}">수정</button>
+							<button class="btn btn-success ml-5 btn-coupon-delete" th:data-no = "${coupon.cNo}">삭제</button>
+						</td>
+					</tr>
+					</th:block>
+				</table>
+			</th:block>	
+			<th:block th:if="${#lists.isEmpty(couponList)}">
+				<table class = "table-custom">
+					<thead>
+					<tr><th>받는이</th><th>쿠폰명</th><th>할인가</th><th>최소금액</th><th>시작일</th><th>만료일</th><th>삭제</th></tr>
+					</thead>
+					<tr>
+						<td class="text-center" colspan="6">검색 결과가 없습니다.</td>
+					</tr>
+				</table>
+			</th:block>		
+		</div>
+	</div>	
+	
+	</th:block>
+</div>
+ 
+</th:block>
+</html>

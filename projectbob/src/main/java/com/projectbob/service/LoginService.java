@@ -72,4 +72,8 @@ public class LoginService {
 	public void updateIsuse(String id, String isuse){
 		loginMapper.updateIsuse(id, isuse);
 	}
+	
+	public List<Member> clientList(){
+		return loginMapper.clientList();
+	}
 }

@@ -174,6 +174,48 @@
 	SET heart = heart - 1
 	WHERE s_id = #{sId}
 </update>
+
+<select id="couponList" resultType="coupon">
+	SELECT *
+	FROM coupon
+	<where>
+		<if test = "searchCoupon == 'id' and keyword != ''">
+			id like CONCAT('%',#{keyword},'%')
+		</if>
+		<if test = "searchCoupon == 'name' and keyword != ''">
+			name like CONCAT('%',#{keyword},'%')
+		</if>
+	</where>
+</select>
+
+<insert id="createCoupon" parameterType="coupon">
+	INSERT INTO coupon(id, name, content, dis_price, min_price, reg_date, modi_date, del_date)
+	VALUES (#{id}, #{name}, #{content}, #{disPrice}, #{minPrice}, #{regDate}, SYSDATE(), #{delDate})
+</insert>
+
+<select id="getCoupon" resultType="coupon">
+	SELECT *
+	FROM coupon
+	WHERE c_no = #{cNo}
+</select>
+
+<delete id="deleteCoupon">
+	DELETE FROM coupon
+	WHERE c_no = #{cNo}
+</delete>
+
+<update id="updateCoupon" parameterType="coupon">
+	UPDATE coupon
+	SET id = #{id}, name = #{name}, content = #{content}, dis_price = #{disPrice}, min_price = #{minPrice}, reg_date = #{regDate}, del_date = #{delDate}, modi_date = SYSDATE()
+	WHERE c_no = #{cNo}
+</update>
+
+<select id="myCoupon" resultType="coupon">
+	select * 
+	from coupon
+	where id = #{id}
+	AND SYSDATE() BETWEEN reg_date AND del_date
+</select>
 </mapper>	
 
 

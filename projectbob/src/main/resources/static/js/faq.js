@@ -187,6 +187,42 @@ $(function(){
 			return false;	
 		}
 	});
+	
+	// 쿠폰 관리 - 수정 버튼
+	$(".btn-coupon-update").on("click",function(){
+		let cNo = $(this).attr("data-no");
+			
+		location.href = "updateCouponForm?cNo="+cNo;
+	});
+	
+	// 쿠폰 관리 - 삭제 버튼
+	$(".btn-coupon-delete").on("click",function(){
+		let cNo = $(this).attr("data-no");
+			
+		if(confirm("쿠폰을 삭제하겠습니까?")){
+			location.href = "deleteCoupon?cNo="+cNo;
+		}else{
+			return false;	
+		}
+	});
+	
+	// 관리자 페이지 - 쿠폰관리 - 쿠폰 검색
+	$("#btn_search_coupon").on("click",function(){
+		let searchCoupon = $("#searchCoupon").val();
+		let keyword = $("#keyword").val();
+		
+		window.location.href="couponManage?searchCoupon="+searchCoupon+"&keyword="+keyword;		
+	});
+	
+	// 관리자 페이지 - 쿠폰관리 - 검색어 검색시
+	$("#couponKeyword").on("keydown",function(e){
+		if(e.key == 'Enter'){
+			let searchCoupon = $("#searchCoupon").val();
+			let keyword = $("#couponKeyword").val();
+					
+			window.location.href="couponManage?searchCoupon="+searchCoupon+"&keyword="+keyword;	
+		}
+	});
 });
 
 // 주소 찾기 API 연동

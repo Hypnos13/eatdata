@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.ChatMessage;
+import com.projectbob.domain.Coupon;
 import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.LikeList;
 import com.projectbob.domain.NoticeBoard;
@@ -143,5 +144,29 @@ public class CustomerServiceService {
 	public void cancleLike(String id, int sId) {
 		csMapper.cancleLike(id, sId);
 		csMapper.decreaseShopLike(sId);
+	}
+	
+	public List<Coupon> couponList(String searchCoupon, String keyword){
+		return csMapper.couponList(searchCoupon, keyword);
+	}
+	
+	public void createCoupon(Coupon coupon) {
+		csMapper.createCoupon(coupon);
+	}
+	
+	public Coupon getCoupon(int cNo) {
+		return csMapper.getCoupon(cNo);
+	}
+	
+	public void deleteCoupon(int cNo) {
+		csMapper.deleteCoupon(cNo);
+	} 
+	
+	public void updateCoupon(Coupon coupon){
+		csMapper.updateCoupon(coupon);
+	}
+	
+	public List<Coupon> myCoupon(String id){
+		return csMapper.myCoupon(id);
 	}
 }
