@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,11 @@ public class MenuController {
 	    menu.setSId(sId);
 	    // 2. sId가 설정된 menu 객체를 모델에 담아 뷰로 전달
 	    model.addAttribute("menu", menu); 
+	    
+	    // 영업시간 안나와서 넣은거 - 준혁
+	    Shop shop = shopService.findBySId(sId);
+	    model.addAttribute("shop", shop);
+
 	    return "/shop/menuRegisterForm";
 	}
 	// 메뉴 등록
@@ -60,14 +66,41 @@ public class MenuController {
 	}
 	// 메뉴 목록 페이지(전체 메뉴)
 	@GetMapping("/menuList")
-	public String getMenuList(@RequestParam("s_id") Integer sId, Model model) {
-	    // sId로 해당 가게의 메뉴만 필터링해서 가져옴
-	    List<Menu> menuList = shopService.getMenusByShopId(sId); 
-
+	public String getMenuList(@RequestParam("s_id") Integer sId, 
+				@RequestParam(value = "category", required=false) String category , Model model) {
+	    // 카테고리 목록 조회
+		List<String> categories = shopService.getMenuCategoriesByShopId(sId);
+		// sId로 해당 가게의 메뉴만 필터링해서 가져옴
+	    List<Menu> menuList = shopService.getMenusByShopId(sId, category);
+	    
+	    // 영업시간 안나와서 넣은거 - 준혁
+	    Shop shop = shopService.findBySId(sId);
+	    model.addAttribute("shop", shop);
 	    model.addAttribute("menuList", menuList);
+	    model.addAttribute("categories", categories);
 	    model.addAttribute("currentShopId", sId); // 새 메뉴 등록 시 sId를 넘겨주기 위해 추가
+	    model.addAttribute("selectedCategory", category );
 	    return "/shop/menuList";
 	}
+	
+	// 메뉴 상태 변경
+	@PostMapping("/menu/updateStatus")
+	@ResponseBody
+	public ResponseEntity<?> updateMenuStatus(@RequestBody Map<String, Object> payload) {
+		try {
+			Integer mId = (Integer) payload.get("mId");
+			String currentStatus = (String) payload.get("status");
+			// 현재 상태에 따라 새 상태 결정
+			String newStatus = "판매중".equals(currentStatus) ? "품절" : "판매중";
+			shopService.updateMenuStatus(mId, newStatus);
+			// 성공 응답 반환
+			return ResponseEntity.ok(Map.of("success", true, "newStatus", newStatus));
+		} catch (Exception e) {
+			log.error("메뉴 상태 변경 실패", e);
+			return ResponseEntity.badRequest().body(Map.of("success", false));
+		}
+	}
+	
 	// 메뉴 수정 폼 이동
 	@GetMapping("/menuUpdateForm")
 	public String showUpdateForm(
@@ -78,6 +111,10 @@ public class MenuController {
 	    // 2. 드롭다운 목록을 현재 가게(sId)의 메뉴로만 채웁니다.
 	    List<Menu> menuListForDropdown = shopService.getMenusByShopId(sId);
 	    model.addAttribute("menuList", menuListForDropdown);
+	    
+	    // 영업시간 안나와서 넣은거 - 준혁
+	    Shop shop = shopService.findBySId(sId);
+	    model.addAttribute("shop", shop);
 
 	    Menu selectedMenu = null;
 	    if (mId != null) {

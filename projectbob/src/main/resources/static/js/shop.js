@@ -90,6 +90,49 @@ function findZipcode() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // ===== 1. 입력 시 하이픈(-) 자동 생성 기능 =====
+    const sNumberInputForFormatting = document.getElementById('sNumber');
+    if (sNumberInputForFormatting) {
+        sNumberInputForFormatting.addEventListener('input', function(event) {
+            let value = event.target.value.replace(/[^0-9]/g, '');
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+
+            let formattedValue = '';
+            if (value.length < 4) {
+                formattedValue = value;
+            } else if (value.length < 6) {
+                formattedValue = value.substring(0, 3) + '-' + value.substring(3);
+            } else {
+                formattedValue = value.substring(0, 3) + '-' + value.substring(3, 5) + '-' + value.substring(5);
+            }
+            event.target.value = formattedValue;
+        });
+    }
+
+    // ===== 2. 폼 제출 시 하이픈(-) 제거 기능 (새로 추가된 부분) =====
+    const shopJoinForm = document.getElementById('shopJoinForm');
+    if (shopJoinForm) {
+        shopJoinForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // 폼 자동 전송 중단
+
+            const sNumberInput = document.getElementById('sNumber');
+            // 사업자등록번호 값에서 하이픈 제거
+            sNumberInput.value = sNumberInput.value.replace(/-/g, '');
+
+            // 다른 전화번호 필드 등도 숫자만 보내고 싶다면 아래처럼 추가 가능
+            // const phoneInput = document.getElementById('phone');
+            // phoneInput.value = phoneInput.value.replace(/-/g, '');
+
+            this.submit(); // 정리된 값으로 폼 전송
+        });
+    }
+
+});
+
+document.addEventListener('DOMContentLoaded', function() {
     const phoneNumberInput = document.getElementById('phone');
 
     if (phoneNumberInput) { // 요소가 존재하는지 확인
@@ -200,3 +243,67 @@ function showMap(address) {
         }
     });
 }
+
+// 영업상태 ON/OFF 토글
+$(function() {
+    $('.shop-status-table input[type="checkbox"]').on('change', function() {
+        const $checkbox = $(this);
+        const sId = $checkbox.data('sid');
+        const isChecked = $checkbox.is(':checked');
+        // AJAX로 상태 변경 요청
+        $.post('/shop/statusUpdate', { sId: sId, status: isChecked ? 'Y' : 'N' })
+            .done(function() {
+                location.reload(); // 새로고침(동적으로 UI만 바꿔도 됨)
+            })
+            .fail(function() {
+                alert('상태 변경에 실패했습니다.');
+                // 실패 시 체크박스 원복
+                $checkbox.prop('checked', !isChecked);
+            });
+    });
+});
+
+
+// ----- 영업시간 관리 (휴무/전체휴무 토글 등) -----
+$(function () {
+
+  // 전체휴무 체크박스
+  $(".allDay-check").on("change", function () {
+    const $tr = $(this).closest("tr");
+    if (this.checked) {
+      $tr.find("select[name^='openHour']").val("00");
+      $tr.find("select[name^='openMin']").val("00");
+      $tr.find("select[name^='closeHour']").val("23");
+      $tr.find("select[name^='closeMin']").val("59");
+    }
+    // disabled 절대 쓰지 않음
+  });
+
+  // 휴무/영업 스위치
+  const updateDayRow = ($chk) => {
+    const $tr = $chk.closest("tr");
+    const idx = $chk.attr("id")
+      ? $chk.attr("id").replace("isOpen", "")
+      : $chk.attr("name").match(/\[(\d+)\]/)[1];
+    const $label = $("#openLabel" + idx);
+    const on = $chk.is(":checked");
+
+    // 값 전송은 그대로, UI만 막기
+    $tr.find("select").toggleClass("disabled-look", !on);
+    $tr.find(".allDay-check").prop("disabled", !on);
+
+    $label
+      .text(on ? "영업중" : "휴무")
+      .toggleClass("bg-success", on)
+      .toggleClass("bg-secondary", !on);
+  };
+
+  $(".switch input[type='checkbox'][name^='isOpen']")
+    .each(function () { updateDayRow($(this)); })
+    .on("change", function () { updateDayRow($(this)); });
+
+  // 혹시라도 다른 스크립트가 disabled 걸면 제출 전에 해제
+  $("#openTimeForm").on("submit", function () {
+    $(this).find("select:disabled").prop("disabled", false);
+  });
+});

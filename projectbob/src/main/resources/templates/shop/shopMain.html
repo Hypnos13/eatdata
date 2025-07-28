@@ -1,168 +1,298 @@
 <!DOCTYPE html>
-<html lang="ko" 
-		xmlns:th="http://www.thymeleaf.org"
-		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="UTF-8">
     <title>Project BoB</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/css/shopLayout.css">
-	<link rel="stylesheet" href="/css/shopMain.css">
+    <link rel="stylesheet" href="/css/shopMain.css">
 </head>
 <body th:attr="data-login=${isLogin} ? 'true' : 'false'">
-    <!-- 헤더 include -->
-    <th:block th:replace="~{fragments/shopHeader :: shopHeader}" />
-    
-	  	<!-- 상단 메뉴 & 로그인 카드 (넓게 펼침) -->
-	    <div class="container-fluid">
-	        <div class="mains-row">
-	            <!-- 아이콘 박스 -->
-	            <div class="mains-icons-col">
-	                <div class="mains-icon-grid">
-	                    <div class="icon-col">
-	                        <a th:href="${hasShop} ? '/shopListMain' : '/shopInfo'" class="mains-icon-box">
-	                            <div class="mains-icon"><i class="bi bi-house-gear"></i></div>
-	                            <div class="mains-icon-label">서비스 홈</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-						    <a th:if="${#lists.size(shopListMain) == 1}"
-						       th:href="@{|/shopBasicView?s_id=${shopListMain[0].sId}|}"
-						       class="mains-icon-box login-required">
-						        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
-						        <div class="mains-icon-label">기본설정</div>
-						    </a>
-						    <a th:if="${#lists.size(shopListMain) > 1}"
-						       th:href="@{/shopListMain}"
-						       class="mains-icon-box login-required">
-						        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
-						        <div class="mains-icon-label">기본설정</div>
-						    </a>
-						    <a th:if="${#lists.size(shopListMain) == 0}"
-						       th:href="@{/shopInfo}"
-						       class="mains-icon-box login-required">
-						        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
-						        <div class="mains-icon-label">기본설정</div>
-						    </a>
-						</div>
-	                    <div class="icon-col">
-	                        <a href="/menuJoinForm" class="mains-icon-box login-required"  >
-	                            <div class="mains-icon"><i class="bi bi-receipt"></i></div>
-	                            <div class="mains-icon-label">메뉴등록</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-	                        <a href="/ads" class="mains-icon-box"  >
-	                            <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
-	                            <div class="mains-icon-label">추천광고</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-	                        <a href="/menu-quality" class="mains-icon-box"  >
-	                            <div class="mains-icon"><i class="bi bi-list-check"></i></div>
-	                            <div class="mains-icon-label">메뉴품질</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-	                        <a href="/holiday" class="mains-icon-box"  >
-	                            <div class="mains-icon"><i class="bi bi-calendar-x"></i></div>
-	                            <div class="mains-icon-label">휴무일</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-	                        <a href="/settlement" class="mains-icon-box"  >
-	                            <div class="mains-icon"><i class="bi bi-coin"></i></div>
-	                            <div class="mains-icon-label">정산/세금</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-	                        <a href="/review" class="mains-icon-box"  >
-	                            <div class="mains-icon"><i class="bi bi-chat-left-text"></i></div>
-	                            <div class="mains-icon-label">리뷰관리</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-	                        <a href="/store-info" class="mains-icon-box"  >
-	                            <div class="mains-icon"><i class="bi bi-shop"></i></div>
-	                            <div class="mains-icon-label">가게정보</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-	                        <a href="/ads/event" class="mains-icon-box"  >
-	                            <div class="mains-icon"><i class="bi bi-gift"></i></div>
-	                            <div class="mains-icon-label">이벤트관리</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-	                        <a href="/stat/sales" class="mains-icon-box"  >
-	                            <div class="mains-icon"><i class="bi bi-graph-up-arrow"></i></div>
-	                            <div class="mains-icon-label">매출통계</div>
-	                        </a>
-	                    </div>
-	                    <div class="icon-col">
-	                        <a href="/setting/profile" class="mains-icon-box"  >
-	                            <div class="mains-icon"><i class="bi bi-person-circle"></i></div>
-	                            <div class="mains-icon-label">프로필설정</div>
-	                        </a>
-	                    </div>
-	                </div>
-	            </div>
-	        </div>
-	    </div>
-	
-	    <main>
-	        <section class="hero">
-	            <h1>사장님의 가게에 날개를 달아주세요</h1>
-	            <p>간편한 입점 신청으로 더 많은 고객을 만나보세요.<br>저희가 사장님의 성공적인 비즈니스를 돕겠습니다.</p>
-	            <a href="/shopJoinForm" class="btn-cta login-required">지금 바로 입점신청하기</a>
-	        </section>
-	
-	        <section id="benefits" class="section">
-	            <h2>왜 Project Bob 인가요?</h2>
-	            <div class="benefits-grid">
-	                <div class="benefit-card">
-	                    <div class="icon">✓</div>
-	                    <h3>수많은 이용자</h3>
-	                    <p>이미 확보된 많은 사용자들이 <br>사장님의 가게를 기다리고 있습니다.</p>
-	                </div>
-	                <div class="benefit-card">
-	                    <div class="icon">✓</div>
-	                    <h3>간편한 주문 관리</h3>
-	                    <p>직관적인 관리자 페이지에서 <br>주문 접수부터 배달까지 손쉽게 처리하세요.</p>
-	                </div>
-	                <div class="benefit-card">
-	                    <div class="icon">✓</div>
-	                    <h3>투명한 정산 시스템</h3>
-	                    <p>복잡한 정산 과정 없이, <br>투명하고 정확하게 매출을 확인할 수 있습니다.</p>
-	                </div>
-	            </div>
-	        </section>
-	
-	        <section id="process" class="section">
-	            <h2>입점 절차 안내</h2>
-	            <div class="process-steps">
-	                <div class="step">
-	                    <div class="step-number">1</div>
-	                    <h3>온라인 입점신청</h3>
-	                    <p>홈페이지에서 간편하게 <br>입점 신청서를 작성하고 제출합니다.</p>
-	                </div>
-	                <div class="step">
-	                    <div class="step-number">2</div>
-	                    <h3>서류 심사</h3>
-	                    <p>제출하신 서류를 바탕으로 <br>신속하게 입점 가능 여부를 심사합니다.</p>
-	                </div>
-	                <div class="step">
-	                    <div class="step-number">3</div>
-	                    <h3>영업 시작</h3>
-	                    <p>심사 완료 후 바로 가게를 오픈하고 <br>주문을 받을 수 있습니다.</p>
-	                </div>
-	            </div>
-	        </section>
-	    </main>
+<!-- 헤더 include -->
+<th:block th:replace="~{fragments/shopHeader :: shopHeader}" />
 
-    <!-- 푸터 include (shopFooter) -->
-    <th:block th:replace="~{fragments/shopFooter :: shopFooter}" />
+<div class="container-fluid">
+    <div class="mains-row">
+        <div class="mains-icons-col">
+            <div class="mains-icon-grid">
+
+                <!-- ========= 서비스 홈 ========= -->
+                <div class="icon-col">
+                    <!-- 가게 없음 -->
+                    <a th:if="${#lists.isEmpty(shopListMain)}"
+                       th:href="@{/shopInfo}"
+                       class="mains-icon-box">
+                        <div class="mains-icon"><i class="bi bi-house-gear"></i></div>
+                        <div class="mains-icon-label">서비스 홈</div>
+                    </a>
+                    <!-- 가게 있음 & currentShop 존재 -->
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+                       th:href="@{/shopListMain}"
+                       class="mains-icon-box">
+                        <div class="mains-icon"><i class="bi bi-house-gear"></i></div>
+                        <div class="mains-icon-label">서비스 홈</div>
+                    </a>
+                    <!-- 가게 있음 & currentShop 없음 -->
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+                       th:href="@{/shopListMain}"
+                       class="mains-icon-box">
+                        <div class="mains-icon"><i class="bi bi-house-gear"></i></div>
+                        <div class="mains-icon-label">서비스 홈</div>
+                    </a>
+                </div>
+
+                <!-- ========= 기본설정 ========= -->
+                <div class="icon-col">
+                    <a th:if="${#lists.isEmpty(shopListMain)}"
+                       th:href="@{/shopInfo}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+                        <div class="mains-icon-label">기본설정</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+                       th:href="@{/shopBasicView(s_id=${currentShop.sId})}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+                        <div class="mains-icon-label">기본설정</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+                       th:href="@{/shopListMain}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+                        <div class="mains-icon-label">기본설정</div>
+                    </a>
+                </div>
+
+				<!-- ========= 사장님 공지 ========= -->
+				<div class="icon-col">
+				  <a th:if="${#lists.isEmpty(shopListMain)}"
+				     th:href="@{/shopInfo}"
+				     class="mains-icon-box login-required">
+				    <i class="bi bi-megaphone"></i>
+				    <div class="mains-icon-label">사장님 공지</div>
+				  </a>
+				  <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+				     th:href="@{/shopNotice(s_id=${currentShop.sId})}"
+				     class="mains-icon-box login-required">
+				    <i class="bi bi-megaphone"></i>
+				    <div class="mains-icon-label">사장님 공지</div>
+				  </a>
+				  <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+				     th:href="@{/shopListMain}"
+				     class="mains-icon-box login-required">
+				    <i class="bi bi-megaphone"></i>
+				    <div class="mains-icon-label">사장님 공지</div>
+				  </a>
+				</div>
+
+                <!-- ========= 영업 시간 ========= -->
+                <div class="icon-col">
+                    <a th:if="${#lists.isEmpty(shopListMain)}"
+                       th:href="@{/shopInfo}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-clock-history"></i></div>
+                        <div class="mains-icon-label">영업 시간</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+                       th:href="@{/shopOpenTime(s_id=${currentShop.sId})}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-clock-history"></i></div>
+                        <div class="mains-icon-label">영업 시간</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+                       th:href="@{/shopListMain}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-clock-history"></i></div>
+                        <div class="mains-icon-label">영업 시간</div>
+                    </a>
+                </div>
+
+                <!-- ========= 영업 상태 ========= -->
+                <div class="icon-col">
+                    <a th:if="${#lists.isEmpty(shopListMain)}"
+                       th:href="@{/shopInfo}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-toggle-on"></i></div>
+                        <div class="mains-icon-label">영업 상태</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+                       th:href="@{/shopStatus(s_id=${currentShop.sId})}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-toggle-on"></i></div>
+                        <div class="mains-icon-label">영업 상태</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+                       th:href="@{/shopListMain}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-toggle-on"></i></div>
+                        <div class="mains-icon-label">영업 상태</div>
+                    </a>
+                </div>
+
+                <!-- ========= 메뉴 리스트 ========= -->
+                <div class="icon-col">
+                    <a th:if="${#lists.isEmpty(shopListMain)}"
+                       th:href="@{/shopInfo}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-card-checklist"></i></div>
+                        <div class="mains-icon-label">메뉴 리스트</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+                       th:href="@{/shop/menuList(s_id=${currentShop.sId})}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-card-checklist"></i></div>
+                        <div class="mains-icon-label">메뉴 리스트</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+                       th:href="@{/shopListMain}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-card-checklist"></i></div>
+                        <div class="mains-icon-label">메뉴 리스트</div>
+                    </a>
+                </div>
+
+                <!-- ========= 메뉴 등록 ========= -->
+                <div class="icon-col">
+                    <a th:if="${#lists.isEmpty(shopListMain)}"
+                       th:href="@{/shopInfo}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-receipt"></i></div>
+                        <div class="mains-icon-label">메뉴 등록</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+                       th:href="@{/shop/menuRegisterForm(s_id=${currentShop.sId})}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-receipt"></i></div>
+                        <div class="mains-icon-label">메뉴 등록</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+                       th:href="@{/shopListMain}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-receipt"></i></div>
+                        <div class="mains-icon-label">메뉴 등록</div>
+                    </a>
+                </div>
+
+                <!-- ========= 메뉴 관리 ========= -->
+                <div class="icon-col">
+                    <a th:if="${#lists.isEmpty(shopListMain)}"
+                       th:href="@{/shopInfo}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-list-task"></i></div>
+                        <div class="mains-icon-label">메뉴 관리</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+                       th:href="@{/shop/menuUpdateForm(s_id=${currentShop.sId})}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-list-task"></i></div>
+                        <div class="mains-icon-label">메뉴 관리</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+                       th:href="@{/shopListMain}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-list-task"></i></div>
+                        <div class="mains-icon-label">메뉴 관리</div>
+                    </a>
+                </div>
+
+                <!-- ========= 메뉴 품절 ========= -->
+                <div class="icon-col">
+                    <a th:if="${#lists.isEmpty(shopListMain)}"
+                       th:href="@{/shopInfo}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-x-circle"></i></div>
+                        <div class="mains-icon-label">메뉴 품절</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+                       th:href="@{/shop/menuSoldOut(s_id=${currentShop.sId})}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-x-circle"></i></div>
+                        <div class="mains-icon-label">메뉴 품절</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+                       th:href="@{/shopListMain}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-x-circle"></i></div>
+                        <div class="mains-icon-label">메뉴 품절</div>
+                    </a>
+                </div>
+
+                <!-- ========== 추가 예정 아이콘들 ========== -->
+                <div class="icon-col">
+                    <a href="javascript:void(0)" class="mains-icon-box disabled" title="추가 예정">
+                        <div class="mains-icon"><i class="bi bi-calendar3"></i></div>
+                        <div class="mains-icon-label">추가예정</div>
+                    </a>
+                </div>
+
+                <div class="icon-col">
+                    <a href="javascript:void(0)" class="mains-icon-box disabled" title="추가 예정">
+                        <div class="mains-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                        <div class="mains-icon-label">추가예정</div>
+                    </a>
+                </div>
+
+            </div><!-- /.mains-icon-grid -->
+        </div><!-- /.mains-icons-col -->
+    </div><!-- /.mains-row -->
+</div><!-- /.container-fluid -->
+
+<main>
+    <section class="hero">
+        <h1>사장님의 가게에 날개를 달아주세요</h1>
+        <p>간편한 입점 신청으로 더 많은 고객을 만나보세요.<br>저희가 사장님의 성공적인 비즈니스를 돕겠습니다.</p>
+        <a href="/shopJoinForm" class="btn-cta login-required">지금 바로 입점신청하기</a>
+    </section>
+
+    <section id="benefits" class="section">
+        <h2>왜 Project Bob 인가요?</h2>
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <div class="icon">✓</div>
+                <h3>수많은 이용자</h3>
+                <p>이미 확보된 많은 사용자들이 <br>사장님의 가게를 기다리고 있습니다.</p>
+            </div>
+            <div class="benefit-card">
+                <div class="icon">✓</div>
+                <h3>간편한 주문 관리</h3>
+                <p>직관적인 관리자 페이지에서 <br>주문 접수부터 배달까지 손쉽게 처리하세요.</p>
+            </div>
+            <div class="benefit-card">
+                <div class="icon">✓</div>
+                <h3>투명한 정산 시스템</h3>
+                <p>복잡한 정산 과정 없이, <br>투명하고 정확하게 매출을 확인할 수 있습니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="process" class="section">
+        <h2>입점 절차 안내</h2>
+        <div class="process-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>온라인 입점신청</h3>
+                <p>홈페이지에서 간편하게 <br>입점 신청서를 작성하고 제출합니다.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>서류 심사</h3>
+                <p>제출하신 서류를 바탕으로 <br>신속하게 입점 가능 여부를 심사합니다.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>영업 시작</h3>
+                <p>심사 완료 후 바로 가게를 오픈하고 <br>주문을 받을 수 있습니다.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- 푸터 -->
+<th:block th:replace="~{fragments/shopFooter :: shopFooter}" />
+
 <script src="/js/jquery-3.7.1.min.js"></script>
 <script src="/js/shop.js"></script>
 </body>

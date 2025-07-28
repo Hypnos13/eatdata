@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{js/faq.js}"></script>
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<link th:href="@{/css/login.css}" rel="stylesheet" />
+	
+	<form name = "updateAddressForm" id = "updateAddressForm" method = "post" action="updateAddress">
+		<input type="hidden" id="no" name="no" th:value="${addressbook.no}">
+		<div class="row mt-5">
+			<div class="col-4 text-end">
+				<label for="address2">장소명 :   </label> 	
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="aName" id="aName" type="text" th:value="${addressbook.aName}" placeholder="ex)우리집, 직장">
+			</div>
+		</div>
+		<div class="row my-2 text-center">
+			<div class="col-5 mx-auto">
+				<div class="text-danger" id="aNameInfo"></div>
+			</div>
+		</div>
+		<div class="row my-3">
+			<div class="col-4 text-end">
+				<label for="address1">*주소 :  </label> 
+			</div>
+			<div class="col-4">	
+				<input class="form-control" name="address1" id="address1" type="text" th:value="${addressbook.address1}" placeholder="주소 찾기를 눌러주세요" readonly="true">
+			</div>
+			<div class="col-1">
+				<input class="form-control" id="btnAdress" value="주소 찾기">
+			</div>
+		</div>
+		<div class="row my-1 text-center">
+			<div class="col-5 mx-auto">
+				<div class="text-danger" id="addressInfo"></div>
+			</div>
+		</div>
+		<div class="row my-3">
+			<div class="col-4 text-end">
+				<label for="address2">상세주소 :   </label> 	
+			</div>
+			<div class="col-5">
+				<input class="form-control" name="address2" id="address2" type="text" th:value="${addressbook.address2}" placeholder="상세 주소를 입력해주세요">
+			</div>
+		</div>
+		<div class="row my-5 justify-content-center">
+			<div class="col-4">
+				<input type="submit" value="저장">
+			</div>
+		</div>
+	</form>
+	
+</th:block>
+</html>

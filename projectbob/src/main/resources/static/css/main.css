@@ -345,9 +345,22 @@ nav.navbar .nav-link.active {
 
 
 
-
-
-
+/* 
+찜 버튼
+ */
+ #btnLikeList{
+ 	font-size: 1.2rem;
+ 	padding: 0.5rem 1rem;
+ }
+#btnLikeList.liked{
+	background-color: #dc3545;
+	border-color: #dc3545;
+	color: #fff;
+}
+#btnLikeList.liked i,
+#btnLikeList.liked span{
+	color: #fff;
+}
 
 
 

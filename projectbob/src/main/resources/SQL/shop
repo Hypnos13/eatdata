@@ -1,3 +1,4 @@
+drop table shop;
 CREATE TABLE `shop` (
 	`s_id`	INTEGER AUTO_INCREMENT PRIMARY KEY,
 	`id`	varchar(20)	NOT NULL,
@@ -12,7 +13,7 @@ CREATE TABLE `shop` (
   `s_pictureURL` varchar(500)	NULL,
 	`rating`	decimal(2,1) NULL DEFAULT 0.0,
 	`heart`	int(5)	NULL	DEFAULT 0,
-	`op_time`	varchar(50)	NULL,
+	`op_time`	varchar(100)	NULL,
 	`off_day`	varchar(50)	NULL,
 	`min_price`	varchar(50)	NULL,
 	`s_licenseURL`	varchar(500)	NULL,
@@ -25,36 +26,18 @@ CREATE TABLE `shop` (
 	`modi_date`	timestamp	NULL
 );
 
-INSERT INTO shop (
-  id, name, phone, zipcode, address1, address2, owner, s_number,
-  category, rating, heart, op_time, off_day, min_price,
-  s_licenseURL, s_certURL, status, info, notice, s_info, reg_date
-) VALUES (
-  'owner01', '보글보글김밥', '010-1234-5678', '12345', '서울특별시 강남구 테헤란로 101', '1층 101호',
-  '김철수', 1234567890, '한식', 4.2, 5, '09:00~21:00', '일요일', '12000',
-  '/img/lic1.jpg', '/img/cert1.jpg', '정상', '포장가능', '오픈기념 이벤트 중', '신메뉴 출시 예정', NOW()
-);
-INSERT INTO shop (
-  id, name, phone, zipcode, address1, address2, owner, s_number,
-  category, rating, heart, op_time, off_day, min_price,
-  s_licenseURL, s_certURL, status, info, notice, s_info, reg_date
-) VALUES (
-  'owner01', '김밥천국 역삼점', '010-2222-3333', '54321', '서울특별시 강남구 역삼로 200', '2층 201호',
-  '김철수', 987654321, '분식', 3.7, 2, '10:00~20:30', '화요일', '10000',
-  '/img/lic2.jpg', '/img/cert2.jpg', '정상', '포장·배달', '이벤트 없음', '대표 메뉴: 참치김밥', NOW()
-);
-INSERT INTO shop (
-  id, name, phone, zipcode, address1, address2, owner, s_number,
-  category, rating, heart, op_time, off_day, min_price,
-  s_licenseURL, s_certURL, status, info, notice, s_info, reg_date
-) VALUES (
-  'owner02', '행복분식', '010-8765-4321', '54321', '경기도 수원시 영통구 광교로 202', '2층 202호',
-  '이영희', 1234554321, '분식', 3.8, 2, '10:30~22:00', '월요일', '8000',
-  '/img/lic2.jpg', '/img/cert2.jpg', '정상', '배달전용', '리뉴얼 오픈', '이벤트 없음', NOW()
-);
+-- owner01의 가게 2개
+INSERT INTO shop (id, name, phone, zipcode, address1, address2, owner, s_number, category, rating, reg_date)
+VALUES 
+('shop01', '서울대입구 카페하우스', '02-1234-1001', '08788', '서울 관악구 관악로 1', '서울대입구역 2번출구', 'owner01', '12345678901', '카페', 4.5, NOW()),
+('shop02', '오거리 버거', '02-1234-1002', '08788', '서울 관악구 관악로 5', '서울대입구역 5번출구', 'owner01', '12345678902', '패스트푸드', 4.2, NOW());
+
+-- owner02의 가게 1개
+INSERT INTO shop (id, name, phone, zipcode, address1, address2, owner, s_number, category, rating, reg_date)
+VALUES 
+('shop03', '한솥밥 도시락', '02-1234-1003', '08788', '서울 관악구 관악로 9', '서울대입구역 1번출구', 'owner02', '12345678903', '한식', 4.8, NOW());
 
 select * from shop;
-drop table shop;
 commit;
 
 drop table menu;
@@ -71,6 +54,39 @@ CREATE TABLE menu (
     modi_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 수정일
     FOREIGN KEY (s_id) REFERENCES shop(s_id) -- 만약 shop 테이블이 있다면 외래키 설정
 );
+
+-- 카페하우스 메뉴 (shop01)
+INSERT INTO menu (s_id, category, name, price, m_info)
+VALUES
+(1, '커피', '아메리카노', 4000, '깔끔하고 산뜻한 맛'),
+(1, '커피', '카페라떼', 4500, '부드러운 우유와 에스프레소의 조화'),
+(1, '커피', '바닐라라떼', 4800, '달콤한 바닐라와 라떼의 조화'),
+(1, '커피', '카라멜 마끼아또', 5000, '카라멜 시럽과 풍부한 우유'),
+(1, '디저트', '티라미수', 4500, '진한 마스카포네와 에스프레소 시럽'),
+(1, '디저트', '스콘', 3000, '버터 풍미 가득한 스콘');
+
+-- 오거리 버거 (shop02)
+INSERT INTO menu (s_id, category, name, price, m_info)
+VALUES
+(2, '버거', '치즈버거', 5500, '두툼한 패티와 고소한 치즈'),
+(2, '버거', '더블치즈버거', 6500, '두 장의 치즈와 패티'),
+(2, '버거', '베이컨버거', 7000, '베이컨이 가득한 풍미'),
+(2, '사이드', '감자튀김', 2000, '바삭한 감자튀김'),
+(2, '사이드', '치즈스틱', 3000, '쭉 늘어나는 모짜렐라'),
+(2, '음료', '콜라 500ml', 2000, '시원한 탄산'),
+(2, '음료', '사이다 500ml', 2000, '깔끔한 탄산');
+
+-- 한솥밥 도시락 (shop03)
+INSERT INTO menu (s_id, category, name, price, m_info)
+VALUES
+(3, '도시락', '제육볶음 도시락', 6500, '매콤한 제육볶음과 반찬 구성'),
+(3, '도시락', '돈까스 도시락', 7000, '바삭한 돈까스와 밥, 국 포함'),
+(3, '도시락', '치킨마요 덮밥', 5500, '달콤 짭조름한 치킨과 마요의 조화'),
+(3, '도시락', '불닭 덮밥', 6000, '매운 맛을 좋아한다면 추천'),
+(3, '도시락', '소불고기 도시락', 7000, '달큰한 불고기와 반찬 세트'),
+(3, '반찬', '계란말이', 2500, '부드러운 계란'),
+(3, '국', '미소된장국', 1500, '따뜻한 국물');
+
 select * from menu;
 
 drop table menu_option;
@@ -85,4 +101,30 @@ CREATE TABLE menu_option (
     status VARCHAR(20) DEFAULT 'active', -- 옵션 상태 (active/deleted)
     FOREIGN KEY (m_id) REFERENCES menu(m_id) ON DELETE CASCADE -- 메뉴 삭제 시 옵션도 함께 삭제
 );
+
+-- 아메리카노 (menu_id = 1 기준) 옵션
+INSERT INTO menu_option (m_id, m_option, content, price)
+VALUES
+(1, '사이즈', 'Tall', 0),
+(1, '사이즈', 'Grande', 500),
+(1, '샷 추가', '에스프레소 샷 추가', 500),
+(1, '휘핑 추가', '휘핑크림 추가', 500);
+
+-- 치즈버거 (menu_id = 2 기준)
+INSERT INTO menu_option (m_id, m_option, content, price)
+VALUES
+(2, '추가', '치즈 추가', 500),
+(2, '추가', '베이컨 추가', 700),
+(2, '추가', '패티 추가', 1500),
+(2, '추가', '치즈 추가', 700),
+(2, '소스', '스파이시 소스', 300);
+
+-- 제육볶음 도시락 (menu_id = 3 기준)
+INSERT INTO menu_option (m_id, m_option, content, price)
+VALUES
+(3, '밥 추가', '공기밥 추가', 1000),
+(3, '밥 양', '곱빼기', 1000),
+(3, '추가', '마요네즈 추가', 200),
+(3, '고기 추가', '치킨 더블', 1500);
+
 select * from menu_option;

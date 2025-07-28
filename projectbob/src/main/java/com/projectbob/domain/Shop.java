@@ -21,14 +21,14 @@ public class Shop {
 	private String owner;
 	private String sNumber;
 	private String category;
-	private String sPictureURL;
+	private String sPictureUrl;
 	private double rating;
 	private int heart;
 	private String opTime;
 	private String offDay;
 	private String minPrice;
-	private String sLicenseURL;
-	private String sCertURL;
+	private String sLicenseUrl;
+	private String sCertUrl;
 	private String status;
 	private String info;
 	private String notice;

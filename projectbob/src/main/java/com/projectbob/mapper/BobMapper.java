@@ -6,10 +6,16 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+<<<<<<< HEAD
+import com.projectbob.domain.LikeList;
+=======
 import com.projectbob.domain.Cart;
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
+import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
+import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 
 @Mapper
@@ -80,16 +86,62 @@ public interface BobMapper {
 	public List<String> getMenuCategoriesByShopId(int sId);
 	
 	// 가게 번호에 해당하는 리뷰리스트에 사용
-	public List<Review> reviewList(int sId);
+	//public List<Review> reviewList(int sId);
+	public List<Review> getReviewList(int sId);
 
 	
 	// shop 하트 증가	
 		int plusHeart(int sId);
 		Integer getHeartCount(int sId);
 		
+	// 찜
+	public int isLiked(LikeList likeList);
+	
+	// 찜 추가
+	public int addLikeList(LikeList likeList);
+	
+	// 찜 삭제
+	public int deleteLikeList(LikeList likeList);
+	
+	// 가게 찜 수
+	public int shopCountLike(@Param("sId") int sId);
+	
+	// 찜 추가 시 shop.heart + 1 , - 1
+	public int incrementHeart(@Param("sId") int sId);
+	public int decrementHeart(@Param("sId") int sId);
+	
+	// 내가 찜한 가게 목록
+	public List<Integer> getLikeShopList(String userId);
+		
 	// 댓글을 DB에 등록하는 메서드
 	public void addReview(Review review);
 	
+	//댓글 수정하는 메서드
+	public void updateReview(Review review);
+	
+	//댓글 삭제하는 메서드
+	public void deleteReview(int rNo);
+	
+	// 댓글에 달린 대댓글 가져오기 메서드
+	public ReviewReply reviewreplyList(@Param("rNo") int rNo);
+	
+	// 대댓글 DB에 등록하는 메서드
+	public void addReviewReply(ReviewReply reviewreply);
+	
+	// 가게 전체 대댓글
+	public List<ReviewReply> getReviewReplyList(@Param("sId") int sId);
+	
+	// 대댓글 수정
+	public void updateReviewReply(ReviewReply reviewreply);
+	
+	// 대댓글 삭제
+	public void deleteReviewReply(@Param("rrNo") int rrNo);
+	
+	// 대댓글 개수조회
+	public int countReviewReply(@Param("rNo") int rNo);
+	
+	// 주문 번호에 해당하는 주문 레코드를 DB에서 가져오기
+	public Orders selectOrderId(@Param("orderId") int orderId);
 
 	
 

@@ -41,6 +41,16 @@
             background-color: var(--theme-color) !important;
             color: white;
         }
+        /* ✨ 스위치 스타일 (기존 코드와 동일) */
+        .form-switch .form-check-input {
+            width: 3.5em;
+            height: 1.8em;
+            cursor: pointer;
+        }
+        .form-switch .form-check-input:checked {
+            background-color: var(--theme-color);
+            border-color: var(--theme-color);
+        }
     </style>
 </head>
 <th:block layout:fragment="content">
@@ -52,6 +62,21 @@
                 <i class="bi bi-plus-circle me-2"></i>새 메뉴 등록
             </a>
         </div>
+        
+        <div class="filter-bar mb-4 p-3 bg-light rounded">
+            <form th:action="@{/shop/menuList}" method="get" id="categoryFilterForm" class="d-flex align-items-center">
+                <input type="hidden" name="s_id" th:value="${currentShopId}">
+                
+                <label for="categorySelect" class="form-label me-3 mb-0 fw-bold">카테고리:</label>
+                <select name="category" id="categorySelect" class="form-select w-auto" onchange="this.form.submit()">
+                    <option value="">-- 전체 --</option>
+                    <option th:each="cat : ${categories}"
+                            th:value="${cat}"
+                            th:text="${cat}"
+                            th:selected="${cat == selectedCategory}"></option>
+                </select>
+            </form>
+        </div>
 
         <table class="table table-hover align-middle text-center">
             <thead>
@@ -61,13 +86,12 @@
                     <th>메뉴 이름</th>
                     <th>가격</th>
                     <th>사진</th>
-                    <th>관리</th>
+                    <th>상태</th> <th>관리</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:if="${#lists.isEmpty(menuList)}">
-                    <td colspan="6" class="text-center p-5 text-muted">등록된 메뉴가 없습니다.</td>
-                </tr>
+                    <td colspan="7" class="text-center p-5 text-muted">등록된 메뉴가 없습니다.</td> </tr>
                <tr th:each="menu : ${menuList}">
                     <td th:text="${menu.mId}"></td>
                     <td th:text="${menu.category}"></td>
@@ -76,6 +100,16 @@
                     <td>
                         <img th:if="${menu.mPictureUrl}" th:src="${menu.mPictureUrl}" alt="메뉴 사진" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;">
                         <span th:unless="${menu.mPictureUrl}" class="text-muted">-</span>
+                    </td>
+                    <td> <div class="form-check form-switch d-flex justify-content-center">
+                            <input class="form-check-input menu-status-toggle" type="checkbox" role="switch"
+                                   th:checked="${menu.status == '판매중'}"
+                                   th:data-mid="${menu.mId}"
+                                   th:data-status="${menu.status}">
+                        </div>
+                        <span th:text="${menu.status}" class="badge mt-1"
+                              th:classappend="${menu.status == '판매중'} ? 'bg-success' : 'bg-danger'">
+                        </span>
                     </td>
                     <td>
                         <a th:href="@{|/shop/menuUpdateForm?mId=${menu.mId}&s_id=${menu.sId}|}" class="btn btn-sm btn-theme me-2">수정</a>

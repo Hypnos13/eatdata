@@ -2,6 +2,8 @@ package com.projectbob.domain;
 
 import java.sql.Timestamp;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +18,7 @@ import lombok.ToString;
 public class Review {
 	private int rNo;
 	private String id;
+	@JsonProperty("s_id")
 	private int sId;
 	private int mId;
 	private String content;

@@ -127,7 +127,10 @@
 											<p class="card-text text-muted small mb-1">[[${shop.address1}]],
 												[[${shop.address2}]]</p>
 											<p class="card-text text-success fw-semibold mb-0">평점
-												★[[${shop.rating}]]</p>
+												★[[${shop.rating}]]
+													<i class="bi bi-heart-fill text-danger ms-1"
+														th:if="${likeShopList != null and likeShopList.contains(shop.sId)}"></i>
+												</p>
 										</div>
 									</div>
 								</div>
@@ -139,7 +142,9 @@
 
 
 			<th:block th:unless="${not #lists.isEmpty(sList)}">
-				<div class="alert alert-info text-center">근처에 등록된 식당이 없습니다.</div>
+				<div class="alert alert-info text-center">아직 등록된 음식점이 없습니다.
+빠른 시일 내에 서비스를
+제공할 수 있도록 하겠습니다.</div>
 				<p>no 식당 no 먹을거</p>
 			</th:block>
 

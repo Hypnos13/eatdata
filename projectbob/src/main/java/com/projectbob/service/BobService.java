@@ -1,22 +1,36 @@
 package com.projectbob.service;
 
+<<<<<<< HEAD
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+=======
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+<<<<<<< HEAD
+import com.projectbob.domain.LikeList;
+import com.projectbob.domain.Member;
+=======
 import com.projectbob.domain.Cart;
 import com.projectbob.domain.CartSummaryDto;
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
+import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
+import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
+import com.projectbob.dto.NewOrder;
 import com.projectbob.mapper.BobMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +43,16 @@ public class BobService {
 	@Autowired
 	private BobMapper bobMapper;
 	
+<<<<<<< HEAD
+	@Autowired
+	private LoginService loginService;
+	
+=======
 	 public CartSummaryDto getCartSummaryForUserOrGuest(String userId, String guestId) {
 	        Map<String, Object> params = new HashMap<>();
 	        params.put("userId", userId);
 	        params.put("guestId", guestId);
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 
 	        List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params);
 
@@ -303,11 +323,23 @@ public class BobService {
 //	}
 
 	// 가게 번호에 해당하는 리뷰리스트에 사용
+<<<<<<< HEAD
+	/*
+	 * public List<Review> reviewList(int sId){ return bobMapper.reviewList(sId); }
+	 */	
+			public List<Review> getReviewList(int sId){
+	    return bobMapper.getReviewList(sId);
+	}
+
+	
+	// 가게 (하트) 증가
+=======
 	public List<Review> reviewList(int sId) {
 		return bobMapper.reviewList(sId);
 	}
 
 	// 가게 찜 (하트) 증가
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 	public int plusHeart(int sId) {
 		return bobMapper.plusHeart(sId);
 	}
@@ -315,12 +347,129 @@ public class BobService {
 	public Integer getHeartCount(int sId) {
 		return bobMapper.getHeartCount(sId);
 	}
+<<<<<<< HEAD
+	
+	// 가게 찜하기
+	public int isLiked(LikeList likeList) {
+		return bobMapper.isLiked(likeList);
+	}
+	
+	// 찜 등록
+	public int addLikeList(LikeList likeList) {
+		return bobMapper.addLikeList(likeList);
+	}
+	
+	// 찜 삭제
+	public int deleteLikeList(LikeList likeList) {
+		return bobMapper.deleteLikeList(likeList);
+	}
+	
+	// 가게 찜
+	public int shopCountLike(int sId) {
+		return bobMapper.shopCountLike(sId);
+	}
+			
+	// 찜 버튼 토글
+	@Transactional
+	public Map<String, Object> toggleLike(LikeList likeList) {
+		boolean exists = bobMapper.isLiked(likeList) > 0;
+		int sId = likeList.getSId();
+		int newCount;
+		
+		if (exists) {
+			bobMapper.deleteLikeList(likeList);
+			bobMapper.decrementHeart(likeList.getSId());
+			
+		} else {
+			bobMapper.addLikeList(likeList);
+			bobMapper.incrementHeart(likeList.getSId());
+			
+		}		
+		newCount = bobMapper.getHeartCount(likeList.getSId());
+		return Map.of(
+				"liked", !exists,
+				"heartCount", newCount
+				);
+	}
+	
+	// 내가 찜한 가게 목록
+	public List<Integer> getLikeShopList(String userId){
+		return bobMapper.getLikeShopList(userId);
+	}
+	
+	
+=======
 
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 	// 댓글 등록하는 메서드
 	public void addReview(Review review) {
 		bobMapper.addReview(review);
 	}
+<<<<<<< HEAD
+	
+	//댓글 수정하는 메서드
+	public void updateReview(Review review) {
+		bobMapper.updateReview(review);
+	}
+	
+	//댓글 삭제하는 메서드
+	public void deleteReview(int rNo) {
+		bobMapper.deleteReview(rNo);
+	}
+	
+	// 대댓글 리스트
+	/*
+	 * public ReviewReply reviewreplyList(int rNo){ return
+	 * bobMapper.reviewreplyList(rNo); }
+	 */
+	
+	// 대댓글 등록/수정하는 메서드	
+	  public void addReviewReply(ReviewReply reviewreply) {
+		  int count = bobMapper.countReviewReply(reviewreply.getRNo());
+		  if (count == 0) {
+			  bobMapper.addReviewReply(reviewreply);
+		  } else {
+			  bobMapper.updateReviewReply(reviewreply);
+		  }
+	   }
+	 
+	// 가게 번호에 해당하는 전체 대댓글을 rNo(리뷰 번호) 기준으로 Map에 담아 반환
+	public Map<Integer, ReviewReply> getReviewReplyMap(int sId) {
+	    List<ReviewReply> replyList = bobMapper.getReviewReplyList(sId); // getReviewReplyList는 sId(가게) 전체 대댓글 가져옴
+	    Map<Integer, ReviewReply> map = new HashMap<>();
+	    for (ReviewReply reply : replyList) {
+	        map.put(reply.getRNo(), reply); // rNo 기준 맵핑
+	    }
+	    return map;
+	}
+
+	// 대댓글 수정하기
+	public void updateReviewReply(ReviewReply reviewreply) {
+		bobMapper.updateReviewReply(reviewreply);
+	}
+
+	// 대댓글 삭제하기
+	public void deleteReviewReply(int rrNo) {
+		bobMapper.deleteReviewReply(rrNo);
+	}
+	
+	
+	// 결제정보 가져오기
+	/*
+	 * public NewOrder getNewOrder(int orderId) { Orders o =
+	 * bobMapper.selectOrderId(orderId); String menuName =
+	 * bobMapper.selectMenuNameByOrderId(orderId); NewOrder dto = NewOrder.builder()
+	 * .orderId(o.getONo()) .shopId(o.getSId()) .menuName(menuName)
+	 * .quantity(o.getQuantity()) .totalPrice(o.getTotalPrice())
+	 * .address(o.getOAddress())
+	 * .phone(loginService.getMember(o.getId()).getPhone()) .request(o.getRequest())
+	 * .status("PENDING") .build(); return dto; }
+	 */
+	
+	
+=======
 
 
 
+>>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 }

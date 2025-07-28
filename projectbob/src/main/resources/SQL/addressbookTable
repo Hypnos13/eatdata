@@ -1,0 +1,16 @@
+CREATE TABLE client (
+	id	varchar(20)	primary key,
+	pass	varchar(255)	NOT NULL,
+	name	varchar(20)	NOT NULL,
+	nickname	varchar(20)	NOT NULL,
+	birthday	varchar(8)	NOT NULL,
+	address1	varchar(200)	NOT NULL,
+	address2	varchar(50)	NOT NULL,
+	email	 varchar(50)	NOT NULL,
+	phone 	varchar(13)	NOT NULL,
+	point	int(10)	NULL	DEFAULT 0,
+	division	varchar(20)	NOT NULL,
+	reg_date	timestamp	NOT NULL,
+	modi_date	timestamp	NOT NULL,
+	isuse varchar(2) NOT NULL DEFAULT 'Y'
+);

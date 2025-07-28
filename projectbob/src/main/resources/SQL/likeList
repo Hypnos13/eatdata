@@ -1,0 +1,6 @@
+CREATE TABLE likeList (
+	id	varchar(20)	NOT NULL,
+	s_id	int(20)	NOT NULL,
+	reg_date	timestamp	NOT NULL,
+	status varchar(50)
+);

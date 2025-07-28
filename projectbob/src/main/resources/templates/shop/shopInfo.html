@@ -16,7 +16,7 @@
                    th:href="@{/shopJoinForm}" 
                    class="btn btn-primary">가게 등록하기</a>
                 <a th:unless="${session.isLogin}" 
-                   th:href="@{/login}" 
+                   th:href="@{/login?from=owner}" 
                    class="btn btn-primary">가게 등록하기</a>
             </div>
         </div>

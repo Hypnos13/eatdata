@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<link th:href="@{/css/login.css}" rel="stylesheet" />
+<div class="container my-5">
+  <!-- 프로필 카드 -->
+  <div class="card shadow-sm mb-4 p-4 text-center">
+    <a class="myNickname" th:href="@{/myProfile}">[[${member.nickname}]]</a>
+    <p class="text-muted"><span class="mx-3">대표 번호 : [[${member.phone}]]</span> <span class="mx-2">대표 이메일 : [[${member.email}]]</span></p>
+    <p><span class="text-muted mx-3">내 포인트 :</span><a class="mypage-box-name" th:href="@{/myProfile}">[[${member.point}]]</a></p>
+  </div>
+
+  <!-- 기능 버튼 목록 -->
+  <div class="card shadow-sm mb-4 p-4 text-center">
+  	<div class="row row-cols-2 row-cols-md-3 g-3">
+	    <div class="col text-center">
+	    	<a href="#" class="mypage-box">
+	      		<img src="/images/orderHistory.png" alt="주문 내역" class="mypage-img">
+	      		<span class="mypage-box-name"> 주문 내역 </span>
+	    	</a>
+	    </div>
+	    <div class="col text-center">
+	    	<a href="myAddressbook" class="mypage-box">
+	      		<img src="/images/addressManage.png" alt="주소 관리" class="mypage-img">
+	      		<span class="mypage-box-name"> 주소 관리 </span>
+	    	</a>
+	    </div>
+	    <div class="col text-center">
+	    	<a href="#" class="mypage-box">
+	      		<img src="/images/reviewHistory.png" alt="리뷰 내역" class="mypage-img">
+	      		<span class="mypage-box-name"> 리뷰 내역 </span>
+	    	</a>
+	    </div>
+	    <div class="col text-center">
+	    	<a href="#" class="mypage-box">
+	      		<img src="/images/payManage.png" alt="결제 관리" class="mypage-img">
+	      		<span class="mypage-box-name"> 결제 관리 </span>
+	    	</a>
+	    </div>
+	     <div class="col text-center">
+	    	<a href="#" class="mypage-box">
+	      		<img src="/images/cuponHistory.png" alt="쿠폰 내역" class="mypage-img">
+	      		<span class="mypage-box-name"> 쿠폰 내역 </span>
+	    	</a>
+	    </div>
+	  </div>
+  </div>
+</div>
+</th:block>
+</html>
