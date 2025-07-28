@@ -177,6 +177,16 @@ $(function(){
 		}
 	});
 	
+	// 찜목록에서 찜 취소
+	$(".toggle-heart").on("click",function(){
+		let sId = $(this).attr("data-no");
+		
+		if(confirm("찜목록을 삭제하겠습니까?")){
+			location.href = "cancleLike?sId="+sId;
+		}else{
+			return false;	
+		}
+	});
 });
 
 // 주소 찾기 API 연동

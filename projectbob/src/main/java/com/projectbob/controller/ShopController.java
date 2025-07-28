@@ -1,18 +1,24 @@
 package com.projectbob.controller;
 
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.http.*;
 
 import java.util.*;
 import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
 
@@ -29,6 +35,54 @@ public class ShopController {
 	@Autowired
 	private FileUploadService fileUploadService;
 	
+	@Autowired
+	private RestTemplate restTemplate;
+	
+	// 식품영양성분DB API 검색
+	@GetMapping("/api/nutrition-search")
+	@ResponseBody
+	public ResponseEntity<?> searchNutritionData(@RequestParam("foodName") String foodName) {
+	    String serviceKey = "25HM7lP49D4X9CnOWL0S6Ec9UnBOQh5/T5rfLzXtv7qn0Wzg+grCn9czsAmSwvR1rjdFDY8h3GxkPLoSZeuglA==";
+	    
+	    // ✨ 1. 최종적으로 확인된, 가장 단순한 형태의 실제 서비스 URL
+	    String apiUrl = "https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02/getFoodNtrCpntDbInq02";
+
+	    try {
+	        String encodedServiceKey = URLEncoder.encode(serviceKey, StandardCharsets.UTF_8);
+	        String encodedFoodName = URLEncoder.encode(foodName, StandardCharsets.UTF_8);
+
+	        // ✨ 2. 검색 파라미터 이름을 'desc_kor'에서 'FOOD_NM_KR'로 변경
+	        String finalUrlString = apiUrl
+	                        + "?serviceKey=" + encodedServiceKey
+	                        + "&FOOD_NM_KR=" + encodedFoodName // ✨ 파라미터 이름 수정
+	                        + "&pageNo=1"
+	                        + "&numOfRows=10"
+	                        + "&type=json";
+
+	        log.info("▶▶▶ 최종 요청 URL: {}", finalUrlString);
+	        
+	        HttpClient client = HttpClient.newHttpClient();
+	        HttpRequest request = HttpRequest.newBuilder()
+	                .uri(new URI(finalUrlString))
+	                .GET()
+	                .build();
+
+	        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+	        
+	        log.info("◀◀◀ API 응답: {}", response.body());
+
+	        HttpHeaders responseHeaders = new HttpHeaders();
+	        responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+	        return new ResponseEntity<>(response.body(), responseHeaders, HttpStatus.OK);
+
+	    } catch (Exception e) {
+	        log.error("!!! 식약처 API 호출 오류", e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body("{\"error\":\"API 호출 중 오류 발생\"}");
+	    }
+	}
+	
+	// 입점 신청
 	@PostMapping("/insertShop")
 	public String insertShop( @RequestParam("id") String id,
 			@RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 

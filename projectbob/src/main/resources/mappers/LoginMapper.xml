@@ -69,35 +69,6 @@
 	WHERE id = #{id}
 </update>
 
-<select id="getMyAddress">
-	SELECT * 
-	FROM addressbook
-	WHERE id = #{id}
-</select>
-
-<insert id="addAddress" parameterType="Addressbook">
-	INSERT INTO addressbook(id, a_name, address1, address2, reg_date, modi_date)
-	VALUES (#{id}, #{aName}, #{address1}, #{address2}, SYSDATE(), SYSDATE())
-</insert>
-
-<select id="getAddress">
-	SELECT * 
-	FROM addressbook
-	WHERE no = #{no}
-</select>
-
-<update id="updateAddress" parameterType="Addressbook">
-	UPDATE addressbook
-	SET a_name=#{aName}, address1 = #{address1}, address2 = #{address2}, modi_date = SYSDATE()
-	WHERE id = #{id}
-	AND no = #{no}
-</update>
-
-<delete id="deleteAddress">
-	DELETE FROM addressbook
-	WHERE id = #{id}
-	AND no = #{no}
-</delete>
 </mapper>	
 
 

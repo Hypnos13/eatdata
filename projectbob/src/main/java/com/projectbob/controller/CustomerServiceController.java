@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.ChatMessage;
 import com.projectbob.domain.CustomerService;
+import com.projectbob.domain.Member;
 import com.projectbob.domain.NoticeBoard;
 import com.projectbob.domain.Shop;
 import com.projectbob.service.CustomerServiceService;
+import com.projectbob.service.LoginService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,6 +33,8 @@ public class CustomerServiceController {
 
 	@Autowired
 	CustomerServiceService csService;
+	@Autowired
+	LoginService loginService;
 	
 	// FAQ 페이지
 	@GetMapping("/faqList")
@@ -241,5 +246,96 @@ public class CustomerServiceController {
 		model.addAttribute("id", id);
 			
 		return "admin/chatBot";
+	}
+	
+	// 마이페이지
+	@GetMapping("/myPage")
+	public String myPage(Model model, HttpSession session){
+			
+	 String id = (String)session.getAttribute("loginId");  
+	 Member member =  loginService.getMember(id);
+	 
+	 model.addAttribute("member", member);
+		  
+	 return "members/myPage";			  
+	}
+		
+	// 주소 관리
+	@GetMapping("/myAddressbook")
+	public String myAddressbook(Model model, HttpSession session){
+			
+	 String id = (String)session.getAttribute("loginId");  
+	 List<Addressbook> addressbook = csService.getMyAddress(id);
+	 
+	 model.addAttribute("addressbook", addressbook);
+		  
+	 return "members/myAddressbook";			  
+	}
+		
+	// 주소 관리 - 주소 등록
+	@PostMapping("/addAddress")
+	public String addAddress(Model model,Addressbook addressbook ,HttpSession session){
+				
+		String id = (String)session.getAttribute("loginId");
+		addressbook.setId(id);
+		
+		csService.addAddress(addressbook);
+			  
+		return "redirect:myAddressbook";			  
+	}
+		
+	// 주소 관리 - 주소 수정 폼
+	@GetMapping("/updateAddressbookform")
+	public String updateAddressbookform(Model model, @RequestParam("no") int no){
+		
+		Addressbook addressbook = csService.getAddress(no);
+		model.addAttribute("addressbook", addressbook);
+			  
+		return "members/updateAddressbookForm";			  
+	}
+		
+	// 주소 관리 - 주소 수정
+	@PostMapping("/updateAddress")
+	public String updateAddress(Model model,Addressbook addressbook ,HttpSession session){
+				
+		String id = (String)session.getAttribute("loginId");
+		addressbook.setId(id);
+			
+		csService.updateAddress(addressbook);
+				  
+		return "redirect:myAddressbook";			  
+	}
+	
+	// 주소 관리 - 주소 삭제
+	@PostMapping("/deleteAddressbook")
+	public String deleteAddressbook( @RequestParam("no") int no, HttpSession session){
+					
+		String id = (String)session.getAttribute("loginId");
+		
+		csService.deleteAddress(id, no);
+			  
+		return "redirect:myAddressbook";			  
+	}
+		
+	// 찜목록
+	@GetMapping("/likePage")
+	public String likePage(Model model, HttpSession session){
+			
+		String id = (String)session.getAttribute("loginId");
+		List<Shop> shopList = csService.getLikeList(id);
+			
+		model.addAttribute("shopList", shopList);
+			
+		return "members/likeList";			  
+	}
+	
+	// 찜 목록 - 찜 누르기
+	@GetMapping("/cancleLike")
+	public String cancleLike(@RequestParam("sId") int sId, HttpSession session){
+		
+		String id = (String)session.getAttribute("loginId");
+		csService.cancleLike(id, sId);
+		
+		return "redirect:likePage";
 	}
 }

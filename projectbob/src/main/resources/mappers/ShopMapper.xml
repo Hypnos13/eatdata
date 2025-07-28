@@ -27,11 +27,15 @@
    </resultMap>
 
 	 <!-- ===== Menu ===== -->
-    <insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
-       INSERT INTO menu(s_id, category, name, price, m_info, m_picture_url, reg_date, modi_date)
-       VALUES(#{sId}, #{category}, #{name}, #{price}, #{mInfo}, #{mPictureUrl}, SYSDATE(), SYSDATE())
-    </insert>
-
+   <insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
+      INSERT INTO menu(
+      s_id, category, name, price, m_info, m_picture_url, 
+      reg_date, modi_date, status,
+      serving_size, calories, carbs, protein, fat, sugar, sodium) 
+      VALUES(#{sId}, #{category}, #{name}, #{price}, #{mInfo}, #{mPictureUrl}, 
+      SYSDATE(), SYSDATE(), '판매중', 
+      #{servingSize}, #{calories}, #{carbs}, #{protein}, #{fat}, #{sugar}, #{sodium})
+   </insert>
    
    <update id="updateMenuStatus">
     UPDATE menu

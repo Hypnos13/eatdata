@@ -13,8 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.ChatMessage;
 import com.projectbob.domain.CustomerService;
+import com.projectbob.domain.LikeList;
 import com.projectbob.domain.NoticeBoard;
 import com.projectbob.domain.Shop;
 import com.projectbob.mapper.CustomerServiceMapper;
@@ -26,70 +28,48 @@ public class CustomerServiceService {
 	CustomerServiceMapper csMapper;
 	
 	public List<CustomerService> FAQList(String type){
-		List<CustomerService> faqList = csMapper.FAQList(type);
-		return faqList;
-	}
-	
+		return csMapper.FAQList(type);
+	}	
 	
 	public void writeFAQ(CustomerService cs) {
 		csMapper.writeFAQ(cs);
 	}
 	
-	
-	public CustomerService getFAQ(int csNo) {
-		
-		CustomerService FAQ =  csMapper.getFAQ(csNo);
-		
-		return FAQ;
+	public CustomerService getFAQ(int csNo) {	
+		return csMapper.getFAQ(csNo);
 	}
-	
 	
 	public void updateFAQ(CustomerService cs) {
 		csMapper.updateFAQ(cs);
 	}
 	
-	
 	public void deleteFAQ(int csNo) {
 		csMapper.deleteFAQ(csNo);
-	}
-	
+	}	
 	
 	public void writeNotice(NoticeBoard noticeBoard){
 		csMapper.writeNotice(noticeBoard);
 	}
-	
-	
-	public List<NoticeBoard> noticeList(String userDivision){
 		
-		List<NoticeBoard> notice = csMapper.noticeList(userDivision);
-		
-		return notice;
+	public List<NoticeBoard> noticeList(String userDivision){	
+		return csMapper.noticeList(userDivision);
 	}
 	
-	
-	public NoticeBoard getNotice(int no) {
-		
-		NoticeBoard notice = csMapper.getNotice(no);
-		
-		return notice;
+	public NoticeBoard getNotice(int no) {	
+		return csMapper.getNotice(no);
 	}
-	
-	
+		
 	public void updateNotice(NoticeBoard noticeBoard){
 		csMapper.updateNotice(noticeBoard);
 	}
-	
 	
 	public void deleteNotice(int no){
 		csMapper.deleteNotice(no);
 	}
 	
-	
 	public List<Shop> shopManageList(String searchShop , String keyword){
-		List<Shop> shopList = csMapper.shopManageList(searchShop, keyword);
-		return shopList;
+		return csMapper.shopManageList(searchShop, keyword);
 	}
-	
 	
 	public void updateShopManage(String sId, String category, String status) {
 		csMapper.updateShopManage(sId, category, status);
@@ -100,10 +80,7 @@ public class CustomerServiceService {
 	}
 	
 	public List<ChatMessage> getChatMessage(String id){
-		
-		List<ChatMessage> chatList = csMapper.getChatMessage(id);
-		
-		return chatList;
+		return csMapper.getChatMessage(id);
 	}
 	
 	public String chatCounselor(String message) {
@@ -137,5 +114,34 @@ public class CustomerServiceService {
 
 	    return answer;
 		
+	}
+	
+	public List<Addressbook> getMyAddress(String id){
+		return csMapper.getMyAddress(id);
+	}
+	
+	public void addAddress(Addressbook addressbook) {
+		csMapper.addAddress(addressbook);
+	}
+	
+	public Addressbook getAddress(int no) {
+		return csMapper.getAddress(no);
+	}
+	
+	public void updateAddress(Addressbook addressbook) {
+		csMapper.updateAddress(addressbook);
+	}
+	
+	public void deleteAddress(String id, int no) {
+		csMapper.deleteAddress(id, no);
+	}
+	
+	public List<Shop> getLikeList(String id){
+		return csMapper.getLikeList(id);
+	}
+	
+	public void cancleLike(String id, int sId) {
+		csMapper.cancleLike(id, sId);
+		csMapper.decreaseShopLike(sId);
 	}
 }
