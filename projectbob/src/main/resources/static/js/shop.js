@@ -153,82 +153,14 @@ document.addEventListener('DOMContentLoaded', function() {
 		    }
 				
 		// 영양성분 검색
-		/*const btnSearch = document.getElementById('btnSearchNutrition');
-		const menuNameInput = document.getElementById('name');
-		const resultList = document.getElementById('nutrition-results');
-		const selectedInfoDiv = document.getElementById('selected-nutrition-info');
-		
-		if(btnSearch) {
-			btnSearch.addEventListener('click', async function() {
-				const foodName = menuNameInput.value;
-				if(!foodName) {
-					alert('메뉴 이름을 먼저 입력해주세요.');
-					return;
-				}
-				try {
-					const resp = await fetch(`/api/nutrition-search?foodName=${encodeURIComponent(foodName)}`);
-					const resultStr = await resp.text();
-					const result = JSON.parse(resultStr);
-					
-					resultList.innerHTML = '';
-					
-					if(result.body && result.body.items && result.body.item.length > 0 ) {
-						resultList.style.display = 'block';
-						result.body.items.forEach(item => {
-							const li = document.createElement('li');
-							li.className = 'list-group-item list-group-item-action';
-							li.style.cursor = 'pointer';
-							li.textContent = `${item.DESC_KOR} (1회 제공량 : ${item.SERVING_WT}g, 열량 : ${item.NUTR_CONT1}kcal)`;
-							
-							li.dataset.servingSize = item.SERVING_WT;
-							li.dataset.calories = item.NUTR_CONT1;
-							li.dataset.carbs = item.NUTR_CONT2;
-							li.dataset.protein = item.NUTR_CONT3;
-							li.dataset.fat = item.NUTR_CONT4;
-							li.dataset.sodium = item.NUTR_CONT6;
-							
-							resultList.appendChild(li);
-						});
-					} else {
-						resultList.innerHTML = '<li class="list-group-item">검색 결과가 없습니다.</li>';
-						resultList.style.display = 'block';
-					}
-				} catch (error) {
-					console.error('Error fetching nutrition data: ', error);
-					alert('영양정보를 불러오는데 실패했습니다.');
-				}
-			});
-			resultList.addEventListener('click', function(e) {
-				if(e.target && e.target.nodeName == 'LI') {
-					const selectedItem = e.target;
-					const { servingSize, calories, crabs, protein, fat, sodium } = selectedItem.dataset;
-					
-					document.querySelector('input[name="servingSize"]').value = servingSize || 0;
-					document.querySelector('input[name="calories"]').value = calories || 0;
-					document.querySelector('input[name="carbs"]').value = carbs || 0;
-					document.querySelector('input[name="protein"]').value = protein || 0;
-					document.querySelector('input[name="fat"]').value = fat || 0;
-					document.querySelector('input[name="sodium"]').value = sodium || 0;
-					
-					selectedInfoDiv.textContent = `✅ ${selectedItem.textContent} 의 영양성분이 선택되었습니다.`;
-					selectedInfoDiv.style.display = 'block';
-					
-					resultList.style.display = 'none';
-				}
-			});
-		}*/
-		
-		// 영양성분 디버깅
 		const btnSearch = document.getElementById('btnSearchNutrition');
 		const menuNameInput = document.getElementById('name');
 		const resultsList = document.getElementById('nutrition-results');
 		const selectedInfoDiv = document.getElementById('selected-nutrition-info');
 
 		if (btnSearch) {
+		    // '영양성분 검색' 버튼 클릭 이벤트
 		    btnSearch.addEventListener('click', async function() {
-		        // --- 디버깅 로그 1 ---
-		        console.log("1. '영양성분 검색' 버튼이 클릭되었습니다.");
-
 		        const foodName = menuNameInput.value;
 		        if (!foodName) {
 		            alert('메뉴 이름을 먼저 입력해주세요.');
@@ -237,59 +169,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		        try {
 		            const response = await fetch(`/api/nutrition-search?foodName=${encodeURIComponent(foodName)}`);
-		            
-		            // --- 디버깅 로그 2 ---
-		            console.log("2. 서버로부터 응답을 받았습니다.", response);
-		            
 		            const resultStr = await response.text();
-		            
-		            // --- 디버깅 로그 3 ---
-		            console.log("3. 서버가 보낸 순수 응답 텍스트:", resultStr);
-
 		            const result = JSON.parse(resultStr);
 		            
-		            // --- 디버깅 로그 4 ---
-		            console.log("4. 응답 텍스트를 JSON 객체로 변환한 결과:", result);
-
+		            resultsList.innerHTML = ''; // 이전 결과 초기화
+		            
 		            if (result.body && result.body.items && result.body.items.length > 0) {
-		                // --- 디버깅 로그 5 ---
-		                console.log("5. 유효한 영양성분 데이터를 발견했습니다. 목록을 생성합니다.");
 		                resultsList.style.display = 'block';
-		                resultsList.innerHTML = ''; // 이전 결과 초기화
-		                
 		                result.body.items.forEach(item => {
-		                    // ... (이하 목록 생성 로직은 동일)
 		                    const li = document.createElement('li');
 		                    li.className = 'list-group-item list-group-item-action';
 		                    li.style.cursor = 'pointer';
-		                    li.textContent = `${item.DESC_KOR} (1회 제공량: ${item.SERVING_WT}g, 열량: ${item.NUTR_CONT1}kcal)`;
+		                    li.textContent = `${item.FOOD_NM_KR} (1회 제공량: ${item.SERVING_SIZE}, 열량: ${item.AMT_NUM1}kcal)`;
 		                    
-		                    li.dataset.servingSize = item.SERVING_WT;
-		                    li.dataset.calories = item.NUTR_CONT1;
-		                    li.dataset.carbs = item.NUTR_CONT2;
-		                    li.dataset.protein = item.NUTR_CONT3;
-		                    li.dataset.fat = item.NUTR_CONT4;
-		                    li.dataset.sodium = item.NUTR_CONT6;
+												li.dataset.servingSize = item.SERVING_SIZE.replace(/[^0-9.]/g, '');
+		                    li.dataset.calories = item.AMT_NUM1;
+		                    li.dataset.carbs = item.AMT_NUM6;
+		                    li.dataset.protein = item.AMT_NUM3;
+		                    li.dataset.fat = item.AMT_NUM4;
+												li.dataset.sugar = item.AMT_NUM7;
+		                    li.dataset.sodium = item.AMT_NUM13;
 		                    
 		                    resultsList.appendChild(li);
 		                });
-
 		            } else {
-		                // --- 디버깅 로그 6 ---
-		                console.log("6. 유효한 영양성분 데이터가 없습니다. '결과 없음'을 표시합니다.");
 		                resultsList.innerHTML = '<li class="list-group-item">검색 결과가 없습니다.</li>';
 		                resultsList.style.display = 'block';
 		            }
 		        } catch (error) {
-		            // --- 디버깅 로그 7 (에러 발생 시) ---
-		            console.error("!!! JavaScript 실행 중 오류가 발생했습니다:", error);
-		            alert('영양 정보를 불러오는 중 오류가 발생했습니다. 개발자 도구 콘솔을 확인해주세요.');
+		            console.error('Error fetching nutrition data:', error);
+		            alert('영양 정보를 불러오는 데 실패했습니다.');
 		        }
 		    });
-
-		    // 검색 결과 리스트에서 항목 클릭 이벤트 (이 부분은 동일)
+		    
+		    // 검색 결과 리스트에서 항목을 클릭했을 때의 동작
 		    resultsList.addEventListener('click', function(e) {
-		        // ...
+		        // 클릭된 요소가 LI 태그일 때만 실행
+		        if (e.target && e.target.nodeName === 'LI') {
+		            const selectedItem = e.target;
+		            const { servingSize, calories, carbs, protein, fat, sugar, sodium } = selectedItem.dataset;
+
+		            // form 안에 있는 hidden input들을 찾아서 값을 채워줍니다.
+		            document.querySelector('input[name="servingSize"]').value = servingSize || 0;
+		            document.querySelector('input[name="calories"]').value = calories || 0;
+		            document.querySelector('input[name="carbs"]').value = carbs || 0;
+		            document.querySelector('input[name="protein"]').value = protein || 0;
+		            document.querySelector('input[name="fat"]').value = fat || 0;
+								document.querySelector('input[name="sugar"]').value = sugar || 0;
+		            document.querySelector('input[name="sodium"]').value = sodium || 0;
+		            
+		            selectedInfoDiv.textContent = `✅ ${selectedItem.textContent} 의 영양성분이 선택되었습니다.`;
+		            selectedInfoDiv.style.display = 'block';
+		            
+		            resultsList.style.display = 'none';
+		        }
 		    });
 		}
 		

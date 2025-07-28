@@ -36,6 +36,7 @@ dependencies {
 	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'org.apache.httpcomponents.client5:httpclient5'
 
 
 // --- 메일 연동 ---	

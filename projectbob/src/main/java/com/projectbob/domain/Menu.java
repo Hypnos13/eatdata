@@ -28,6 +28,7 @@ public class Menu {
     private Double carbs;
     private Double protein;
     private Double fat;
+    private Double sugar;
     private Double sodium;
     private Integer servingSize;
 
