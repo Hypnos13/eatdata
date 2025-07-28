@@ -1,61 +1,43 @@
 package com.projectbob.ajax;
 
-<<<<<<< HEAD
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-=======
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
->>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
-<<<<<<< HEAD
-=======
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
->>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-<<<<<<< HEAD
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.projectbob.domain.LikeList;
-=======
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.projectbob.domain.Cart;
 import com.projectbob.domain.CartSummaryDto;
->>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.OrderData;
 import com.projectbob.domain.Review;
 import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 import com.projectbob.service.BobService;
-
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
@@ -479,13 +461,6 @@ public class MenuAjaxController {
 		return result;
 	}
 	
-<<<<<<< HEAD
-	
-	
-=======
-
-
->>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 	
 	
 	

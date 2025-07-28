@@ -285,7 +285,7 @@ CREATE TABLE IF NOT EXISTS review(
 insert into review (id,s_id,m_id,content,rating,status) values('admin',1,1,'리뷰 내용~',5,'상태');
 insert into review (id,s_id,m_id,content,rating,status) values('admin',1,1,'리뷰 내용2~',1,'상태');
 insert into review (id,s_id,m_id,content,rating,status) values('admin',1,1,'리뷰 내용3~',4,'상태');
-<<<<<<< HEAD
+
 
 
 -- 대댓글 테이블(사장만 가능)
@@ -323,8 +323,7 @@ CREATE TABLE likeList(
 	CONSTRAINT fk_likeList_shop FOREIGN KEY(s_id) REFERENCES shop(s_id)
 		ON DELETE CASCADE ON UPDATE CASCADE
 );
-=======
->>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
+
 
 commit;
 --------------------------------------------------------------------------------------------------------------

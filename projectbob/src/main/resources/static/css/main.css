@@ -363,7 +363,11 @@ nav.navbar .nav-link.active {
 }
 
 
-
+#global-content {
+    display: flex; /* 플렉스 컨테이너로 설정 */
+   align-items: flex-start !important; /* 임시로 추가해 테스트 */
+  
+}
 
 
 

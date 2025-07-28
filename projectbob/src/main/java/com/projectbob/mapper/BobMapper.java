@@ -6,11 +6,11 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-<<<<<<< HEAD
+
 import com.projectbob.domain.LikeList;
-=======
+
 import com.projectbob.domain.Cart;
->>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
+
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Orders;
@@ -86,7 +86,7 @@ public interface BobMapper {
 	public List<String> getMenuCategoriesByShopId(int sId);
 	
 	// 가게 번호에 해당하는 리뷰리스트에 사용
-	//public List<Review> reviewList(int sId);
+	public List<Review> reviewList(int sId);
 	public List<Review> getReviewList(int sId);
 
 	

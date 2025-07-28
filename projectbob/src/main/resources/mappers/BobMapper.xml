@@ -4,7 +4,7 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
-<<<<<<< HEAD
+
 <!-- 주문 번호에 해당하는 주문 레코드를 DB에서 가져오기 -->
 <select id="selectOrderId" parameterType="int" resultType="com.projectbob.domain.Orders">
 	SELECT * FROM orders WHERE o_no = #{orderId}
@@ -30,10 +30,10 @@
 <insert id="addReviewReply" parameterType="ReviewReply">
 	INSERT INTO review_reply(r_no, s_id, id, content, status)
 	VALUES(#{rNo}, #{sId}, #{id}, #{content}, #{status})
-=======
+</insert>
 
     <!-- 장바구니 항목 수량 업데이트 -->
-  <update id="updateCartItemQuantity" parameterType="map">
+ <update id="updateCartItemQuantity" parameterType="map">
     UPDATE cart
     SET
         quantity = #{quantity},
@@ -166,13 +166,6 @@
 </select>
 
 
-
-<!-- 댓글 추가 맵핑 구문 -->
-<insert id="addReview" parameterType="Review">
-	INSERT INTO review(id, s_id, m_id, content, rating, r_picture, liked, status)
-	VALUES(#{id}, #{sId}, #{mId}, #{content}, #{rating}, #{rPicture}, #{liked}, #{status})
->>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
-</insert>
 
 <!-- 대댓글 -->
 <select id="reviewreplyList" parameterType="int" resultType="ReviewReply">
@@ -326,8 +319,4 @@
 	ORDER BY s.s_id DESC
 </select>
 
-<<<<<<< HEAD
-=======
-
->>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 </mapper>

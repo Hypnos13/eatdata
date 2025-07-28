@@ -233,7 +233,7 @@ $(document).ready(function() {
 // ==============================
 function updateOrderSummary(cartList, totalCartPrice) {
     const $orderItemList = $(".order-item-list");
-    const $emptyOrderMessage = $("#emptyOrderMessage");
+    const $emptyOrderMessage = $(".empty-order-message"); // 클래스 선택자로 변경
     const $orderSummaryInfo = $("#orderSummaryInfo");
 
     $orderItemList.empty(); // 기존 목록 비우기
@@ -256,41 +256,39 @@ function updateOrderSummary(cartList, totalCartPrice) {
         const options = cartList.filter(opt => opt.caPid != null && opt.caPid === mainItem.caId);
 
         let optionHtml = "";
-		options.forEach(opt => {
-		  
-		    const optName = opt.optionName || "옵션명 없음"; // 여기서 정의!
-		    const optPrice = opt.unitPrice || 0; // 옵션 가격은 unitPrice를 사용 (totalPrice는 수량까지 곱해진 값)
-		    optionHtml += `
-		        <div class="text-muted small ms-3 mb-1 cart-option-item" data-ca-id="${opt.caId}">
-		          └ 옵션: ${optName} (+${optPrice.toLocaleString()}원)
-		        </div>
-		    `;
-		});
+        options.forEach(opt => {
+            const optName = opt.optionName || "옵션명 없음";
+            const optPrice = opt.unitPrice || 0;
+            optionHtml += `
+                <div class="text-muted small ms-3 mb-1 cart-option-item" data-ca-id="${opt.caId}">
+                  └ 옵션: ${optName} (+${optPrice.toLocaleString()}원)
+                </div>
+            `;
+        });
 
         const quantity = mainItem.quantity || 0;
-        const menuBasePrice = mainItem.menuPrice || 0; // 메뉴의 순수 단가
+        const menuBasePrice = mainItem.menuPrice || 0;
 
-		const html = `
-		           <div class="pb-3 mb-3 border-bottom cart-main-item" data-ca-id="${mainItem.caId}">
-		               <div class="mb-2">
-		                   <div class="fw-bold small mb-1">${mainItem.menuName} : ${menuBasePrice.toLocaleString()}원</div>
-		                   ${optionHtml}
-		                   <div class="d-flex justify-content-between align-items-center mt-2">
-		                       <div class="d-flex align-items-center">
-		                           <button class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-minus" data-ca-id="${mainItem.caId}">−</button>
-		                           <input type="text" class="form-control form-control-sm mx-1 text-center quantity-input" value="${quantity}" readonly data-ca-id="${mainItem.caId}" style="width: 32px; height: 26px; font-size: 0.75rem; padding: 0;">
-		                           <button class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-plus" data-ca-id="${mainItem.caId}">+</button>
-		                       </div>
-		                       <button class="btn btn-outline-danger btn-sm py-0 px-2 btn-delete-main-item" data-ca-id="${mainItem.caId}">x</button>
-		                   </div>
-		               </div>
-		           </div>
-		       `;
-		       $orderItemList.append(html);
-		   });
+        const html = `
+           <div class="pb-3 mb-3 border-bottom cart-main-item" data-ca-id="${mainItem.caId}">
+               <div class="mb-2">
+                   <div class="fw-bold small mb-1">${mainItem.menuName} : ${menuBasePrice.toLocaleString()}원</div>
+                   ${optionHtml}
+                   <div class="d-flex justify-content-between align-items-center mt-2">
+                       <div class="d-flex align-items-center">
+                           <button class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-minus" data-ca-id="${mainItem.caId}">−</button>
+                           <input type="text" class="form-control form-control-sm mx-1 text-center quantity-input" value="${quantity}" readonly data-ca-id="${mainItem.caId}" style="width: 32px; height: 26px; font-size: 0.75rem; padding: 0;">
+                           <button class="btn btn-outline-secondary btn-sm py-0 px-1 btn-quantity-plus" data-ca-id="${mainItem.caId}">+</button>
+                       </div>
+                       <button class="btn btn-outline-danger btn-sm py-0 px-2 btn-delete-main-item" data-ca-id="${mainItem.caId}">x</button>
+                   </div>
+               </div>
+           </div>
+       `;
+        $orderItemList.append(html);
+    });
 
-
-		   updateOverallTotalPriceDisplay(totalCartPrice);
+    updateOverallTotalPriceDisplay(totalCartPrice);
 }
 
 // ==============================
@@ -597,7 +595,7 @@ function showStoreOnMap() {
 // ==============================
 // 찜하기 기능
 // ==============================
-<<<<<<< HEAD
+
 document.addEventListener("DOMContentLoaded", () => {
 	
 	if(document.querySelectorAll("#reviewList .reviewRow").length > 0){
@@ -607,7 +605,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 	
   updateOrder();
-=======
+
 $("#btnHeart").click(function () {
   // sId를 data-sid 속성에서 가져오는 것이 더 안정적입니다.
   const sId = $(this).data("sid");
@@ -615,7 +613,6 @@ $("#btnHeart").click(function () {
       alert('가게 정보를 찾을 수 없습니다.');
       return;
   }
->>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 
   $.ajax({
     url: "/heart.ajax",
@@ -688,7 +685,7 @@ $("#rPicture").on("change", function () { // ID를 rPicture로 변경
       $imgPreview.hide().attr('src', ''); // 파일 없으면 숨기고 src 초기화
       return;
   }
-<<<<<<< HEAD
+
 	
 	//검색버튼
 	document.getElementById('searchSubmitBtn').addEventListener('click', function () {
@@ -1331,12 +1328,6 @@ function resetReviewForm(){
 
 
 
-
-
-
-
-=======
->>>>>>> d4cc63f3bbc9a24ab2d24813d806be42e6b7a5f2
 
   const reader = new FileReader();
   reader.onload = function (e) {
