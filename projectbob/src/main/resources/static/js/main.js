@@ -11,8 +11,10 @@ let currentTotalQuantity = 0;
 
 const defaultMenuImage = "https://i.imgur.com/Sg4b61a.png";
 
+// ==============================
+// 주문하기 버튼 클릭 이벤트
+// ==============================
 $('#btnOrderNow').on('click', function() {
-
     // 서버로 보낼 주문 데이터 객체 구성
     const orderData = {
         cartList: currentCartData,       // 현재 장바구니의 모든 아이템 상세 정보
@@ -194,7 +196,13 @@ $(document).on("click", "#btnAddExtras", function () {
       if (response.success && response.cartList) {
         console.log("장바구니에 추가되었습니다.");
  
-        updateOrderSummary(response.cartList, response.totalPrice);
+        // 전역 변수 currentCartData와 currentTotalPrice, currentTotalQuantity 업데이트
+        currentCartData = response.cartList;
+        currentTotalPrice = response.totalPrice;
+        // 서버 응답에 totalQuantity가 있다면 여기서 업데이트:
+        // currentTotalQuantity = response.totalQuantity;
+
+        updateOrderSummary(currentCartData, currentTotalPrice);
 
         const modalEl = document.getElementById("addMenuModal");
         const modal = bootstrap.Modal.getInstance(modalEl);
@@ -216,13 +224,13 @@ $(document).on("click", "#btnAddExtras", function () {
 // 페이지 로드 시 장바구니 내용 불러오기
 // ==============================
 $(document).ready(function() {
-  // Thymeleaf를 통해 HTML에 주입된 guestId를 전역 변수에 할당
+  // Thymeleaf를 통해 HTML에 주입된 guestId와 userId를 전역 변수에 할당 (userId도 함께 주입된다고 가정)
   const guestInfoElem = document.getElementById('guestInfo');
   if (guestInfoElem) {
     window.currentGuestId = guestInfoElem.dataset.guestId;
+    window.currentUserId = guestInfoElem.dataset.userId; // userId도 HTML에서 주입된다고 가정
   }
   loadCartItems();
-
 });
 
 
@@ -257,9 +265,8 @@ function updateOrderSummary(cartList, totalCartPrice) {
 
         let optionHtml = "";
 		options.forEach(opt => {
-		  
-		    const optName = opt.optionName || "옵션명 없음"; // 여기서 정의!
-		    const optPrice = opt.unitPrice || 0; // 옵션 가격은 unitPrice를 사용 (totalPrice는 수량까지 곱해진 값)
+		    const optName = opt.optionName || "옵션명 없음"; 
+		    const optPrice = opt.unitPrice || 0; 
 		    optionHtml += `
 		        <div class="text-muted small ms-3 mb-1 cart-option-item" data-ca-id="${opt.caId}">
 		          └ 옵션: ${optName} (+${optPrice.toLocaleString()}원)
@@ -289,49 +296,41 @@ function updateOrderSummary(cartList, totalCartPrice) {
 		       $orderItemList.append(html);
 		   });
 
-
 		   updateOverallTotalPriceDisplay(totalCartPrice);
 }
 
 // ==============================
 // 전체 삭제 버튼 (#btnRemoveAllItems)
 // ==============================
-$("#btnRemoveAllItems").click(function () { // "장바구니 전체 삭제" 버튼의 ID
-  // 1. 사용자에게 삭제를 한 번 더 확인합니다.
+$("#btnRemoveAllItems").click(function () {
   if (!confirm("장바구니의 모든 항목을 삭제하시겠습니까?")) {
-      return; // '취소'를 누르면 함수를 종료합니다.
+      return;
   }
 
-  // 2. 서버에 전달할 사용자 ID 또는 게스트 ID를 준비합니다.
-  //    'window.currentUserId'와 'window.currentGuestId'는 페이지 로드 시 전역 변수로 설정되어 있다고 가정합니다.
   const requestData = {};
-  if (window.currentUserId && window.currentUserId.trim() !== '') {
+  if (window.currentUserId && String(window.currentUserId).trim() !== '') {
     requestData.userId = window.currentUserId;
   }
-  if (window.currentGuestId && window.currentGuestId.trim() !== '') {
+  if (window.currentGuestId && String(window.currentGuestId).trim() !== '') {
     requestData.guestId = window.currentGuestId;
   }
 
-  // 3. 삭제할 정보(userId 또는 guestId)가 없으면 알림 후 종료합니다.
   if (Object.keys(requestData).length === 0) {
       alert("삭제할 장바구니 정보가 없습니다. 다시 로그인하거나 페이지를 새로고침해주세요.");
       return;
   }
-
 		
 	let sId = null;
-	   const urlParams = new URLSearchParams(window.location.search); // 현재 URL의 쿼리 파라미터를 파싱
+	   const urlParams = new URLSearchParams(window.location.search);
 	   if (urlParams.has('sId')) {
-	       sId = urlParams.get('sId'); // 'sId' 파라미터 값 가져오기
+	       sId = urlParams.get('sId');
 	   }
 
 	   if (sId === null) {
 	       alert("메뉴 상세 페이지로 돌아갈 가게 정보(sId)를 찾을 수 없습니다.");
-	       return; // sId가 없으면 더 이상 진행하지 않음
+	       return;
 	   }
 		 
-  // 4. AJAX 요청을 보냅니다.
-	    // AJAX 요청
 	    $.ajax({
 	        url: "/removeAll",
 	        method: "POST",
@@ -429,7 +428,7 @@ function deleteCartItem(caId) {
     };
 
     $.ajax({
-        url: "/deleteCart", // 컨트롤러에 해당 엔드포인트가 필요합니다.
+        url: "/deleteCart", 
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify(requestData),
@@ -453,7 +452,7 @@ function deleteCartItem(caId) {
 }
 
 // ==============================
-// **변경:** 전체 장바구니 UI를 다시 그리지 않고, 총 결제 금액만 업데이트하는 새로운 함수
+// 전체 장바구니 총 결제 금액만 업데이트하는 함수
 // ==============================
 function updateOverallTotalPriceDisplay(totalCartPrice) {
     const $totalOrderPriceDisplay = $("#totalOrderPrice");
@@ -463,9 +462,9 @@ function updateOverallTotalPriceDisplay(totalCartPrice) {
 //장바구니 새로고침해주는 함수
 function loadCartItems() {
     const requestData = {};
-    if (window.currentUserId && window.currentUserId.trim() !== '') {
+    if (window.currentUserId && String(window.currentUserId).trim() !== '') {
         requestData.id = window.currentUserId;
-    } else if (window.currentGuestId && window.currentGuestId.trim() !== '') {
+    } else if (window.currentGuestId && String(window.currentGuestId).trim() !== '') {
         requestData.guestId = window.currentGuestId;
     } else {
         console.log("사용자/게스트 ID 없음, 빈 장바구니 표시."); 
@@ -482,7 +481,13 @@ function loadCartItems() {
         success: function(response) {
             console.log("AJAX 성공: /getCart 응답:", response); 
             if (response.success && response.cartList) {
-                updateOrderSummary(response.cartList, response.totalPrice);
+                // 서버에서 받은 최신 장바구니 데이터로 전역 변수 업데이트
+                currentCartData = response.cartList;
+                currentTotalPrice = response.totalPrice;
+                // response에 totalQuantity가 있다면 여기서 업데이트:
+                // currentTotalQuantity = response.totalQuantity;
+
+                updateOrderSummary(currentCartData, currentTotalPrice);
             } else {
                 console.error("장바구니 로드 실패 (서버 응답):", response.message || "알 수 없는 오류");
                 updateOrderSummary([], 0); // 실패 시에도 빈 장바구니 표시
@@ -495,244 +500,302 @@ function loadCartItems() {
     });
 }
 
-// ==============================
-// 기존 DOMContentLoaded 내 기존 스크립트 (변수명 'count' -> 'currentQuantity' 변경)
-// ==============================
-document.addEventListener("DOMContentLoaded", () => {
+// =========================================================================
+// DOMContentLoaded 이벤트 리스너 통합 및 카카오 지도 API 로드 개선
+// =========================================================================
 
-	const checkKakaoApi = setInterval(() => {
+// 모든 DOMContentLoaded 관련 스크립트를 하나의 jQuery $(document).ready() 블록으로 통합
+$(document).ready(function() {
+	//집버튼 클릭시 주소록 가져오기 
+	$("#homeAddressBtn")?.on("click", function() {
+	       // 주소 선택 모달 열기
+	       const addressSelectModal = new bootstrap.Modal(document.getElementById('addressSelectModal'));
+	       addressSelectModal.show();
+	       
+	       // 데이터 로딩 함수 호출 (모달이 열릴 때 빈 상태로 뜨도록 합니다)
+	       loadUserAddressesIntoModal();
+	   });
+
+	   // --- 주소 목록 아이템 클릭 시 이벤트 (선택 버튼 클릭 시) ---
+	   // (지금은 데이터가 없어 이 이벤트가 발생할 일은 없지만, 나중에 데이터를 추가하면 동작합니다.)
+	   $(document).on("click", "#addressTabContent .select-address-btn", function(e) {
+	       e.stopPropagation(); // 부모 div의 클릭 이벤트가 발생하지 않도록 방지
+	       const selectedAddress = $(this).closest('.address-item').data("full-address");
+
+	       if (selectedAddress) {
+	           $("#location-input").val(selectedAddress);
+	           const addressSelectModal = bootstrap.Modal.getInstance(document.getElementById('addressSelectModal'));
+	           addressSelectModal.hide();
+	           $("#addressInputSearchBtn").trigger('click');
+	           console.log(`선택된 주소 '${selectedAddress}'로 검색 완료.`);
+	       } else {
+	           console.error("선택된 주소 데이터를 찾을 수 없습니다.");
+	       }
+	   });
+	
+    // 탭 전환 시 가게 지도 표시
+    $('a[href="#info"]')?.on('shown.bs.tab', function () {
+        showStoreOnMap();
+    });
+		
 		if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
-			clearInterval(checkKakaoApi); // API 로드 확인 후 인터벌 중지
-			initAddressSearch(); // 주소 검색 기능 초기화
-		}
-	}, 100); // 0.1초마다 확인	
+		      initAddressSearchInput();
+		      console.log("주소 검색 기능 초기화 완료.");
+		  } else {
+		      console.warn("경고: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않아 주소 검색 기능을 초기화할 수 없습니다.");
+		  }
 
 
-	document.querySelector('a[href="#info"]')?.addEventListener('shown.bs.tab', () => {
-		showStoreOnMap();
-	});
+		  // --- 2. 현재 위치 검색 버튼 (currentLocationSearchBtn) 기능 초기화 ---
+		  // 카카오 지도 API가 로드된 후에만 이 함수가 호출되도록 조건부 실행
+		  if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
+		      handleCurrentLocationSearch();
+		      console.log("현재 위치 검색 기능 초기화 완료.");
+		  } else {
+		      console.warn("경고: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않아 현재 위치 검색 기능을 초기화할 수 없습니다.");
+		  }
 
-	if (typeof kakao === 'undefined' || !kakao.maps) {
-		const interval = setInterval(() => {
-			if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.load) {
-				clearInterval(interval);
-				runKakaoScript();
-				showStoreOnMap();
-			}
-		}, 300);
-	} else {
-		runKakaoScript();
-		showStoreOnMap();
-	}
+    // 검색 제출 버튼 (키워드 검색)
+    $("#searchSubmitBtn")?.on("click", function () {
+        const keyword = $('#searchBox input[type="text"]')?.val().trim();
+        if (keyword) {
+            window.location.href = `/shopList?keyword=${encodeURIComponent(keyword)}`;
+        } else {
+            alert("검색어를 입력해주세요.");
+        }
+    });
 
-	document.getElementById("searchBtn")?.addEventListener("click", () => {
-		document.getElementById("searchBox")?.classList.toggle("d-none");
-	});
+    // 주소 검색/지우기 버튼 로직 
+    const locationInput = document.getElementById('location-input');
+    const addressInputSearchBtn  = document.getElementById('addressInputSearchBtn'); // HTML에 'id="searchButton"'이 반드시 있어야 합니다.
 
-	document.getElementById("searchSubmitBtn")?.addEventListener("click", () => {
-		const keyword = document.querySelector('#searchBox input[type="text"]')?.value.trim();
-		if (keyword) {
-		           window.location.href = `/shopList?keyword=${encodeURIComponent(keyword)}`;
-		       } else {
-		           alert("검색어를 입력해주세요.");
-		       }
-					 
-					 
-					 const locationInput = document.getElementById('location-input');
-					    const searchButton = document.getElementById('searchButton'); // HTML에 'id="searchButton"'이 반드시 있어야 합니다.
+    if (locationInput && addressInputSearchBtn ) {
+        // 초기 로드 시 버튼 상태 설정
+        updateSearchButtonState();
 
-					    if (locationInput && searchButton) {
-					        // 초기 로드 시 버튼 상태 설정
-					        updateSearchButtonState();
+        // 입력 필드 내용이 변경될 때마다 버튼 상태 업데이트
+        locationInput.addEventListener('input', updateSearchButtonState);
 
-					        // 입력 필드 내용이 변경될 때마다 버튼 상태 업데이트
-					        locationInput.addEventListener('input', updateSearchButtonState);
 
-					        // 검색/지우기 버튼 클릭 이벤트.
-					        // 이 클릭 이벤트는 'handleAddressSearch()' 함수를 호출합니다.
-					        searchButton.addEventListener('click', () => {
-					            const currentAddress = locationInput.value.trim();
-
-					            if (currentAddress === '') {
-					                // 주소 입력 필드가 비어 있으면 '검색' 버튼 역할
-					                // handleAddressSearch(geocoder, locationInput); // 이 함수는 외부에서 정의되어야 하며, geocoder는 initAddressSearch() 등에서 생성되어야 합니다.
-					            } else {
-					                // 주소 입력 필드에 값이 있으면 '지우기' 버튼 역할
-					                locationInput.value = ''; // 입력 필드 초기화
-					                locationInput.focus();    // 커서를 다시 입력 필드로 이동
-					                updateSearchButtonState(); // 버튼 텍스트를 '검색'으로 다시 변경
-					            }
-					        });
-
-					        // --- 검색 버튼 텍스트와 스타일을 업데이트하는 도우미 함수 (DOMContentLoaded 내부 정의) ---
-					        function updateSearchButtonState() {
-					            if (locationInput.value.trim() !== '') {
-					                searchButton.textContent = '지우기';
-					                searchButton.style.backgroundColor = '#dc3545'; // 지우기 버튼은 빨간색 (예시)
-					                searchButton.style.color = 'white';
-					            } else {
-					                searchButton.textContent = '검색';
-					                searchButton.style.backgroundColor = '#43d091'; // 검색 버튼은 원래 초록색
-					                searchButton.style.color = 'black'; // 글자색도 원래대로
-					            }
-					        }
-					    } else {
-					        console.warn("경고: 주소 검색 또는 초기화를 위한 HTML 요소('location-input' 또는 'searchButton')를 찾을 수 없습니다.");
-					    }
-					 			 
-	});
-
-	//검색버튼
+        // --- 검색 버튼 텍스트와 스타일을 업데이트하는 도우미 함수 ---
+        function updateSearchButtonState() {
+       
+                addressInputSearchBtn .textContent = '검색';
+                addressInputSearchBtn .style.backgroundColor = '#43d091'; // 검색 버튼은 원래 초록색
+                addressInputSearchBtn .style.color = 'black'; // 글자색도 원래대로
+            
+        }
+    } else {
+        console.warn("경고: 주소 검색 또는 초기화를 위한 HTML 요소('location-input' 또는 'addressInputSearchBtn')를 찾을 수 없습니다.");
+    }
 
 });
 
-function runKakaoScript() {
-	if (typeof kakao === 'undefined' || !kakao.maps) return;
 
-	const searchButton = document.getElementById('btn-search-toggle');
-	const inputField = document.getElementById('location-input');
-	if (!searchButton || !inputField) return;
 
-	searchButton.addEventListener('click', () => {
-		if (!navigator.geolocation) {
-			alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
-			return;
-		}
+function handleCurrentLocationSearch() {
+    console.log("handleCurrentLocationSearch 함수 시작");
+    if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
+        console.error("오류: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않았습니다. 현재 위치 검색을 실행할 수 없습니다.");
+        return;
+    }
+		console.log("카카오 API 로드 확인 완료");
+    const currentLocationSearchBtn = document.getElementById('currentLocationSearchBtn'); // ★ HTML ID: currentLocationSearchBtn ★
+    const locationInputField = document.getElementById('location-input'); // 주소 입력 필드 ID
 
-		navigator.geolocation.getCurrentPosition(
-			(position) => {
-				const lat = position.coords.latitude;
-				const lon = position.coords.longitude;
-				const geocoder = new kakao.maps.services.Geocoder();
-				const coord = new kakao.maps.LatLng(lat, lon);
+    if (!currentLocationSearchBtn || !locationInputField) {
+        console.warn("경고: 'currentLocationSearchBtn' 또는 'location-input' 요소를 찾을 수 없어 현재 위치 검색 기능을 초기화할 수 없습니다.");
+        return;
+    }
+		console.log("HTML 요소 찾음");
+		
+    currentLocationSearchBtn.addEventListener('click', () => {
+			console.log("위치 찾기 버튼 클릭됨");
+        if (!navigator.geolocation) {
+            alert('이 브라우저는 위치 정보를 지원하지 않습니다. 최신 브라우저를 사용해주세요.');
+            return;
+        }
+	
+				console.log("Geolocation 지원됨");	
+				
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+							console.log("위치 정보 가져오기 성공:", position);
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+								console.log(`위치 정보 가져오기 성공: 위도 ${lat}, 경도 ${lon}`);
+                const geocoder = new kakao.maps.services.Geocoder();
+                const coord = new kakao.maps.LatLng(lat, lon);
 
-				geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
-					if (status === kakao.maps.services.Status.OK) {
-						const address = result[0].address.address_name;
-						inputField.value = address;
+                geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+                    if (status === kakao.maps.services.Status.OK && result.length > 0) {
+                        const address = result[0].address.address_name;
+                        locationInputField.value = address; // 입력 필드에 주소 자동 채우기
 
-						// shopList 페이지로 category=전체보기, address 전달
-						const url = `/shopList?category=전체보기&address=${encodeURIComponent(address)}`;
-						window.location.href = url;
-					} else {
-						alert('주소 변환 실패');
-					}
-				});
-			},
-			(error) => alert('위치 정보를 가져오지 못했습니다: ' + error.message),
-			{ enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-		);
-	});
+                        const url = `/shopList?category=전체보기&address=${encodeURIComponent(address)}`;
+                        window.location.href = url;
+                    } else {
+                        alert('위치 정보를 주소로 변환하는 데 실패했습니다. 다시 시도해주세요.');
+                        console.error("주소 변환 실패:", status, result);
+                    }
+                });
+            },
+            (error) => {
+                let errorMessage = '위치 정보를 가져오는 데 실패했습니다.';
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = '위치 정보 사용 권한이 거부되었습니다. 브라우저 설정에서 허용해주세요.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = '위치 정보를 사용할 수 없습니다.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = '위치 정보를 가져오는 요청 시간이 초과되었습니다.';
+                        break;
+                    default:
+                        errorMessage = `알 수 없는 오류: ${error.message}`;
+                        break;
+                }
+                alert(errorMessage);
+                console.error("위치 정보 가져오기 오류:", error);
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
+    });
+		console.log("이벤트 리스너 등록 완료");
 }
 
-// 가게 주소를 받아서 지도에 마커 표시하고 지도 중심을 이동시키는 함수
+/**
+ * 주소 입력 필드의 내용을 기반으로 주소 검색을 수행하고 'shopList' 페이지로 이동합니다.
+ * HTML에서 주소 입력 필드는 'location-input' ID를, 검색 버튼은 'addressInputSearchBtn' ID를 가정합니다.
+ * 이 버튼은 '검색' 역할과 '지우기' 역할을 겸할 수 있습니다 (아래 `$(document).ready` 로직 참고).
+ */
+function initAddressSearchInput() { // 함수명 변경 (initAddressSearch -> initAddressSearchInput)
+    const locationInputField = document.getElementById('location-input');
+    const addressInputSearchBtn = document.getElementById('addressInputSearchBtn'); // ★ HTML ID: addressInputSearchBtn ★
+
+    if (!locationInputField || !addressInputSearchBtn) {
+        console.warn("경고: 'location-input' 또는 'addressInputSearchBtn' 요소를 찾을 수 없어 주소 검색 기능을 초기화할 수 없습니다.");
+        return;
+    }
+    if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
+        console.error("오류: 카카오 맵스 Geocoder API가 로드되지 않았습니다. 주소 검색을 초기화할 수 없습니다.");
+        return;
+    }
+
+    const geocoder = new kakao.maps.services.Geocoder();
+
+    addressInputSearchBtn.addEventListener('click', () => {
+			console.log("주소 검색 버튼 (addressInputSearchBtn) 클릭됨!");
+        const addressInput = locationInputField.value.trim();
+
+        // 이 버튼은 $(document).ready()에서 '지우기' 역할을 이미 처리합니다.
+        // 따라서 여기서는 '검색' 역할만 수행합니다.
+        if (!addressInput) {
+            alert('배달받으실 주소를 입력해주세요.');
+            return;
+        }
+
+        geocoder.addressSearch(addressInput, (result, status) => {
+            if (status === kakao.maps.services.Status.OK && result.length > 0) {
+                const foundAddress = result[0].address.address_name || result[0].road_address?.address_name || addressInput;
+                console.log("카카오 API에서 확인된 주소:", foundAddress);
+
+                const url = `/shopList?category=전체보기&address=${encodeURIComponent(foundAddress)}`;
+                window.location.href = url;
+            } else {
+                alert('입력하신 주소에 대한 검색 결과가 없거나 유효하지 않습니다. 다시 확인해주세요.');
+                console.error("카카오 주소 검색 실패 (상태 코드):", status, "입력 주소:", addressInput);
+            }
+        });
+    });
+}
+
+/**
+ * 가게 주소를 지도에 마커로 표시하고 지도의 중심을 이동시킵니다.
+ * HTML에서 가게 주소는 'storeAddress' ID의 요소에서, 지도는 'map' ID의 컨테이너에서 가져옵니다.
+ */
 function showStoreOnMap() {
-	const address = document.getElementById('storeAddress')?.innerText;
-	const mapContainer = document.getElementById('map');
-	if (!address || !mapContainer) return;
+	console.log("showStoreOnMap 함수 실행 시작.");
+    const address = document.getElementById('storeAddress')?.innerText;
+    const mapContainer = document.getElementById('map');
 
-	const map = new kakao.maps.Map(mapContainer, {
-		center: new kakao.maps.LatLng(33.450701, 126.570667), // 기본 중심 좌표
-		level: 3
-	});
+    if (!address || !mapContainer) {
+        console.warn("경고: 가게 주소 지도 표시를 위한 HTML 요소('storeAddress' 또는 'map')를 찾을 수 없습니다.");
+        return;
+    }
+    if (typeof kakao === 'undefined' || !kakao.maps) {
+        console.error("오류: 카카오 맵스 API가 로드되지 않았습니다. 가게 지도를 표시할 수 없습니다.");
+        return;
+    }
 
-	const geocoder = new kakao.maps.services.Geocoder();
-	geocoder.addressSearch(address, (result, status) => {
-		if (status === kakao.maps.services.Status.OK) {
-			const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-			new kakao.maps.Marker({ map, position: coords });
-			map.setCenter(coords);
-		}
-	});
+    const map = new kakao.maps.Map(mapContainer, {
+        center: new kakao.maps.LatLng(33.450701, 126.570667), // 기본 중심 좌표 (제주도 카카오 본사)
+        level: 3 
+    });
+
+    const geocoder = new kakao.maps.services.Geocoder();
+    geocoder.addressSearch(address, (result, status) => {
+        if (status === kakao.maps.services.Status.OK && result.length > 0) {
+            const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+            new kakao.maps.Marker({ map, position: coords });
+            map.setCenter(coords);
+        } else {
+            console.error("가게 주소 검색 실패:", status, "주소:", address);
+            alert("가게 주소를 지도에서 찾는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
+        }
+    });
 }
 
-function initAddressSearch() {
-	const locationInputField = document.getElementById('location-input');
-	const searchButton = document.getElementById('searchbtn');
+function loadUserAddressesIntoModal() {
+    console.log("loadUserAddressesIntoModal 함수 호출됨. (데이터 로딩은 현재 비활성화)");
+    
+    // 모든 탭의 기존 목록을 비우고, 로딩 메시지를 표시합니다.
+    $('.tab-pane .list-group').empty();
+    $('#loadingHomeAddressMessage, #loadingWorkAddressMessage, #loadingOtherAddressMessage').removeClass("d-none").show();
+    $('#noHomeAddressMessage, #noWorkAddressMessage, #noOtherAddressMessage').addClass("d-none").hide();
 
-	// 요소가 존재하는지 확인
-	if (!locationInputField || !searchButton) {
-		console.warn("주소 검색 기능을 위한 HTML 요소를 찾을 수 없습니다.");
-		return;
-	}
+    // ---------------------------------------------------------------
+    // 실제 데이터 로딩 로직 (AJAX 호출 등)은 여기에 들어갈 예정입니다.
+    // 지금은 이 부분을 건너뛰어 데이터를 로드하지 않습니다.
+    // ---------------------------------------------------------------
 
-	// 카카오 Geocoder 서비스 객체 생성
-	const geocoder = new kakao.maps.services.Geocoder();
-
-	// 검색 버튼 클릭 이벤트 리스너
-	searchButton.addEventListener('click', () => {
-		const addressInput = locationInputField.value.trim(); // 입력된 주소 가져오기
-
-		if (!addressInput) {
-			alert('배달 주소를 입력해주세요.');
-			return; // 입력값이 없으면 함수 종료
-		}
-
-		// 카카오 지도 API를 사용하여 주소 검색
-		geocoder.addressSearch(addressInput, (result, status) => {
-			if (status === kakao.maps.services.Status.OK) {
-				// 검색 결과가 있을 경우 (유효한 주소)
-				if (result.length > 0) {
-					// 가장 첫 번째(가장 정확하다고 판단되는) 검색 결과 사용
-					const foundAddress = result[0].address_name || result[0].road_address?.address_name || addressInput;
-					console.log("카카오 API에서 확인된 주소:", foundAddress);
-
-					// shopList 페이지로 이동
-					const url = `/shopList?category=전체보기&address=${encodeURIComponent(foundAddress)}`;
-					window.location.href = url;
-				} else {
-					// 검색 결과는 없지만 status는 OK인 경우 (매우 드물지만 발생 가능)
-					alert('입력하신 주소에 대한 검색 결과가 없습니다. 다시 확인해주세요.');
-					console.error("카카오 주소 검색 결과 없음:", addressInput);
-				}
-			} else {
-				// 주소 검색 실패 (예: 잘못된 형식, 네트워크 오류 등)
-				alert('유효한 배달 주소를 찾을 수 없습니다. 다시 확인해주세요.');
-				console.error("카카오 주소 검색 실패 (상태 코드):", status, "입력 주소:", addressInput);
-			}
-		});
-	});
+    // 일정 시간 후 로딩 메시지를 숨기고, '주소 없음' 메시지를 표시합니다.
+    // 이는 데이터가 없음을 시뮬레이션합니다.
+    setTimeout(() => {
+        $('#loadingHomeAddressMessage, #loadingWorkAddressMessage, #loadingOtherAddressMessage').addClass("d-none").hide();
+        // 모든 탭에 '주소 없음' 메시지를 표시합니다.
+        $('#noHomeAddressMessage').removeClass("d-none").show();
+        $('#noWorkAddressMessage').removeClass("d-none").show();
+        $('#noOtherAddressMessage').removeClass("d-none").show();
+    }, 500); // 0.5초 후에 메시지 상태 변경
 }
 
-function handleAddressSearch() {
-	const addressInput = locationInput.value.trim();
+/**
+ * 주소 목록을 특정 HTML 요소에 렌더링하는 헬퍼 함수
+ * (현재는 호출되지 않거나, 데이터가 비어있어 아무것도 렌더링하지 않습니다.)
+ */
+function renderAddresses(addresses, listSelector, noAddressMessageSelector) {
+    const $listElement = $(listSelector);
+    const $noMessageElement = $(noAddressMessageSelector);
 
-	if (!addressInput) {
-		alert('배달 주소를 입력해주세요.');
-		return;
-	}
+    $listElement.empty(); // 현재 목록을 비웁니다.
 
-	if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services || !new kakao.maps.services.Geocoder()) {
-		console.error("카카오맵 Geocoder API가 로드되지 않았거나 사용할 수 없습니다.");
-		alert("주소 검색 기능을 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.");
-		return;
-	}
-	const geocoder = new kakao.maps.services.Geocoder();
-
-
-	geocoder.addressSearch(addressInput, (result, status) => {
-		if (status === kakao.maps.services.Status.OK) {
-			if (result.length > 0) {
-				const foundAddress = result[0].address_name || result[0].road_address?.address_name || addressInput;
-				console.log("카카오 API에서 확인된 주소:", foundAddress);
-
-				const url = `/shopList?category=전체보기&address=${encodeURIComponent(foundAddress)}`;
-				window.location.href = url;
-			} else {
-				alert('입력하신 주소에 대한 검색 결과가 없습니다. 다시 확인해주세요.');
-			}
-		} else {
-			alert('유효한 배달 주소를 찾을 수 없습니다. 다시 확인해주세요.');
-			console.error("카카오 주소 검색 실패:", status, addressInput);
-		}
-	});
+    if (addresses && addresses.length > 0) {
+        // 실제 데이터가 있다면 이 곳에서 주소 항목을 생성합니다.
+        // 현재는 addresses 배열이 비어있으므로 아무것도 추가되지 않습니다.
+        addresses.forEach(addr => {
+            // ... (주소 항목 HTML 생성 로직) ...
+        });
+    } else {
+        // 주소 데이터가 없으면 '주소 없음' 메시지를 표시합니다.
+        $noMessageElement.removeClass("d-none").show();
+    }
 }
-
 // ==============================
 // 찜하기 기능
 // ==============================
 $("#btnHeart").click(function () {
-  // sId를 data-sid 속성에서 가져오는 것이 더 안정적입니다.
   const sId = $(this).data("sid");
   if (!sId) {
       alert('가게 정보를 찾을 수 없습니다.');
@@ -742,7 +805,7 @@ $("#btnHeart").click(function () {
   $.ajax({
     url: "/heart.ajax",
     type: "post",
-    data: { sId: sId }, // 데이터 객체로 전달
+    data: { sId: sId }, 
     dataType: "json",
     success: function (data) {
       if (data && typeof data.heartCount !== 'undefined') {
@@ -782,15 +845,15 @@ $(document).on("submit", "#reviewWriteForm", function (e) {
     url: "reviewWrite.ajax",
     data: formData,
     type: "post",
-    processData: false, // FormData 사용 시 필수
-    contentType: false, // FormData 사용 시 필수
+    processData: false, 
+    contentType: false, 
     dataType: "json",
     success: function (resData) {
       // TODO: 리뷰 목록을 새로고침하는 로직 추가 (예: 리뷰 목록을 다시 AJAX로 불러오거나, 응답 데이터로 UI 업데이트)
       // 현재는 단순히 alert만 띄우고 있습니다.
       alert("댓글이 등록되었습니다.");
-      $("#reviewWriteForm")[0].reset(); // 폼 초기화
-      $("#reviewForm").addClass("d-none"); // 폼 숨기기
+      $("#reviewWriteForm")[0].reset(); 
+      $("#reviewForm").addClass("d-none"); 
       // 예: fetchAndDisplayReviews(); // 리뷰 목록을 다시 불러오는 함수 호출
     },
     error: function (xhr, status, error) {
@@ -801,13 +864,12 @@ $(document).on("submit", "#reviewWriteForm", function (e) {
 });
 
 // 리뷰 사진 미리보기
-// 'previewUrl' 전역 변수는 필요 없으며, 직접 src를 설정하면 됩니다.
-$("#rPicture").on("change", function () { // ID를 rPicture로 변경
+$("#rPicture").on("change", function () { 
   const file = this.files[0];
-  const $imgPreview = $('#imgPreview'); // jQuery 객체로 변경
+  const $imgPreview = $('#imgPreview');
 
   if (!file) {
-      $imgPreview.hide().attr('src', ''); // 파일 없으면 숨기고 src 초기화
+      $imgPreview.hide().attr('src', ''); 
       return;
   }
 
@@ -817,3 +879,4 @@ $("#rPicture").on("change", function () { // ID를 rPicture로 변경
   };
   reader.readAsDataURL(file);
 });
+

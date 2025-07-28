@@ -341,27 +341,82 @@ nav.navbar .nav-link.active {
 	color: #ffc700;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* 모달창 주소 버튼  */
+ .address-item {
+        display: flex;
+        align-items: stretch;
+        margin-bottom: 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        cursor: pointer;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .address-item:hover {
+        background-color: #f8f9fa;
+    }
+    .address-item-col {
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    .address-item-type {
+        flex: 0 0 25%;
+        background-color: #f8f9fa;
+        border-right: 1px solid #dee2e6;
+        font-weight: bold;
+        color: #343a40;
+    }
+    .address-item-type span.alias {
+        font-size: 0.85em;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+    .address-item-details {
+        flex: 1;
+        text-align: left;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    .address-item-details .main-address {
+        font-size: 1em;
+        color: #212529;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 4px;
+    }
+    .address-item-details .detail-address {
+        font-size: 0.85em;
+        color: #6c757d;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .address-item-select {
+        flex: 0 0 20%;
+        border-left: 1px solid #dee2e6;
+        background-color: #f8f9fa;
+    }
+    .address-item-select .btn {
+        width: 80%;
+        padding: 8px 0;
+        font-size: 0.95em;
+    }
+    .message-container {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    .message-container p {
+        margin-bottom: 0;
+        color: #555;
+    }
+    
+    
+    

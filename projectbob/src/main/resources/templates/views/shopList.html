@@ -13,36 +13,44 @@
 			<div class="text-center mb-2">
 				<h5 class="mb-1 fw-semibold text-black">배달받으실 주소를 입력해주세요</h5>
 			</div>
+
 			<div class="d-flex justify-content-center mt-2">
-				<button id="btn-search-toggle"
+				<button id="homeAddressBtn"
 					class="btn text-white me-2 d-flex align-items-center"
-					style="background-color: #43d091" title="검색창 열기/닫기">
+					style="background-color: #43d091" title="등록된 집 주소로 검색">
+					<img src="https://img.icons8.com/ios-filled/24/000000/home.png"
+						alt="집" class="me-1" />
+				</button>
+				<button id="currentLocationSearchBtn"
+					class="btn text-white me-2 d-flex align-items-center"
+					style="background-color: #43d091" title="현재 위치로 주소 검색">
 					<img src="https://img.icons8.com/ios-filled/24/000000/marker.png"
 						alt="위치" class="me-1" />
 				</button>
 				<input id="location-input" type="text"
 					class="form-control w-25 me-2" th:value="${userAddress}"
 					placeholder="배달주소입력" />
-				<button id="searchBtn" class="btn text-dark fw-semibold"
+				<button id="addressInputSearchBtn" class="btn text-dark fw-semibold"
 					style="background-color: #43d091">검색</button>
 			</div>
+
 		</div>
 
 		<!-- 네비게이션 (한줄, 버튼 없음, 스크롤 가능) -->
 		<div class="container my-4">
 
-	
+
 			<div id="searchBox" class="mb-3 d-none">
 				<div class="input-group input-group-sm" style="width: 300px;">
 					<input type="text" class="form-control"
-						placeholder="가게명 또는 메뉴를 검색하세요" >
+						placeholder="가게명 또는 메뉴를 검색하세요">
 
 					<button class="btn text-white" id="searchSubmitBtn"
 						style="background-color: #43d091;">검색</button>
 				</div>
 			</div>
-	
-		
+
+
 
 			<nav class="navbar px-0">
 				<div class="d-flex align-items-center overflow-auto w-100">
