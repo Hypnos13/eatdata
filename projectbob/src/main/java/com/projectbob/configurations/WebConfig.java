@@ -1,15 +1,12 @@
 package com.projectbob.configurations;
 
+<<<<<<< HEAD
 
 import org.springframework.beans.factory.annotation.Value;
+=======
+>>>>>>> Yong
 import org.springframework.context.annotation.Configuration;
-
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-
 import org.springframework.web.servlet.config.annotation.*;
-
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer{
@@ -23,9 +20,15 @@ public class WebConfig implements WebMvcConfigurer{
 		registry.addViewController("/searchIdPassForm").setViewName("members/searchIdPass");
 		registry.addViewController("/writeFAQForm").setViewName("admin/writeFAQForm");
 		registry.addViewController("/writeNoticeForm").setViewName("admin/writeNoticeForm");
-		registry.addViewController("/shopJoinForm").setViewName("shop/shopJoinForm");
 		registry.addViewController("/login/naver/callback").setViewName("members/naverCallback");
 		registry.addViewController("/addAddressForm").setViewName("members/addAddressForm");
+	}
+	
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(new LoginCheckInterceptor())
+				.order(1).addPathPatterns("/shop*", "/menu*")
+				.excludePathPatterns("/shopMain");
 	}
 	
 	//리뷰 사진 추가

@@ -55,6 +55,14 @@ CREATE TABLE menu (
     FOREIGN KEY (s_id) REFERENCES shop(s_id) -- 만약 shop 테이블이 있다면 외래키 설정
 );
 
+ALTER TABLE menu
+ADD COLUMN calories DECIMAL(10, 2),     -- 열량 (kcal)
+ADD COLUMN carbs DECIMAL(10, 2),        -- 탄수화물 (g)
+ADD COLUMN protein DECIMAL(10, 2),      -- 단백질 (g)
+ADD COLUMN fat DECIMAL(10, 2),          -- 지방 (g)
+ADD COLUMN sodium DECIMAL(10, 2),       -- 나트륨 (mg)
+ADD COLUMN serving_size INT;            -- 1회 제공량 (g)
+
 -- 카페하우스 메뉴 (shop01)
 INSERT INTO menu (s_id, category, name, price, m_info)
 VALUES
