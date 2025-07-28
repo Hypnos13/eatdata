@@ -143,6 +143,12 @@
 	  </div>
 	
 	  <!-- 메뉴 관리 -->
+	  <div class="mb-2" th:if="${currentShop != null}">
+	  	<a th:href="@{|/shop/menuList?s_id=${currentShop.sId}|}" class="btn w-100 text-start sidebar-group-btn fw-bold">
+	  		<i class="bi bi-list-check me-2"></i> 메뉴 관리
+  		</a>
+		</div>
+	  <!-- 이전 버전
 	  <div class="mb-2">
 	    <button class="btn w-100 text-start sidebar-group-btn fw-bold"
 	            data-bs-toggle="collapse" data-bs-target="#collapseMenu" aria-expanded="false">
@@ -152,10 +158,9 @@
 	    <div class="collapse" id="collapseMenu" th:if="${currentShop != null}" >
 	      <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
 		      <li><a th:href="@{|/shop/menuList?s_id=${currentShop.sId}|}" class="sidebar-sub-link">메뉴 리스트</a></li>
-		      <li><a th:href="@{|/shop/menuRegisterForm?s_id=${currentShop.sId}|}" class="sidebar-sub-link">메뉴 등록</a></li>
 	      </ul>
 	    </div>
-	   </div>
+	   </div> -->
 	  
 		<!-- 리뷰관리 -->
 		<div class="mb-2">

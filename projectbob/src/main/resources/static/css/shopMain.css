@@ -38,13 +38,14 @@ body {
 /* 아이콘 그리드 - grid 사용! */
 .mains-icon-grid {
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 6px 0;
-    width: 100%;
+    width: 75%;
     background: #fff;
     border-radius: 20px;
     box-shadow: 0 2px 10px rgba(34,34,34,0.05);
     padding: 18px 0 8px 0;
+    margin: 0px auto;
 }
 .icon-col {
     display: block;
@@ -82,17 +83,15 @@ body {
     color: var(--text-color);
 }
 
-/* 반응형: 12, 6, 4, 2열 */
+/* 반응형: 6, 3, 2열 */
 @media (max-width: 1550px) {
-    .mains-icon-grid { grid-template-columns: repeat(8, 1fr);}
-}
-@media (max-width: 1199px) {
     .mains-icon-grid { grid-template-columns: repeat(6, 1fr);}
 }
+
 @media (max-width: 991px) {
     .mains-row { flex-direction: column; gap: 18px; }
     .mains-icons-col, .mains-login-col { width: 100%; max-width: 100%; }
-    .mains-icon-grid { grid-template-columns: repeat(4, 1fr);}
+    .mains-icon-grid { grid-template-columns: repeat(3, 1fr);}
     .mains-login-col { margin-top: 14px; }
     .benefits-grid, .process-steps {flex-direction: column !important; gap: 32px !important; align-items: center; }
 }
@@ -108,7 +107,7 @@ body {
     border-radius: 16px;
     box-shadow: 0 2px 7px rgba(44, 208, 145, 0.09);
     background: #fff;
-    padding: 24px 16px 14px 16px;
+    padding: 14px 16px 14px 16px;
     height: 100%;
     min-height: 170px;
     display: flex;
@@ -137,7 +136,7 @@ body {
 .hero {
     margin: 0 auto;
     background-color: var(--light-gray);
-    padding: 100px 32px 80px 32px;
+    padding: 80px 32px 80px 32px;
     text-align: center;
 }
 
@@ -176,7 +175,7 @@ body {
 
 /* 공통 섹션 스타일 */
 .section {
-    padding: 80px 50px;
+    padding: 50px 50px;
 }
 .section h2 {
     font-size: 36px;

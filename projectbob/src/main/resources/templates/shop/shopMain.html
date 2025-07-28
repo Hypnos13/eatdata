@@ -66,7 +66,7 @@
                     </a>
                 </div>
 
-				<!-- ========= 사장님 공지 ========= -->
+				<!-- ========= 사장님 공지 ========= 
 				<div class="icon-col">
 				  <a th:if="${#lists.isEmpty(shopListMain)}"
 				     th:href="@{/shopInfo}"
@@ -86,7 +86,7 @@
 				    <i class="bi bi-megaphone"></i>
 				    <div class="mains-icon-label">사장님 공지</div>
 				  </a>
-				</div>
+				</div>		-->
 
                 <!-- ========= 영업 시간 ========= -->
                 <div class="icon-col">
@@ -110,7 +110,7 @@
                     </a>
                 </div>
 
-                <!-- ========= 영업 상태 ========= -->
+                <!-- ========= 영업 상태 =========
                 <div class="icon-col">
                     <a th:if="${#lists.isEmpty(shopListMain)}"
                        th:href="@{/shopInfo}"
@@ -130,7 +130,7 @@
                         <div class="mains-icon"><i class="bi bi-toggle-on"></i></div>
                         <div class="mains-icon-label">영업 상태</div>
                     </a>
-                </div>
+                </div>		-->
 
                 <!-- ========= 메뉴 리스트 ========= -->
                 <div class="icon-col">
@@ -154,7 +154,7 @@
                     </a>
                 </div>
 
-                <!-- ========= 메뉴 등록 ========= -->
+                <!-- ========= 메뉴 등록 ========= 
                 <div class="icon-col">
                     <a th:if="${#lists.isEmpty(shopListMain)}"
                        th:href="@{/shopInfo}"
@@ -174,9 +174,9 @@
                         <div class="mains-icon"><i class="bi bi-receipt"></i></div>
                         <div class="mains-icon-label">메뉴 등록</div>
                     </a>
-                </div>
+                </div>		-->
 
-                <!-- ========= 메뉴 관리 ========= -->
+                <!-- ========= 메뉴 관리 ========= 
                 <div class="icon-col">
                     <a th:if="${#lists.isEmpty(shopListMain)}"
                        th:href="@{/shopInfo}"
@@ -196,29 +196,7 @@
                         <div class="mains-icon"><i class="bi bi-list-task"></i></div>
                         <div class="mains-icon-label">메뉴 관리</div>
                     </a>
-                </div>
-
-                <!-- ========= 메뉴 품절 ========= -->
-                <div class="icon-col">
-                    <a th:if="${#lists.isEmpty(shopListMain)}"
-                       th:href="@{/shopInfo}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-x-circle"></i></div>
-                        <div class="mains-icon-label">메뉴 품절</div>
-                    </a>
-                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
-                       th:href="@{/shop/menuSoldOut(s_id=${currentShop.sId})}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-x-circle"></i></div>
-                        <div class="mains-icon-label">메뉴 품절</div>
-                    </a>
-                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
-                       th:href="@{/shopListMain}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-x-circle"></i></div>
-                        <div class="mains-icon-label">메뉴 품절</div>
-                    </a>
-                </div>
+                </div>		-->
 
                 <!-- ========== 추가 예정 아이콘들 ========== -->
                 <div class="icon-col">

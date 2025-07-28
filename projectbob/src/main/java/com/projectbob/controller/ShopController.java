@@ -16,7 +16,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.projectbob.domain.*;
@@ -34,9 +33,6 @@ public class ShopController {
 	
 	@Autowired
 	private FileUploadService fileUploadService;
-	
-	@Autowired
-	private RestTemplate restTemplate;
 	
 	// 식품영양성분DB API 검색
 	@GetMapping("/api/nutrition-search")
