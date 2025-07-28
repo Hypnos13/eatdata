@@ -57,11 +57,23 @@
         FROM menu WHERE m_id = #{mId}
     </select>
 
-	<update id="updateMenu" parameterType="Menu">
-        UPDATE menu
-        SET category = #{category}, name = #{name}, price = #{price}, m_info = #{mInfo},
-            m_picture_url = #{mPictureUrl}, modi_date = SYSDATE()
-        WHERE m_id = #{mId}
+    <update id="updateMenu" parameterType="Menu">
+    UPDATE menu
+    SET 
+        category = #{category}, 
+        name = #{name}, 
+        price = #{price}, 
+        m_info = #{mInfo},
+        m_picture_url = #{mPictureUrl}, 
+        modi_date = SYSDATE(),
+        serving_size = #{servingSize},
+        calories = #{calories},
+        carbs = #{carbs},
+        protein = #{protein},
+        fat = #{fat},
+        sugar = #{sugar},
+        sodium = #{sodium}
+    WHERE m_id = #{mId}
     </update>
 
 	<delete id="deleteMenu" parameterType="int">
