@@ -283,6 +283,13 @@ body {
   box-shadow: 0 2px 12px rgba(67, 208, 145, 0.06);
   font-size: 1.12rem;
 }
+
+.shop-basic-list img {
+  width: 100%;  
+  max-width: 900px;
+  height: auto;
+}
+
 .shop-basic-list .list-group-item {
   border: none;
   padding: 18px 16px;

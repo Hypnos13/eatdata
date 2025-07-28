@@ -308,28 +308,3 @@ $(function () {
   });
 });
 
-// === shopBasicView.html: 위/아래 화살표 토글 ===
-document.addEventListener('DOMContentLoaded', function() {
-  // 가게 사진 토글
-  const shopPicIcon = document.getElementById('toggleShopPicIcon');
-  const shopPicContainer = document.getElementById('shopPicContainer');
-  if (shopPicIcon && shopPicContainer) {
-    shopPicIcon.addEventListener('click', () => {
-      shopPicContainer.classList.toggle('d-none');
-      shopPicIcon.classList.toggle('bi-chevron-down');
-      shopPicIcon.classList.toggle('bi-chevron-up');
-    });
-  }
-
-  // 사업자등록증 토글
-  const licenseIcon = document.getElementById('toggleLicenseIcon');
-  const licenseContainer = document.getElementById('licenseContainer');
-  if (licenseIcon && licenseContainer) {
-    licenseIcon.addEventListener('click', () => {
-      licenseContainer.classList.toggle('d-none');
-      licenseIcon.classList.toggle('bi-chevron-down');
-      licenseIcon.classList.toggle('bi-chevron-up');
-    });
-  }
-});
-
