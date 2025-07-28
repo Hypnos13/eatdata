@@ -19,9 +19,4 @@ public interface LoginMapper {
 	String searchPassword(@Param("id") String id, @Param("name") String name, @Param("email") String email, @Param("phone") String phone, @Param("receive") String receive);
 	List<Member> userList(@Param("division") String division, @Param("keyword") String keyword );
 	void updateIsuse(@Param("id") String id, @Param("isuse") String isuse);
-	List<Addressbook> getMyAddress(String id);
-	void addAddress(Addressbook addressbook);
-	Addressbook getAddress(int no);
-	void updateAddress(Addressbook addressbook);
-	void deleteAddress(@Param("id") String id, @Param("no") int no);
 }

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"		
+		layout:decorate="~{layouts/main_layout}">
+<th:block layout:fragment="content">
+<script th:src="@{/js/faq.js}"></script>
+<div class="container my-5" style="max-width: 800px; margin-top: 3rem; margin-bottom: 3rem;">
+    <h4 class="mb-4 text-center fw-bold">나의 찜 목록</h4>
+
+    <div th:each="shop : ${shopList}" class="card mb-4 p-3 shadow-sm rounded-4 border-0">
+        <div class="d-flex justify-content-between align-items-center"  th:onclick="|location.href='@{/MenuDetail(sId=${shop.sId})}'|">
+            
+            <div class="flex-grow-1 pe-3">
+                <div class="d-flex align-items-center mb-1">
+                    <h5 class="mb-0 fw-bold text-dark" th:text="${shop.name}">가게이름</h5>
+                    <span class="badge ms-2"
+                          th:classappend="${shop.status == 'Y'} ? 'bg-success' : 'bg-secondary'"
+                          th:text="${shop.status == 'Y'} ? '영업중' : '영업준비중'">
+                        
+                    </span>
+                </div>
+                <div class="text-muted small mb-1">
+                    ⭐ 평점: <span th:text="${#numbers.formatDecimal(shop.rating, 1, 1)}"></span>
+                </div>
+                <div class="text-secondary small">
+                    가게정보: <span th:text="${shop.sInfo}">설명</span>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <button type="button"
+                        class="btn p-0 border-0 bg-transparent toggle-heart" th:data-no="${shop.sId}">
+                        
+                    <i class="bi bi-heart-fill text-danger fs-4"></i>
+                    <span class="text-danger small fw-semibold ms-1" th:text="'(' + ${shop.heart} + ')'"></span>
+                </button>
+            </div>
+                      
+        </div>
+    </div>
+</div>
+</th:block>
+</html>
