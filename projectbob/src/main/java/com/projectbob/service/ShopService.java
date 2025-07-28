@@ -331,4 +331,28 @@ public class ShopService {
         shopMapper.insertReviewReply(reply);
     }
     
+	/** 리뷰 등록 */
+    @Transactional
+    public void addReview(Review review) {
+        log.info("리뷰 등록, sId={}", review.getSId());
+        shopMapper.insertReview(review);              // 리뷰 등록
+        log.info("shopMapper.updateShopRatingBySId() 호출, sId={}", review.getSId());
+        shopMapper.updateShopRatingBySId(review.getSId()); // ★ 평점 갱신
+    }
+
+    /** 리뷰 수정 */
+    @Transactional
+    public void updateReview(Review review) {
+        shopMapper.updateReview(review);              // 리뷰 수정
+        shopMapper.updateShopRatingBySId(review.getSId()); // ★ 평점 갱신
+    }
+    
+    /** 리뷰 삭제 */
+    @Transactional
+    public void deleteReview(int rNo, int sId) {
+        shopMapper.deleteReview(rNo);                 // 리뷰 삭제
+        shopMapper.updateShopRatingBySId(sId);             // ★ 평점 갱신
+    }
+
+
 }

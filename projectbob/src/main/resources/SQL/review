@@ -54,3 +54,4 @@ VALUES
   
   SELECT * FROM review_reply;
   
+commit;
