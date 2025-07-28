@@ -59,6 +59,10 @@ public class ShopService {
 		return shopMapper.getAllMenus();
 	}
 
+	//가게별 메뉴 수 조회
+	public int getMenuCount(int sId) {
+		return shopMapper.countMenusByShopId(sId);
+	}
 	
 	// 메뉴 리스트
 	public List<Menu> getMenusByShopId(int sId) {

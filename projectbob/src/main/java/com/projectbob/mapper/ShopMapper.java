@@ -64,5 +64,8 @@ public interface ShopMapper {
     List<Menu> getMenusByShopId(@Param("sId") int sId, @Param("category") String category);
     List<String> getMenuCategoriesByShopId(int sId); //카테고리 목록 조회를 위한 메서드 추가
 	
+    /** 특정 가게의 메뉴 개수 조회 */
+    @Select("SELECT COUNT(*) FROM menu WHERE s_id = #{sId}")
+    int countMenusByShopId(@Param("sId") int sId);
 
 }

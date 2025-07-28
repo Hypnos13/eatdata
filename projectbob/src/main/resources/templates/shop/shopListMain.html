@@ -19,25 +19,37 @@
 		    <table class="table table-bordered align-middle">
 		        <thead>
 		            <tr>
-		                <th>가게명</th>
-		                <th>대표자명</th>
-		                <th>연락처</th>
-		                <th>상태</th>
-		                <th>가게아이디</th>
+		                <th>사진</th>
+	                    <th>가게ID</th>
+	                    <th>가게명</th>
+	                    <th>상태</th>
+	                    <th>메뉴 수</th>
+	                    <th>평점</th>
 		            </tr>
 		        </thead>
 		        <tbody>
 		            <tr th:each="shop : ${shopListMain}">
-		                <td th:text="${shop.name}"></td>
-		                <td th:text="${shop.owner}"></td>
-		                <td th:text="${shop.phone}"></td>
-		                <td>
-		                    <!-- 상태표시 뱃지 -->
-		                    <span th:if="${shop.status == 'Y'}" class="badge bg-success">영업중</span>
-		                    <span th:if="${shop.status != 'Y'}" class="badge bg-secondary">휴점</span>
-		                </td>
-		                <td th:text="${shop.sId}"></td>
-		            </tr>
+	                    <!-- 1. 썸네일 -->
+	                    <td style="width:60px;">
+	                        <img th:if="${shop.sPictureUrl}"
+	                             th:src="@{${shop.sPictureUrl}}"
+	                             alt="썸네일"
+	                             class="img-fluid rounded" />
+	                    </td>
+	                    <!-- 2. 가게ID -->
+	                    <td th:text="${shop.sId}"></td>
+	                    <!-- 3. 가게명 -->
+	                    <td th:text="${shop.name}"></td>
+	                    <!-- 4. 상태 -->
+	                    <td>
+	                        <span th:if="${shop.status == 'Y'}" class="badge bg-success">영업중</span>
+	                        <span th:if="${shop.status != 'Y'}" class="badge bg-secondary">휴점</span>
+	                    </td>
+	                    <!-- 5. 메뉴 수 -->
+	                    <td th:text="${menuCountMap[shop.sId]} + '개'"></td>
+	                    <!-- 6. 평점 (소수점 1자리) -->
+            			<td th:text="${#numbers.formatDecimal(shop.rating, 1, 1)}"></td>
+	                </tr>
 		        </tbody>
 		    </table>
 		</div>

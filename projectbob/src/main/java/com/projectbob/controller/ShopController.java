@@ -181,57 +181,98 @@ public class ShopController {
         return "shop/shopBasicSet";
     }
 	
-	//기본정보 수정 로직
+ // 기본정보 수정 로직
     @PostMapping("/shop/updateBasic")
     public String updateBasicInfo(
+            @SessionAttribute(name="loginId", required=false) String loginId,
             @ModelAttribute Shop shop,
             @RequestParam(value="sPicture", required=false) MultipartFile sPictureFile,
             @RequestParam(value="sLicense", required=false) MultipartFile sLicenseFile,
             Model model) throws IOException {
 
-        // 1) 파일 업로드 처리
+        // 0) 로그인 체크
+        if (loginId == null) {
+            return "redirect:/login";
+        }
+
+        // 1) 기존 Shop 조회 (소유권 검증 포함)
+        Shop existing = shopService.findByShopIdAndOwnerId(shop.getSId(), loginId);
+        if (existing == null) {
+            model.addAttribute("errorMessage", "가게 정보를 찾을 수 없습니다.");
+            return "shop/shopBasicSet";
+        }
+
+        // 2) 파일 업로드 처리 & 기존 URL 복원
         try {
+            // 가게 사진
             if (sPictureFile != null && !sPictureFile.isEmpty()) {
                 String picUrl = fileUploadService.uploadFile(sPictureFile, "shop");
                 shop.setSPictureUrl(picUrl);
+            } else {
+                // 업로드 없으면 기존 URL 유지
+                shop.setSPictureUrl(existing.getSPictureUrl());
             }
+            // 사업자등록증
             if (sLicenseFile != null && !sLicenseFile.isEmpty()) {
                 String licUrl = fileUploadService.uploadFile(sLicenseFile, "business-licenses");
                 shop.setSLicenseUrl(licUrl);
+            } else {
+                shop.setSLicenseUrl(existing.getSLicenseUrl());
             }
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "shop/shopBasicSet";
         }
 
-        // 2) 수정 일시 세팅
+        // 3) 수정 일시 세팅
         shop.setModiDate(new Timestamp(System.currentTimeMillis()));
 
-        // 3) DB 업데이트
+        // 4) DB 업데이트
         shopService.updateShopBasicInfo(shop);
 
-        // 4) 뷰로 리다이렉트
+        // 5) 리다이렉트
         return "redirect:/shopBasicView?s_id=" + shop.getSId();
     }
 	
     /* ----------------------- 내 가게 리스트 ----------------------- */
     @GetMapping("/shopListMain")
-    public String shopListMain(Model model,
-                               @SessionAttribute(name = "loginId", required = false) String loginId,
-                               @RequestParam(value = "s_id", required = false) Integer sId,
-                               HttpSession session) {
-        if (loginId == null) return "redirect:/login";
+    public String shopListMain(
+            Model model,
+            @SessionAttribute(name = "loginId", required = false) String loginId,
+            @RequestParam(value = "s_id", required = false) Integer sId,
+            HttpSession session) {
 
+        // 0) 로그인 체크
+        if (loginId == null) {
+            return "redirect:/login";
+        }
+
+        // 1) 사장님이 가진 가게 목록 조회
         List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
-        if (shopListMain.isEmpty()) return "shop/shopInfo";
+        if (shopListMain.isEmpty()) {
+            return "shop/shopInfo";
+        }
 
+        // 2) currentShop 결정 (세션 또는 파라미터 기반)
         Shop currentShop = resolveCurrentShop(sId, loginId, session, shopListMain);
 
-        model.addAttribute("shopListMain", shopListMain);
-        model.addAttribute("shop", currentShop);
-        model.addAttribute("currentShop", currentShop);
+        // 3) 메뉴 개수 맵 생성
+        Map<Integer, Integer> menuCountMap = new HashMap<>();
+        for (Shop shop : shopListMain) {
+            menuCountMap.put(
+                shop.getSId(),
+                shopService.getMenuCount(shop.getSId())
+            );
+        }
+
+        // 4) 모델에 담기
+        model.addAttribute("shopListMain",  shopListMain);
+        model.addAttribute("currentShop",   currentShop);
+        model.addAttribute("menuCountMap",  menuCountMap);
+
         return "shop/shopListMain";
     }
+
 	
     /* ----------------------- 영업 상태 ----------------------- */
     @PostMapping("/shop/updateStatus")

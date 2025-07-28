@@ -33,13 +33,13 @@
 		    <span class="ms-auto" th:text="${shop.name}"></span>
 		  </li>
 		
-		  <!-- 가게 사진 (항상 노출) -->
-		  <li class="list-group-item ps-5">
-		    <img th:if="${shop.sPictureUrl}"
-		         th:src="@{${shop.sPictureUrl}}"
-		         alt="가게 사진"
-		         style="max-height:200px; width:auto; display:block; margin:0 auto;" />
-		  </li>
+		  <!-- 가게 사진 -->
+			<li class="list-group-item ps-5">
+			  <img th:if="${shop.sPictureUrl}"
+			       th:src="@{${shop.sPictureUrl}}"
+			       alt="가게 사진"
+			       class="img-fluid d-block mx-auto" />
+			</li>
 			
 	        <li class="list-group-item d-flex align-items-center">
 	            <i class="bi bi-telephone me-3 text-success fs-4"></i>

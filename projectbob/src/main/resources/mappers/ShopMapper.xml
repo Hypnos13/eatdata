@@ -119,9 +119,23 @@
         VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{sNumber}, #{sPictureUrl}, #{sLicenseUrl}, SYSDATE())
     </insert>
     
-	<select id="shopList" resultType="com.projectbob.domain.Shop">
-        SELECT * FROM shop
-    </select>
+	<!-- 관리 화면 첫 페이지 용 전체 가게 리스트 -->
+	<select id="shopList"
+          resultType="com.projectbob.domain.Shop">
+	    SELECT
+	      s_id,
+	      name,
+	      status,
+	      owner,
+	      phone,
+	      zipcode,
+	      address1,
+	      address2,
+	      s_number,
+	      s_pictureURL AS s_picture_url,     <!-- alias 추가 -->
+	      s_licenseURL AS s_license_url      <!-- alias 추가 -->
+	    FROM shop
+	  </select>
 	
 	<!-- 가게정보 불러오기 -->
 
@@ -132,16 +146,49 @@
 	</select>
 	
 	<!-- 가게 유무 확인 후 보여주기 -->
-	<select id="findShopListByOwnerId" resultType="com.projectbob.domain.Shop">
-	    SELECT *
+	<select id="findShopListByOwnerId"
+          parameterType="string"
+          resultType="com.projectbob.domain.Shop">
+	    SELECT
+	      s_id,
+	      name,
+	      status,
+	      owner,
+	      phone,
+	      zipcode,
+	      address1,
+	      address2,
+	      s_number,
+	      s_pictureURL AS s_picture_url,     <!-- alias 추가 -->
+	      s_licenseURL AS s_license_url      <!-- alias 추가 -->
 	    FROM shop
 	    WHERE id = #{ownerId}
 	    ORDER BY reg_date DESC
-	</select>
+	  </select>
    
 	<!-- 다수 가게에서 현재 선택한 가게고정 -->
 	<select id="findByShopIdAndOwnerId" resultType="com.projectbob.domain.Shop">
-	    SELECT * FROM shop WHERE s_id = #{sId} AND id = #{ownerId}
+	  SELECT
+	    s_id,
+	    name,
+	    phone,
+	    zipcode,
+	    address1,
+	    address2,
+	    owner,
+	    s_number,
+	    s_pictureURL,
+	    s_licenseURL,
+	    category,
+	    info,
+	    notice,
+	    s_info,
+	    status,
+	    reg_date,
+	    modi_date
+	  FROM shop
+	  WHERE s_id = #{sId}
+	    AND id = #{ownerId}
 	</select>
 
 	<!-- 메뉴 컨트롤러에 shop 모델 추가 -->
