@@ -60,6 +60,7 @@ ADD COLUMN calories DECIMAL(10, 2),     -- 열량 (kcal)
 ADD COLUMN carbs DECIMAL(10, 2),        -- 탄수화물 (g)
 ADD COLUMN protein DECIMAL(10, 2),      -- 단백질 (g)
 ADD COLUMN fat DECIMAL(10, 2),          -- 지방 (g)
+ADD COLUMN sugar DECIMAL(10, 2),       -- 당 (mg)
 ADD COLUMN sodium DECIMAL(10, 2),       -- 나트륨 (mg)
 ADD COLUMN serving_size INT;            -- 1회 제공량 (g)
 
