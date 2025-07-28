@@ -243,5 +243,41 @@
 	      modi_date = SYSDATE()
 	  WHERE s_id = #{sId}
 	</update>
+	
+	<!-- 리뷰관리 -->
+	<select id="findReviewsByShopId" resultType="com.projectbob.domain.Review">
+    SELECT r_no          AS rNo,
+           id,
+           s_id          AS sId,
+           m_id          AS mId,
+           content,
+           rating,
+           r_picture     AS rPicture,
+           liked,
+           reg_date      AS regDate,
+           status
+      FROM review
+     WHERE s_id = #{sId}
+       AND status = 'active'
+     ORDER BY reg_date DESC
+  </select>
 
+  <select id="findRepliesByReviewNo" resultType="com.projectbob.domain.ReviewReply">
+    SELECT rr_no        AS rrNo,
+           r_no         AS rNo,
+           s_id         AS sId,
+           id,
+           content,
+           reg_date     AS regDate,
+           status
+      FROM review_reply
+     WHERE r_no = #{rNo}
+       AND status = 'active'
+     ORDER BY reg_date ASC
+  </select>
+
+  <insert id="insertReviewReply" parameterType="com.projectbob.domain.ReviewReply">
+    INSERT INTO review_reply(r_no, s_id, id, content, reg_date, status)
+    VALUES(#{rNo}, #{sId}, #{id}, #{content}, SYSDATE(), 'active')
+  </insert>
 </mapper>	

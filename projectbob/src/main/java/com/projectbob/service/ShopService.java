@@ -315,4 +315,20 @@ public class ShopService {
         shopMapper.updateShopInfo(sId, sInfo);
     }
     
+    /** 리뷰 + 답글 함께 불러오기 */
+    public List<Review> getReviewsWithReplies(int sId) {
+        List<Review> reviews = shopMapper.findReviewsByShopId(sId);
+        for (Review r : reviews) {
+            r.getReplies().addAll(
+                shopMapper.findRepliesByReviewNo(r.getRNo())
+            );
+        }
+        return reviews;
+    }
+
+    /** 답글 등록 */
+    public void addReply(ReviewReply reply) {
+        shopMapper.insertReviewReply(reply);
+    }
+    
 }

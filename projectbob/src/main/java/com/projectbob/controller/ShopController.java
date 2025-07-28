@@ -487,6 +487,70 @@ public class ShopController {
 
         return "redirect:/shopNotice?s_id=" + sId;
     }
+    
+ // ① 리뷰 관리 화면
+ @GetMapping("/shop/reviewManage")
+ public String shopReviewManage(
+         @SessionAttribute(name="loginId", required=false) String loginId,
+         @RequestParam("s_id") Integer sId,
+         HttpSession session,
+         Model model) {
+
+     if (loginId == null) {
+         return "redirect:/login";
+     }
+
+     // 1) 사장님이 가진 가게 목록 조회
+     List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+     if (shopListMain.isEmpty()) {
+         // 가게가 하나도 없으면 기본 페이지로
+         return "redirect:/shopInfo";
+     }
+
+     // 2) currentShop 결정 (세션 or 파라미터 기반)
+     Shop currentShop = resolveCurrentShop(sId, loginId, session, shopListMain);
+     if (currentShop == null) {
+         return "redirect:/shopMain";
+     }
+
+     // 3) 리뷰+답글 조회
+     List<Review> reviews = shopService.getReviewsWithReplies(currentShop.getSId());
+
+     // 4) 모델에 담기 (사이드바용 shopListMain/currentShop, 뷰용 shop/reviews)
+     model.addAttribute("shopListMain", shopListMain);
+     model.addAttribute("currentShop", currentShop);
+     model.addAttribute("shop", currentShop);
+     model.addAttribute("reviews", reviews);
+
+     return "shop/shopReviewManage";
+}
+
+ // ② 답글 등록 처리
+ @PostMapping("/shop/review/reply")
+ public String postReviewReply(
+         @SessionAttribute(name="loginId") String loginId,
+         @ModelAttribute ReviewReply reply,
+         RedirectAttributes ra) {
+
+     // 로그인 체크
+     if (loginId == null) {
+         return "redirect:/login";
+     }
+
+     // 소유권 검증
+     Shop shop = shopService.findByShopIdAndOwnerId(reply.getSId(), loginId);
+     if (shop == null) {
+         ra.addFlashAttribute("error", "권한이 없습니다.");
+         return "redirect:/shopMain";
+     }
+
+     // 답글 작성자 세팅
+     reply.setId(loginId);
+     shopService.addReply(reply);
+
+     ra.addFlashAttribute("msg", "답글이 등록되었습니다.");
+     return "redirect:/shop/reviewManage?s_id=" + reply.getSId();
+ }
 
 	/* ----------------------- 전역 타이틀 ----------------------- */
     @ControllerAdvice
@@ -500,6 +564,7 @@ public class ShopController {
             else if (uri.contains("shopStatus")) pageTitle = "영업상태";
             else if (uri.contains("menu")) pageTitle = "메뉴관리";
             else if (uri.contains("shopNotice")) pageTitle = "사장님 공지";
+            else if (uri.contains("shopReview")) pageTitle = "리뷰 관리";
 
             model.addAttribute("pageTitle", pageTitle);
         }

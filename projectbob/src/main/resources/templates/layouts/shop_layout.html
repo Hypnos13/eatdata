@@ -161,13 +161,18 @@
 		<div class="mb-2">
 		  <button class="btn w-100 text-start sidebar-group-btn fw-bold"
 		          data-bs-toggle="collapse" data-bs-target="#collapseReview" aria-expanded="false">
-		    <i class="bi bi-chat-dots me-2"></i> 리뷰관리
+		    <i class="bi bi-chat-dots me-2"></i> 리뷰 관리
 		    <i class="bi bi-chevron-down float-end"></i>
 		  </button>
-		  <div class="collapse" id="collapseReview">
+		  <!-- currentShop이 있을 때만 펼쳐집니다 -->
+		  <div class="collapse" id="collapseReview" th:if="${currentShop != null}">
 		    <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
-		      <li><a href="/review/manage" class="sidebar-sub-link">리뷰 관리</a></li>
-		      <li><a href="/review/answer" class="sidebar-sub-link">답글 관리</a></li>
+		      <li>
+			  <a th:href="@{|/shop/reviewManage?s_id=${currentShop.sId}|}"
+			     class="sidebar-sub-link">
+			    리뷰 관리
+			  </a>
+			</li>
 		    </ul>
 		  </div>
 		</div>

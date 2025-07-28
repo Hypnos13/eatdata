@@ -1,0 +1,56 @@
+-- 1) 리뷰 테이블
+drop table review;
+CREATE TABLE `review` (
+  `r_no`       INT(20)      NOT NULL AUTO_INCREMENT COMMENT '리뷰번호',
+  `id`         VARCHAR(20)  NOT NULL               COMMENT '회원ID',
+  `s_id`       INT(20)      NOT NULL               COMMENT '가게ID',
+  `m_id`       INT(20)      NOT NULL               COMMENT '메뉴ID',
+  `content`    VARCHAR(250) NOT NULL               COMMENT '내용',
+  `rating`     TINYINT      NOT NULL               COMMENT '별점',
+  `r_picture`  VARCHAR(500) NULL                   COMMENT '리뷰사진',
+  `liked`      INT(10)      NOT NULL DEFAULT 0     COMMENT '좋아요',
+  `reg_date`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP                     COMMENT '작성일',
+  `modi_date`  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일',
+  `status`     VARCHAR(200) NOT NULL DEFAULT '일반' COMMENT '상태',
+  PRIMARY KEY (`r_no`),
+  KEY `idx_review_s_id` (`s_id`),
+  KEY `idx_review_id`   (`id`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COMMENT='리뷰';
+  
+  INSERT INTO review (id, s_id, m_id, content, rating, r_picture)
+VALUES
+  ('user01', 1, 1, '아메리카노가 진하고 깔끔해서 매일 마시고 싶어요!', 5, 'https://example.com/rev1.jpg'),
+  ('user01', 2, 7, '치즈버거 패티가 두툼하고 치즈가 풍부하네요.', 4, NULL);
+
+SELECT * FROM review;
+
+-- 2) 답글(사장님리뷰) 테이블
+drop table review_reply;
+CREATE TABLE `review_reply` (
+  `rr_no`      INT           NOT NULL AUTO_INCREMENT COMMENT '댓글번호',
+  `r_no`       INT(20)       NOT NULL               COMMENT '리뷰번호',
+  `s_id`       INT(20)       NOT NULL               COMMENT '가게ID',
+  `id`         VARCHAR(20)   NOT NULL               COMMENT '회원ID',
+  `content`    VARCHAR(250)  NOT NULL               COMMENT '내용',
+  `reg_date`   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP                     COMMENT '작성일',
+  `modi_date`  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일',
+  `status`     VARCHAR(20)   NOT NULL DEFAULT '일반' COMMENT '상태',
+  PRIMARY KEY (`rr_no`),
+  KEY `idx_reply_r_no` (`r_no`),
+  KEY `idx_reply_id`   (`id`),
+  CONSTRAINT `fk_reply_review`
+    FOREIGN KEY (`r_no`) REFERENCES `review` (`r_no`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COMMENT='사장님리뷰';
+
+  INSERT INTO review_reply (r_no, s_id, id, content)
+VALUES
+  (1, 1, 'owner01', '소중한 리뷰 감사합니다! 더욱 맛있는 커피로 보답하겠습니다 😊'),
+  (2, 2, 'owner01', '맛있게 드셨다니 기쁩니다! 다음 방문 때도 좋은 메뉴로 모시겠습니다.');
+  
+  SELECT * FROM review_reply;
+  
