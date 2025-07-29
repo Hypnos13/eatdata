@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/shop_layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>리뷰 관리</title>
+  <link rel="stylesheet" href="/css/shopLayout.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <!-- 헤더는 layout:decorate로 포함됨 -->
+  <div layout:fragment="content">
+    <div class="content-card">
+      <h2 class="text-center mb-4">리뷰 관리</h2>
+
+      <!-- 리뷰가 하나도 없을 때 -->
+      <div th:if="${#lists.isEmpty(reviews)}">
+        <p class="text-center text-muted">등록된 리뷰가 없습니다.</p>
+      </div>
+
+      <!-- 리뷰 목록 반복 -->
+      <div th:each="rev : ${reviews}" class="review-card">
+		  <div class="review-header">
+		    <span class="review-menu-badge" th:text="${rev.menuName}">메뉴명</span>
+		    <span class="review-writer" th:text="${rev.id}">ID</span>
+		    <span class="review-date" th:text="${#dates.format(rev.regDate, 'yyyy-MM-dd HH:mm')}"></span>
+		    <div class="review-stars">
+		      <i class="bi bi-star-fill"></i>
+		      <span class="score" th:text="${rev.rating}">5</span>
+		      <span style="color:#b9a66e;font-weight:500;font-size:0.98em;">/5</span>
+		    </div>
+		  </div>
+		  <div class="review-content" th:text="${rev.content}"></div>
+		  <div th:if="${rev.rPicture}">
+			  <img class="review-img" th:src="@{'/images/review/' + ${rev.rPicture}}" alt="리뷰 사진"/>
+		  </div>
+		  <!-- 답글 반복 -->
+		  <div th:each="rp : ${rev.replies}" class="reply-box">
+		    <div class="reply-header">
+		      <span class="reply-badge">사장님</span>
+		      <span class="reply-writer" th:text="${rp.id}"></span>
+		      <span class="reply-date" th:text="${#dates.format(rp.regDate,'yyyy-MM-dd HH:mm')}"></span>
+		    </div>
+		    <div class="reply-content" th:text="${rp.content}"></div>
+		  </div>
+		  <!-- 답글 등록 폼 -->
+		  <form th:action="@{/shop/review/reply}" method="post" class="reply-form">
+		    <input type="hidden" name="rNo" th:value="${rev.rNo}">
+		    <input type="hidden" name="sId" th:value="${shop.sId}">
+		    <div class="input-group">
+		      <input type="text" name="content" class="form-control" placeholder="사장님 답글을 입력하세요." required>
+		      <button class="btn btn-submit" type="submit">등록</button>
+		    </div>
+		  </form>
+		</div>
+    </div>
+  </div>
+
+  <!-- 푸터도 layout:decorate에 포함 -->
+</body>
+</html>

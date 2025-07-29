@@ -16,6 +16,7 @@ import com.projectbob.domain.Review;
 import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 import com.projectbob.mapper.BobMapper;
+import com.projectbob.mapper.ShopMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +30,8 @@ public class BobService{
 	@Autowired
 	private BobMapper bobMapper;
 	
-
+	@Autowired
+    private ShopMapper shopMapper;
 	//가게 검색하기
 //	public List<Shop> searchList(String keyword){
 //		return bobMapper.searchList(keyword);
@@ -133,18 +135,24 @@ public class BobService{
 	
 	
 	// 댓글 등록하는 메서드
+	@Transactional
 	public void addReview(Review review) {
 		bobMapper.addReview(review);
+		shopMapper.updateShopRatingBySId(review.getSId());
 	}
 	
 	//댓글 수정하는 메서드
+	@Transactional
 	public void updateReview(Review review) {
 		bobMapper.updateReview(review);
+		shopMapper.updateShopRatingBySId(review.getSId());
 	}
 	
 	//댓글 삭제하는 메서드
-	public void deleteReview(int rNo) {
+	@Transactional
+	public void deleteReview(int rNo, int sId) {
 		bobMapper.deleteReview(rNo);
+		shopMapper.updateShopRatingBySId(sId);
 	}
 	
 	// 대댓글 리스트
@@ -182,8 +190,5 @@ public class BobService{
 	public void deleteReviewReply(int rrNo) {
 		bobMapper.deleteReviewReply(rrNo);
 	}
-	
-	
-	
 	
 }

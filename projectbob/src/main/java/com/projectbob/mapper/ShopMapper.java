@@ -43,7 +43,28 @@ public interface ShopMapper {
 
     int updateShopInfo(@Param("sId") Integer sId, @Param("sInfo") String sInfo);
 
+    // 리뷰 목록 (XML 의 <select id="findReviewsByShopId">)
+    List<Review> findReviewsByShopId(@Param("sId") int sId);
 
+    // 답글 목록 (XML 의 <select id="findRepliesByReviewNo">)
+    List<ReviewReply> findRepliesByReviewNo(@Param("rNo") int rNo);
+
+    // 답글 등록 (XML 의 <insert id="insertReviewReply">)
+    void insertReviewReply(ReviewReply reply);
+    
+    // 리뷰 등록
+    void insertReview(Review review);
+
+    // 리뷰 수정
+    void updateReview(Review review);
+
+    // 리뷰 삭제
+    void deleteReview(@Param("rNo") int rNo);
+
+    // 가게 평점(average) 갱신
+    void updateShopRatingBySId(@Param("sId") int sId);
+
+    
 	/* === Menu === */
 	// 메뉴 관련 메서드
     void insertMenu(Menu menu);                  // 메뉴 등록
