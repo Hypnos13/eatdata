@@ -10,15 +10,28 @@
             <span th:text="${pageTitle}">현재 페이지명</span>
         </span>
     </div>
-    <nav>
-        <th:block th:if="${session.isLogin}">
+    
+    <nav class="d-flex align-items-center">
+	    <!-- 로그인 상태일 때, 알림 아이콘 먼저 -->
+	    <th:block th:if="${session.isLogin}">
+	      <div class="position-relative me-3">
+	        <a href="#" id="headerNotifyBtn" class="text-decoration-none text-dark">
+	          <i class="bi bi-bell-fill fs-4"></i>
+	        </a>
+	        <span th:text="${session.notifyCount}" 
+	              class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1">0</span>
+	      </div>
 	      <a class="me-2 fw-bold">[[${session.loginNickname}]] 님 어서오세요.</a>
 	      <a href="logout" class="btn-login">로그아웃</a>
 	      <a href="myProfile" class="btn-login">내정보수정</a>
 	    </th:block>
+	    
+	    <!-- 비로그인 상태 -->
 	    <th:block th:unless="${session.isLogin}">
 	      <a href="login?from=owner" class="btn-login">로그인</a>  
 	    </th:block>
+	    
+	    <!-- master 권한일 때만 보이는 관리 링크 -->
 	    <th:block th:if="${session.loginDivision == 'master'}">
 	    	<a href="faqList" class="btn-register">FAQ관리</a>
 	    	<a href="noticeList" class="btn-register">공지사항관리</a>

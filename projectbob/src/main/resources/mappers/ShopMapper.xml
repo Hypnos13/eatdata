@@ -173,7 +173,7 @@
 	  </select>
    
 	<!-- 다수 가게에서 현재 선택한 가게고정 -->
-	<select id="findByShopIdAndOwnerId" resultType="com.projectbob.domain.Shop">
+	<select id="findByShopIdAndOwnerId" resultMap="shopResultMap">
 	  SELECT
 	    s_id,
 	    name,
@@ -190,6 +190,8 @@
 	    notice,
 	    s_info,
 	    status,
+	    op_time,
+	    off_day, 
 	    reg_date,
 	    modi_date
 	  FROM shop
@@ -338,6 +340,8 @@
     <result property="sNumber" column="s_number"/>
     <result property="sPictureUrl" column="s_picture_url"/>
     <result property="sLicenseUrl" column="s_license_url"/>
+    <result property="opTime" column="op_time"/>
+    <result property="offDay" column="off_day"/>
     <result property="rating" column="rating"/>
 </resultMap>
 

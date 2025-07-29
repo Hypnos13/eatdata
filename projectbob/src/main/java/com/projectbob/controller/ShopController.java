@@ -33,6 +33,9 @@ public class ShopController {
 	private ShopService shopService;
 	
 	@Autowired
+    private BobService bobService;
+	
+	@Autowired
 	private FileUploadService fileUploadService;
 	
 	@Autowired
@@ -351,6 +354,7 @@ public class ShopController {
         if (loginId == null) return "redirect:/login";
         List<Shop> shopList = shopService.findShopListByOwnerId(loginId);
         Shop shop = resolveCurrentShop(sId, loginId, session, shopList);
+        log.debug(">>> shop.opTime = {}", shop.getOpTime());
         if (shop == null) {
             model.addAttribute("message", "가게를 찾을 수 없습니다.");
             return "shop/errorPage";
@@ -604,6 +608,16 @@ public class ShopController {
 
      ra.addFlashAttribute("msg", "답글이 등록되었습니다.");
      return "redirect:/shop/reviewManage?s_id=" + reply.getSId();
+ }
+ 
+ 
+ /** 리뷰 등록 */
+ @PostMapping("/review/add")
+ public String addReview(@ModelAttribute Review review, RedirectAttributes ra) {
+     review.setStatus("일반");
+     bobService.addReview(review);
+     ra.addFlashAttribute("msg", "리뷰가 등록되었습니다.");
+     return "redirect:/shop/reviewManage?s_id=" + review.getSId();
  }
 
 	/* ----------------------- 전역 타이틀 ----------------------- */

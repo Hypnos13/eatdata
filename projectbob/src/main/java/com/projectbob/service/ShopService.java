@@ -334,9 +334,7 @@ public class ShopService {
 	/** 리뷰 등록 */
     @Transactional
     public void addReview(Review review) {
-        log.info("리뷰 등록, sId={}", review.getSId());
         shopMapper.insertReview(review);              // 리뷰 등록
-        log.info("shopMapper.updateShopRatingBySId() 호출, sId={}", review.getSId());
         shopMapper.updateShopRatingBySId(review.getSId()); // ★ 평점 갱신
     }
 
