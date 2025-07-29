@@ -30,12 +30,13 @@ $('#btnOrderNow').on('click', function() {
         type: 'POST', // POST 메소드 사용
         contentType: 'application/json', // JSON 형식으로 데이터 전송
         data: JSON.stringify(orderData), // JavaScript 객체를 JSON 문자열로 변환
-        success: function(response, textStatus, xhr) {
-            // 서버가 HTML 페이지를 반환할 것으로 예상됩니다.
-            // 받은 HTML을 현재 페이지의 body에 덮어씌우는 방식으로 처리합니다.
-            document.open();
-            document.write(response);
-            document.close();
+        success: function(response) {
+            if (response.success && response.redirectUrl) {
+                // 서버가 지시하는 URL로 페이지를 리디렉션합니다.
+                window.location.href = response.redirectUrl;
+            } else {
+                alert('주문 처리 중 오류가 발생했습니다.');
+            }
         },
         error: function(xhr, status, error) {
             // AJAX 요청 자체에서 오류가 발생한 경우 (네트워크 문제, 서버 응답 없음 등)
@@ -597,14 +598,16 @@ function showStoreOnMap() {
 // ==============================
 
 document.addEventListener("DOMContentLoaded", () => {
+  const noReviewElement = document.getElementById("noReview");
+  if (noReviewElement) {
+    if(document.querySelectorAll("#reviewList .reviewRow").length > 0){
+      noReviewElement.style.display = "none";
+    } else {
+      noReviewElement.style.display = "block";
+    }
+  }
 	
-	if(document.querySelectorAll("#reviewList .reviewRow").length > 0){
-		document.getElementById("noReview").style.display = "none";
-	} else {
-		document.getElementById("noReview").style.display = "block";
-	}
-	
-  updateOrder();
+
 
 $("#btnHeart").click(function () {
   // sId를 data-sid 속성에서 가져오는 것이 더 안정적입니다.
@@ -1335,3 +1338,194 @@ function resetReviewForm(){
   };
   reader.readAsDataURL(file);
 });
+
+// 리뷰 사진 미리보기
+$("#rPicture").on("change", function () { // ID를 rPicture로 변경
+  const file = this.files[0];
+  const $imgPreview = $('#imgPreview'); // jQuery 객체로 변경
+
+  if (!file) {
+      $imgPreview.hide().attr('src', ''); // 파일 없으면 숨기고 src 초기화
+      return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    $imgPreview.attr('src', e.target.result).show();
+  };
+  reader.readAsDataURL(file);
+});
+
+
+// 결제 수단 및 버튼 클릭시
+let selectedMethod = null;
+
+$('.payment-method').on('click', function(){
+	
+	$('.payment-method')
+		.removeClass('active')
+		.addClass('btn-outline-secondary')
+		.removeClass('btn-secondary');
+
+		$(this).addClass('active btn-secondary').removeClass('btn-outline-secondary');
+		
+		selectedMethod = $(this).data('method');
+		
+		$('#btnPayNow').prop('disabled', false);
+});
+
+
+
+// pay.html의 결제하기 버튼 클릭 이벤트
+$(document).on("click", "#btnPayNow", function() {
+	if(!selectedMethod){
+		alert('결제 수단을 선택해주세요');
+		return;
+	}
+    // 1. 입력된 정보 수집
+    const address1 = $("input[name='address1']").val();
+    const address2 = $("input[name='address2']").val();
+    const phone = $("#phone").val();
+    const orderRequest = $("#orderRequest").val();
+    const safeNum = $("#safeNum").is(":checked");
+
+    // 2. 필수 입력 값 검증
+    if (!address1 || !address2 || !phone) {
+        alert("필수 입력 항목(주소, 상세주소, 휴대전화번호)을 모두 입력해주세요.");
+        return;
+    }
+
+    // 3. 주문표에서 정보 수집
+    const orderedItems = [];
+    $(".cart-main-item").each(function() {
+        const mainItem = {
+            menuName: $(this).find(".fw-bold.small.mb-1").text().split(' : ')[0],
+            totalPrice: parseInt($(this).find(".fw-bold.small.mb-1").text().split(' : ')[1].replace(/[^0-9]/g, '')),
+            options: []
+        };
+
+        $(this).find(".cart-option-item").each(function() {
+            mainItem.options.push($(this).text().trim());
+        });
+        orderedItems.push(mainItem);
+    });
+
+    // --- DEBUGGING finalTotalPrice START ---
+    const totalOrderPriceDiv = $("#totalOrderPrice");
+    console.log("DEBUG: Parent element #totalOrderPrice:", totalOrderPriceDiv);
+    console.log("DEBUG: Parent element #totalOrderPrice length:", totalOrderPriceDiv.length);
+
+    let finalTotalPrice = 0;
+    if (totalOrderPriceDiv.length > 0) {
+        const totalPriceSpan = totalOrderPriceDiv.find("span");
+        console.log("DEBUG: Child span element:", totalPriceSpan);
+        console.log("DEBUG: Child span element length:", totalPriceSpan.length);
+
+        if (totalPriceSpan.length > 0) {
+            const rawPrice = totalPriceSpan.attr("data-price");
+            console.log("DEBUG: Raw data-price attribute value from span:", rawPrice);
+            finalTotalPrice = parseInt(rawPrice) || 0;
+            console.log("DEBUG: Parsed finalTotalPrice from span:", finalTotalPrice);
+        } else {
+            console.log("DEBUG: Span element inside #totalOrderPrice not found.");
+            // Fallback: try to parse from the text content of the div if span is not found or data-price is missing
+            const textPrice = totalOrderPriceDiv.text().replace(/[^0-9]/g, '');
+            finalTotalPrice = parseInt(textPrice) || 0;
+            console.log("DEBUG: Fallback: Parsed finalTotalPrice from div text:", finalTotalPrice);
+        }
+    } else {
+        console.log("DEBUG: #totalOrderPrice div not found.");
+    }
+    console.log("--- DEBUGGING finalTotalPrice END ---");
+
+    // 4. 수집된 정보 콘솔에 출력 (확인용)
+    console.log("--- 결제 요청 정보 ---");
+    console.log("주소:", address1);
+    console.log("상세주소:", address2);
+    console.log("휴대전화번호:", phone);
+    console.log("안심번호 사용:", safeNum);
+    console.log("요청사항:", orderRequest);
+    // console.log("주문 메뉴:", orderedItems); // 이 값은 preparePayment AJAX 호출에 직접 사용되지 않습니다.
+    console.log("총 결제 금액:", finalTotalPrice);
+    console.log("----------------------");
+
+    // 5. AJAX로 서버에 결제 준비 요청
+    $.ajax({
+        url: "/preparePayment", // 서버의 결제 준비 엔드포인트
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+            address1: address1,
+            address2: address2,
+            phone: phone,
+            orderRequest: orderRequest,
+            safeNum: safeNum,
+            finalTotalPrice: finalTotalPrice,
+						paymentMethod: selectedMethod,
+            // 장바구니 정보는 서버에서 다시 조회하거나, 필요하다면 여기서도 보낼 수 있습니다.
+            // 여기서는 서버에서 장바구니 정보를 다시 조회한다고 가정합니다.
+            userId: window.currentUserId,   // 로그인한 사용자 ID 명시적으로 전달
+            guestId: window.currentGuestId  // 게스트 ID 명시적으로 전달
+        }),
+        success: function(response) {
+            if (response.success && response.paymentData) {
+                // PortOne 결제 시작
+                // response.orderId를 merchant_uid로 사용
+                response.paymentData.merchant_uid = response.orderId; 
+                
+                PortOne.requestPayment(response.paymentData)
+                    .then(function(payment) {
+                        console.log("Payment object from PortOne.requestPayment:", payment); // 추가된 로그
+                        console.log("imp_uid:", payment.imp_uid); // imp_uid 확인
+                        console.log("merchant_uid:", payment.merchant_uid); // merchant_uid 확인
+
+                        if (payment.code !== undefined) {
+                            alert("결제 실패: " + payment.message);
+                            console.error("PortOne Error:", payment);
+                        } else {
+                            // 결제 성공 시 서버에 최종 확인 요청
+                            $.ajax({
+                                url: "/completePayment", // 서버의 결제 완료 엔드포인트
+                                type: "POST",
+                                contentType: "application/json",
+                                data: JSON.stringify({
+                                    paymentId: payment.paymentId, // PortOne SDK가 반환한 paymentId 사용
+                                    orderId: response.orderId, // 백엔드에서 미리 생성한 orderId 사용
+                                    paymentMethod: selectedMethod // 선택된 결제 수단 추가
+                                }),
+                                success: function(completeResponse) {
+                                    if (completeResponse.success) {
+                                        alert("결제가 성공적으로 완료되었습니다!");
+                                        window.location.href = "/end?orderId=" + encodeURIComponent(completeResponse.orderNo); // 결제 완료 페이지로 이동
+                                    } else {
+                                        alert("결제 완료 처리 중 오류가 발생했습니다: " + completeResponse.message);
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error("결제 완료 서버 통신 오류:", status, error, xhr.responseText);
+                                    alert("결제 완료 처리 중 서버 통신 오류가 발생했습니다.");
+                                }
+                            });
+                        }
+                    })
+                    .catch(function(error) {
+                        // PortOne SDK 오류
+                        console.error("PortOne SDK 오류:", error);
+                        alert("결제 중 오류가 발생했습니다. 다시 시도해주세요.");
+                    });
+            } else {
+                alert("결제 준비 중 오류가 발생했습니다: " + (response.message || "알 수 없는 오류"));
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("결제 준비 서버 통신 오류:", status, error, xhr.responseText);
+            alert("결제 준비 중 서버 통신 오류가 발생했습니다.");
+        },
+        beforeSend: function(xhr) { // 요청 보내기 직전
+            const requestData = JSON.parse(this.data); // 보내려는 데이터를 파싱
+            console.log("Sending to /preparePayment:", requestData); // 이 로그를 추가
+        }
+    });
+});
+
+

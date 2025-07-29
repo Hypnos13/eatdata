@@ -11,6 +11,16 @@
 <link rel="stylesheet"
 	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+<!-- window.currentUserId 주입 코드 추가 -->
+<script th:inline="javascript">
+    // Thymeleaf를 사용하여 세션에서 로그인 ID를 가져와 window.currentUserId에 할당
+    // 값이 문자열이면 자동으로 따옴표로 묶이고, null이면 JavaScript의 null 키워드로 렌더링됩니다.
+    window.currentUserId = /*[[${session.loginId}]]*/ null;
+
+    // 디버깅을 위해 콘솔에 출력
+    console.log("Current User ID (from main_layout):", window.currentUserId);
+</script>
+
 </head>
 <body>
 	<div th:replace="~{fragments/header::header}"></div>
@@ -22,6 +32,7 @@
 		src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=30a0d7b80b66b1135d1195c80899795d&libraries=services" ></script>
 
 	<script th:src="@{js/main.js}"></script>
+	<script src="https://cdn.portone.io/v2/browser-sdk.js" async defer></script>
 
 	<!-- 추가 메뉴 선택 모달 -->
 <div class="modal fade" id="addMenuModal" tabindex="-1"

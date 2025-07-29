@@ -94,4 +94,12 @@ public class LoginService {
 	public void deleteAddress(String id, int no) {
 		loginMapper.deleteAddress(id, no);
 	}
+	
+	// 비회원 ID를 client 테이블에 삽입 (이미 존재하면 무시)
+    public void insertGuestClientIfNotExist(String guestId) {
+        if (guestId != null && loginMapper.getClientById(guestId) == null) {
+            loginMapper.insertClient(guestId);
+        }
+    }
 }
+

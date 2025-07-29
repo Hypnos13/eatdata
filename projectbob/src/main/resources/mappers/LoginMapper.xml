@@ -2,6 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.LoginMapper" >
+
+<!-- 비회원 ID를 client 테이블에 삽입 (이미 존재하면 무시) -->
+<insert id="insertClient" parameterType="string">
+    INSERT IGNORE INTO client (id, reg_date) VALUES (#{id}, NOW())
+</insert>
+
+<!-- ID로 client 정보 조회 -->
+<select id="getClientById" parameterType="string" resultType="Member">
+    SELECT id FROM client WHERE id = #{id}
+</select>
+
 <insert id="joinMember" parameterType="Member">
 	INSERT INTO client(id, pass, name, nickname, birthday, address1, address2, email, phone, division, reg_date, modi_date) 
 	VALUES (#{id}, #{pass}, #{name}, #{nickname}, #{birthday}, #{address1}, #{address2}, #{email}, #{phone}, #{division}, SYSDATE(), SYSDATE())

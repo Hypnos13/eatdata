@@ -20,6 +20,10 @@ import com.projectbob.domain.Shop;
 
 @Mapper
 public interface BobMapper {
+	
+	// 주문페이지에서 주문완료 페이지로 보내기
+	public int insertOrder(Orders order);
+	
 	  /**
      * 특정 장바구니 항목(caId)의 상세 정보를 조회합니다.
      * (메뉴의 m_id와 옵션의 mo_id를 포함)
@@ -142,6 +146,7 @@ public interface BobMapper {
 	
 	// 주문 번호에 해당하는 주문 레코드를 DB에서 가져오기
 	public Orders selectOrderId(@Param("orderId") int orderId);
+	public Orders selectOrderByPaymentUid(@Param("paymentUid") String paymentUid);
 
 	
 

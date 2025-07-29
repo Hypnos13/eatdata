@@ -4,10 +4,20 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
 
+<!-- 주문 페이지에서 주문 완료 페이지로 보내기 -->
+<insert id="insertOrder" parameterType="com.projectbob.domain.Orders" useGeneratedKeys="true" keyProperty="oNo">
+	INSERT INTO orders (s_id, id, total_price, payment, payment_uid, o_address, request, status, quantity, menus, reg_date)
+	VALUES (#{sId}, #{id}, #{totalPrice}, #{payment}, #{paymentUid}, #{oAddress}, #{request}, #{status}, #{quantity}, #{menus}, NOW())
+</insert>
 
 <!-- 주문 번호에 해당하는 주문 레코드를 DB에서 가져오기 -->
 <select id="selectOrderId" parameterType="int" resultType="com.projectbob.domain.Orders">
 	SELECT * FROM orders WHERE o_no = #{orderId}
+</select>
+
+<!-- payment_uid에 해당하는 주문 레코드를 DB에서 가져오기 -->
+<select id="selectOrderByPaymentUid" parameterType="string" resultType="com.projectbob.domain.Orders">
+	SELECT * FROM orders WHERE payment_uid = #{paymentUid}
 </select>
 
 <!-- 대댓글 개수 조회 -->
@@ -120,7 +130,11 @@
     c.status,
     c.total_price,        m.name AS menuName,
     m.price AS menuPrice, mo.content AS optionName,
-    mo.price AS optionPrice FROM cart c
+    mo.price AS optionPrice,
+    CASE
+        WHEN c.mo_id IS NULL THEN m.price  -- Main menu item
+        ELSE mo.price                     -- Option item
+    END AS unitPrice FROM cart c
   INNER JOIN menu m ON c.m_id = m.m_id
   LEFT JOIN menu_option mo ON c.mo_id = mo.mo_id
   WHERE (c.id = #{userId} AND #{userId} IS NOT NULL)

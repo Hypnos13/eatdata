@@ -12,7 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.projectbob.domain.*;
-import com.projectbob.dto.NewOrder;
+import com.projectbob.domain.NewOrder;
 import com.projectbob.service.*;
 
 import jakarta.servlet.http.HttpSession;
@@ -40,7 +40,10 @@ public class BobController {
 	}
 	
 	@GetMapping("/end")
-	public String completed() {
+	public String completed(@RequestParam("orderId") int orderId, Model model) {
+		
+		NewOrder order = bobService.getNewOrder(orderId);
+		model.addAttribute("order", order);
 		return "views/completed";
 	}
 	
@@ -162,6 +165,7 @@ public class BobController {
 
 
 		  // menudetail 에서 pay로 
+		  /*
 		  @PostMapping("/pay")		  
 		  public String payPage(
 				  @RequestParam("menuId") Long menuId,
@@ -184,6 +188,7 @@ public class BobController {
 			  
 			  return "views/pay";			  
 		  }
+		  */
 		  
 			/*
 			 * @PostMapping("/pay") public String doPayment(@ModelAttribute NewOrder form,
@@ -207,8 +212,17 @@ public class BobController {
 		      String userId = (String) session.getAttribute("userId");
 		      String guestId = (String) session.getAttribute("guestId");
 
+		      // 로그인한 사용자 정보 조회 및 모델에 추가
+		      if (userId != null) {
+		          Member member = loginService.getMember(userId); // LoginService에 getMember(String id) 메서드 필요
+		          log.info("Pay Page - Retrieved Member: {}", member); // 이 로그를 추가
+		          model.addAttribute("member", member);
+		      }
+
 		      // 세션 기준 주문 내역 조회
 		      CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
+
+			  log.info("Pay Page - Total Price from Service: {}", cartSummary.getTotalPrice());
 
 		      // 뷰에 데이터 전달
 		      model.addAttribute("orderSummary", cartSummary);
@@ -220,23 +234,85 @@ public class BobController {
 		  
 		  //스크립트ajax
 		  @PostMapping("/payjs")
-			public String payJsPage(@RequestBody OrderData orderData, HttpSession session, Model model) {
+			@ResponseBody
+			public ResponseEntity<Map<String, Object>> payJsPage(@RequestBody OrderData orderData, HttpSession session) {
 			    String userId = (String) session.getAttribute("userId");
 			    String guestId = (String) session.getAttribute("guestId");
 
 			    // 주문 처리 (DB 저장)
 			    bobService.processAndAddCartItems(orderData.getCartList(), userId, guestId);
 
-			    // 처리 후 주문 내역 다시 조회
-			    CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
+			    Map<String, Object> response = new HashMap<>();
+			    response.put("success", true);
+			    response.put("redirectUrl", "/pay");
 
-			    // 뷰에 데이터 전달
-			    model.addAttribute("orderSummary", cartSummary);
-			    model.addAttribute("orderedItems", cartSummary.getCartList());
-			    model.addAttribute("finalTotalPrice", cartSummary.getTotalPrice());
-
-			    // views/pay.jsp (또는 pay.html) 뷰를 그대로 렌더링해서 반환
-			    return "views/pay";
+			    return ResponseEntity.ok(response);
 			}
 		
-}
+    @Autowired
+	private PortoneService portoneService; // PortoneService 의존성 주입
+
+    @PostMapping("/preparePayment")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> preparePayment(@RequestBody Map<String, Object> requestData, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String userId = (String) session.getAttribute("userId");
+            String guestId = (String) session.getAttribute("guestId");
+
+            // BobService를 통해 현재 장바구니 정보 가져오기
+            CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
+            if (cartSummary == null || cartSummary.getCartList().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "장바구니가 비어있습니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // PortoneService를 통해 결제 준비 (가상의 서비스 호출)
+            // 실제 구현에서는 PortoneService가 PortOne API를 호출하고 필요한 정보를 반환합니다.
+            Map<String, Object> paymentInfo = portoneService.preparePayment(
+                cartSummary.getTotalPrice(), // 총 결제 금액
+                "주문 상품명", // 실제 상품명으로 대체 필요
+                userId != null ? userId : guestId, // 주문자 ID
+                (String) requestData.get("address1"),
+                (String) requestData.get("address2"),
+                (String) requestData.get("phone"),
+                (String) requestData.get("orderRequest")
+            );
+
+            response.put("success", true);
+            response.put("paymentData", paymentInfo); // PortOne SDK에 전달할 데이터
+            response.put("orderId", "ORDER_" + System.currentTimeMillis()); // 임시 주문 ID (실제로는 DB에서 생성)
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("결제 준비 중 오류 발생: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "결제 준비 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping("/completePayment")
+    @ResponseBody
+    public Map<String, Object> completePayment(@RequestBody Map<String, Object> req, HttpSession session) {
+    	boolean verified = portoneService.verifyPayment(
+    			(String) req.get("paymentId"),
+    			(String) req.get("orderId")
+    			);
+                if (!verified) {
+                	return Map.of("success", false, "message", "결제 검증 실패");
+                }
+                int newOrderNo = bobService.createOrder(req, session, (String) req.get("paymentId"));
+                
+                bobService.deleteAllCartItems(
+                		(String) session.getAttribute("userId"),
+                		(String) session.getAttribute("guestId")
+                		);
+
+            return Map.of("success", true, "orderNo", newOrderNo);
+        }
+    }
+
+

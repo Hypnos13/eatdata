@@ -22,9 +22,10 @@ import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
 import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
-import com.projectbob.dto.NewOrder;
+import com.projectbob.domain.NewOrder;
 import com.projectbob.mapper.BobMapper;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -45,6 +46,17 @@ public class BobService {
 	        params.put("guestId", guestId);
 
 	        List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params);
+
+	        // 각 Cart 항목의 totalPrice를 해당 항목의 단가 * 수량으로 재계산
+	        allCartItems.forEach(item -> {
+	            int unitPrice = 0;
+	            if (item.getCaPid() == null) { // 메인 메뉴
+	                unitPrice = item.getMenuPrice();
+	            } else { // 옵션
+	                unitPrice = item.getOptionPrice();
+	            }
+	            item.setTotalPrice(unitPrice * item.getQuantity());
+	        });
 
 	        int totalQuantity = 0;
 	        int totalPrice = 0;
@@ -442,15 +454,91 @@ public class BobService {
 	
 	
 	// 결제정보 가져오기
-	/*
-	 * public NewOrder getNewOrder(int orderId) { Orders o =
-	 * bobMapper.selectOrderId(orderId); String menuName =
-	 * bobMapper.selectMenuNameByOrderId(orderId); NewOrder dto = NewOrder.builder()
-	 * .orderId(o.getONo()) .shopId(o.getSId()) .menuName(menuName)
-	 * .quantity(o.getQuantity()) .totalPrice(o.getTotalPrice())
-	 * .address(o.getOAddress())
-	 * .phone(loginService.getMember(o.getId()).getPhone()) .request(o.getRequest())
-	 * .status("PENDING") .build(); return dto; }
-	 */
+	
+	 public NewOrder getNewOrder(int orderId) {
+		 Orders o =	 bobMapper.selectOrderId(orderId);
+		 if (o == null) {
+			 throw new IllegalArgumentException("해당 주문을 못찾음: " + orderId);
+		 }
+		 String shopName = this.getShopDetail(o.getSId()).getName();
+		 
+		 NewOrder newo = new NewOrder();
+		 newo.setOrderId(o.getONo());
+		 newo.setShopId(o.getSId());
+		 newo.setShopName(shopName);
+		 newo.setMenus(o.getMenus());
+		 newo.setTotalPrice(o.getTotalPrice());
+		 newo.setPayment(o.getPayment());
+		 newo.setAddress(o.getOAddress());
+		 newo.setPhone(loginService.getMember(o.getId()).getPhone());
+		 newo.setRequest(o.getRequest());
+		 newo.setStatus(o.getStatus());
+		 newo.setRegDate(o.getRegDate());
+		 return newo;
+	 }
+	 
+	 // 주문 번호로 실제 주문 금액을 가져오는 메서드
+	 public int getActualOrderAmount(String orderId) {
+		 Orders order = bobMapper.selectOrderByPaymentUid(orderId);
+		 if (order != null) {
+			 return order.getTotalPrice();
+		 }
+		 throw new IllegalArgumentException("해당 주문 ID(" + orderId + ")에 대한 주문을 찾을 수 없습니다.");
+	 }
+	 
+	 // 주문페이지에서 결제완료 페이지로 보내기
+	 @Transactional
+	 public int createOrder(Map<String, Object> req, HttpSession session, String paymentUid) {
+		 String userId = (String) session.getAttribute("userId");
+		 String guestId = (String) session.getAttribute("guestId");
+		 String payment = (String) req.get("paymentMethod");
+		 System.out.println("BobService - paymentMethod from request: " + payment);
 
+		 // 로그인한 사용자가 있다면 guestId를 무시 (임시 방편)
+		 if (userId != null) {
+			 guestId = null;
+		 } else if (guestId != null) {
+			// 비회원인 경우, client 테이블에 guestId를 삽입 (이미 존재하면 무시)
+			loginService.insertGuestClientIfNotExist(guestId);
+		 }
+		 String address = req.get("address1") + " " + req.get("address2");
+		 String phone = (String) req.get("phone");
+		 String request = (String) req.get("orderRequest");
+		 
+		 CartSummaryDto cartSummary =getCartSummaryForUserOrGuest(userId, guestId);
+		 
+		 Orders order = new Orders();
+		 order.setSId(cartSummary.getCartList().get(0).getSId());
+		 order.setId(userId != null ? userId : guestId); // 이 라인 바로 다음
+		 System.out.println("BobService - Setting Order ID to: " + order.getId()); // 이 로그를 추가
+		 order.setTotalPrice(cartSummary.getTotalPrice());
+		 order.setPayment(payment);
+		 order.setPaymentUid(paymentUid); // paymentUid 설정
+		 order.setOAddress(address);
+		 order.setRequest(request);
+		 order.setStatus("PENDING");
+		 // quantity와 menus 정보 설정
+		 order.setQuantity(cartSummary.getTotalQuantity());
+		 String orderedMenus = cartSummary.getCartList().stream()
+		                                 .map(cartItem -> cartItem.getMenuName() + " x " + cartItem.getQuantity())
+		                                 .collect(Collectors.joining(", "));
+		 order.setMenus(orderedMenus);
+		 
+		 bobMapper.insertOrder(order);
+		 int newOrderNo = order.getONo();
+		 
+		 return newOrderNo;
+	 }
+	 
+
+	 
+	 
+	 
+	 
 }
+
+
+
+
+
+
