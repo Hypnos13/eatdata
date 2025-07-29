@@ -31,10 +31,10 @@
       INSERT INTO menu(
       s_id, category, name, price, m_info, m_picture_url, 
       reg_date, modi_date, status,
-      serving_size, calories, carbs, protein, fat, sugar, sodium) 
+      serving_size, calories, carbs, protein, fat, sfa, sugar, sodium) 
       VALUES(#{sId}, #{category}, #{name}, #{price}, #{mInfo}, #{mPictureUrl}, 
       SYSDATE(), SYSDATE(), '판매중', 
-      #{servingSize}, #{calories}, #{carbs}, #{protein}, #{fat}, #{sugar}, #{sodium})
+      #{servingSize}, #{calories}, #{carbs}, #{protein}, #{fat}, #{sfa}, #{sugar}, #{sodium})
    </insert>
    
    <update id="updateMenuStatus">
@@ -71,6 +71,7 @@
         carbs = #{carbs},
         protein = #{protein},
         fat = #{fat},
+        sfa = #{sfa},
         sugar = #{sugar},
         sodium = #{sodium}
     WHERE m_id = #{mId}

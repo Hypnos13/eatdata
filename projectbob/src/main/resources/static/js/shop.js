@@ -187,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		                    li.dataset.carbs = item.AMT_NUM6;
 		                    li.dataset.protein = item.AMT_NUM3;
 		                    li.dataset.fat = item.AMT_NUM4;
+												li.dataset.sfa = item.AMT_NUM24;
 												li.dataset.sugar = item.AMT_NUM7;
 		                    li.dataset.sodium = item.AMT_NUM13;
 		                    
@@ -207,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		        // 클릭된 요소가 LI 태그일 때만 실행
 		        if (e.target && e.target.nodeName === 'LI') {
 		            const selectedItem = e.target;
-		            const { servingSize, calories, carbs, protein, fat, sugar, sodium } = selectedItem.dataset;
+		            const { servingSize, calories, carbs, protein, fat, sfa, sugar, sodium } = selectedItem.dataset;
 
 		            // form 안에 있는 hidden input들을 찾아서 값을 채워줍니다.
 		            document.querySelector('input[name="servingSize"]').value = servingSize || 0;
@@ -215,6 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		            document.querySelector('input[name="carbs"]').value = carbs || 0;
 		            document.querySelector('input[name="protein"]').value = protein || 0;
 		            document.querySelector('input[name="fat"]').value = fat || 0;
+								document.querySelector('input[name="sfa"]').value = sfa || 0;
 								document.querySelector('input[name="sugar"]').value = sugar || 0;
 		            document.querySelector('input[name="sodium"]').value = sodium || 0;
 		            

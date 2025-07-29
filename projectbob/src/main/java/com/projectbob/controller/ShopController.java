@@ -55,7 +55,7 @@ public class ShopController {
 	                        + "?serviceKey=" + encodedServiceKey
 	                        + "&FOOD_NM_KR=" + encodedFoodName // ✨ 파라미터 이름 수정
 	                        + "&pageNo=1"
-	                        + "&numOfRows=10"
+	                        + "&numOfRows=20"
 	                        + "&type=json";
 
 	        log.info("▶▶▶ 최종 요청 URL: {}", finalUrlString);
