@@ -37,14 +37,34 @@
 			  <img class="review-img" th:src="@{'/images/review/' + ${rev.rPicture}}" alt="리뷰 사진"/>
 		  </div>
 		  <!-- 답글 반복 -->
-		  <div th:each="rp : ${rev.replies}" class="reply-box">
-		    <div class="reply-header">
-		      <span class="reply-badge">사장님</span>
-		      <span class="reply-writer" th:text="${rp.id}"></span>
-		      <span class="reply-date" th:text="${#dates.format(rp.regDate,'yyyy-MM-dd HH:mm')}"></span>
-		    </div>
-		    <div class="reply-content" th:text="${rp.content}"></div>
-		  </div>
+			<div th:each="rp : ${rev.replies}" class="reply-box">
+			  <div class="reply-header d-flex align-items-center">
+			    <div>
+			      <span class="reply-badge">사장님</span>
+			      <span class="reply-writer" th:text="${rp.id}"></span>
+			      <span class="reply-date" th:text="${#dates.format(rp.regDate,'yyyy-MM-dd HH:mm')}"></span>
+			    </div>
+			    <!-- 우측 상단에 수정/삭제 버튼 -->
+			    <div class="ms-auto">
+			      <!-- 수정 폼 -->
+			      <form th:action="@{/shop/review/reply/update}" method="post" class="d-inline">
+			        <input type="hidden" name="rrNo"   th:value="${rp.rrNo}"/>
+			        <input type="hidden" name="sId"    th:value="${shop.sId}"/>
+			        <input type="text"   name="content" 
+			               class="form-control form-control-sm d-inline w-auto"
+			               th:value="${rp.content}" required/>
+			        <button type="submit" class="btn btn-sm btn-outline-primary ms-1">수정</button>
+			      </form>
+			      <!-- 삭제 폼 -->
+			      <form th:action="@{/shop/review/reply/delete}" method="post" class="d-inline ms-1">
+			        <input type="hidden" name="rrNo" th:value="${rp.rrNo}"/>
+			        <input type="hidden" name="sId"  th:value="${shop.sId}"/>
+			        <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+			      </form>
+			    </div>
+			  </div>
+			  <div class="reply-content" th:text="${rp.content}"></div>
+			</div>
 		  <!-- 답글 등록 폼 -->
 		  <form th:action="@{/shop/review/reply}" method="post" class="reply-form">
 		    <input type="hidden" name="rNo" th:value="${rev.rNo}">
