@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @Slf4j
 public class BobController {
-
+	
     
     @Autowired
 	private LoginController loginController;
@@ -28,6 +28,40 @@ public class BobController {
 	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	
 	
+	@PostMapping("/getAddress")
+	public ResponseEntity<Map<String, Object>> getAddresses(HttpSession session) {
+	    Map<String, Object> responseBody = new HashMap<>();
+	    String userId = (String) session.getAttribute("loginId");
+
+	    System.out.println("[DEBUG] 세션 userId: " + userId);
+
+	    if (userId == null || userId.trim().isEmpty()) {
+	        responseBody.put("success", false);
+	        responseBody.put("message", "로그인이 필요합니다.");
+	        responseBody.put("addressList", Collections.emptyList());
+	        return ResponseEntity.status(401).body(responseBody);
+	    }
+
+	    try {
+	        List<Addressbook> addresses = bobService.getAddressesByUserId(userId);
+	        System.out.println("[DEBUG] 조회된 주소 수: " + addresses.size());
+
+	        // 디버그용 주소 상세 출력
+	        addresses.forEach(addr -> System.out.printf("[DEBUG] 주소 no: %d, aName: %s, address1: %s, address2: %s%n",
+	                addr.getNo(), addr.getAName(), addr.getAddress1(), addr.getAddress2()));
+
+	        responseBody.put("success", true);
+	        responseBody.put("message", "사용자 ID로 주소 조회 성공");
+	        responseBody.put("addressList", addresses);
+	        return ResponseEntity.ok(responseBody);
+	    } catch (Exception e) {
+	        System.err.println("주소 조회 중 오류 발생: " + e.getMessage());
+	        responseBody.put("success", false);
+	        responseBody.put("message", "주소 조회 중 서버 오류가 발생했습니다.");
+	        responseBody.put("addressList", Collections.emptyList());
+	        return ResponseEntity.internalServerError().body(responseBody);
+	    }
+	}
 
 	@GetMapping({"/", "/main"})
 	public String Main() {		

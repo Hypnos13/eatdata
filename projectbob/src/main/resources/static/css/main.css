@@ -4,134 +4,134 @@
 
 /* 기본 배경 */
 body {
-  background-color: #f9f9f9;
+	background-color: #f9f9f9;
 }
 
 /* 상단 바 */
 .top-bar {
-  background-color: #f9f9f9;
-  color: #36b882;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  padding: 12px 12px 12px 12px; 
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+	background-color: #f9f9f9;
+	color: #36b882;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+	padding: 12px 12px 12px 12px;
+	position: sticky;
+	top: 0;
+	z-index: 1000;
 }
 
 .topbar-href {
-	color : #36b882;
-	border : 1px solid #36b882;
-	border-radius : 5px;
-	padding : 10px 15px;
+	color: #36b882;
+	border: 1px solid #36b882;
+	border-radius: 5px;
+	padding: 10px 15px;
 	font-size: 0.9rem;
-	font-weight : bold;
+	font-weight: bold;
 	text-decoration: none;
 }
 
-.topbar-href:hover{
-	color : white;
-	background-color : #36b882;
+.topbar-href:hover {
+	color: white;
+	background-color: #36b882;
 }
 
-.me-2{
+.me-2 {
 	text-decoration: none;
-	color : black;
+	color: black;
 }
 
 /* footer */
 .footer {
-  font-size: 0.9rem;
-  background-color : #2c3e50;
-  color: white;
-  padding: 20px 0;
-  border-top: 1px solid #ddd;
+	font-size: 0.9rem;
+	background-color: #2c3e50;
+	color: white;
+	padding: 20px 0;
+	border-top: 1px solid #ddd;
 }
 
 .footer-href {
-  color: white;
-  text-decoration: none;
-  font-weight : bold;
+	color: white;
+	text-decoration: none;
+	font-weight: bold;
 }
 
 /* 네비게이션 바 */
 nav.navbar {
-  background-color: #f8f9fa;
-  padding: 0.25rem 1rem;
-  border-radius: 0;
-  margin-bottom: 1.5rem;
-  overflow-x: auto;
-  scrollbar-width: thin; /* Firefox */
+	background-color: #f8f9fa;
+	padding: 0.25rem 1rem;
+	border-radius: 0;
+	margin-bottom: 1.5rem;
+	overflow-x: auto;
+	scrollbar-width: thin; /* Firefox */
 }
 
 nav.navbar::-webkit-scrollbar {
-  height: 6px;
+	height: 6px;
 }
 
 nav.navbar::-webkit-scrollbar-thumb {
-  background-color: #43d091;
-  border-radius: 3px;
+	background-color: #43d091;
+	border-radius: 3px;
 }
 
 nav.navbar .nav {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 0.5rem;
-  white-space: nowrap;
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 0.5rem;
+	white-space: nowrap;
 }
 
 nav.navbar .nav-link {
-  border-radius: 0;
-  font-size: 0.85rem;
-  padding: 0.35rem 0.75rem;
-  color: #333;
+	border-radius: 0;
+	font-size: 0.85rem;
+	padding: 0.35rem 0.75rem;
+	color: #333;
 }
 
 nav.navbar .nav-link:hover {
-  background-color: #d3f0de;
+	background-color: #d3f0de;
 }
 
 nav.navbar .nav-link.active {
-  background-color: #43d091;
-  color: white !important;
-  font-weight: bold;
-  border-bottom: 2px solid #43d091;
+	background-color: #43d091;
+	color: white !important;
+	font-weight: bold;
+	border-bottom: 2px solid #43d091;
 }
 
 /* 결제 제목 */
 .section-title {
-  background: #444;
-  color: white;
-  padding: 10px;
-  margin-bottom: 15px;
-  font-weight: bold;
+	background: #444;
+	color: white;
+	padding: 10px;
+	margin-bottom: 15px;
+	font-weight: bold;
 }
 
 /* 결제 완료 박스 */
 .complete-box {
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 30px;
-  margin-top: 40px;
+	background-color: white;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 30px;
+	margin-top: 40px;
 }
 
 /* 검색 영역 */
 .search-box {
-  background-image: url('https://images.deliveryhero.io/image/foodpanda/bg/bg_header.jpg');
-  background-size: cover;
-  background-position: center;
-  height: 220px;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-  padding: 20px;
+	background-image:
+		url('https://images.deliveryhero.io/image/foodpanda/bg/bg_header.jpg');
+	background-size: cover;
+	background-position: center;
+	height: 220px;
+	color: white;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	padding: 20px;
 }
-
 
 /* =====================
    shopList 영역
@@ -139,59 +139,57 @@ nav.navbar .nav-link.active {
 
 /* 카테고리 바 */
 .category-bar {
-  display: flex;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  scrollbar-width: none; /* Firefox */
+	display: flex;
+	overflow-x: auto;
+	padding-bottom: 0.5rem;
+	scrollbar-width: none; /* Firefox */
 }
 
 .category-bar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+	display: none; /* Chrome, Safari */
 }
 
 /* 카테고리 버튼 */
 .category-btn {
-  flex: 0 0 auto;
-  margin-right: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  border: 1px solid #e1e1e1;
-  background: #f9f9f9;
-  color: #333;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: background-color 0.3s, color 0.3s;
+	flex: 0 0 auto;
+	margin-right: 0.5rem;
+	padding: 0.5rem 1rem;
+	border-radius: 20px;
+	border: 1px solid #e1e1e1;
+	background: #f9f9f9;
+	color: #333;
+	font-weight: 500;
+	white-space: nowrap;
+	transition: background-color 0.3s, color 0.3s;
 }
 
-.category-btn.active,
-.category-btn:hover {
-  background-color: #43d091;
-  border-color: #43d091;
-  color: white;
+.category-btn.active, .category-btn:hover {
+	background-color: #43d091;
+	border-color: #43d091;
+	color: white;
 }
 
 /* 카테고리 카드 */
 .category-card {
-  aspect-ratio: 1/1;
-  background-size: cover;
-  background-position: center;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
+	aspect-ratio: 1/1;
+	background-size: cover;
+	background-position: center;
+	overflow: hidden;
+	position: relative;
+	cursor: pointer;
+	width: 100%;
+	height: 100%;
 }
 
 .category-title {
-  position: absolute;
-  top: 0.4rem;
-  left: 0.5rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #000;
-  z-index: 2;
+	position: absolute;
+	top: 0.4rem;
+	left: 0.5rem;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #000;
+	z-index: 2;
 }
-
 
 /* =====================
    menu 영역
@@ -199,184 +197,198 @@ nav.navbar .nav-link.active {
 
 /* 메뉴 카드 박스 사이즈 고정 */
 .card.menu-card {
-  min-height: 350px;
-  height: auto;
-  display: flex;
-  flex-direction: column;
+	min-height: 350px;
+	height: auto;
+	display: flex;
+	flex-direction: column;
 }
 
-
 .card.menu-card img {
-  width: 100%;
-  height: auto;
-  max-height: 200px; /* 너무 커지지 않도록 제한 */
-  object-fit: contain;
+	width: 100%;
+	height: auto;
+	max-height: 200px; /* 너무 커지지 않도록 제한 */
+	object-fit: contain;
 }
 /* 메뉴 설명 영역 고정 높이 */
 .card.menu-card .fw-semibold {
-  min-height: 40px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+	min-height: 40px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
+
 .card.menu-card:hover {
-  transform: translateY(-5px);
+	transform: translateY(-5px);
 }
 
 /* 수량 조절 영역 */
 .qty-control {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem; 
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
 }
+
 .qty-control button {
-  padding: 0.25rem 0.6rem;
-  font-size: 0.9rem;
+	padding: 0.25rem 0.6rem;
+	font-size: 0.9rem;
 }
 
 /* 메뉴 타이틀 및 가격 */
 .menu-title {
-  font-weight: bold;
-  font-size: 1rem;
+	font-weight: bold;
+	font-size: 1rem;
 }
 
 .menu-price {
-  font-weight: bold;
-  color: #43d091;
+	font-weight: bold;
+	color: #43d091;
 }
 
 /* 주문표 영역 */
 .order-summary {
-  background: #fff;
-  padding: 20px;
-  border: 1px solid #ccc;
-  position: sticky;
-  top: 100px;
-  z-index: 10;
+	background: #fff;
+	padding: 20px;
+	border: 1px solid #ccc;
+	position: sticky;
+	top: 100px;
+	z-index: 10;
 }
 
 .order-summary .card-title {
-  font-size: 1.2rem;
-  font-weight: bold;
+	font-size: 1.2rem;
+	font-weight: bold;
 }
 
 /* 주문표 항목 정렬 */
 .order-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 /* 주문표 메뉴명 */
 .order-item-name {
-  font-weight: 600;
-  font-size: 1rem;
-  text-align: center;
-  width: 100%;
+	font-weight: 600;
+	font-size: 1rem;
+	text-align: center;
+	width: 100%;
 }
 
 /* 버튼 크기 조절 및 가로 정렬 유지 */
 .btn-qty {
-  width: 18px;   
-  height: 18px;
-  font-size: 1rem;
-  line-height: 1;
-  padding: 0;
-  border-radius: 4px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
+	width: 18px;
+	height: 18px;
+	font-size: 1rem;
+	line-height: 1;
+	padding: 0;
+	border-radius: 4px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
 }
 
 /* 주문 아이템 내 삭제(제거) 버튼 스타일 */
 .order-item-left .btn-remove-item {
-  min-width: 28px;
-  height: 28px;
-  padding: 0;
-  font-weight: bold;
-  font-size: 1.1rem;
-  line-height: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  color: #dc3545; /* Bootstrap danger 색상 */
-  border: 1px solid #dc3545;
-  background: transparent;
-  border-radius: 4px;
-  transition: background-color 0.2s, color 0.2s;
+	min-width: 28px;
+	height: 28px;
+	padding: 0;
+	font-weight: bold;
+	font-size: 1.1rem;
+	line-height: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	color: #dc3545; /* Bootstrap danger 색상 */
+	border: 1px solid #dc3545;
+	background: transparent;
+	border-radius: 4px;
+	transition: background-color 0.2s, color 0.2s;
 }
 
 .order-item-left .btn-remove-item:hover {
-  background-color: #dc3545;
-  color: white;
+	background-color: #dc3545;
+	color: white;
 }
 
 /* 주문 추가 메뉴(서브메뉴) 들여쓰기 및 스타일 */
 .order-list-item.ms-4 {
-  font-size: 0.9rem;
-  color: #6c757d; /* Bootstrap text-muted 색상 */
-  padding-left: 0.5rem;
-  border-left: 2px solid #43d091;
-  margin-left: 1rem;
-  margin-bottom: 0.25rem;
+	font-size: 0.9rem;
+	color: #6c757d; /* Bootstrap text-muted 색상 */
+	padding-left: 0.5rem;
+	border-left: 2px solid #43d091;
+	margin-left: 1rem;
+	margin-bottom: 0.25rem;
 }
 
 /* 리뷰 별점 */
-.star-rating{
+.star-rating {
 	direction: rtl;
 	unicode-bidi: bidi-override;
 	font-size: 2rem;
 }
-.star-rating input { display: none; }
+
+.star-rating input {
+	display: none;
+}
+
 .star-rating label {
 	color: #ddd;
 	cursor: pointer;
 	transition: color 0.2s;
 }
-.star-rating input:checked ~ label,
-.star-rating label:hover,
-.star-rating label:hover ~ label{
+
+.star-rating input:checked ~ label, .star-rating label:hover,
+	.star-rating label:hover ~ label {
 	color: #ffc700;
 }
 
 /* 주소 검색 창 */
 /* 팝업 창의 스타일 */
 .address-popup-wrapper {
-    position: fixed; /* 뷰포트에 고정 (스크롤해도 위치 유지) */
-    top: 50%; /* 화면 세로 중앙 */
-    left: 50%; /* 화면 가로 중앙 */
-    transform: translate(-50%, -50%); /* 정확한 중앙 정렬 */
-    
-    /* 팝업 창의 크기 조절 */
-    width: 400px; /* 원하는 너비로 설정 */
-    max-width: 90%; /* 화면이 좁을 때를 대비한 최대 너비 (모바일 반응형) */
-    
-    background-color: white; /* 배경색 */
-    border: 1px solid #ddd; /* 테두리 */
-    border-radius: 8px; /* 둥근 모서리 */
-    padding: 25px; /* 내부 여백 */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
-    z-index: 1050; /* 다른 요소들 위에 표시되도록 z-index 설정 (Bootstrap 모달보다 높게) */
-    
-    /* 초기에는 숨김 처리 (d-none 클래스가 없으면 이 부분이 적용됨) */
-    display: none; 
+	position: fixed; /* 뷰포트에 고정 (스크롤해도 위치 유지) */
+	top: 50%; /* 화면 세로 중앙 */
+	left: 50%; /* 화면 가로 중앙 */
+	transform: translate(-50%, -50%); /* 정확한 중앙 정렬 */
+	/* 팝업 창의 크기 조절 */
+	width: 400px; /* 원하는 너비로 설정 */
+	max-width: 90%; /* 화면이 좁을 때를 대비한 최대 너비 (모바일 반응형) */
+	background-color: white; /* 배경색 */
+	border: 1px solid #ddd; /* 테두리 */
+	border-radius: 8px; /* 둥근 모서리 */
+	padding: 25px; /* 내부 여백 */
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
+	z-index: 1050; /* 다른 요소들 위에 표시되도록 z-index 설정 (Bootstrap 모달보다 높게) */
+	/* 초기에는 숨김 처리 (d-none 클래스가 없으면 이 부분이 적용됨) */
+	display: none;
 }
 
 /* 팝업이 활성화될 때 보여지도록 하는 클래스 (JS가 추가/제거) */
 .address-popup-wrapper.show {
-    display: block;
+	display: block;
 }
 
 /* 팝업 뒤 배경을 어둡게 만드는 오버레이 스타일 */
 .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* 반투명 검정색 */
-    z-index: 1040; /* 팝업보다 낮게, 하지만 다른 콘텐츠보다는 높게 */
-    /* 초기에는 d-none 클래스로 숨김 */
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5); /* 반투명 검정색 */
+	z-index: 1040; /* 팝업보다 낮게, 하지만 다른 콘텐츠보다는 높게 */
+	/* 초기에는 d-none 클래스로 숨김 */
+}
+/* 주소 탭 내용 스크롤 영역 스타일 */
+#addressTabContent {
+	max-height: 300px; /* 원하는 높이로 조절 (px 단위) */
+	overflow-y: auto;
+}
+
+/* 모바일 대응 시 예시 (선택 사항) */
+@media ( max-width : 768px) {
+	#addressTabContent {
+		max-height: 200px;
+	}
 }

@@ -31,11 +31,14 @@
 		
 		<div id="searchBox" class="mt-3 d-none"></div>
 		
-		<!-- 주소검색 -->
-		<div class="address-popup-wrapper d-none">
+			<!-- 주소 검색 시작 부분  -->
+		<div
+			class="address-popup-wrapper 
+    [[${session.loginId} != null ? '' : 'd-none']]">
 			<div class="address-section">
 				<h4 class="mb-3">배달 주소 입력</h4>
 
+				<!-- 주소 검색창 -->
 				<div class="input-group mb-3">
 					<input type="text" id="searchAddressInput" class="form-control"
 						placeholder="주소를 검색하세요">
@@ -43,6 +46,7 @@
 						class="btn btn-primary">검색</button>
 				</div>
 
+				<!-- 검색된 주소 -->
 				<div id="searchedAddressResult"
 					class="mb-3 p-2 border rounded d-none">
 					<p class="mb-0" id="searchedPostcode">우편번호:</p>
@@ -53,7 +57,9 @@
 						class="btn btn-success btn-sm mt-2 w-100">이 주소 선택</button>
 				</div>
 
-				<ul class="nav nav-tabs mt-4" id="addressTabs" role="tablist">
+				<!-- 주소 탭 -->
+				<ul class="nav nav-tabs mt-4" id="addressTabs" role="tablist"
+					th:if="${session.loginId != null}">
 					<li class="nav-item" role="presentation">
 						<button class="nav-link active" id="home-tab" data-bs-toggle="tab"
 							data-bs-target="#home-addresses" type="button" role="tab"
@@ -72,25 +78,37 @@
 				</ul>
 
 				<div class="tab-content border border-top-0 p-3"
-					id="addressTabContent">
+					id="addressTabContent" th:if="${session.loginId != null}">
+
+					<!-- 집 주소 -->
 					<div class="tab-pane fade show active" id="home-addresses"
 						role="tabpanel" aria-labelledby="home-tab">
-						<p class="text-muted">저장된 집 주소가 없습니다.</p>
+						<p class="text-muted">주소를 불러오는 중입니다...</p>
 					</div>
+
+					<!-- 회사 주소 -->
 					<div class="tab-pane fade" id="company-addresses" role="tabpanel"
 						aria-labelledby="company-tab">
-						<p class="text-muted">저장된 회사 주소가 없습니다.</p>
+						<p class="text-muted">주소를 불러오는 중입니다...</p>
 					</div>
+
+					<!-- 기타 주소 -->
 					<div class="tab-pane fade" id="etc-addresses" role="tabpanel"
 						aria-labelledby="etc-tab">
-						<p class="text-muted">저장된 기타 주소가 없습니다.</p>
+						<p class="text-muted">주소를 불러오는 중입니다...</p>
 					</div>
+
 				</div>
 
 				<button type="button" id="closeAddressSectionBtn"
 					class="btn btn-secondary mt-3 w-100">닫기</button>
 			</div>
+			<div></div>
 		</div>
+
+		<!-- 오버레이 -->
+		<div class="popup-overlay d-none"></div>
+		<!-- 주소 끝  -->
 
 		<div class="popup-overlay d-none"></div>
 

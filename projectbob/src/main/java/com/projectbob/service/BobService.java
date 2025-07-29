@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.Cart;
 import com.projectbob.domain.CartSummaryDto;
 import com.projectbob.domain.Menu;
@@ -28,6 +29,13 @@ public class BobService {
 	// DB작업에 필요한 BobMapper 객체 의존성 주입 설정
 	@Autowired
 	private BobMapper bobMapper;
+	
+	 public List<Addressbook> getAddressesByUserId(String userId) { // 반환 타입 변경
+		  System.out.println("[DEBUG] 서비스에 전달된 userId: " + userId);
+		    List<Addressbook> addresses = bobMapper.findAddressesById(userId);
+		    System.out.println("[DEBUG] 서비스에서 조회된 주소 개수: " + (addresses == null ? 0 : addresses.size()));
+		    return addresses;
+	    }
 	
 	 public CartSummaryDto getCartSummaryForUserOrGuest(String userId, String guestId) {
 	        Map<String, Object> params = new HashMap<>();

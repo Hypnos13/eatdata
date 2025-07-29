@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.Cart;
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
@@ -14,6 +15,8 @@ import com.projectbob.domain.Shop;
 
 @Mapper
 public interface BobMapper {
+	
+	 List<Addressbook> findAddressesById(@Param("userId") String userId);
 	  /**
      * 특정 장바구니 항목(caId)의 상세 정보를 조회합니다.
      * (메뉴의 m_id와 옵션의 mo_id를 포함)
