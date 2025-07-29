@@ -24,7 +24,8 @@ public class BobController {
 	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	@Autowired
 	private LoginService loginService;
-	
+	@Autowired
+    private ShopService shopService;
 	
     BobController(LoginController loginController) {
         this.loginController = loginController;
@@ -116,6 +117,9 @@ public class BobController {
 		 Map<Integer, ReviewReply> reviewReplyMap = bobService.getReviewReplyMap(sId);
 		 model.addAttribute("reviewReplyMap", reviewReplyMap);
 		  
+		 List<String> openLines = shopService.buildOpenTextLines(shop);
+         model.addAttribute("openLines", openLines);
+		 
 		  return "views/MenuDetail"; 
 		  }
 		  

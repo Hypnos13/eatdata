@@ -30,7 +30,6 @@ public interface ShopMapper {
 	
 	// 영업시간/휴무 정보만 업데이트
 	void updateShopOpenTime(Shop shop);
-	Shop findByShopIdAndOwnerIdShop(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
 	
 	@Update("UPDATE shop SET status = #{status} WHERE s_id = #{sId}")
 	void updateShopStatus(@Param("sId") Integer sId, @Param("status") String status);

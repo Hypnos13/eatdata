@@ -277,9 +277,19 @@
 
 						<!-- 정보 탭 -->
 						<div class="tab-pane fade" id="info">
+							  <p><strong>영업시간:</strong></p>
+							  <ul class="list-unstyled ms-3">
+							    <!-- shop.sId에 맞는 openTextMap 리스트를 순회 -->
+							    <li th:each="line : ${openLines}"
+							        th:text="${line}">
+							      <!-- 출력 예: 월요일 : 10:30 ~ 20:30 -->
+							    </li>
+							  </ul>
+							
 							<p>
-								<strong>영업시간:</strong>[[${shop.opTime}]]<br /> <strong>위치:</strong> <span
-									id="storeAddress">[[${shop.address1}]] - [[${shop.address2}]]</span><br /> <strong>전화:</strong>
+								<strong>위치:</strong> 
+								<span id="storeAddress">[[${shop.address1}]] - [[${shop.address2}]]</span><br /> 
+								<strong>전화:</strong>
 								[[${shop.phone}]]
 							</p>
 
