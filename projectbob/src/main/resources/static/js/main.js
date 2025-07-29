@@ -503,35 +503,156 @@ function loadCartItems() {
 // =========================================================================
 // DOMContentLoaded 이벤트 리스너 통합 및 카카오 지도 API 로드 개선
 // =========================================================================
+//input버튼 클릭시 주소 검색창
+$(document).ready(function() {
+    // 필요한 HTML 요소들을 가져옵니다.
+    const mainAddressInput = document.getElementById('location-input');
+    const addressPopupWrapper = document.querySelector('.address-popup-wrapper');
+    const closeAddressSectionBtn = document.getElementById('closeAddressSectionBtn');
+    const popupOverlay = document.querySelector('.popup-overlay');
+
+    // 검색된 주소 표시 영역
+    const searchedAddressResultDiv = document.getElementById('searchedAddressResult');
+    const searchedPostcodeP = document.getElementById('searchedPostcode');
+    const searchedAddressP = document.getElementById('searchedAddress');
+    const searchedDetailAddressInput = document.getElementById('searchedDetailAddress');
+    const selectSearchedAddressBtn = document.getElementById('selectSearchedAddressBtn'); // 검색된 주소 선택 버튼
+
+    // '주소 검색' 버튼 (이전 'open-postcode-search' ID 유지)
+    const openPostcodeSearchBtn = document.getElementById('open-postcode-search');
+    const searchAddressInput = document.getElementById('searchAddressInput'); // 새로운 검색 입력 필드
+
+    // 팝업 열기 함수
+    function openAddressPopup() {
+        if (addressPopupWrapper) {
+            addressPopupWrapper.classList.add('show');
+            addressPopupWrapper.classList.remove('d-none'); 
+
+            if (popupOverlay) {
+                popupOverlay.classList.remove('d-none');
+            }
+            console.log("배달주소입력 필드 클릭됨: 주소 팝업 표시.");
+            // 팝업이 열리면 검색 입력 필드에 포커스
+            if (searchAddressInput) {
+                searchAddressInput.focus();
+            }
+        }
+    }
+
+    // 팝업 닫기 함수
+    function closeAddressPopup() {
+        if (addressPopupWrapper) {
+            addressPopupWrapper.classList.remove('show');
+            addressPopupWrapper.classList.add('d-none'); 
+
+            if (popupOverlay) {
+                popupOverlay.classList.add('d-none');
+            }
+            console.log("주소 팝업 닫힘.");
+            // 팝업 닫을 때 검색 결과 초기화 (선택 사항)
+            searchedAddressResultDiv.classList.add('d-none');
+            searchedPostcodeP.textContent = '우편번호: ';
+            searchedAddressP.textContent = '기본 주소: ';
+            searchedDetailAddressInput.value = '';
+            searchAddressInput.value = ''; // 검색창도 비움
+        }
+    }
+
+    // 1. 'location-input' 클릭 이벤트: 팝업 열기
+    if (mainAddressInput) {
+        mainAddressInput.addEventListener('click', openAddressPopup);
+    }
+
+    // 2. '닫기' 버튼 클릭 이벤트: 팝업 닫기
+    if (closeAddressSectionBtn) {
+        closeAddressSectionBtn.addEventListener('click', closeAddressPopup);
+    }
+
+    // 3. (선택 사항) 오버레이 클릭 시 팝업 닫기
+    if (popupOverlay) {
+        popupOverlay.addEventListener('click', closeAddressPopup);
+    }
+
+    // --- 새로운 기능 관련 JavaScript ---
+
+    // 4. '검색' 버튼 클릭 이벤트 (open-postcode-search): 현재는 alert만 띄움
+		if (openPostcodeSearchBtn) {
+		    openPostcodeSearchBtn.addEventListener('click', function() {
+		        const query = searchAddressInput.value.trim(); // 검색어 가져오기
+
+		        if (!query) {
+		            alert('검색어를 입력해주세요.');
+		            return;
+		        }
+
+		        // 카카오 주소 검색 API 호출을 위한 객체 생성
+		        // 이 부분이 실행되려면 HTML에 카카오 지도 API 스크립트가 로드되어 있어야 합니다.
+		        // <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_APP_KEY&libraries=services"></script>
+		        if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
+		            console.error("카카오 지도 API 또는 서비스 라이브러리가 로드되지 않았습니다. 주소 검색을 수행할 수 없습니다.");
+		            alert("주소 검색 기능을 사용할 수 없습니다. 잠시 후 다시 시도하거나 개발자 도구 콘솔을 확인해주세요.");
+		            return;
+		        }
+
+		        const geocoder = new kakao.maps.services.Geocoder();
+
+		        // 주소 검색 실행
+		        geocoder.addressSearch(query, function(result, status) {
+		            if (status === kakao.maps.services.Status.OK) {
+		                if (result.length > 0) {
+		                    // 검색 결과가 있을 경우
+		                    const firstResult = result[0]; // 첫 번째 결과 사용
+		                    const postCode = firstResult.road_address ? firstResult.road_address.zone_no : firstResult.address.zip_code;
+		                    const mainAddress = firstResult.road_address ? firstResult.road_address.address_name : firstResult.address.address_name;
+
+		                    // 결과 표시
+		                    searchedPostcodeP.textContent = `우편번호: ${postCode || '정보 없음'}`;
+		                    searchedAddressP.textContent = `기본 주소: ${mainAddress}`;
+		                    searchedAddressResultDiv.classList.remove('d-none'); // 검색 결과 영역 표시
+
+		                    // 상세 주소 입력 필드를 초기화하거나 유지할 수 있습니다.
+		                    searchedDetailAddressInput.value = '';
+
+		                } else {
+		                    // 검색 결과가 없을 경우
+		                    alert('입력하신 검색어에 대한 주소 검색 결과가 없습니다.');
+		                    searchedAddressResultDiv.classList.add('d-none'); // 검색 결과 영역 숨김
+		                }
+		            } else {
+		                // API 호출 자체에 실패한 경우
+		                console.error("카카오 주소 검색 실패:", status, result);
+		                alert('주소 검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+		                searchedAddressResultDiv.classList.add('d-none'); // 검색 결과 영역 숨김
+		            }
+		        });
+		    });
+		}
+
+    // 5. '이 주소 선택' 버튼 클릭 이벤트: 메인 input에 반영하고 팝업 닫기
+    if (selectSearchedAddressBtn && mainAddressInput) {
+        selectSearchedAddressBtn.addEventListener('click', function() {
+            const postcode = searchedPostcodeP.textContent.replace('우편번호: ', '');
+            const basicAddress = searchedAddressP.textContent.replace('기본 주소: ', '');
+            const detailAddress = searchedDetailAddressInput.value.trim();
+
+            if (basicAddress && basicAddress !== '기본 주소: ') { // 실제 주소가 있는지 확인
+                mainAddressInput.value = `${basicAddress} ${detailAddress}`.trim();
+                closeAddressPopup(); // 팝업 닫기
+            } else {
+                alert('선택할 주소가 없습니다. 먼저 주소를 검색해주세요.');
+            }
+        });
+    }
+
+    // --- (이전에 작성했던 다른 JavaScript 코드들은 여기에 유지) ---
+    // 돋보기 버튼, 검색 제출 등 기존 기능들은 이 아래에 그대로 붙여넣으시면 됩니다.
+    // 카카오맵 API 관련 함수 (handleCurrentLocationSearch, triggerKakaoPostcodeSearch)는 삭제되었습니다.
+});
 
 // 모든 DOMContentLoaded 관련 스크립트를 하나의 jQuery $(document).ready() 블록으로 통합
 $(document).ready(function() {
-	//집버튼 클릭시 주소록 가져오기 
-	$("#homeAddressBtn")?.on("click", function() {
-	       // 주소 선택 모달 열기
-	       const addressSelectModal = new bootstrap.Modal(document.getElementById('addressSelectModal'));
-	       addressSelectModal.show();
-	       
-	       // 데이터 로딩 함수 호출 (모달이 열릴 때 빈 상태로 뜨도록 합니다)
-	       loadUserAddressesIntoModal();
-	   });
-
-	   // --- 주소 목록 아이템 클릭 시 이벤트 (선택 버튼 클릭 시) ---
-	   // (지금은 데이터가 없어 이 이벤트가 발생할 일은 없지만, 나중에 데이터를 추가하면 동작합니다.)
-	   $(document).on("click", "#addressTabContent .select-address-btn", function(e) {
-	       e.stopPropagation(); // 부모 div의 클릭 이벤트가 발생하지 않도록 방지
-	       const selectedAddress = $(this).closest('.address-item').data("full-address");
-
-	       if (selectedAddress) {
-	           $("#location-input").val(selectedAddress);
-	           const addressSelectModal = bootstrap.Modal.getInstance(document.getElementById('addressSelectModal'));
-	           addressSelectModal.hide();
-	           $("#addressInputSearchBtn").trigger('click');
-	           console.log(`선택된 주소 '${selectedAddress}'로 검색 완료.`);
-	       } else {
-	           console.error("선택된 주소 데이터를 찾을 수 없습니다.");
-	       }
-	   });
+		
+	
 	
     // 탭 전환 시 가게 지도 표시
     $('a[href="#info"]')?.on('shown.bs.tab', function () {
@@ -554,6 +675,29 @@ $(document).ready(function() {
 		  } else {
 		      console.warn("경고: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않아 현재 위치 검색 기능을 초기화할 수 없습니다.");
 		  }
+			
+
+	const searchMenuBtn = document.getElementById('searchMenuBtn');
+	const searchBox = document.getElementById('searchBox');
+
+	// 검색 버튼에 클릭 이벤트 리스너를 추가합니다.
+	if (searchMenuBtn && searchBox) {
+	       searchMenuBtn.addEventListener('click', function() {
+	           searchBox.classList.toggle('d-none');
+	           // 검색창이 나타나면 input에 포커스
+	           if (!searchBox.classList.contains('d-none')) {
+	               // searchBox 내부의 input에 id가 있다면 사용
+	               const inputInsideSearchBox = searchBox.querySelector('input[type="text"]');
+	               if (inputInsideSearchBox) {
+	                   inputInsideSearchBox.focus();
+	               }
+	           }
+	       });
+	       console.log("돋보기 검색창 토글 기능 초기화 완료.");
+	   } else {
+	       console.warn("경고: 'searchMenuBtn' 또는 'searchBox' 요소를 찾을 수 없어 돋보기 검색 기능을 초기화할 수 없습니다.");
+	   }
+
 
     // 검색 제출 버튼 (키워드 검색)
     $("#searchSubmitBtn")?.on("click", function () {
@@ -592,7 +736,7 @@ $(document).ready(function() {
 });
 
 
-
+//위치버튼 클릭스 주소 
 function handleCurrentLocationSearch() {
     console.log("handleCurrentLocationSearch 함수 시작");
     if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
@@ -665,12 +809,8 @@ function handleCurrentLocationSearch() {
 		console.log("이벤트 리스너 등록 완료");
 }
 
-/**
- * 주소 입력 필드의 내용을 기반으로 주소 검색을 수행하고 'shopList' 페이지로 이동합니다.
- * HTML에서 주소 입력 필드는 'location-input' ID를, 검색 버튼은 'addressInputSearchBtn' ID를 가정합니다.
- * 이 버튼은 '검색' 역할과 '지우기' 역할을 겸할 수 있습니다 (아래 `$(document).ready` 로직 참고).
- */
-function initAddressSearchInput() { // 함수명 변경 (initAddressSearch -> initAddressSearchInput)
+//검색시 주소찾아주기
+function initAddressSearchInput() { 
     const locationInputField = document.getElementById('location-input');
     const addressInputSearchBtn = document.getElementById('addressInputSearchBtn'); // ★ HTML ID: addressInputSearchBtn ★
 
@@ -711,10 +851,8 @@ function initAddressSearchInput() { // 함수명 변경 (initAddressSearch -> in
     });
 }
 
-/**
- * 가게 주소를 지도에 마커로 표시하고 지도의 중심을 이동시킵니다.
- * HTML에서 가게 주소는 'storeAddress' ID의 요소에서, 지도는 'map' ID의 컨테이너에서 가져옵니다.
- */
+
+//정보탭에서 지도보여주기
 function showStoreOnMap() {
 	console.log("showStoreOnMap 함수 실행 시작.");
     const address = document.getElementById('storeAddress')?.innerText;
@@ -747,51 +885,8 @@ function showStoreOnMap() {
     });
 }
 
-function loadUserAddressesIntoModal() {
-    console.log("loadUserAddressesIntoModal 함수 호출됨. (데이터 로딩은 현재 비활성화)");
-    
-    // 모든 탭의 기존 목록을 비우고, 로딩 메시지를 표시합니다.
-    $('.tab-pane .list-group').empty();
-    $('#loadingHomeAddressMessage, #loadingWorkAddressMessage, #loadingOtherAddressMessage').removeClass("d-none").show();
-    $('#noHomeAddressMessage, #noWorkAddressMessage, #noOtherAddressMessage').addClass("d-none").hide();
 
-    // ---------------------------------------------------------------
-    // 실제 데이터 로딩 로직 (AJAX 호출 등)은 여기에 들어갈 예정입니다.
-    // 지금은 이 부분을 건너뛰어 데이터를 로드하지 않습니다.
-    // ---------------------------------------------------------------
 
-    // 일정 시간 후 로딩 메시지를 숨기고, '주소 없음' 메시지를 표시합니다.
-    // 이는 데이터가 없음을 시뮬레이션합니다.
-    setTimeout(() => {
-        $('#loadingHomeAddressMessage, #loadingWorkAddressMessage, #loadingOtherAddressMessage').addClass("d-none").hide();
-        // 모든 탭에 '주소 없음' 메시지를 표시합니다.
-        $('#noHomeAddressMessage').removeClass("d-none").show();
-        $('#noWorkAddressMessage').removeClass("d-none").show();
-        $('#noOtherAddressMessage').removeClass("d-none").show();
-    }, 500); // 0.5초 후에 메시지 상태 변경
-}
-
-/**
- * 주소 목록을 특정 HTML 요소에 렌더링하는 헬퍼 함수
- * (현재는 호출되지 않거나, 데이터가 비어있어 아무것도 렌더링하지 않습니다.)
- */
-function renderAddresses(addresses, listSelector, noAddressMessageSelector) {
-    const $listElement = $(listSelector);
-    const $noMessageElement = $(noAddressMessageSelector);
-
-    $listElement.empty(); // 현재 목록을 비웁니다.
-
-    if (addresses && addresses.length > 0) {
-        // 실제 데이터가 있다면 이 곳에서 주소 항목을 생성합니다.
-        // 현재는 addresses 배열이 비어있으므로 아무것도 추가되지 않습니다.
-        addresses.forEach(addr => {
-            // ... (주소 항목 HTML 생성 로직) ...
-        });
-    } else {
-        // 주소 데이터가 없으면 '주소 없음' 메시지를 표시합니다.
-        $noMessageElement.removeClass("d-none").show();
-    }
-}
 // ==============================
 // 찜하기 기능
 // ==============================

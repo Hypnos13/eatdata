@@ -15,12 +15,7 @@
 			</div>
 			
 			<div class="d-flex justify-content-center mt-2">
-				<button id="homeAddressBtn"
-					class="btn text-white me-2 d-flex align-items-center"
-					style="background-color: #43d091" title="등록된 집 주소로 검색">
-					<img src="https://img.icons8.com/ios-filled/24/000000/home.png"
-						alt="집" class="me-1" />
-				</button>
+		
 				<button id="currentLocationSearchBtn"
 					class="btn text-white me-2 d-flex align-items-center"
 					style="background-color: #43d091" title="현재 위치로 주소 검색">
@@ -32,10 +27,72 @@
 				<button id="addressInputSearchBtn" class="btn text-dark fw-semibold"
 					style="background-color: #43d091">검색</button>
 			</div>
-			
 		</div>
 		
 		<div id="searchBox" class="mt-3 d-none"></div>
+		
+		<!-- 주소검색 -->
+		<div class="address-popup-wrapper d-none">
+			<div class="address-section">
+				<h4 class="mb-3">배달 주소 입력</h4>
+
+				<div class="input-group mb-3">
+					<input type="text" id="searchAddressInput" class="form-control"
+						placeholder="주소를 검색하세요">
+					<button type="button" id="open-postcode-search"
+						class="btn btn-primary">검색</button>
+				</div>
+
+				<div id="searchedAddressResult"
+					class="mb-3 p-2 border rounded d-none">
+					<p class="mb-0" id="searchedPostcode">우편번호:</p>
+					<p class="mb-0" id="searchedAddress">기본 주소:</p>
+					<input type="text" id="searchedDetailAddress"
+						class="form-control mt-2" placeholder="상세 주소를 입력하세요">
+					<button type="button" id="selectSearchedAddressBtn"
+						class="btn btn-success btn-sm mt-2 w-100">이 주소 선택</button>
+				</div>
+
+				<ul class="nav nav-tabs mt-4" id="addressTabs" role="tablist">
+					<li class="nav-item" role="presentation">
+						<button class="nav-link active" id="home-tab" data-bs-toggle="tab"
+							data-bs-target="#home-addresses" type="button" role="tab"
+							aria-controls="home-addresses" aria-selected="true">집</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="company-tab" data-bs-toggle="tab"
+							data-bs-target="#company-addresses" type="button" role="tab"
+							aria-controls="company-addresses" aria-selected="false">회사</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="etc-tab" data-bs-toggle="tab"
+							data-bs-target="#etc-addresses" type="button" role="tab"
+							aria-controls="etc-addresses" aria-selected="false">그 외</button>
+					</li>
+				</ul>
+
+				<div class="tab-content border border-top-0 p-3"
+					id="addressTabContent">
+					<div class="tab-pane fade show active" id="home-addresses"
+						role="tabpanel" aria-labelledby="home-tab">
+						<p class="text-muted">저장된 집 주소가 없습니다.</p>
+					</div>
+					<div class="tab-pane fade" id="company-addresses" role="tabpanel"
+						aria-labelledby="company-tab">
+						<p class="text-muted">저장된 회사 주소가 없습니다.</p>
+					</div>
+					<div class="tab-pane fade" id="etc-addresses" role="tabpanel"
+						aria-labelledby="etc-tab">
+						<p class="text-muted">저장된 기타 주소가 없습니다.</p>
+					</div>
+				</div>
+
+				<button type="button" id="closeAddressSectionBtn"
+					class="btn btn-secondary mt-3 w-100">닫기</button>
+			</div>
+		</div>
+
+		<div class="popup-overlay d-none"></div>
 
 		<!-- 카테고리 영역 -->
 		<div class="container mt-5">

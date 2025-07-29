@@ -10,7 +10,7 @@
 
 <link rel="stylesheet"
 	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 	<div th:replace="~{fragments/header::header}"></div>
@@ -19,16 +19,7 @@
 	</div>
 	<div th:replace="~{fragments/footer::footer}"></div>
 
-	<script
-		src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-	<script
-		src="//dapi.kakao.com/v2/maps/sdk.js?appkey=30a0d7b80b66b1135d1195c80899795d&libraries=services"></script>
-
-	<script th:src="@{js/main.js}"></script>
 
 	<!-- 추가 메뉴 선택 모달 -->
 	<div class="modal fade" id="addMenuModal" tabindex="-1"
@@ -86,66 +77,7 @@
 									id="btnCountPlus">+</button>
 							</div>
 
-							<!-- 주소 버튼  -->
-						<div class="modal fade" id="addressSelectModal" tabindex="-1" aria-labelledby="addressSelectModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addressSelectModalLabel">배달 주소 선택</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <ul class="nav nav-tabs justify-content-center" id="addressTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#homeAddresses" type="button" role="tab" aria-controls="homeAddresses" aria-selected="true">집</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="work-tab" data-bs-toggle="tab" data-bs-target="#workAddresses" type="button" role="tab" aria-controls="workAddresses" aria-selected="false">직장</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#otherAddresses" type="button" role="tab" aria-controls="otherAddresses" aria-selected="false">그 외</button>
-                    </li>
-                </ul>
 
-                <div class="tab-content mt-4" id="addressTabContent">
-                    <div class="tab-pane fade show active" id="homeAddresses" role="tabpanel" aria-labelledby="home-tab">
-                        <div class="list-group">
-                            <div class="message-container text-center" id="loadingHomeAddressMessage">
-                                <p>주소를 불러오는 중...</p>
-                            </div>
-                            <div class="message-container text-center d-none" id="noHomeAddressMessage">
-                                <p>등록된 집 주소가 없습니다.</p>
-                            </div>
-                            </div>
-                    </div>
-                    <div class="tab-pane fade" id="workAddresses" role="tabpanel" aria-labelledby="work-tab">
-                        <div class="list-group">
-                            <div class="message-container text-center" id="loadingWorkAddressMessage">
-                                <p>주소를 불러오는 중...</p>
-                            </div>
-                            <div class="message-container text-center d-none" id="noWorkAddressMessage">
-                                <p>등록된 직장 주소가 없습니다.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="otherAddresses" role="tabpanel" aria-labelledby="other-tab">
-                        <div class="list-group">
-                            <div class="message-container text-center" id="loadingOtherAddressMessage">
-                                <p>주소를 불러오는 중...</p>
-                            </div>
-                            <div class="message-container text-center d-none" id="noOtherAddressMessage">
-                                <p>등록된 기타 주소가 없습니다.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 						</div>
 					</div>
@@ -162,7 +94,16 @@
 
 
 
+	<script
+		src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+	<script
+		src="//dapi.kakao.com/v2/maps/sdk.js?appkey=30a0d7b80b66b1135d1195c80899795d&libraries=services"></script>
+
+	<script th:src="@{js/main.js}"></script>
 </body>
 </html>
 
