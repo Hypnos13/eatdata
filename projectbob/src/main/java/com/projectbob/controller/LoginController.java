@@ -3,6 +3,9 @@ package com.projectbob.controller;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.SecureRandom;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
-import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.Member;
 import com.projectbob.service.LoginService;
 
@@ -98,8 +100,22 @@ public class LoginController {
 		session.setAttribute("loginId", id);
 		session.setAttribute("loginNickname", member.getNickname());
 		session.setAttribute("loginDivision", member.getDivision());
+		
+		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+		LocalDate birthday = LocalDate.parse(member.getBirthday(), dateFormatter);
+		LocalDate today = LocalDate.now();
+		
 		if(member.getDivision().equals("owner")){
 			return "redirect:/shopMain";
+		}else if (member.getDivision().equals("client")) {
+			if((birthday.getMonth() == today.getMonth()) && (birthday.getDayOfMonth() == today.getDayOfMonth())) {
+				if(loginService.checkbirthdayCoupon(id) == -1) {
+					System.out.println("생일 쿠폰 없음");
+					loginService.addBirthdayCoupon(id);
+				}else{
+					System.out.println("생일 쿠폰 이미받음");
+				}
+			}	
 		}
 		
 		return "redirect:/main";

@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.projectbob.domain.Addressbook;
+import com.projectbob.domain.Coupon;
 import com.projectbob.domain.Member;
 
 @Mapper
@@ -20,4 +21,6 @@ public interface LoginMapper {
 	List<Member> userList(@Param("division") String division, @Param("keyword") String keyword );
 	void updateIsuse(@Param("id") String id, @Param("isuse") String isuse);
 	List<Member> clientList();
+	void addBirthdayCoupon(String id);
+	Coupon checkbirthdayCoupon(String id);
 }

@@ -17,9 +17,12 @@
 		  <th:block th:each="coupon, status: ${couponList}">
 		    <div class="address-card">
 		      <div class="row mb-1">
-		      	<div class="col-6 text-start">
+		      	<div class="col-7 text-start">
 		      		<a class="addressbook-title">* [[${coupon.name}]] ([[${#dates.format(coupon.regDate, 'yyyy-MM-dd')}]] ~ [[${#dates.format(coupon.delDate, 'yyyy-MM-dd')}]])</a>	
-		      	</div>											 
+		      	</div>			
+		      	<div class="col-5 text-end">
+		      		<span class="span-address1">할인가 : [[${coupon.disPrice}]]  | 최소금액 : [[${coupon.minPrice}]]</span>
+		      	</div>								 
 		      </div>
 		      <div class="mb-1">
 		        <span class="span-address1">[[${coupon.content}]]</span>

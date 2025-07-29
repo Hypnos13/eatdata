@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.projectbob.domain.Coupon;
 import com.projectbob.domain.Member;
 import com.projectbob.mapper.LoginMapper;
 
@@ -75,5 +76,21 @@ public class LoginService {
 	
 	public List<Member> clientList(){
 		return loginMapper.clientList();
+	}
+	
+	public void addBirthdayCoupon(String id){
+		loginMapper.addBirthdayCoupon(id);
+	}
+	
+	public int checkbirthdayCoupon(String id){
+		int result = -1;  // 쿠폰 없음
+		
+		Coupon coupon = loginMapper.checkbirthdayCoupon(id);
+		
+		if(coupon == null) { return result; }
+		
+		result = 1 ; // 쿠폰 있음
+		
+		return result;
 	}
 }
