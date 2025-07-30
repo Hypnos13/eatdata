@@ -69,6 +69,27 @@ public interface ShopMapper {
     // 답글 삭제(soft-delete)
     void deleteReviewReply(@Param("rrNo") int rrNo);
     
+    // 리뷰 전체 개수 조회
+    @Select("SELECT COUNT(*) FROM review WHERE s_id = #{sId} AND status = '일반'")
+    int countReviewsByShopId(@Param("sId") int sId);
+
+    // 페이징 적용된 리뷰 목록 조회
+    @Select({
+        "SELECT r.r_no AS rNo, r.id, r.s_id AS sId, r.m_id AS mId, r.content, r.rating,",
+        "       r.r_picture AS rPicture, r.liked, r.reg_date AS regDate, r.status,",
+        "       m.name AS menuName",
+        "FROM review r",
+        "LEFT JOIN menu m ON r.m_id = m.m_id",
+        "WHERE r.s_id = #{sId} AND r.status = '일반'",
+        "ORDER BY r.reg_date DESC",
+        "LIMIT #{limit} OFFSET #{offset}"
+      })
+      List<Review> findReviewsByShopIdPaged(
+        @Param("sId")    int sId,
+        @Param("offset") int offset,
+        @Param("limit")  int limit
+      );
+    
 	/* === Menu === */
 	// 메뉴 관련 메서드
     void insertMenu(Menu menu);                  // 메뉴 등록

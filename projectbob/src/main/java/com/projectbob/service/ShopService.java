@@ -363,4 +363,21 @@ public class ShopService {
     public void deleteReply(int rrNo) {
         shopMapper.deleteReviewReply(rrNo);
     }
+    
+    /** 전체 리뷰 개수 조회 (필수) */
+    public int countReviewsByShopId(int sId) {
+        return shopMapper.countReviewsByShopId(sId);
+    }
+
+    /** 페이징된 리뷰 + 답글 조회 (필수) */
+    public List<Review> getReviewsWithRepliesPaged(int sId, int page, int size) {
+        int offset = (page - 1) * size;
+        List<Review> reviews = shopMapper.findReviewsByShopIdPaged(sId, offset, size);
+        for (Review r : reviews) {
+            r.getReplies().addAll(
+                shopMapper.findRepliesByReviewNo(r.getRNo())
+            );
+        }
+        return reviews;
+    }
 }
