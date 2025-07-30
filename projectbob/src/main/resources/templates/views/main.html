@@ -10,18 +10,107 @@
 
 		<!-- 배경 + 검색 -->
 		<div class="search-box">
+			<div class="text-center mb-2">
+				<h5 class="mb-1 fw-semibold text-black">배달받으실 주소를 입력해주세요</h5>
+			</div>
+			
 			<div class="d-flex justify-content-center mt-2">
-				<button id="btn-search-toggle"
+		
+				<button id="currentLocationSearchBtn"
 					class="btn text-white me-2 d-flex align-items-center"
-					style="background-color: #43d091" title="검색창 열기/닫기">
-					<img src="https://img.icons8.com/ios-filled/24/000000/marker.png"
-						alt="위치" class="me-1" />
+					style="background-color: #43d091" title="현재 위치로 주소 검색">
+				<img src="https://img.icons8.com/ios-filled/24/000000/marker.png" alt="위치" class="me-1" />
 				</button>
-				<input id="location-input" type="text" class="form-control w-25 me-2" placeholder="서울특별시 관악구..." />
-				<button class="btn text-dark fw-semibold"
+				<input id="location-input" type="text"
+					class="form-control w-25 me-2" th:value="${userAddress}"
+					placeholder="배달주소입력" />
+				<button id="addressInputSearchBtn" class="btn text-dark fw-semibold"
 					style="background-color: #43d091">검색</button>
 			</div>
 		</div>
+		
+		<div id="searchBox" class="mt-3 d-none"></div>
+		
+			<!-- 주소 검색 시작 부분  -->
+		<div
+			class="address-popup-wrapper 
+    [[${session.loginId} != null ? '' : 'd-none']]">
+			<div class="address-section">
+				<h4 class="mb-3">배달 주소 입력</h4>
+
+				<!-- 주소 검색창 -->
+				<div class="input-group mb-3">
+					<input type="text" id="searchAddressInput" class="form-control"
+						placeholder="주소를 검색하세요">
+					<button type="button" id="open-postcode-search"
+						class="btn btn-primary">검색</button>
+				</div>
+
+				<!-- 검색된 주소 -->
+				<div id="searchedAddressResult"
+					class="mb-3 p-2 border rounded d-none">
+					<p class="mb-0" id="searchedPostcode">우편번호:</p>
+					<p class="mb-0" id="searchedAddress">기본 주소:</p>
+					<input type="text" id="searchedDetailAddress"
+						class="form-control mt-2" placeholder="상세 주소를 입력하세요">
+					<button type="button" id="selectSearchedAddressBtn"
+						class="btn btn-success btn-sm mt-2 w-100">이 주소 선택</button>
+				</div>
+
+				<!-- 주소 탭 -->
+				<ul class="nav nav-tabs mt-4" id="addressTabs" role="tablist"
+					th:if="${session.loginId != null}">
+					<li class="nav-item" role="presentation">
+						<button class="nav-link active" id="home-tab" data-bs-toggle="tab"
+							data-bs-target="#home-addresses" type="button" role="tab"
+							aria-controls="home-addresses" aria-selected="true">집</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="company-tab" data-bs-toggle="tab"
+							data-bs-target="#company-addresses" type="button" role="tab"
+							aria-controls="company-addresses" aria-selected="false">회사</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="etc-tab" data-bs-toggle="tab"
+							data-bs-target="#etc-addresses" type="button" role="tab"
+							aria-controls="etc-addresses" aria-selected="false">그 외</button>
+					</li>
+				</ul>
+
+				<div class="tab-content border border-top-0 p-3"
+					id="addressTabContent" th:if="${session.loginId != null}">
+
+					<!-- 집 주소 -->
+					<div class="tab-pane fade show active" id="home-addresses"
+						role="tabpanel" aria-labelledby="home-tab">
+						<p class="text-muted">주소를 불러오는 중입니다...</p>
+					</div>
+
+					<!-- 회사 주소 -->
+					<div class="tab-pane fade" id="company-addresses" role="tabpanel"
+						aria-labelledby="company-tab">
+						<p class="text-muted">주소를 불러오는 중입니다...</p>
+					</div>
+
+					<!-- 기타 주소 -->
+					<div class="tab-pane fade" id="etc-addresses" role="tabpanel"
+						aria-labelledby="etc-tab">
+						<p class="text-muted">주소를 불러오는 중입니다...</p>
+					</div>
+
+				</div>
+
+				<button type="button" id="closeAddressSectionBtn"
+					class="btn btn-secondary mt-3 w-100">닫기</button>
+			</div>
+			<div></div>
+		</div>
+
+		<!-- 오버레이 -->
+		<div class="popup-overlay d-none"></div>
+		<!-- 주소 끝  -->
+
+		<div class="popup-overlay d-none"></div>
 
 		<!-- 카테고리 영역 -->
 		<div class="container mt-5">
@@ -31,7 +120,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='전체보기')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-01.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-01.png');">
 							<div class="category-title">전체보기</div>
 						</div>
 					</a>
@@ -41,7 +131,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='1인분 주문')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-02.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-02.png');">
 							<div class="category-title">1인분 주문</div>
 						</div>
 					</a>
@@ -51,7 +142,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='프랜차이즈')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-03.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-03.png');">
 							<div class="category-title">프랜차이즈</div>
 						</div>
 					</a>
@@ -61,7 +153,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='치킨')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-04.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-04.png');">
 							<div class="category-title">치킨</div>
 						</div>
 					</a>
@@ -71,7 +164,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='피자/양식')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-05.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-05.png');">
 							<div class="category-title">피자/양식</div>
 						</div>
 					</a>
@@ -81,7 +175,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='중국집')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-06.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-06.png');">
 							<div class="category-title">중국집</div>
 						</div>
 					</a>
@@ -91,7 +186,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='한식')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-07.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-07.png');">
 							<div class="category-title">한식</div>
 						</div>
 					</a>
@@ -101,7 +197,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='일식/돈까스')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-08.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-08.png');">
 							<div class="category-title">일식/돈까스</div>
 						</div>
 					</a>
@@ -111,7 +208,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='족발/보쌈')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-09.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-09.png');">
 							<div class="category-title">족발/보쌈</div>
 						</div>
 					</a>
@@ -121,7 +219,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='야식')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-10.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-10.png');">
 							<div class="category-title">야식</div>
 						</div>
 					</a>
@@ -131,7 +230,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='분식')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-11.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-11.png');">
 							<div class="category-title">분식</div>
 						</div>
 					</a>
@@ -141,7 +241,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='카페/디저트')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-12.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-12.png');">
 							<div class="category-title">카페/디저트</div>
 						</div>
 					</a>
@@ -151,7 +252,8 @@
 				<div class="col-6 col-md-3">
 					<a th:href="@{/shopList(category='편의점/마트')}"
 						style="text-decoration: none;">
-						<div class="category-card" style="background-image: url('/images/category-13.png');">
+						<div class="category-card"
+							style="background-image: url('/images/category-13.png');">
 							<div class="category-title">편의점/마트</div>
 						</div>
 					</a>

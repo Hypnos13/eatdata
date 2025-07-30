@@ -13,14 +13,18 @@
 				<div class="col-md-8">
 					<div class="section-title">결제하기</div>
 					<div class="mb-3">
-						<label class="form-label">주소</label> <input type="text"
-							class="form-control" placeholder="서울특별시 동작구 상도동 301-28 푸르주주택" />
-						<input type="text" class="form-control mt-2"
+						<label class="form-label">주소</label>
+						 <input type="text" name="address1" class="form-control"
+						 	th:value="${member != null ? member.address1 : ''}"
+							 placeholder="(필수)주소를 입력하세연" />
+						<input type="text" class="form-control mt-2" name="address2"
+							th:value="${member != null ? member.address2 : ''}"
 							placeholder="(필수) 상세주소 입력" />
 					</div>
 					<div class="mb-3">
 						<label class="form-label">휴대전화번호</label> <input type="text"
-							class="form-control" placeholder="(필수) 휴대전화 번호 입력" />
+							id="phone" class="form-control" placeholder="(필수) 휴대전화 번호 입력"
+							th:value="${member != null ? member.phone : ''}" />
 						<div class="form-check mt-2">
 							<input class="form-check-input" type="checkbox" id="safeNum" />
 							<label class="form-check-label" for="safeNum">안심번호 사용</label>
@@ -28,22 +32,27 @@
 					</div>
 					<div class="mb-3">
 						<label class="form-label">주문시 요청사항</label>
-						<textarea class="form-control" rows="3" maxlength="100"
+						<textarea id="orderRequest" class="form-control" rows="3" maxlength="100"
 							placeholder="예: 배달 시 초인종 누르지 말아주세요."></textarea>
 					</div>
 					<div class="section-title">결제수단 선택</div>
 					<div class="row g-2">
 						<div class="col-md-6">
-							<button class="btn btn-outline-secondary w-100">신용카드</button>
+							<button type="button"
+							 class="btn btn-outline-secondary w-100" data-method="CARD">신용카드</button>
 						</div>
 						<div class="col-md-6">
-							<button class="btn btn-outline-secondary w-100">휴대폰</button>
+							<button type="button"
+							 class="btn btn-outline-secondary w-100" data-method="MOBILE">휴대폰</button>
 						</div>
 						<div class="col-md-6">
-							<button class="btn btn-outline-success w-100">네이버페이</button>
+							<button type="button"
+							 class="btn btn-outline-success w-100" data-method="NAVERPAY">네이버페이</button>
 						</div>
 						<div class="col-md-6">
-							<button class="btn btn-outline-secondary w-100">스마일페이</button>
+							<button type="button" 
+							class="payment-method btn btn-outline-warning w-100" 
+							data-method="KAKAO">카카오페이</button>
 						</div>
 					</div>
 					<div class="mt-4">
@@ -54,69 +63,64 @@
 						</div>
 					</div>
 				</div>
+				
+				<div class="col-12 col-md-4">
+				    <div class="card order-summary p-3">
+				        <h5 class="card-title mb-3">주문표</h5>
 
-				<!-- 주문표 -->
-				<div class="col-md-4">
-					<div class="card order-summary p-3">
-						<h5 class="card-title">🛒 주문표</h5>
-<form id="orderForm" method="post" action="/pay">
-	<!-- <div>
-		<div>메뉴ID: <span th:text="${menuId}"></span></div>
-		<div>수량: <span th:text="${count}"></span></div>
-		<div>옵션ID: <span th:text="${optionIds}"></span></div>		
-		<div>총가격: <span th:text="${totalPrice}"></span></div>
-	</div> -->
-	<input type="hidden" name="menuId" th:value="${menuId}">
-	<input type="hidden" name="count" th:value="${count}">
-	<input type="hidden" name="optionIds" th:value="${optionIds}">
-	<input type="hidden" name="totalPrice" th:value="${totalPrice}">
+				        <div class="order-item-list mb-3">
+				            <div id="emptyOrderMessage"
+				                 class="text-muted fst-italic small text-center"
+				                 th:classappend="${#lists.isEmpty(orderedItems)} ? '' : 'd-none'">
+				                주문한 메뉴가 없습니다.
+				            </div>
 
-						<div class="order-item-list mb-3">
-							<!-- 주문 메뉴 및 추가 메뉴가 여기 동적으로 들어갑니다 -->
-						
-						
-						<div class="fw-bold">
-						<span th:text="'메뉴ID: ' + ${menuId}"></span>
-						x <span th:text="${count}"></span>
-						(<span th:text="${totalPrice}"></span>원)
-						</div>
-						<div th:if="${optionIds != null && optionIds != ''}">
-							옵션 ID: <span th:text="${optionIds}"></span>
-						</div>
-						<div th:if="${optionIds == null || optionIds == ''}" class="text-muted fst-italic ms-3">
-							추가 메뉴 없음
-						</div>
-						</div>
-						<p>
-							총 가격: <strong id="totalPrice">[[${totalPrice}]]원</strong><br /> <small>
+				            <div th:each="mainItem : ${orderedItems}"
+				                 th:if="${mainItem.caPid == null}"
+				                 th:data-ca-id="${mainItem.caId}"
+				                 class="pb-3 mb-3 border-bottom cart-main-item">
 
-								class="text-muted">(배달비 포함)</small>
-						</p>
+				                <div class="mb-2">
+				                    <div class="fw-bold small mb-1"
+				                         th:text="|${mainItem.menuName} : ${#numbers.formatInteger(mainItem.totalPrice, 0, 'COMMA')}원|">
+				                        메인메뉴명 : 0원
+				                    </div>
 
-						<!-- 수량 조절 영역 -->
-						<div class="qty-control d-flex flex-row align-items-center mb-3">
-							<button class="btn btn-outline-secondary btn-qty"
-								onclick="minus()">−</button>
-							<span id="itemCount" class="mx-3">0</span>
-							<button class="btn btn-outline-secondary btn-qty"
-								onclick="plus()">＋</button>
-						</div>
+				                    <div th:each="optItem : ${orderedItems}"
+				                         th:if="${optItem.caPid != null and optItem.caPid == mainItem.caId}"
+				                         th:data-ca-id="${optItem.caId}"
+				                         class="text-muted small ms-3 mb-1 cart-option-item"
+				                         th:text="|└ 옵션: ${optItem.optionName} (${#numbers.formatInteger(optItem.totalPrice, 0, 'COMMA')}원)|">
+				                        └ 옵션: 옵션명 (0원)
+				                    </div>
 
-						<!-- 주문 초기화(삭제) 버튼 -->
-						<button class="btn btn-danger w-100 mb-2" id="btnRemoveItem">주문
-							취소</button>
+				                    <!-- +, -, x 버튼 제거 -->
+				                </div>
+				            </div>
+				        </div>
 
-						<button type="submit" class="btn text-white w-100" 
-							style="background-color: #43d091;" id="btnOrderNow">
-							주문하기
-							</button>
-</form>
-					</div>
+				        <div id="totalOrderPrice" class="mb-2 fw-bold">
+				            총 결제 금액: <span th:text="${#numbers.formatInteger(finalTotalPrice, 0, 'COMMA')} + '원'" th:data-price="${finalTotalPrice}"></span>
+				        </div>
+				        <div id="orderSummaryInfo" class="mb-3"
+				             th:classappend="${#lists.isEmpty(orderedItems)} ? 'd-none' : ''">
+				            <small class="text-muted d-block mt-1"> (배달비 3,000원 추가) </small>
+				        </div>
+
+				        <button class="btn btn-sm w-100 text-white" 
+				        		type="button" id="btnPayNow" style="background-color: #43d091;"
+				        		disabled>
+				            결제하기
+				        </button>
+
+				        <div id="guestInfo" th:data-guest-id="${session.guestId}"></div>
+				    </div>
 				</div>
+
 
 			</div>
 		</div>
 	</div>
-	<script src="/js/main.js"></script>
+	
 </body>
 </html>
