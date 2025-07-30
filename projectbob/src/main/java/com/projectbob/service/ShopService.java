@@ -326,12 +326,7 @@ public class ShopService {
         return reviews;
     }
 
-    /** 답글 등록 */
-    public void addReply(ReviewReply reply) {
-        shopMapper.insertReviewReply(reply);
-    }
-    
-	/** 리뷰 등록 */
+    /** 리뷰 등록 */
     @Transactional
     public void addReview(Review review) {
         shopMapper.insertReview(review);              // 리뷰 등록
@@ -352,5 +347,20 @@ public class ShopService {
         shopMapper.updateShopRatingBySId(sId);             // ★ 평점 갱신
     }
 
-
+    /** 답글 등록 */
+    public void addReply(ReviewReply reply) {
+        shopMapper.insertReviewReply(reply);
+    }
+    
+    /** 답글 수정 */
+    @Transactional
+    public void updateReply(ReviewReply reply) {
+        shopMapper.updateReviewReply(reply);
+    }
+    
+    /** 답글 삭제(soft-delete) */
+    @Transactional
+    public void deleteReply(int rrNo) {
+        shopMapper.deleteReviewReply(rrNo);
+    }
 }

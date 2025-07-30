@@ -14,7 +14,7 @@
 
   <div layout:fragment="content">
     <div class="content-card">
-      <h2 class="text-center fw-bold mb-4">사장님 공지</h2>
+      <h2 class="text-center fw-bold mb-4">가게 공지</h2>
 	  <form th:action="@{/shopNotice}" method="post" th:object="${shop}">
 	        <input type="hidden" name="s_id" th:value="${shop.sId}" />
 

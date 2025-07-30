@@ -301,11 +301,6 @@
      ORDER BY reg_date ASC
   </select>
 
-	<!-- 대댓글 관리 -->
-  <insert id="insertReviewReply" parameterType="com.projectbob.domain.ReviewReply">
-    INSERT INTO review_reply(r_no, s_id, id, content, reg_date, status)
-    VALUES(#{rNo}, #{sId}, #{id}, #{content}, SYSDATE(), 'active')
-  </insert>
   
   <!-- 리뷰 평점 -->
   <update id="updateShopRatingBySId" parameterType="int">
@@ -339,6 +334,27 @@
 <!-- 리뷰 삭제 -->
 <delete id="deleteReview" parameterType="int">
     DELETE FROM review WHERE r_no = #{rNo}
+</delete>
+
+<!-- 답글 작성 -->
+<insert id="insertReviewReply" parameterType="com.projectbob.domain.ReviewReply">
+	INSERT INTO review_reply(r_no, s_id, id, content, reg_date, status)
+	VALUES(#{rNo}, #{sId}, #{id}, #{content}, SYSDATE(), 'active')
+</insert>
+
+<!-- 답글 내용 수정 -->
+<update id="updateReviewReply" parameterType="com.projectbob.domain.ReviewReply">
+  UPDATE review_reply
+  SET content   = #{content},
+      modi_date = NOW()
+  WHERE rr_no    = #{rrNo}
+    AND status   = 'active'
+</update>
+
+<!-- 답글 삭제 -->
+<delete id="deleteReviewReply" parameterType="int">
+  DELETE FROM review_reply
+  WHERE rr_no = #{rrNo}
 </delete>
 
 <resultMap id="shopResultMap" type="com.projectbob.domain.Shop">

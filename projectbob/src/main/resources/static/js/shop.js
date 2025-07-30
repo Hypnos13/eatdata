@@ -381,3 +381,60 @@ $(function () {
   });
 });
 
+// # 리뷰 답글 “수정/삭제” 바로가기 토글 & AJAX 처리
+$(function () {
+$('.reply-box')
+  // [수정] 버튼 → 수정 모드로 전환
+  .on('click', '.btn-edit', function() {
+    const $box = $(this).closest('.reply-box');
+    $box.find('.view-mode').addClass('d-none');
+    $box.find('.edit-mode').removeClass('d-none');
+  })
+  // [취소] 버튼 → 원래 보기 모드로 복귀
+  .on('click', '.btn-cancel', function() {
+    const $box = $(this).closest('.reply-box');
+    $box.find('.edit-mode').addClass('d-none');
+    $box.find('.view-mode').removeClass('d-none');
+  })
+  // [저장] 버튼 → 서버에 수정 요청 (AJAX)
+  .on('click', '.btn-save', function(e) {
+    e.preventDefault();
+    const $box = $(this).closest('.reply-box');
+    const rrNo = $box.data('rrno');
+    const sId  = $box.data('sid');
+    const newContent = $box.find('.edit-input').val().trim();
+    if (!newContent) {
+      alert('내용을 입력해주세요.');
+      return;
+    }
+    $.post('/shop/review/reply/update', {
+      rrNo: rrNo,
+      sId: sId,
+      content: newContent
+    }).done(function() {
+      // 반영 후 UI 복구
+      $box.find('.view-mode').text(newContent);
+      $box.find('.edit-mode').addClass('d-none');
+      $box.find('.view-mode').removeClass('d-none');
+    }).fail(function() {
+      alert('수정에 실패했습니다. 다시 시도해주세요.');
+    });
+  })
+  // [삭제] 버튼 → 서버에 삭제 요청 (AJAX)
+  .on('click', '.btn-delete', function(e) {
+    e.preventDefault();
+    if (!confirm('이 답글을 삭제하시겠습니까?')) return;
+    const $box = $(this).closest('.reply-box');
+    const rrNo = $box.data('rrno');
+    const sId  = $box.data('sid');
+    $.post('/shop/review/reply/delete', {
+      rrNo: rrNo,
+      sId: sId
+    }).done(function() {
+      $box.remove();
+    }).fail(function() {
+      alert('삭제에 실패했습니다. 다시 시도해주세요.');
+    });
+  });
+});
+
