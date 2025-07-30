@@ -354,13 +354,13 @@ public class ShopService {
     
     /** 답글 수정 */
     @Transactional
-    public void updateReviewReply(ReviewReply reply) {
+    public void updateReply(ReviewReply reply) {
         shopMapper.updateReviewReply(reply);
     }
     
     /** 답글 삭제(soft-delete) */
     @Transactional
-    public void deleteReviewReply(int rrNo) {
+    public void deleteReply(int rrNo) {
         shopMapper.deleteReviewReply(rrNo);
     }
 }

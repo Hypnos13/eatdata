@@ -608,21 +608,25 @@ public class ShopController {
 	
 	// 답글 수정 처리
 	@PostMapping("/shop/review/reply/update")
-	public String updateReviewReply(@ModelAttribute ReviewReply reply, RedirectAttributes ra) {
-	    shopService.updateReviewReply(reply);
-	    ra.addFlashAttribute("msg", "답글이 수정되었습니다.");
-	    return "redirect:/shop/reviewManage?s_id=" + reply.getSId();
-	}
+    public String updateReviewReply(
+            @ModelAttribute ReviewReply reply,
+            RedirectAttributes ra) {
+        shopService.updateReply(reply);
+        ra.addFlashAttribute("msg", "답글이 수정되었습니다.");
+        // 수정 후 다시 관리 페이지로
+        return "redirect:/shop/reviewManage?s_id=" + reply.getSId();
+    }
 
     // 답글 삭제 처리 
 	@PostMapping("/shop/review/reply/delete")
-	public String deleteReviewReply(@RequestParam("rrNo") int rrNo,
-	                                @RequestParam("sId")  int sId,
-	                                RedirectAttributes ra) {
-	    shopService.deleteReviewReply(rrNo);
-	    ra.addFlashAttribute("msg", "답글이 삭제되었습니다.");
-	    return "redirect:/shop/reviewManage?s_id=" + sId;
-	}
+    public String deleteReviewReply(
+            @RequestParam("rrNo") int rrNo,
+            @RequestParam("sId") int sId,
+            RedirectAttributes ra) {
+        shopService.deleteReply(rrNo);
+        ra.addFlashAttribute("msg", "답글이 삭제되었습니다.");
+        return "redirect:/shop/reviewManage?s_id=" + sId;
+    }
 
  
 	/* ----------------------- 전역 타이틀 ----------------------- */

@@ -37,34 +37,36 @@
 			  <img class="review-img" th:src="@{'/images/review/' + ${rev.rPicture}}" alt="리뷰 사진"/>
 		  </div>
 		  <!-- 답글 반복 -->
-			<div th:each="rp : ${rev.replies}" class="reply-box">
+			<div th:each="rp : ${rev.replies}"
+			     class="reply-box"
+			     th:attr="data-rrno=${rp.rrNo}, data-sid=${shop.sId}">
 			  <div class="reply-header d-flex align-items-center">
 			    <div>
 			      <span class="reply-badge">사장님</span>
 			      <span class="reply-writer" th:text="${rp.id}"></span>
-			      <span class="reply-date" th:text="${#dates.format(rp.regDate,'yyyy-MM-dd HH:mm')}"></span>
+			      <span class="reply-date"   th:text="${#dates.format(rp.regDate,'yyyy-MM-dd HH:mm')}"></span>
 			    </div>
-			    <!-- 우측 상단에 수정/삭제 버튼 -->
+			    <!-- 우측: 수정/삭제 버튼 -->
 			    <div class="ms-auto">
-			      <!-- 수정 폼 -->
-			      <form th:action="@{/shop/review/reply/update}" method="post" class="d-inline">
-			        <input type="hidden" name="rrNo"   th:value="${rp.rrNo}"/>
-			        <input type="hidden" name="sId"    th:value="${shop.sId}"/>
-			        <input type="text"   name="content" 
-			               class="form-control form-control-sm d-inline w-auto"
-			               th:value="${rp.content}" required/>
-			        <button type="submit" class="btn btn-sm btn-outline-primary ms-1">수정</button>
-			      </form>
-			      <!-- 삭제 폼 -->
-			      <form th:action="@{/shop/review/reply/delete}" method="post" class="d-inline ms-1">
-			        <input type="hidden" name="rrNo" th:value="${rp.rrNo}"/>
-			        <input type="hidden" name="sId"  th:value="${shop.sId}"/>
-			        <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
-			      </form>
+			      <button type="button" class="btn btn-sm btn-outline-primary btn-edit">수정</button>
+			      <button type="button" class="btn btn-sm btn-outline-danger btn-delete">삭제</button>
 			    </div>
 			  </div>
-			  <div class="reply-content" th:text="${rp.content}"></div>
+			
+			  <!-- (A) 보여주기 전용 텍스트 -->
+			  <div class="reply-content view-mode" th:text="${rp.content}"></div>
+			
+			  <!-- (B) 수정 모드 인풋 + 버튼 (초기엔 숨김) -->
+			  <div class="edit-mode d-none">
+			    <div class="input-group">
+			      <input type="text" class="form-control form-control-sm edit-input"
+			             th:value="${rp.content}" />
+			      <button class="btn btn-sm btn-success btn-save">저장</button>
+			      <button class="btn btn-sm btn-secondary btn-cancel">취소</button>
+			    </div>
+			  </div>
 			</div>
+
 		  <!-- 답글 등록 폼 -->
 		  <form th:action="@{/shop/review/reply}" method="post" class="reply-form">
 		    <input type="hidden" name="rNo" th:value="${rev.rNo}">

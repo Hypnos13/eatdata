@@ -342,20 +342,20 @@
 	VALUES(#{rNo}, #{sId}, #{id}, #{content}, SYSDATE(), 'active')
 </insert>
 
-<!-- 답글 수정 -->
+<!-- 답글 내용 수정 -->
 <update id="updateReviewReply" parameterType="com.projectbob.domain.ReviewReply">
   UPDATE review_reply
   SET content   = #{content},
-      modi_date = SYSDATE()
-  WHERE rr_no = #{rrNo}
+      modi_date = NOW()
+  WHERE rr_no    = #{rrNo}
+    AND status   = 'active'
 </update>
 
-<!-- 답글 삭제(soft-delete) -->
-<update id="deleteReviewReply" parameterType="int">
-  UPDATE review_reply
-  SET status = 'deleted', modi_date = SYSDATE()
+<!-- 답글 삭제 -->
+<delete id="deleteReviewReply" parameterType="int">
+  DELETE FROM review_reply
   WHERE rr_no = #{rrNo}
-</update>
+</delete>
 
 <resultMap id="shopResultMap" type="com.projectbob.domain.Shop">
     <id property="sId" column="s_id"/>
