@@ -265,7 +265,6 @@ function updateOrderSummary(cartList, totalCartPrice) {
         const options = cartList.filter(opt => opt.caPid != null && opt.caPid === mainItem.caId);
 
         let optionHtml = "";
-<<<<<<< HEAD
         options.forEach(opt => {
             const optName = opt.optionName || "옵션명 없음";
             const optPrice = opt.unitPrice || 0;
@@ -275,17 +274,7 @@ function updateOrderSummary(cartList, totalCartPrice) {
                 </div>
             `;
         });
-=======
-		options.forEach(opt => {
-		    const optName = opt.optionName || "옵션명 없음"; 
-		    const optPrice = opt.unitPrice || 0; 
-		    optionHtml += `
-		        <div class="text-muted small ms-3 mb-1 cart-option-item" data-ca-id="${opt.caId}">
-		          └ 옵션: ${optName} (+${optPrice.toLocaleString()}원)
-		        </div>
-		    `;
-		});
->>>>>>> seon
+
 
         const quantity = mainItem.quantity || 0;
         const menuBasePrice = mainItem.menuPrice || 0;
@@ -309,11 +298,9 @@ function updateOrderSummary(cartList, totalCartPrice) {
         $orderItemList.append(html);
     });
 
-<<<<<<< HEAD
+
     updateOverallTotalPriceDisplay(totalCartPrice);
-=======
-		   updateOverallTotalPriceDisplay(totalCartPrice);
->>>>>>> seon
+
 }
 
 // ==============================
@@ -1790,7 +1777,7 @@ function resetReviewForm(){
   reader.readAsDataURL(file);
 });
 
-<<<<<<< HEAD
+
 // 리뷰 사진 미리보기
 $("#rPicture").on("change", function () { // ID를 rPicture로 변경
   const file = this.files[0];
@@ -1981,5 +1968,3 @@ $(document).on("click", "#btnPayNow", function() {
 });
 
 
-=======
->>>>>>> seon

@@ -29,10 +29,18 @@ public class BobController {
 	@Autowired
 	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	
+<<<<<<< HEAD
+=======
+
+>>>>>>> hong
 
 	@Autowired
 	private LoginService loginService;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> hong
 	
 	@PostMapping("/getAddress")
 	public ResponseEntity<Map<String, Object>> getAddresses(HttpSession session) {
@@ -68,6 +76,10 @@ public class BobController {
 	        return ResponseEntity.internalServerError().body(responseBody);
 	    }
 	}
+<<<<<<< HEAD
+=======
+
+>>>>>>> hong
 
 	@GetMapping({"/", "/main"})
 	public String Main() {		

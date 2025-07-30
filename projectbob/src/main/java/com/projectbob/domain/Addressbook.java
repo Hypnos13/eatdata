@@ -17,5 +17,10 @@ public class Addressbook {
 	int no;
 	Timestamp regDate, modiDate;
 	
+<<<<<<< HEAD
 }
 
+=======
+
+}
+>>>>>>> hong
