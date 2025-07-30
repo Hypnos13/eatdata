@@ -1,6 +1,7 @@
 package com.projectbob.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -9,7 +10,6 @@ import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.ChatMessage;
 import com.projectbob.domain.Coupon;
 import com.projectbob.domain.CustomerService;
-import com.projectbob.domain.LikeList;
 import com.projectbob.domain.NoticeBoard;
 import com.projectbob.domain.Shop;
 
@@ -44,4 +44,5 @@ public interface CustomerServiceMapper {
 	void deleteCoupon(int cNo);
 	void updateCoupon(Coupon coupon);
 	List<Coupon> myCoupon(String id);
+	List<Map<String, Object>> myReviewList(String id);
 }

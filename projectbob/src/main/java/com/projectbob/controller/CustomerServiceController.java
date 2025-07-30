@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,7 @@ import com.projectbob.domain.Coupon;
 import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.Member;
 import com.projectbob.domain.NoticeBoard;
+import com.projectbob.domain.Review;
 import com.projectbob.domain.Shop;
 import com.projectbob.service.CustomerServiceService;
 import com.projectbob.service.LoginService;
@@ -420,7 +422,7 @@ public class CustomerServiceController {
 		return "redirect:couponManage";
 	}
 	
-	// 마이페이지 - 쿠폰관리 myCoupon
+	// 마이페이지 - 쿠폰관리
 	@GetMapping("/myCoupon")
 	public String myCoupon(Model model, HttpSession session) {
 		
@@ -430,5 +432,17 @@ public class CustomerServiceController {
 		model.addAttribute("couponList", couponList);
 			  
 		return "members/myCoupon";	
+	}
+	
+	// 마이페이지 - 댓글 관리
+	@GetMapping("/myReview")
+	public String myReview(Model model, HttpSession session) {
+		
+		String id = (String) session.getAttribute("loginId");
+		
+		List<Map<String, Object>> reviewList = csService.myReviewList(id);
+		model.addAttribute("reviewList", reviewList);
+		
+		return "members/myReview";
 	}
 }

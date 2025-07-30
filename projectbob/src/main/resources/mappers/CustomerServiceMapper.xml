@@ -216,6 +216,14 @@
 	where id = #{id}
 	AND SYSDATE() BETWEEN reg_date AND del_date
 </select>
+
+<select id="myReviewList" resultType="map">
+	SELECT r.*, s.name 
+	FROM review r, shop s
+	WHERE r.s_id = s.s_id 
+	AND r.id = #{id}
+</select>
+
 </mapper>	
 
 

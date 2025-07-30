@@ -19,6 +19,7 @@ import com.projectbob.domain.Coupon;
 import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.LikeList;
 import com.projectbob.domain.NoticeBoard;
+import com.projectbob.domain.Review;
 import com.projectbob.domain.Shop;
 import com.projectbob.mapper.CustomerServiceMapper;
 
@@ -168,5 +169,9 @@ public class CustomerServiceService {
 	
 	public List<Coupon> myCoupon(String id){
 		return csMapper.myCoupon(id);
+	}
+	
+	public List<Map<String, Object>> myReviewList(String id){
+		return csMapper.myReviewList(id);
 	}
 }
