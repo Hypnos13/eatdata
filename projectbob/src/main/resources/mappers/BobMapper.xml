@@ -3,6 +3,7 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
+<<<<<<< HEAD
 
 <!-- 주문 페이지에서 주문 완료 페이지로 보내기 -->
 <insert id="insertOrder" parameterType="com.projectbob.domain.Orders" useGeneratedKeys="true" keyProperty="oNo">
@@ -42,6 +43,21 @@
 	VALUES(#{rNo}, #{sId}, #{id}, #{content}, #{status})
 </insert>
 
+=======
+	<!-- 주소내용 가져오기  -->
+    <select id="findAddressesById" resultType="com.projectbob.domain.Addressbook"> SELECT
+            no,
+            id,
+            a_name AS aName,    
+            address1,
+            address2
+        FROM
+            addressbook
+        WHERE
+            id = #{userId}
+    </select>
+	
+>>>>>>> seon
     <!-- 장바구니 항목 수량 업데이트 -->
  <update id="updateCartItemQuantity" parameterType="map">
     UPDATE cart

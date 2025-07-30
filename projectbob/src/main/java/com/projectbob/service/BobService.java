@@ -12,8 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+<<<<<<< HEAD
 import com.projectbob.domain.LikeList;
 import com.projectbob.domain.Member;
+=======
+import com.projectbob.domain.Addressbook;
+>>>>>>> seon
 import com.projectbob.domain.Cart;
 import com.projectbob.domain.CartSummaryDto;
 import com.projectbob.domain.Menu;
@@ -36,10 +40,20 @@ public class BobService {
 	@Autowired
 	private BobMapper bobMapper;
 	
+<<<<<<< HEAD
 
 	@Autowired
 	private LoginService loginService;
 
+=======
+	 public List<Addressbook> getAddressesByUserId(String userId) { // 반환 타입 변경
+		  System.out.println("[DEBUG] 서비스에 전달된 userId: " + userId);
+		    List<Addressbook> addresses = bobMapper.findAddressesById(userId);
+		    System.out.println("[DEBUG] 서비스에서 조회된 주소 개수: " + (addresses == null ? 0 : addresses.size()));
+		    return addresses;
+	    }
+	
+>>>>>>> seon
 	 public CartSummaryDto getCartSummaryForUserOrGuest(String userId, String guestId) {
 	        Map<String, Object> params = new HashMap<>();
 	        params.put("userId", userId);

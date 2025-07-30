@@ -6,9 +6,13 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+<<<<<<< HEAD
 
 import com.projectbob.domain.LikeList;
 
+=======
+import com.projectbob.domain.Addressbook;
+>>>>>>> seon
 import com.projectbob.domain.Cart;
 
 import com.projectbob.domain.Menu;
@@ -21,9 +25,13 @@ import com.projectbob.domain.Shop;
 @Mapper
 public interface BobMapper {
 	
+<<<<<<< HEAD
 	// 주문페이지에서 주문완료 페이지로 보내기
 	public int insertOrder(Orders order);
 	
+=======
+	 List<Addressbook> findAddressesById(@Param("userId") String userId);
+>>>>>>> seon
 	  /**
      * 특정 장바구니 항목(caId)의 상세 정보를 조회합니다.
      * (메뉴의 m_id와 옵션의 mo_id를 포함)

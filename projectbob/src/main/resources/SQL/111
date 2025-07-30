@@ -25,6 +25,29 @@ SELECT * FROM menu WHERE m_id IN (1, 2, 3, 4);
 select * from shop order by s_id DESC;
 SELECT	*	FROM menu	WHERE s_id  ORDER BY category, name;
 
+
+--ADDRESSBOOK-------------------------------------------------------------------
+CREATE TABLE addressbook (
+    no INT AUTO_INCREMENT PRIMARY KEY,
+    id VARCHAR(20) NOT NULL, -- 클라이언트 ID를 참조할 컬럼
+    a_name VARCHAR(20) NOT NULL,
+    address1 VARCHAR(100) NOT NULL,
+    address2 VARCHAR(50) NOT NULL,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modi_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    status VARCHAR(50), -- NULL 허용 (이미지 스키마 기준)
+
+    -- 외래 키 제약 조건: 'id' 컬럼이 'client' 테이블의 'id' 컬럼을 참조합니다.
+    -- client 테이블의 기본 키가 'id'이고, 타입이 VARCHAR(20)이라고 가정합니다.
+    FOREIGN KEY (id) REFERENCES client(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+SET SESSION sql_mode = '';
+INSERT INTO addressbook (id, a_name, address1, address2, reg_date, modi_date)
+VALUES ('testing', '집', '서울특별시 강남구 테헤란로 123', '102동 305호', NOW(), NOW());
+-----------------------------------------------------------------------------------------
+
+
 -- 회원 테이블
 -- 회원ID, 이름, 닉네임, 비밀번호, 연락처, 주소, 상세주소, 이메일, 포인트, 생년월일, 회원구분, 가입일, 수정일, 사용여부
 DROP TABLE IF EXISTS client;
