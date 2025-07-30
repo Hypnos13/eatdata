@@ -3,6 +3,7 @@ package com.projectbob.service;
 import java.io.*;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
@@ -324,6 +325,39 @@ public class ShopService {
             );
         }
         return reviews;
+    }
+    
+	/** 페이지네이션 */
+    public Map<String, Object> getPagedReviews(int sId, int page, int size) {
+        int totalCount = shopMapper.countReviewsByShopId(sId);
+        int totalPages = (totalCount + size - 1) / size;
+        int offset     = (page - 1) * size;
+
+        List<Review> reviews = shopMapper.findReviewsByShopIdWithPaging(sId, offset, size);
+        // 각 리뷰에 답글까지 붙여주고 싶으면
+        for (Review r : reviews) {
+            r.getReplies().addAll(shopMapper.findRepliesByReviewNo(r.getRNo()));
+        }
+
+        // 페이지 블록 계산 (블록 크기 = 10)
+        int blockSize    = 10;
+        int currentBlock = (page - 1) / blockSize;
+        int startPage    = currentBlock * blockSize + 1;
+        int endPage      = Math.min(startPage + blockSize - 1, totalPages);
+
+        List<Integer> pageList = IntStream.rangeClosed(startPage, endPage)
+                                          .boxed().toList();
+
+        // 결과를 Map에 담아 반환
+        Map<String, Object> result = new HashMap<>();
+        result.put("reviews",    reviews);
+        result.put("currentPage", page);
+        result.put("size",        size);
+        result.put("totalPages",  totalPages);
+        result.put("startPage",   startPage);
+        result.put("endPage",     endPage);
+        result.put("pageList",    pageList);
+        return result;
     }
 
     /** 리뷰 등록 */

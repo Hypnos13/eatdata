@@ -533,42 +533,48 @@ public class ShopController {
         return "redirect:/shopNotice?s_id=" + sId;
     }
     
-	// 리뷰 관리 화면
-	@GetMapping("/shop/reviewManage")
-	public String shopReviewManage(
-	        @SessionAttribute(name="loginId", required=false) String loginId,
-	        @RequestParam("s_id") Integer sId,
-	        HttpSession session,
-	        Model model) {
-	
-	    if (loginId == null) {
-	        return "redirect:/login";
-	    }
-	
-	    // 1) 사장님이 가진 가게 목록 조회
-	    List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
-	    if (shopListMain.isEmpty()) {
-	        // 가게가 하나도 없으면 기본 페이지로
-	        return "redirect:/shopInfo";
-	    }
-	
-	    // 2) currentShop 결정 (세션 or 파라미터 기반)
-	    Shop currentShop = resolveCurrentShop(sId, loginId, session, shopListMain);
-	    if (currentShop == null) {
-	        return "redirect:/shopMain";
-	    }
-	
-	    // 3) 리뷰+답글 조회
-	    List<Review> reviews = shopService.getReviewsWithReplies(currentShop.getSId());
-	
-	    // 4) 모델에 담기 (사이드바용 shopListMain/currentShop, 뷰용 shop/reviews)
-	    model.addAttribute("shopListMain", shopListMain);
-	    model.addAttribute("currentShop", currentShop);
-	    model.addAttribute("shop", currentShop);
-	    model.addAttribute("reviews", reviews);
-	
-	    return "shop/shopReviewManage";
-	}
+    // ── 리뷰 관리 (페이징 포함) ────────────────────
+    @GetMapping("/shop/shopReviewManage")
+    public String shopReviewManage(
+            @SessionAttribute(name="loginId", required=false) String loginId,
+            @RequestParam("sId") Integer sId,                 // <-- 템플릿과 일치시킴
+            @RequestParam(value="page", defaultValue="1") int page,
+            @RequestParam(value="size", defaultValue="10") int size,
+            HttpSession session,
+            Model model) {
+
+        if (loginId == null) {
+            return "redirect:/login";
+        }
+
+        // 1) 내 가게 목록 + 권한 체크
+        List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+        if (shopListMain.isEmpty()) {
+            return "redirect:/shopInfo";
+        }
+        Shop currentShop = resolveCurrentShop(sId, loginId, session, shopListMain);
+        if (currentShop == null) {
+            return "redirect:/shopMain";
+        }
+
+        // 2) 페이징 리뷰 조회
+        Map<String,Object> pr = shopService.getPagedReviews(currentShop.getSId(), page, size);
+
+        // 3) 모델에 담기
+        model.addAttribute("shopListMain", shopListMain);
+        model.addAttribute("currentShop",   currentShop);
+        model.addAttribute("shop",          currentShop);
+        model.addAttribute("reviews",       pr.get("reviews"));
+        model.addAttribute("currentPage",   pr.get("currentPage"));
+        model.addAttribute("totalPages",    pr.get("totalPages"));
+        model.addAttribute("startPage",     pr.get("startPage"));
+        model.addAttribute("endPage",       pr.get("endPage"));
+        model.addAttribute("pageList",      pr.get("pageList"));
+        model.addAttribute("sizeOptions",   List.of(10,20,30));
+        model.addAttribute("selectedSize",  pr.get("size"));
+
+        return "shop/shopReviewManage";
+    }
 	
 	// 리뷰 등록 
 	@PostMapping("/review/add")
