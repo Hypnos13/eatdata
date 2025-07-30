@@ -14,16 +14,18 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class Orders {
-	private int oNo;
-	private int sId;
-	private String id;
-	private int totalPrice;
-	private String payment;
-	private String oAddress;
-	private String request;
-	private Timestamp regDate;
-	private Timestamp modiDate;
-	private String status;
-	private int quantity;
+	private int oNo; //주문번호
+	private int sId;//가게id
+	private String id; //회원id
+	private int totalPrice;//총 가격
+	private String payment; // 결제수단
+	private String oAddress; // 배달주소
+	private String request; //요청사항
+	private Timestamp regDate;//생성일
+	private Timestamp modiDate;//수정일
+	private String status;//상태
+	private int quantity;//수량
+	private String menus; //주문메뉴
+	private String paymentUid; // 포트원 결제 고유ID
 
 }

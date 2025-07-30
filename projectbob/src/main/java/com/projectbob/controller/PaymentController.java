@@ -21,13 +21,17 @@ public class PaymentController {
 		return "views/paymenttoss";
 	}
 
-	@PostMapping("/api/payment/complete")
-	@ResponseBody
-	public Map<String, String> completePayment(@RequestBody Map<String, String> payload){
-		String paymentId = payload.get("paymentId");
-		return Map.of("status", "PAID");
-	}
-	
+	/*
+	 * @PostMapping("/api/payment/complete")
+	 * 
+	 * @ResponseBody public Map<String, String> completePayment(@RequestBody
+	 * Map<String, String> payload){ String paymentId = payload.get("paymentId");
+	 * String orderIdFromClient = payload.get("orderId");
+	 * 
+	 * int newOrderNo = bobService.createOrder
+	 * 
+	 * return Map.of("status", "PAID","orderNo", newOrderNo); }
+	 */
 	@GetMapping("/api/item")
 	@ResponseBody
 	public Map<String,Object> getDummyItem(){

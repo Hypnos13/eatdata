@@ -89,11 +89,9 @@
                 .join("")
             }
 
-            const paymentId = randomId()
             const payment = await PortOne.requestPayment({
               storeId: "store-d5e7696b-604a-4b03-a1f7-2637ff538712",
               channelKey: "channel-key-3a2e28ac-f305-4e9e-add2-1b55f1c6e70c",
-              paymentId,
               orderName: item.name,
               totalAmount: item.price,
               currency: item.currency,
@@ -102,6 +100,11 @@
                 item: item.id,
               }
             });
+            // PortOne.requestPayment가 성공적으로 완료되면 payment.imp_uid와 payment.merchant_uid가 포함됩니다.
+            console.log("Payment object from PortOne.requestPayment:", payment); // payment 객체 전체를 로그로 찍어 확인
+            console.log("imp_uid:", payment.imp_uid); // imp_uid 확인
+            console.log("merchant_uid:", payment.merchant_uid); // merchant_uid 확인
+
             if (payment.code !== undefined) {
               this.setWaitingPayment(false)
               console.log(payment)
@@ -113,7 +116,9 @@
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                paymentId: payment.paymentId,
+                // paymentId 대신 payment.imp_uid를 전달
+                paymentId: payment.imp_uid, // PortOne에서 발급한 고유 결제 ID
+                orderId: payment.merchant_uid // PortOne에서 발급한 주문 ID (선택 사항, 백엔드에서 검증용)
               }),
             })
             this.setWaitingPayment(false)

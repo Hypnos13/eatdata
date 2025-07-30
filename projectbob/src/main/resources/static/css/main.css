@@ -197,13 +197,28 @@ nav.navbar .nav-link.active {
    menu 영역
 ===================== */
 
-/* 메뉴 카드 공통 */
+/* 메뉴 카드 박스 사이즈 고정 */
 .card.menu-card {
-  transition: transform 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
+  min-height: 350px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
 }
 
+
+.card.menu-card img {
+  width: 100%;
+  height: auto;
+  max-height: 200px; /* 너무 커지지 않도록 제한 */
+  object-fit: contain;
+}
+/* 메뉴 설명 영역 고정 높이 */
+.card.menu-card .fw-semibold {
+  min-height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .card.menu-card:hover {
   transform: translateY(-5px);
 }
@@ -348,7 +363,11 @@ nav.navbar .nav-link.active {
 }
 
 
-
+#global-content {
+    display: flex; /* 플렉스 컨테이너로 설정 */
+   align-items: flex-start !important; /* 임시로 추가해 테스트 */
+  
+}
 
 
 

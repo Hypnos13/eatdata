@@ -1,11 +1,16 @@
 package com.projectbob.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+
 import com.projectbob.domain.LikeList;
+
+import com.projectbob.domain.Cart;
+
 import com.projectbob.domain.Menu;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.Orders;
@@ -15,6 +20,64 @@ import com.projectbob.domain.Shop;
 
 @Mapper
 public interface BobMapper {
+	
+	// 주문페이지에서 주문완료 페이지로 보내기
+	public int insertOrder(Orders order);
+	
+	  /**
+     * 특정 장바구니 항목(caId)의 상세 정보를 조회합니다.
+     * (메뉴의 m_id와 옵션의 mo_id를 포함)
+     */
+    Cart selectCartItemDetails(Integer caId);
+
+    /**
+     * 특정 메뉴의 기본 가격을 조회합니다.
+     */
+    Integer selectMenuBasePrice(Integer mId);
+
+    /**
+     * 특정 장바구니 메인 항목(caId)에 연결된 모든 옵션들의 기본 가격 합계를 조회합니다.
+     */
+    Integer selectTotalOptionPriceForCartItem(Integer caId);
+    
+    /**
+     * 장바구니 항목의 수량을 업데이트합니다.
+    
+     */
+    int updateCartItemQuantity(Map<String, Object> params);
+
+    /**
+     * 장바구니 개별 항목과 그에 연결된 모든 옵션 항목을 삭제합니다.
+  
+     */
+    void deleteCartItemAndOptions(Map<String, Object> params);
+
+    /**
+     * 사용자 또는 비회원의 모든 장바구니 항목을 삭제합니다.
+ 
+     */
+    int deleteAllCartItemsByUserOrGuest(Map<String, Object> params);
+    
+    /**
+     * 장바구니 항목을 DB에 삽입합니다.
+     * useGeneratedKeys="true"와 keyProperty="caId" 설정으로 삽입 후 생성된 ca_id가 Cart 객체에 설정됩니다.
+ 
+     */
+    void insertCart(Cart cart);
+
+    /**
+     * 사용자 ID 또는 비회원 ID로 모든 장바구니 항목을 조회합니다.
+     * 메인 메뉴와 옵션 항목을 모두 포함합니다.
+     */
+    List<Cart> selectCartByUserOrGuest(Map<String, Object> params);
+    
+    
+    /**
+     * 사용자 ID 또는 비회원 ID로 메인 메뉴 장바구니 항목만 조회합니다.
+     * ca_pid가 NULL인 항목(즉, 메인 메뉴)만 반환합니다.
+     */
+    List<Cart> selectMainCartItemsByUserOrGuest(Map<String, Object> params);
+
 	public List<Shop> shopList(@Param("category") String category,@Param("keyword") String keyword); //shopList 페이지
 	
 	public Shop getShopDetail(int sId); // s_id를 받아 Shop 객체 반환
@@ -23,11 +86,11 @@ public interface BobMapper {
 	public List<Menu> getMenuListByShopId(int sId); 	
 	
 	// 메뉴옵션 선택하는 모달창에서 사용
-	public List<MenuOption> getMenuOptionsByMenuId(int mId);		
+	public List<MenuOption> getMenuOptionsByMenuId(@Param("mId")int mId);		
 	public List<String> getMenuCategoriesByShopId(int sId);
 	
 	// 가게 번호에 해당하는 리뷰리스트에 사용
-	//public List<Review> reviewList(int sId);
+	public List<Review> reviewList(int sId);
 	public List<Review> getReviewList(int sId);
 
 	
@@ -83,6 +146,9 @@ public interface BobMapper {
 	
 	// 주문 번호에 해당하는 주문 레코드를 DB에서 가져오기
 	public Orders selectOrderId(@Param("orderId") int orderId);
+	public Orders selectOrderByPaymentUid(@Param("paymentUid") String paymentUid);
+
+	
 
 }
 
