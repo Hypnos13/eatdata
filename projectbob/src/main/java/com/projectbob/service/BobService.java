@@ -41,8 +41,6 @@ public class BobService {
 	@Autowired
 	private BobMapper bobMapper;
 	
-<<<<<<< HEAD
-
 
 	@Autowired
 	private LoginService loginService;
@@ -307,15 +305,14 @@ public class BobService {
 		
 	  
 	
-	
-=======
+
 	@Autowired
     private ShopMapper shopMapper;
 	//가게 검색하기
 //	public List<Shop> searchList(String keyword){
 //		return bobMapper.searchList(keyword);
 //	}
->>>>>>> develop
+
 	
 	// 전체 게시글을 읽어와 반환하는 메서드
 
@@ -482,7 +479,6 @@ public class BobService {
 		bobMapper.deleteReviewReply(rrNo);
 	}
 	
-<<<<<<< HEAD
 	
 	// 결제정보 가져오기
 	
@@ -565,9 +561,7 @@ public class BobService {
 	 
 	 
 	 
-	 
-=======
->>>>>>> develop
+
 }
 
 

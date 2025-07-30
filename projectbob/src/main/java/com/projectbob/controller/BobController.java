@@ -30,10 +30,9 @@ public class BobController {
 	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	
 
-
 	@Autowired
 	private LoginService loginService;
-<<<<<<< HEAD
+
 
 
 	
@@ -72,14 +71,14 @@ public class BobController {
 	    }
 	}
 
-=======
+
 	@Autowired
     private ShopService shopService;
 	
     BobController(LoginController loginController) {
         this.loginController = loginController;
     }
->>>>>>> develop
+
 
 	@GetMapping({"/", "/main"})
 	public String Main() {		
