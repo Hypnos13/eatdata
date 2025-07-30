@@ -52,14 +52,14 @@
 			        <option th:each="h : ${#numbers.sequence(0,23)}"
 					        th:value="${#numbers.formatInteger(h, 2)}"
 					        th:text="${#numbers.formatInteger(h, 2)}"
-					        th:selected="${oH[i.index] eq #numbers.formatInteger(h, 2)}"></option>
+					        th:selected="${cH[i.index] eq #numbers.formatInteger(h, 2)}"></option>
 			      </select>
 			      <span class="time-unit">시</span>
 			      <select th:name="closeMin" class="min-select">
 			        <option th:each="m : ${#numbers.sequence(0,59,10)}"
 					        th:value="${#numbers.formatInteger(m, 2)}"
 					        th:text="${#numbers.formatInteger(m, 2)}"
-					        th:selected="${oM[i.index] eq #numbers.formatInteger(m, 2)}"></option>
+					        th:selected="${cM[i.index] eq #numbers.formatInteger(m, 2)}"></option>
 			      </select>
 			      <span class="time-unit">분</span>
 			    </div>

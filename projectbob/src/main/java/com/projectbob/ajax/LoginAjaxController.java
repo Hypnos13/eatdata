@@ -1,13 +1,20 @@
 package com.projectbob.ajax;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.projectbob.domain.CustomerService;
+import com.projectbob.domain.LikeList;
+import com.projectbob.domain.Shop;
+import com.projectbob.service.BobService;
+import com.projectbob.service.CustomerServiceService;
 import com.projectbob.service.LoginService;
 
 @RestController
@@ -15,6 +22,10 @@ public class LoginAjaxController {
 
 	@Autowired
 	LoginService loginService;
+	@Autowired
+	CustomerServiceService csService;
+	@Autowired
+	BobService bobService;
 	
 	@GetMapping("/overlapId.ajax")
 	public Map<String, Boolean> overlapId(@RequestParam("userId") String id){

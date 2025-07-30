@@ -30,7 +30,6 @@ public interface ShopMapper {
 	
 	// 영업시간/휴무 정보만 업데이트
 	void updateShopOpenTime(Shop shop);
-	Shop findByShopIdAndOwnerIdShop(@Param("sId") Integer sId, @Param("ownerId") String ownerId);
 	
 	@Update("UPDATE shop SET status = #{status} WHERE s_id = #{sId}")
 	void updateShopStatus(@Param("sId") Integer sId, @Param("status") String status);
@@ -43,7 +42,33 @@ public interface ShopMapper {
 
     int updateShopInfo(@Param("sId") Integer sId, @Param("sInfo") String sInfo);
 
+    // 리뷰 목록 (XML 의 <select id="findReviewsByShopId">)
+    List<Review> findReviewsByShopId(@Param("sId") int sId);
+    
+    // 리뷰 등록
+    void insertReview(Review review);
 
+    // 리뷰 수정
+    void updateReview(Review review);
+
+    // 리뷰 삭제
+    void deleteReview(@Param("rNo") int rNo);
+
+    // 가게 평점(average) 갱신
+    void updateShopRatingBySId(@Param("sId") int sId);
+    
+    // 답글 목록 (XML 의 <select id="findRepliesByReviewNo">)
+    List<ReviewReply> findRepliesByReviewNo(@Param("rNo") int rNo);
+    
+    // 답글 등록 (XML 의 <insert id="insertReviewReply">)
+    void insertReviewReply(ReviewReply reply);
+
+    //답글 수정
+    void updateReviewReply(ReviewReply reply);
+
+    // 답글 삭제(soft-delete)
+    void deleteReviewReply(@Param("rrNo") int rrNo);
+    
 	/* === Menu === */
 	// 메뉴 관련 메서드
     void insertMenu(Menu menu);                  // 메뉴 등록
@@ -64,5 +89,8 @@ public interface ShopMapper {
     List<Menu> getMenusByShopId(@Param("sId") int sId, @Param("category") String category);
     List<String> getMenuCategoriesByShopId(int sId); //카테고리 목록 조회를 위한 메서드 추가
 	
+    /** 특정 가게의 메뉴 개수 조회 */
+    @Select("SELECT COUNT(*) FROM menu WHERE s_id = #{sId}")
+    int countMenusByShopId(@Param("sId") int sId);
 
 }

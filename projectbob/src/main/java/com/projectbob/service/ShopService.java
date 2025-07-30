@@ -59,6 +59,10 @@ public class ShopService {
 		return shopMapper.getAllMenus();
 	}
 
+	//가게별 메뉴 수 조회
+	public int getMenuCount(int sId) {
+		return shopMapper.countMenusByShopId(sId);
+	}
 	
 	// 메뉴 리스트
 	public List<Menu> getMenusByShopId(int sId) {
@@ -311,4 +315,52 @@ public class ShopService {
         shopMapper.updateShopInfo(sId, sInfo);
     }
     
+    /** 리뷰 + 답글 함께 불러오기 */
+    public List<Review> getReviewsWithReplies(int sId) {
+        List<Review> reviews = shopMapper.findReviewsByShopId(sId);
+        for (Review r : reviews) {
+            r.getReplies().addAll(
+                shopMapper.findRepliesByReviewNo(r.getRNo())
+            );
+        }
+        return reviews;
+    }
+
+    /** 리뷰 등록 */
+    @Transactional
+    public void addReview(Review review) {
+        shopMapper.insertReview(review);              // 리뷰 등록
+        shopMapper.updateShopRatingBySId(review.getSId()); // ★ 평점 갱신
+    }
+
+    /** 리뷰 수정 */
+    @Transactional
+    public void updateReview(Review review) {
+        shopMapper.updateReview(review);              // 리뷰 수정
+        shopMapper.updateShopRatingBySId(review.getSId()); // ★ 평점 갱신
+    }
+    
+    /** 리뷰 삭제 */
+    @Transactional
+    public void deleteReview(int rNo, int sId) {
+        shopMapper.deleteReview(rNo);                 // 리뷰 삭제
+        shopMapper.updateShopRatingBySId(sId);             // ★ 평점 갱신
+    }
+
+    /** 답글 등록 */
+    public void addReply(ReviewReply reply) {
+        shopMapper.insertReviewReply(reply);
+    }
+    
+    /** 답글 수정 */
+    @Transactional
+    public void updateReply(ReviewReply reply) {
+        shopMapper.updateReviewReply(reply);
+    }
+    
+    /** 답글 삭제(soft-delete) */
+    @Transactional
+    public void deleteReply(int rrNo) {
+        shopMapper.deleteReviewReply(rrNo);
+    }
 }

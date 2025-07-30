@@ -27,7 +27,6 @@ function menuJoinFormCheck() {
 	}
 }
 
-
 function shopJoinFormCheck(isShopJoinForm) {
 	if($("#sNumber").val().length != 10 ) {
 		alert("사업자 등록번호는 10자리입니다.")
@@ -61,7 +60,6 @@ function shopJoinFormCheck(isShopJoinForm) {
 		return false;
 	}
 }
-
 
 // 카카오 우편번호 API
 function findZipcode() {
@@ -129,32 +127,107 @@ document.addEventListener('DOMContentLoaded', function() {
             this.submit(); // 정리된 값으로 폼 전송
         });
     }
+		
+		// 폰번호 포맷팅
+		const phoneNumberInput = document.getElementById('phone');
 
-});
+		    if (phoneNumberInput) { // 요소가 존재하는지 확인
+		        phoneNumberInput.addEventListener('input', function(event) {
+		            let value = event.target.value.replace(/[^0-9]/g, ''); // 숫자 이외의 문자 제거
 
-document.addEventListener('DOMContentLoaded', function() {
-    const phoneNumberInput = document.getElementById('phone');
+		            if (value.length > 11) {
+		                value = value.substring(0, 11); // 11자리 초과 시 잘라냄
+		            }
 
-    if (phoneNumberInput) { // 요소가 존재하는지 확인
-        phoneNumberInput.addEventListener('input', function(event) {
-            let value = event.target.value.replace(/[^0-9]/g, ''); // 숫자 이외의 문자 제거
+		            let formattedValue = '';
+		            if (value.length < 4) {
+		                formattedValue = value;
+		            } else if (value.length < 8) {
+		                formattedValue = value.substring(0, 3) + '-' + value.substring(3);
+		            } else {
+		                formattedValue = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7);
+		            }
 
-            if (value.length > 11) {
-                value = value.substring(0, 11); // 11자리 초과 시 잘라냄
-            }
+		            event.target.value = formattedValue;
+		        });
+		    }
+				
+		// 영양성분 검색
+		const btnSearch = document.getElementById('btnSearchNutrition');
+		const menuNameInput = document.getElementById('name');
+		const resultsList = document.getElementById('nutrition-results');
+		const selectedInfoDiv = document.getElementById('selected-nutrition-info');
 
-            let formattedValue = '';
-            if (value.length < 4) {
-                formattedValue = value;
-            } else if (value.length < 8) {
-                formattedValue = value.substring(0, 3) + '-' + value.substring(3);
-            } else {
-                formattedValue = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7);
-            }
+		if (btnSearch) {
+		    // '영양성분 검색' 버튼 클릭 이벤트
+		    btnSearch.addEventListener('click', async function() {
+		        const foodName = menuNameInput.value;
+		        if (!foodName) {
+		            alert('메뉴 이름을 먼저 입력해주세요.');
+		            return;
+		        }
 
-            event.target.value = formattedValue;
-        });
-    }
+		        try {
+		            const response = await fetch(`/api/nutrition-search?foodName=${encodeURIComponent(foodName)}`);
+		            const resultStr = await response.text();
+		            const result = JSON.parse(resultStr);
+		            
+		            resultsList.innerHTML = ''; // 이전 결과 초기화
+		            
+		            if (result.body && result.body.items && result.body.items.length > 0) {
+		                resultsList.style.display = 'block';
+		                result.body.items.forEach(item => {
+		                    const li = document.createElement('li');
+		                    li.className = 'list-group-item list-group-item-action';
+		                    li.style.cursor = 'pointer';
+		                    li.textContent = `${item.FOOD_NM_KR} (1회 제공량: ${item.SERVING_SIZE}, 열량: ${item.AMT_NUM1}kcal)`;
+		                    
+												li.dataset.servingSize = item.SERVING_SIZE.replace(/[^0-9.]/g, '');
+		                    li.dataset.calories = item.AMT_NUM1;
+		                    li.dataset.carbs = item.AMT_NUM6;
+		                    li.dataset.protein = item.AMT_NUM3;
+		                    li.dataset.fat = item.AMT_NUM4;
+												li.dataset.sfa = item.AMT_NUM24;
+												li.dataset.sugar = item.AMT_NUM7;
+		                    li.dataset.sodium = item.AMT_NUM13;
+		                    
+		                    resultsList.appendChild(li);
+		                });
+		            } else {
+		                resultsList.innerHTML = '<li class="list-group-item">검색 결과가 없습니다.</li>';
+		                resultsList.style.display = 'block';
+		            }
+		        } catch (error) {
+		            console.error('Error fetching nutrition data:', error);
+		            alert('영양 정보를 불러오는 데 실패했습니다.');
+		        }
+		    });
+		    
+		    // 검색 결과 리스트에서 항목을 클릭했을 때의 동작
+		    resultsList.addEventListener('click', function(e) {
+		        // 클릭된 요소가 LI 태그일 때만 실행
+		        if (e.target && e.target.nodeName === 'LI') {
+		            const selectedItem = e.target;
+		            const { servingSize, calories, carbs, protein, fat, sfa, sugar, sodium } = selectedItem.dataset;
+
+		            // form 안에 있는 hidden input들을 찾아서 값을 채워줍니다.
+		            document.querySelector('input[name="servingSize"]').value = servingSize || 0;
+		            document.querySelector('input[name="calories"]').value = calories || 0;
+		            document.querySelector('input[name="carbs"]').value = carbs || 0;
+		            document.querySelector('input[name="protein"]').value = protein || 0;
+		            document.querySelector('input[name="fat"]').value = fat || 0;
+								document.querySelector('input[name="sfa"]').value = sfa || 0;
+								document.querySelector('input[name="sugar"]').value = sugar || 0;
+		            document.querySelector('input[name="sodium"]').value = sodium || 0;
+		            
+		            selectedInfoDiv.textContent = `✅ ${selectedItem.textContent} 의 영양성분이 선택되었습니다.`;
+		            selectedInfoDiv.style.display = 'block';
+		            
+		            resultsList.style.display = 'none';
+		        }
+		    });
+		}
+		
 });
 
 // ---------- [출력/뷰(shopBasicView) 페이지 전용 지도 표시 코드] ----------
@@ -307,3 +380,61 @@ $(function () {
     $(this).find("select:disabled").prop("disabled", false);
   });
 });
+
+// # 리뷰 답글 “수정/삭제” 바로가기 토글 & AJAX 처리
+$(function () {
+$('.reply-box')
+  // [수정] 버튼 → 수정 모드로 전환
+  .on('click', '.btn-edit', function() {
+    const $box = $(this).closest('.reply-box');
+    $box.find('.view-mode').addClass('d-none');
+    $box.find('.edit-mode').removeClass('d-none');
+  })
+  // [취소] 버튼 → 원래 보기 모드로 복귀
+  .on('click', '.btn-cancel', function() {
+    const $box = $(this).closest('.reply-box');
+    $box.find('.edit-mode').addClass('d-none');
+    $box.find('.view-mode').removeClass('d-none');
+  })
+  // [저장] 버튼 → 서버에 수정 요청 (AJAX)
+  .on('click', '.btn-save', function(e) {
+    e.preventDefault();
+    const $box = $(this).closest('.reply-box');
+    const rrNo = $box.data('rrno');
+    const sId  = $box.data('sid');
+    const newContent = $box.find('.edit-input').val().trim();
+    if (!newContent) {
+      alert('내용을 입력해주세요.');
+      return;
+    }
+    $.post('/shop/review/reply/update', {
+      rrNo: rrNo,
+      sId: sId,
+      content: newContent
+    }).done(function() {
+      // 반영 후 UI 복구
+      $box.find('.view-mode').text(newContent);
+      $box.find('.edit-mode').addClass('d-none');
+      $box.find('.view-mode').removeClass('d-none');
+    }).fail(function() {
+      alert('수정에 실패했습니다. 다시 시도해주세요.');
+    });
+  })
+  // [삭제] 버튼 → 서버에 삭제 요청 (AJAX)
+  .on('click', '.btn-delete', function(e) {
+    e.preventDefault();
+    if (!confirm('이 답글을 삭제하시겠습니까?')) return;
+    const $box = $(this).closest('.reply-box');
+    const rrNo = $box.data('rrno');
+    const sId  = $box.data('sid');
+    $.post('/shop/review/reply/delete', {
+      rrNo: rrNo,
+      sId: sId
+    }).done(function() {
+      $box.remove();
+    }).fail(function() {
+      alert('삭제에 실패했습니다. 다시 시도해주세요.');
+    });
+  });
+});
+

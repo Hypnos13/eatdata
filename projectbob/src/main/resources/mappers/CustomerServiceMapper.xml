@@ -124,6 +124,106 @@
 	WHERE id = #{id}
 	ORDER BY reg_date ASC
 </select>
+
+<select id="getMyAddress">
+	SELECT * 
+	FROM addressbook
+	WHERE id = #{id}
+</select>
+
+<insert id="addAddress" parameterType="Addressbook">
+	INSERT INTO addressbook(id, a_name, address1, address2, reg_date, modi_date)
+	VALUES (#{id}, #{aName}, #{address1}, #{address2}, SYSDATE(), SYSDATE())
+</insert>
+
+<select id="getAddress">
+	SELECT * 
+	FROM addressbook
+	WHERE no = #{no}
+</select>
+
+<update id="updateAddress" parameterType="Addressbook">
+	UPDATE addressbook
+	SET a_name=#{aName}, address1 = #{address1}, address2 = #{address2}, modi_date = SYSDATE()
+	WHERE id = #{id}
+	AND no = #{no}
+</update>
+
+<delete id="deleteAddress">
+	DELETE FROM addressbook
+	WHERE id = #{id}
+	AND no = #{no}
+</delete>
+
+<select id="getLikeList" resultType="Shop">
+	SELECT s.*
+	from shop s, likelist l
+	where s.s_id = l.s_id
+	and l.id = #{id}
+	and l.status = 'Y'
+</select>
+
+<delete id="cancleLike">
+	DELETE FROM likelist
+	WHERE id = #{id}
+	AND s_id = #{sId}
+</delete>
+
+<update id="decreaseShopLike">
+	UPDATE shop
+	SET heart = heart - 1
+	WHERE s_id = #{sId}
+</update>
+
+<select id="couponList" resultType="coupon">
+	SELECT *
+	FROM coupon
+	<where>
+		<if test = "searchCoupon == 'id' and keyword != ''">
+			id like CONCAT('%',#{keyword},'%')
+		</if>
+		<if test = "searchCoupon == 'name' and keyword != ''">
+			name like CONCAT('%',#{keyword},'%')
+		</if>
+	</where>
+</select>
+
+<insert id="createCoupon" parameterType="coupon">
+	INSERT INTO coupon(id, name, content, dis_price, min_price, reg_date, modi_date, del_date)
+	VALUES (#{id}, #{name}, #{content}, #{disPrice}, #{minPrice}, #{regDate}, SYSDATE(), #{delDate})
+</insert>
+
+<select id="getCoupon" resultType="coupon">
+	SELECT *
+	FROM coupon
+	WHERE c_no = #{cNo}
+</select>
+
+<delete id="deleteCoupon">
+	DELETE FROM coupon
+	WHERE c_no = #{cNo}
+</delete>
+
+<update id="updateCoupon" parameterType="coupon">
+	UPDATE coupon
+	SET id = #{id}, name = #{name}, content = #{content}, dis_price = #{disPrice}, min_price = #{minPrice}, reg_date = #{regDate}, del_date = #{delDate}, modi_date = SYSDATE()
+	WHERE c_no = #{cNo}
+</update>
+
+<select id="myCoupon" resultType="coupon">
+	select * 
+	from coupon
+	where id = #{id}
+	AND SYSDATE() BETWEEN reg_date AND del_date
+</select>
+
+<select id="myReviewList" resultType="map">
+	SELECT r.*, s.name 
+	FROM review r, shop s
+	WHERE r.s_id = s.s_id 
+	AND r.id = #{id}
+</select>
+
 </mapper>	
 
 

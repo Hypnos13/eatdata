@@ -33,6 +33,12 @@ INSERT INTO client (id, pass, name, nickname, birthday, address1, address2, emai
 VALUES (
   'owner03', '1234', '강감찬', '감찬이', '19981230', '서울 관악구 관악로 3', '서울대입구역 1번출구', 'owner03@email.com', '010-1234-0003', 'owner', NOW(), NOW()
 );
+
+-- user01 손님
+INSERT INTO client (id, pass, name, nickname, birthday, address1, address2, email, phone, division, reg_date, modi_date)
+VALUES (
+  'user01', '1234', '유저', '유저저', '19990225', '강원특별자치도 속초시 골말길 5 (도문동)', '1호', 'user01@email.com', '010-7898-9878', 'client', NOW(), NOW()
+);
 select * from client;
 
 

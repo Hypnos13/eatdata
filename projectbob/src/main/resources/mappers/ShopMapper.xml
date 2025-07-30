@@ -27,11 +27,15 @@
    </resultMap>
 
 	 <!-- ===== Menu ===== -->
-    <insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
-       INSERT INTO menu(s_id, category, name, price, m_info, m_picture_url, reg_date, modi_date)
-       VALUES(#{sId}, #{category}, #{name}, #{price}, #{mInfo}, #{mPictureUrl}, SYSDATE(), SYSDATE())
-    </insert>
-
+   <insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
+      INSERT INTO menu(
+      s_id, category, name, price, m_info, m_picture_url, 
+      reg_date, modi_date, status,
+      serving_size, calories, carbs, protein, fat, sfa, sugar, sodium) 
+      VALUES(#{sId}, #{category}, #{name}, #{price}, #{mInfo}, #{mPictureUrl}, 
+      SYSDATE(), SYSDATE(), '판매중', 
+      #{servingSize}, #{calories}, #{carbs}, #{protein}, #{fat}, #{sfa}, #{sugar}, #{sodium})
+   </insert>
    
    <update id="updateMenuStatus">
     UPDATE menu
@@ -53,11 +57,24 @@
         FROM menu WHERE m_id = #{mId}
     </select>
 
-	<update id="updateMenu" parameterType="Menu">
-        UPDATE menu
-        SET category = #{category}, name = #{name}, price = #{price}, m_info = #{mInfo},
-            m_picture_url = #{mPictureUrl}, modi_date = SYSDATE()
-        WHERE m_id = #{mId}
+    <update id="updateMenu" parameterType="Menu">
+    UPDATE menu
+    SET 
+        category = #{category}, 
+        name = #{name}, 
+        price = #{price}, 
+        m_info = #{mInfo},
+        m_picture_url = #{mPictureUrl}, 
+        modi_date = SYSDATE(),
+        serving_size = #{servingSize},
+        calories = #{calories},
+        carbs = #{carbs},
+        protein = #{protein},
+        fat = #{fat},
+        sfa = #{sfa},
+        sugar = #{sugar},
+        sodium = #{sodium}
+    WHERE m_id = #{mId}
     </update>
 
 	<delete id="deleteMenu" parameterType="int">
@@ -119,9 +136,24 @@
         VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{sNumber}, #{sPictureUrl}, #{sLicenseUrl}, SYSDATE())
     </insert>
     
-	<select id="shopList" resultType="com.projectbob.domain.Shop">
-        SELECT * FROM shop
-    </select>
+	<!-- 관리 화면 첫 페이지 용 전체 가게 리스트 -->
+	<select id="shopList"
+          resultType="com.projectbob.domain.Shop">
+	    SELECT
+	      s_id,
+	      name,
+	      status,
+	      owner,
+	      phone,
+	      zipcode,
+	      address1,
+	      address2,
+	      s_number,
+	      s_pictureURL AS s_picture_url,
+	      s_licenseURL AS s_license_url,
+	      rating
+	    FROM shop
+	  </select>
 	
 	<!-- 가게정보 불러오기 -->
 
@@ -132,16 +164,52 @@
 	</select>
 	
 	<!-- 가게 유무 확인 후 보여주기 -->
-	<select id="findShopListByOwnerId" resultType="com.projectbob.domain.Shop">
-	    SELECT *
+	<select id="findShopListByOwnerId"
+          parameterType="string"
+          resultMap="shopResultMap">
+	    SELECT
+	      s_id,
+	      name,
+	      status,
+	      owner,
+	      phone,
+	      zipcode,
+	      address1,
+	      address2,
+	      s_number,
+	      s_pictureURL AS s_picture_url,
+	      s_licenseURL AS s_license_url,
+	      rating
 	    FROM shop
 	    WHERE id = #{ownerId}
 	    ORDER BY reg_date DESC
-	</select>
+	  </select>
    
 	<!-- 다수 가게에서 현재 선택한 가게고정 -->
-	<select id="findByShopIdAndOwnerId" resultType="com.projectbob.domain.Shop">
-	    SELECT * FROM shop WHERE s_id = #{sId} AND id = #{ownerId}
+	<select id="findByShopIdAndOwnerId" resultMap="shopResultMap">
+	  SELECT
+	    s_id,
+	    name,
+	    phone,
+	    zipcode,
+	    address1,
+	    address2,
+	    owner,
+	    s_number,
+	    s_pictureURL,
+	    s_licenseURL,
+	    category,
+	    info,
+	    notice,
+	    s_info,
+	    status,
+	    op_time,
+	    off_day, 
+	    reg_date,
+	    modi_date
+	  FROM shop
+	  WHERE s_id = #{sId}
+	    AND id = #{ownerId}
 	</select>
 
 	<!-- 메뉴 컨트롤러에 shop 모델 추가 -->
@@ -161,6 +229,8 @@
             s_number = #{sNumber},
             category = #{category},
             info     = #{info},
+            s_pictureURL  = #{sPictureUrl},
+	        s_licenseURL  = #{sLicenseUrl},
             modi_date= #{modiDate}
         WHERE s_id = #{sId}
     </update>
@@ -194,5 +264,114 @@
 	      modi_date = SYSDATE()
 	  WHERE s_id = #{sId}
 	</update>
+	
+	<!-- 리뷰관리 -->
+	<select id="findReviewsByShopId" resultType="com.projectbob.domain.Review">
+	    SELECT
+	        r.r_no AS rNo,
+	        r.id,
+	        r.s_id AS sId,
+	        r.m_id AS mId,
+	        r.content,
+	        r.rating,
+	        r.r_picture AS rPicture,
+	        r.liked,
+	        r.reg_date AS regDate,
+	        r.status,
+	        m.name AS menuName  <!-- 조인 추가! -->
+	    FROM review r
+	    LEFT JOIN menu m ON r.m_id = m.m_id
+	    WHERE r.s_id = #{sId}
+	      AND r.status = '일반'
+	    ORDER BY r.reg_date DESC
+	</select>
+	
+	<!-- 리뷰넘버 체크 -->
+  <select id="findRepliesByReviewNo" resultType="com.projectbob.domain.ReviewReply">
+    SELECT rr_no        AS rrNo,
+           r_no         AS rNo,
+           s_id         AS sId,
+           id,
+           content,
+           reg_date     AS regDate,
+           status
+      FROM review_reply
+     WHERE r_no = #{rNo}
+       AND status = 'active'
+     ORDER BY reg_date ASC
+  </select>
+
+  
+  <!-- 리뷰 평점 -->
+  <update id="updateShopRatingBySId" parameterType="int">
+  UPDATE shop
+  SET rating = (
+      SELECT IFNULL(ROUND(AVG(rating), 1), 0)
+      FROM review
+      WHERE s_id = #{sId} AND status = '일반'
+  )
+  WHERE s_id = #{sId}
+</update>
+
+<!-- 리뷰 등록 -->
+<insert id="insertReview" parameterType="com.projectbob.domain.Review">
+    INSERT INTO review
+        (id, s_id, m_id, content, rating, r_picture, liked, status, reg_date, modi_date)
+    VALUES
+        (#{id}, #{sId}, #{mId}, #{content}, #{rating}, #{rPicture}, #{liked}, #{status}, NOW(), NOW())
+</insert>
+
+<!-- 리뷰 수정 -->
+<update id="updateReview" parameterType="com.projectbob.domain.Review">
+    UPDATE review
+    SET content = #{content},
+        rating = #{rating},
+        r_picture = #{rPicture},
+        modi_date = NOW()
+    WHERE r_no = #{rNo}
+</update>
+
+<!-- 리뷰 삭제 -->
+<delete id="deleteReview" parameterType="int">
+    DELETE FROM review WHERE r_no = #{rNo}
+</delete>
+
+<!-- 답글 작성 -->
+<insert id="insertReviewReply" parameterType="com.projectbob.domain.ReviewReply">
+	INSERT INTO review_reply(r_no, s_id, id, content, reg_date, status)
+	VALUES(#{rNo}, #{sId}, #{id}, #{content}, SYSDATE(), 'active')
+</insert>
+
+<!-- 답글 내용 수정 -->
+<update id="updateReviewReply" parameterType="com.projectbob.domain.ReviewReply">
+  UPDATE review_reply
+  SET content   = #{content},
+      modi_date = NOW()
+  WHERE rr_no    = #{rrNo}
+    AND status   = 'active'
+</update>
+
+<!-- 답글 삭제 -->
+<delete id="deleteReviewReply" parameterType="int">
+  DELETE FROM review_reply
+  WHERE rr_no = #{rrNo}
+</delete>
+
+<resultMap id="shopResultMap" type="com.projectbob.domain.Shop">
+    <id property="sId" column="s_id"/>
+    <result property="name" column="name"/>
+    <result property="status" column="status"/>
+    <result property="owner" column="owner"/>
+    <result property="phone" column="phone"/>
+    <result property="zipcode" column="zipcode"/>
+    <result property="address1" column="address1"/>
+    <result property="address2" column="address2"/>
+    <result property="sNumber" column="s_number"/>
+    <result property="sPictureUrl" column="s_picture_url"/>
+    <result property="sLicenseUrl" column="s_license_url"/>
+    <result property="opTime" column="op_time"/>
+    <result property="offDay" column="off_day"/>
+    <result property="rating" column="rating"/>
+</resultMap>
 
 </mapper>	

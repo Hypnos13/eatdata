@@ -367,7 +367,7 @@ public class MenuAjaxController {
 	@DeleteMapping("/reviewDelete.ajax")
 	public Map<String, Object> deleteReview(@RequestParam("rNo") int rNo,
 			@RequestParam("sId")int sId){
-		bobService.deleteReview(rNo);
+		bobService.deleteReview(rNo, sId);
 		
 		Map<String, Object> result = new HashMap<>();
 		result.put("reviewList", bobService.getReviewList(sId));

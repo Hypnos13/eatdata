@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/shop_layout}"> <th:block layout:fragment="content">
+      layout:decorate="~{layouts/shop_layout}">
+<th:block layout:fragment="content">
 
     <div class="row my-5" id="global-content">
         <div class="col">
@@ -17,35 +18,80 @@
                 <span th:text="${message}"></span>
             </div>
 
-            <!-- <div class="row my-3">
-            	<div class="col-8 offset-2">
-            		<label for="menuSelect" class="form-label">* 수정할 메뉴 선택 : </label>
-            		<select id="menuSelect" class="form-select" th:data-s-id="${sId}">
-            		<option value="">-- 메뉴를 선택하세요 --</option>
-            		<option th:each="menuItem : ${menuList}"
-            						th:value="${menuItem.mId}"
-                    		th:text="${menuItem.name}"
-                    		th:selected="${menu != null and menuItem.mId == menu.mId}"></option>
-                </select>
-              </div>
-            </div> -->
             <div id="initialMenuDataJson" th:data-menu-json="${menuJson}" style="display:none;"></div>
             <form action="/shop/updateMenu" name="menuUpdateForm" method="post" id="menuUpdateForm"
                   enctype="multipart/form-data" th:object="${menu}">
                 <input type="hidden" name="mId" id="mId" th:field="*{mId}"/>
                 <input type="hidden" name="sId" id="sId" th:field="*{sId}" />
+
                 <div class="row my-3">
                     <div class="col-8 offset-2">
                         <label for="category" class="form-label">* 카테고리 : </label>
                         <input type="text" class="form-control" name="category" id="category" th:field="*{category}" required>
                     </div>
                 </div>
+
                 <div class="row my-3">
                     <div class="col-8 offset-2">
                         <label for="name" class="form-label">* 메뉴 이름 : </label>
-                        <input type="text" class="form-control" name="name" id="name" th:field="*{name}" required>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="name" id="name" th:field="*{name}" required>
+                            <button type="button" class="btn btn-info" id="btnSearchNutrition">영양성분 검색</button>
+                        </div>
                     </div>
                 </div>
+
+                <div class="row my-3">
+                    <div class="col-8 offset-2">
+                        <ul class="list-group" id="nutrition-results" style="display: none;"></ul>
+                        <div id="selected-nutrition-info" class="mt-2 p-2 border rounded bg-light" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="row my-3">
+                    <div class="col-8 offset-2">
+                        <label class="form-label">영양 정보 (자동 입력)</label>
+                        <div class="p-3 bg-light border rounded">
+                            <div class="row mb-2">
+                                <div class="col-md-3">
+                                    <label for="servingSize" class="form-label small">1회 제공량(g)</label>
+                                    <input type="text" class="form-control" th:field="*{servingSize}" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="calories" class="form-label small">열량(kcal)</label>
+                                    <input type="text" class="form-control" th:field="*{calories}" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="carbs" class="form-label small">탄수화물(g)</label>
+                                    <input type="text" class="form-control" th:field="*{carbs}" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="protein" class="form-label small">단백질(g)</label>
+                                    <input type="text" class="form-control" th:field="*{protein}" readonly>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="fat" class="form-label small">지방(g)</label>
+                                    <input type="text" class="form-control" th:field="*{fat}" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="sfa" class="form-label small">포화지방산(g)</label>
+                                    <input type="text" class="form-control" th:field="*{sfa}" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="sugar" class="form-label small">당류(g)</label>
+                                    <input type="text" class="form-control" th:field="*{sugar}" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="sodium" class="form-label small">나트륨(mg)</label>
+                                    <input type="text" class="form-control" th:field="*{sodium}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row my-3">
                     <div class="col-8 offset-2">
                         <label for="price" class="form-label">* 가격 : </label>
@@ -62,8 +108,7 @@
                     <div class="col-8 offset-2">
                         <label for="mPictureInput">* 메뉴 사진 : </label>
                         <div th:if="${menu != null and menu.mPictureUrl != null}" class="mb-2" id="currentPictureDisplay">
-                            <img id="currentMenuPicture" th:src="${menu.mPictureUrl}" alt="현재 메뉴 사진"
-                                 style="max-width: 200px; height: auto;">
+                            <img id="currentMenuPicture" th:src="${menu.mPictureUrl}" alt="현재 메뉴 사진" style="max-width: 200px; height: auto;">
                             <p class="mt-1">현재 사진: <span th:text="${menu.mPictureUrl}"></span></p>
                         </div>
                         <input type="file" id="mPictureInput" name="mPicture" class="form-control">
@@ -75,14 +120,7 @@
                     <div class="col-8 offset-2">
                         <label class="form-label">메뉴 옵션:</label>
                         <div id="menuOptionsContainer">
-                            <div class="input-group mb-2 menu-option-item" th:each="option, stat : *{options}">
-                                <input type="hidden" th:field="*{options[__${stat.index}__].moId}" />
-                                <input type="text" th:field="*{options[__${stat.index}__].mOption}" class="form-control" placeholder="옵션 이름 (예: 사이즈)" required/>
-                                <input type="text" th:field="*{options[__${stat.index}__].content}" class="form-control" placeholder="옵션 내용 (예: Large)" required/>
-                                <input type="number" th:field="*{options[__${stat.index}__].price}" class="form-control" placeholder="가격" />
-                                <input type="hidden" th:field="*{options[__${stat.index}__].status}" /> <button type="button" class="btn btn-outline-danger remove-option-btn">삭제</button>
                             </div>
-                        </div>
                         <button type="button" class="btn btn-success mt-2" id="addOptionBtn">옵션 추가</button>
                     </div>
                 </div>
@@ -90,13 +128,11 @@
                 <div class="row mb-3 mt-5">
                     <div class="col-8 offset-2">
                         <input type="submit" value="메뉴 정보 수정하기" class="btn btn-primary"/>
-                        &nbsp;&nbsp;
                         <a th:href="@{|/shop/menuList?s_id=${sId}|}" class="btn btn-secondary">목록으로</a>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-  
 </th:block>
 </html>

@@ -23,5 +23,14 @@ public class Menu {
 	private String status;
 
 	private List<MenuOption> options;
+	
+	private Double calories;
+    private Double carbs;
+    private Double protein;
+    private Double fat;
+    private Double sfa;
+    private Double sugar;
+    private Double sodium;
+    private Integer servingSize;
 
 }

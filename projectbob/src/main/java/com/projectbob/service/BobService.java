@@ -28,6 +28,7 @@ import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 import com.projectbob.domain.NewOrder;
 import com.projectbob.mapper.BobMapper;
+import com.projectbob.mapper.ShopMapper;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ public class BobService {
 	@Autowired
 	private BobMapper bobMapper;
 	
+<<<<<<< HEAD
 
 
 	@Autowired
@@ -306,6 +308,14 @@ public class BobService {
 	  
 	
 	
+=======
+	@Autowired
+    private ShopMapper shopMapper;
+	//가게 검색하기
+//	public List<Shop> searchList(String keyword){
+//		return bobMapper.searchList(keyword);
+//	}
+>>>>>>> develop
 	
 	// 전체 게시글을 읽어와 반환하는 메서드
 
@@ -416,18 +426,24 @@ public class BobService {
 	
 
 	// 댓글 등록하는 메서드
+	@Transactional
 	public void addReview(Review review) {
 		bobMapper.addReview(review);
+		shopMapper.updateShopRatingBySId(review.getSId());
 	}
 	
 	//댓글 수정하는 메서드
+	@Transactional
 	public void updateReview(Review review) {
 		bobMapper.updateReview(review);
+		shopMapper.updateShopRatingBySId(review.getSId());
 	}
 	
 	//댓글 삭제하는 메서드
-	public void deleteReview(int rNo) {
+	@Transactional
+	public void deleteReview(int rNo, int sId) {
 		bobMapper.deleteReview(rNo);
+		shopMapper.updateShopRatingBySId(sId);
 	}
 	
 	// 대댓글 리스트
@@ -466,6 +482,7 @@ public class BobService {
 		bobMapper.deleteReviewReply(rrNo);
 	}
 	
+<<<<<<< HEAD
 	
 	// 결제정보 가져오기
 	
@@ -549,6 +566,8 @@ public class BobService {
 	 
 	 
 	 
+=======
+>>>>>>> develop
 }
 
 

@@ -1,10 +1,16 @@
 package com.projectbob.controller;
 
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.http.*;
 
 import java.util.*;
 import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,7 +18,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
 
@@ -27,8 +32,56 @@ public class ShopController {
 	private ShopService shopService;
 	
 	@Autowired
+    private BobService bobService;
+	
+	@Autowired
 	private FileUploadService fileUploadService;
 	
+	// 식품영양성분DB API 검색
+	@GetMapping("/api/nutrition-search")
+	@ResponseBody
+	public ResponseEntity<?> searchNutritionData(@RequestParam("foodName") String foodName) {
+	    String serviceKey = "25HM7lP49D4X9CnOWL0S6Ec9UnBOQh5/T5rfLzXtv7qn0Wzg+grCn9czsAmSwvR1rjdFDY8h3GxkPLoSZeuglA==";
+	    
+	    // ✨ 1. 최종적으로 확인된, 가장 단순한 형태의 실제 서비스 URL
+	    String apiUrl = "https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02/getFoodNtrCpntDbInq02";
+
+	    try {
+	        String encodedServiceKey = URLEncoder.encode(serviceKey, StandardCharsets.UTF_8);
+	        String encodedFoodName = URLEncoder.encode(foodName, StandardCharsets.UTF_8);
+
+	        // ✨ 2. 검색 파라미터 이름을 'desc_kor'에서 'FOOD_NM_KR'로 변경
+	        String finalUrlString = apiUrl
+	                        + "?serviceKey=" + encodedServiceKey
+	                        + "&FOOD_NM_KR=" + encodedFoodName // ✨ 파라미터 이름 수정
+	                        + "&pageNo=1"
+	                        + "&numOfRows=20"
+	                        + "&type=json";
+
+	        log.info("▶▶▶ 최종 요청 URL: {}", finalUrlString);
+	        
+	        HttpClient client = HttpClient.newHttpClient();
+	        HttpRequest request = HttpRequest.newBuilder()
+	                .uri(new URI(finalUrlString))
+	                .GET()
+	                .build();
+
+	        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+	        
+	        log.info("◀◀◀ API 응답: {}", response.body());
+
+	        HttpHeaders responseHeaders = new HttpHeaders();
+	        responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+	        return new ResponseEntity<>(response.body(), responseHeaders, HttpStatus.OK);
+
+	    } catch (Exception e) {
+	        log.error("!!! 식약처 API 호출 오류", e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body("{\"error\":\"API 호출 중 오류 발생\"}");
+	    }
+	}
+	
+	// 입점 신청
 	@PostMapping("/insertShop")
 	public String insertShop( @RequestParam("id") String id,
 			@RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 
@@ -181,32 +234,98 @@ public class ShopController {
         return "shop/shopBasicSet";
     }
 	
-	//기본정보 수정 로직
+ // 기본정보 수정 로직
     @PostMapping("/shop/updateBasic")
-    public String updateBasicInfo(@ModelAttribute Shop shop) {
+    public String updateBasicInfo(
+            @SessionAttribute(name="loginId", required=false) String loginId,
+            @ModelAttribute Shop shop,
+            @RequestParam(value="sPicture", required=false) MultipartFile sPictureFile,
+            @RequestParam(value="sLicense", required=false) MultipartFile sLicenseFile,
+            Model model) throws IOException {
+
+        // 0) 로그인 체크
+        if (loginId == null) {
+            return "redirect:/login";
+        }
+
+        // 1) 기존 Shop 조회 (소유권 검증 포함)
+        Shop existing = shopService.findByShopIdAndOwnerId(shop.getSId(), loginId);
+        if (existing == null) {
+            model.addAttribute("errorMessage", "가게 정보를 찾을 수 없습니다.");
+            return "shop/shopBasicSet";
+        }
+
+        // 2) 파일 업로드 처리 & 기존 URL 복원
+        try {
+            // 가게 사진
+            if (sPictureFile != null && !sPictureFile.isEmpty()) {
+                String picUrl = fileUploadService.uploadFile(sPictureFile, "shop");
+                shop.setSPictureUrl(picUrl);
+            } else {
+                // 업로드 없으면 기존 URL 유지
+                shop.setSPictureUrl(existing.getSPictureUrl());
+            }
+            // 사업자등록증
+            if (sLicenseFile != null && !sLicenseFile.isEmpty()) {
+                String licUrl = fileUploadService.uploadFile(sLicenseFile, "business-licenses");
+                shop.setSLicenseUrl(licUrl);
+            } else {
+                shop.setSLicenseUrl(existing.getSLicenseUrl());
+            }
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "shop/shopBasicSet";
+        }
+
+        // 3) 수정 일시 세팅
         shop.setModiDate(new Timestamp(System.currentTimeMillis()));
+
+        // 4) DB 업데이트
         shopService.updateShopBasicInfo(shop);
+
+        // 5) 리다이렉트
         return "redirect:/shopBasicView?s_id=" + shop.getSId();
     }
 	
     /* ----------------------- 내 가게 리스트 ----------------------- */
     @GetMapping("/shopListMain")
-    public String shopListMain(Model model,
-                               @SessionAttribute(name = "loginId", required = false) String loginId,
-                               @RequestParam(value = "s_id", required = false) Integer sId,
-                               HttpSession session) {
-        if (loginId == null) return "redirect:/login";
+    public String shopListMain(
+            Model model,
+            @SessionAttribute(name = "loginId", required = false) String loginId,
+            @RequestParam(value = "s_id", required = false) Integer sId,
+            HttpSession session) {
 
+        // 0) 로그인 체크
+        if (loginId == null) {
+            return "redirect:/login";
+        }
+
+        // 1) 사장님이 가진 가게 목록 조회
         List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
-        if (shopListMain.isEmpty()) return "shop/shopInfo";
+        if (shopListMain.isEmpty()) {
+            return "shop/shopInfo";
+        }
 
+        // 2) currentShop 결정 (세션 또는 파라미터 기반)
         Shop currentShop = resolveCurrentShop(sId, loginId, session, shopListMain);
 
-        model.addAttribute("shopListMain", shopListMain);
-        model.addAttribute("shop", currentShop);
-        model.addAttribute("currentShop", currentShop);
+        // 3) 메뉴 개수 맵 생성
+        Map<Integer, Integer> menuCountMap = new HashMap<>();
+        for (Shop shop : shopListMain) {
+            menuCountMap.put(
+                shop.getSId(),
+                shopService.getMenuCount(shop.getSId())
+            );
+        }
+
+        // 4) 모델에 담기
+        model.addAttribute("shopListMain",  shopListMain);
+        model.addAttribute("currentShop",   currentShop);
+        model.addAttribute("menuCountMap",  menuCountMap);
+
         return "shop/shopListMain";
     }
+
 	
     /* ----------------------- 영업 상태 ----------------------- */
     @PostMapping("/shop/updateStatus")
@@ -222,21 +341,19 @@ public class ShopController {
 	
     /* ----------------------- 영업시간 ----------------------- */
     @GetMapping("/shopOpenTime")
-    public String shopOpenTime(@RequestParam(value = "s_id", required = false) Integer sId,
-                               @SessionAttribute(name = "loginId", required = false) String loginId,
-                               HttpSession session,
-                               @ModelAttribute("message") String message,
-                               Model model) {
+    public String shopOpenTime(
+    		@SessionAttribute(name="loginId", required=false) String loginId,
+            @ModelAttribute("message") String message,
+            @ModelAttribute("currentShop") Shop shop,
+            Model model) {
 
-        if (loginId == null) return "redirect:/login";
-        List<Shop> shopList = shopService.findShopListByOwnerId(loginId);
-        Shop shop = resolveCurrentShop(sId, loginId, session, shopList);
+    	if (loginId == null) 
+            return "redirect:/login";
         if (shop == null) {
             model.addAttribute("message", "가게를 찾을 수 없습니다.");
             return "shop/errorPage";
         }
 
-        // raw
         List<String[]> raw = shopService.getOpenTimeList(shop);
         while (raw.size() < 7) raw.add(new String[]{"-", ""});
 
@@ -261,8 +378,8 @@ public class ShopController {
             }
         }
 
-        model.addAttribute("daysOfWeek", Arrays.asList("월", "화", "수", "목", "금", "토", "일"));
         model.addAttribute("shop", shop);
+        model.addAttribute("daysOfWeek", Arrays.asList("월", "화", "수", "목", "금", "토", "일"));
         model.addAttribute("oH", oH);
         model.addAttribute("oM", oM);
         model.addAttribute("cH", cH);
@@ -275,33 +392,33 @@ public class ShopController {
 
 	// 영업시간 업데이트
     @PostMapping("/shopOpenTimeUpdate")
-    public String shopOpenTimeUpdate(@RequestParam(value = "s_id", required = false) Integer sId,
-                                     @RequestParam("openHour") String[] openHour,
-                                     @RequestParam("openMin") String[] openMin,
-                                     @RequestParam("closeHour") String[] closeHour,
-                                     @RequestParam("closeMin") String[] closeMin,
-                                     @RequestParam MultiValueMap<String, String> isOpenMap,
-                                     @SessionAttribute(name = "loginId", required = false) String loginId,
-                                     HttpSession session,
-                                     RedirectAttributes redirectAttributes) {
+    public String shopOpenTimeUpdate(
+            @ModelAttribute("currentShop") Shop shop,
+            @RequestParam("openHour") String[] openHour,
+            @RequestParam("openMin")  String[] openMin,
+            @RequestParam("closeHour") String[] closeHour,
+            @RequestParam("closeMin")  String[] closeMin,
+            @RequestParam MultiValueMap<String,String> isOpenMap,
+            @SessionAttribute(name="loginId", required=false) String loginId,
+            RedirectAttributes ra) {
 
-        if (loginId == null) return "redirect:/login";
-        if (sId == null) {
-            sId = (Integer) session.getAttribute("currentSId");
+        if (loginId == null) {
+            return "redirect:/login";
+        }
+        if (shop == null) {
+            ra.addFlashAttribute("message", "가게를 찾을 수 없습니다.");
+            return "redirect:/shopOpenTime";
         }
 
-        log.info("len openHour={}, openMin={}, closeHour={}, closeMin={}",
-                openHour.length, openMin.length, closeHour.length, closeMin.length);
-
+        // offDay, opTime 문자열 조립
         StringBuilder offDay = new StringBuilder();
         StringBuilder opTime = new StringBuilder();
-
         for (int i = 0; i < 7; i++) {
-            List<String> vals = isOpenMap.get("isOpen[" + i + "]");
-            String flag = (vals != null && !vals.isEmpty()) ? vals.get(vals.size() - 1) : "0";
-            boolean closed = !"1".equals(flag);
-
-            if (closed) {
+            String flag = Optional.ofNullable(isOpenMap.get("isOpen[" + i + "]"))
+                                  .filter(l -> !l.isEmpty())
+                                  .map(l -> l.get(l.size()-1))
+                                  .orElse("0");
+            if (!"1".equals(flag)) {
                 offDay.append(i).append(',');
                 opTime.append("-,").append("-;");
             } else {
@@ -309,32 +426,28 @@ public class ShopController {
                 String om = val(openMin, i, "");
                 String ch = val(closeHour, i, "");
                 String cm = val(closeMin, i, "");
-
                 if (oh.isBlank() || om.isBlank() || ch.isBlank() || cm.isBlank()) {
                     offDay.append(i).append(',');
                     opTime.append("-,").append("-;");
                 } else {
-                    opTime.append(oh).append(':').append(om).append(',')
-                          .append(ch).append(':').append(cm).append(';');
+                    opTime.append(oh).append(':').append(om)
+                          .append(',').append(ch).append(':').append(cm)
+                          .append(';');
                 }
             }
         }
+        if (offDay.length()>0) offDay.setLength(offDay.length()-1);
+        if (opTime.length()>0) opTime.setLength(opTime.length()-1);
 
-        if (opTime.length() > 0) opTime.setLength(opTime.length() - 1);
-        if (offDay.length() > 0) offDay.setLength(offDay.length() - 1);
-
-        Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
-        if (shop == null) {
-            redirectAttributes.addFlashAttribute("message", "가게를 찾을 수 없습니다.");
-            return "redirect:/shopOpenTime?s_id=" + sId;
-        }
-        shop.setOpTime(opTime.toString());
+        // Shop 엔티티에 반영 후 저장
         shop.setOffDay(offDay.toString());
+        shop.setOpTime(opTime.toString());
         shopService.updateShopOpenTime(shop);
 
-        redirectAttributes.addFlashAttribute("message", "영업시간 정보가 저장되었습니다.");
-        return "redirect:/shopOpenTime?s_id=" + sId;
+        ra.addFlashAttribute("message", "영업시간 정보가 저장되었습니다.");
+        return "redirect:/shopOpenTime?s_id=" + shop.getSId();
     }
+
 	
     /** 배열 방어 */
     private String val(String[] arr, int idx, String def) {
@@ -373,19 +486,17 @@ public class ShopController {
 	// ── 사장님 공지 보기 ─────────────────────────────
     @GetMapping("/shopNotice")
     public String showNotice(
-            @RequestParam("s_id") Integer sId,
-            @SessionAttribute(name = "loginId", required = false) String loginId,
-            HttpSession session,
+    		@ModelAttribute("currentShop") Shop shop,
+            @SessionAttribute(name="loginId", required=false) String loginId,
             Model model) {
-        if (loginId == null) {
+
+    	if (loginId == null) 
             return "redirect:/login";
-        }
-        // 소유권 체크
-        Shop shop = shopService.findByShopIdAndOwnerId(sId, loginId);
         if (shop == null) {
             model.addAttribute("errorMessage", "권한이 없거나 가게를 찾을 수 없습니다.");
             return "shop/errorPage";
         }
+        
         model.addAttribute("shop", shop);
         return "shop/shopNotice";
     }
@@ -421,7 +532,103 @@ public class ShopController {
 
         return "redirect:/shopNotice?s_id=" + sId;
     }
+    
+	// 리뷰 관리 화면
+	@GetMapping("/shop/reviewManage")
+	public String shopReviewManage(
+	        @SessionAttribute(name="loginId", required=false) String loginId,
+	        @RequestParam("s_id") Integer sId,
+	        HttpSession session,
+	        Model model) {
+	
+	    if (loginId == null) {
+	        return "redirect:/login";
+	    }
+	
+	    // 1) 사장님이 가진 가게 목록 조회
+	    List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+	    if (shopListMain.isEmpty()) {
+	        // 가게가 하나도 없으면 기본 페이지로
+	        return "redirect:/shopInfo";
+	    }
+	
+	    // 2) currentShop 결정 (세션 or 파라미터 기반)
+	    Shop currentShop = resolveCurrentShop(sId, loginId, session, shopListMain);
+	    if (currentShop == null) {
+	        return "redirect:/shopMain";
+	    }
+	
+	    // 3) 리뷰+답글 조회
+	    List<Review> reviews = shopService.getReviewsWithReplies(currentShop.getSId());
+	
+	    // 4) 모델에 담기 (사이드바용 shopListMain/currentShop, 뷰용 shop/reviews)
+	    model.addAttribute("shopListMain", shopListMain);
+	    model.addAttribute("currentShop", currentShop);
+	    model.addAttribute("shop", currentShop);
+	    model.addAttribute("reviews", reviews);
+	
+	    return "shop/shopReviewManage";
+	}
+	
+	// 리뷰 등록 
+	@PostMapping("/review/add")
+	public String addReview(@ModelAttribute Review review, RedirectAttributes ra) {
+	    review.setStatus("일반");
+	    bobService.addReview(review);
+	    ra.addFlashAttribute("msg", "리뷰가 등록되었습니다.");
+	    return "redirect:/shop/reviewManage?s_id=" + review.getSId();
+	}
+	 
+	// ② 답글 등록 처리
+	@PostMapping("/shop/review/reply")
+	public String postReviewReply(
+	        @SessionAttribute(name="loginId") String loginId,
+	        @ModelAttribute ReviewReply reply,
+	        RedirectAttributes ra) {
+	
+	    // 로그인 체크
+	    if (loginId == null) {
+	        return "redirect:/login";
+	    }
+	
+	    // 소유권 검증
+	    Shop shop = shopService.findByShopIdAndOwnerId(reply.getSId(), loginId);
+	    if (shop == null) {
+	        ra.addFlashAttribute("error", "권한이 없습니다.");
+	        return "redirect:/shopMain";
+	    }
+	
+	    // 답글 작성자 세팅
+	    reply.setId(loginId);
+	    shopService.addReply(reply);
+	
+	    ra.addFlashAttribute("msg", "답글이 등록되었습니다.");
+	    return "redirect:/shop/reviewManage?s_id=" + reply.getSId();
+	}
+	
+	// 답글 수정 처리
+	@PostMapping("/shop/review/reply/update")
+    public String updateReviewReply(
+            @ModelAttribute ReviewReply reply,
+            RedirectAttributes ra) {
+        shopService.updateReply(reply);
+        ra.addFlashAttribute("msg", "답글이 수정되었습니다.");
+        // 수정 후 다시 관리 페이지로
+        return "redirect:/shop/reviewManage?s_id=" + reply.getSId();
+    }
 
+    // 답글 삭제 처리 
+	@PostMapping("/shop/review/reply/delete")
+    public String deleteReviewReply(
+            @RequestParam("rrNo") int rrNo,
+            @RequestParam("sId") int sId,
+            RedirectAttributes ra) {
+        shopService.deleteReply(rrNo);
+        ra.addFlashAttribute("msg", "답글이 삭제되었습니다.");
+        return "redirect:/shop/reviewManage?s_id=" + sId;
+    }
+
+ 
 	/* ----------------------- 전역 타이틀 ----------------------- */
     @ControllerAdvice
     public static class GlobalModelAdvice {
@@ -433,7 +640,8 @@ public class ShopController {
             else if (uri.contains("shopOpenTime")) pageTitle = "영업시간";
             else if (uri.contains("shopStatus")) pageTitle = "영업상태";
             else if (uri.contains("menu")) pageTitle = "메뉴관리";
-            else if (uri.contains("shopNotice")) pageTitle = "사장님 공지";
+            else if (uri.contains("shopNotice")) pageTitle = "가게 공지";
+            else if (uri.contains("reviewManage")) pageTitle = "리뷰 관리";
 
             model.addAttribute("pageTitle", pageTitle);
         }

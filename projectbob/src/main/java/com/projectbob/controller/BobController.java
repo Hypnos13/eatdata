@@ -33,6 +33,7 @@ public class BobController {
 
 	@Autowired
 	private LoginService loginService;
+<<<<<<< HEAD
 
 
 	
@@ -71,6 +72,14 @@ public class BobController {
 	    }
 	}
 
+=======
+	@Autowired
+    private ShopService shopService;
+	
+    BobController(LoginController loginController) {
+        this.loginController = loginController;
+    }
+>>>>>>> develop
 
 	@GetMapping({"/", "/main"})
 	public String Main() {		
@@ -189,6 +198,9 @@ public class BobController {
 		  log.info("장바구니 총 수량: {}, 총액: {}", totalQuantity, totalPrice); 
 		 
 		  
+		 List<String> openLines = shopService.buildOpenTextLines(shop);
+         model.addAttribute("openLines", openLines);
+		 
 		  return "views/MenuDetail"; 
 		  }
 		  
