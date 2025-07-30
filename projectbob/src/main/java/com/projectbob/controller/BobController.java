@@ -29,18 +29,9 @@ public class BobController {
 	@Autowired
 	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	
-<<<<<<< HEAD
-=======
-
->>>>>>> hong
-
 	@Autowired
 	private LoginService loginService;
 
-<<<<<<< HEAD
-=======
-
->>>>>>> hong
 	
 	@PostMapping("/getAddress")
 	public ResponseEntity<Map<String, Object>> getAddresses(HttpSession session) {
@@ -76,10 +67,7 @@ public class BobController {
 	        return ResponseEntity.internalServerError().body(responseBody);
 	    }
 	}
-<<<<<<< HEAD
-=======
 
->>>>>>> hong
 
 	@GetMapping({"/", "/main"})
 	public String Main() {		
@@ -151,6 +139,15 @@ public class BobController {
 		  List<Review> reviewList = bobService.getReviewList(sId);
 		  model.addAttribute("reviewList", reviewList);
 		  
+		  Map<Integer, Menu> menuCalMap = new HashMap<>();
+		  for (Menu menu : menuList) {
+		      Menu menuCal = bobService.getMenuCal(menu.getMId());
+		      if (menuCal != null) {
+		    	  menuCalMap.put(menu.getMId(), menuCal);
+		      }
+		  }
+		  model.addAttribute("menuCalMap", menuCalMap);
+		  
 		  // 회원 정보 세팅
 		  String loginId = (String) session.getAttribute("loginId");
 		  Member member = null;
@@ -209,48 +206,6 @@ public class BobController {
 		  }
 		  
 		  
-
-
-		  // menudetail 에서 pay로 
-		  /*
-		  @PostMapping("/pay")		  
-		  public String payPage(
-				  @RequestParam("menuId") Long menuId,
-				  @RequestParam("count") int count,
-				  @RequestParam("optionIds") String optionIds,
-				  @RequestParam("totalPrice") int totalPrice,
-				  HttpSession session,
-				  Model model) {
-			  System.out.println("menuId=" + menuId + " count=" + count + " optionIds=" + optionIds + " totalPrice=" + totalPrice);
-			  model.addAttribute("menuId", menuId);
-			  model.addAttribute("count", count);
-			  model.addAttribute("optionIds", optionIds);
-			  model.addAttribute("totalPrice", totalPrice);
-			  
-			  String loginId = (String) session.getAttribute("loginId");
-			  if(loginId != null) {
-				  Member member = loginService.getMember(loginId);
-				  model.addAttribute("member", member);
-			  }
-			  
-			  return "views/pay";			  
-		  }
-		  */
-		  
-			/*
-			 * @PostMapping("/pay") public String doPayment(@ModelAttribute NewOrder form,
-			 * HttpSession session,Model model) {
-			 * 
-			 * int orderId = bobService.createOrder(form);
-			 * WebsocketService.sendNewOrder(form.getShopId(), form.getOrderId());
-			 * 
-			 * model.addAttribute("orderId", orderId); model.addAttribute("shopId",
-			 * form.getShopId());
-			 * 
-			 * return "views/ordercheckout"; }
-			 * 
-			 * @GetMapping("/end") public String completed() { return "views/completed"; }
-			 */
 	
 		  
 		  //데이터저장용  임시방편

@@ -40,17 +40,14 @@ public class Cart {
 	    
 	    private Integer unitPrice;
 
-	    // DB 컬럼에는 직접 매핑되지 않지만, 조회 시 조인하여 가져오거나
-	    // 클라이언트와의 통신(DTO)을 위해 필요한 필드들
-	    private String menuName; // 메뉴 이름 (조회 시 사용)
-	    private Integer menuPrice; // 메뉴 기본 가격 (조회 시 사용)
-	    private String optionName; // 메뉴 옵션 이름 (조회 시 사용)
-	    private Integer optionPrice; // 메뉴 옵션 가격 (조회 시 사용)
-	    
+	 
+	    private String menuName; 
+	    private Integer menuPrice; 
+	    private String optionName; 
+	    private Integer optionPrice; 
+	    private String optionGroupName; 
 	    private Integer itemGroupTotalPrice;
-	    
-	    // 클라이언트로부터 여러 옵션 ID와 가격을 받을 때 사용되는 임시 필드 (DB 컬럼 아님)
-	    // 장바구니 추가 요청 시 JSON 본문에서 이 리스트들을 파싱하여 사용합니다.
+
 	    private List<Integer> moIds;
 	    private List<Integer> optionPrices;
 

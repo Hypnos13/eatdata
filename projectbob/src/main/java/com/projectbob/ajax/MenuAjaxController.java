@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.projectbob.domain.LikeList;
+import com.projectbob.domain.Menu;
+
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.projectbob.domain.Cart;
@@ -75,7 +77,18 @@ public class MenuAjaxController {
         try {
             // BobService의 공통 메서드 활용
             CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
-
+            
+            List<Cart> cartList = cartSummary.getCartList();
+            System.out.println("=== 장바구니 목록 ===");
+            for (Cart item : cartList) {
+                System.out.println("메뉴명: " + item.getMenuName());
+                System.out.println("수량: " + item.getQuantity());
+                System.out.println("가격: " + item.getTotalPrice());
+                System.out.println("옵션명: " + item.getOptionName());
+                System.out.println("---------------------");
+            }
+            
+            
             response.put("success", true);
             response.put("message", "장바구니 로드 성공");
             response.put("cartList", cartSummary.getCartList());
@@ -104,8 +117,8 @@ public class MenuAjaxController {
 	        Map<String, Object> result = new HashMap<>();
 
 	        try {
-	        	String userId = null; // <- 이 부분이 반드시 있어야 합니다!
-	            String guestId = null; // <- 이 부분도 마찬가지
+	        	String userId = null; 
+	            String guestId = null; 
 
 	            if (!cartItems.isEmpty()) {
 	                userId = cartItems.get(0).getId();
@@ -130,7 +143,7 @@ public class MenuAjaxController {
 	            System.out.println("Cart items processed and added to DB.");
 
 	            // Get CartSummaryDto directly
-	            CartSummaryDto cartSummary = bobService.getCartByUser(userId, guestId); // Use the DTO returning method
+	            CartSummaryDto cartSummary = bobService.getCartByUser(userId, guestId);
 
 	            List<Cart> updatedCartList = cartSummary.getCartList();
 	            int totalPrice = cartSummary.getTotalPrice();
@@ -264,11 +277,12 @@ public class MenuAjaxController {
 	 
 	
 	// 메뉴 옵션 목록
-	@GetMapping("/ajax/menu/options")
-	public List<MenuOption> getMenuOptions(@RequestParam("mId") int mId ){
-		//log.info("MenuAjaxController: getMenuOptions() called, mId={}", mId);
-		return bobService.getMenuOptionsByMenuId(mId);
-	}
+    @GetMapping("/ajax/menu/options")
+    public List<MenuOption> getMenuOptions(@RequestParam("mId") int mId ){
+        List<MenuOption> options = bobService.getMenuOptionsByMenuId(mId);
+        System.out.println("options: " + options);
+        return options;
+    }
 	
 	// 리뷰 탭 하트
 	@PostMapping("/heart.ajax")

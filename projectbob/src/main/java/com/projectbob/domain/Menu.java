@@ -1,5 +1,6 @@
 package com.projectbob.domain;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 
@@ -23,5 +24,14 @@ public class Menu {
 	private String status;
 
 	private List<MenuOption> options;
+	
+	 private BigDecimal calories; // 열량
+	 private BigDecimal carbs;    // 탄수화물
+	 private BigDecimal protein;  // 단백질
+	 private BigDecimal fat;      // 지방
+	 private BigDecimal sfa;      // 포화지방
+	 private BigDecimal sugar;    // 당
+	 private BigDecimal sodium;   // 나트륨
+	 private BigDecimal servingSize; // 제공량
 
 }

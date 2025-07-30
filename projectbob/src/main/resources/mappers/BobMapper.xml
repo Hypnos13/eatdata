@@ -3,6 +3,12 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
+<!-- 메뉴 성분표  -->
+<select id="getMenuCal" resultType="com.projectbob.domain.Menu">
+        SELECT m_id, calories, carbs, protein, fat, sfa, sugar, sodium, serving_size
+        FROM menu
+        WHERE m_id = #{mId}
+    </select>
 
 
 <!-- 주문 페이지에서 주문 완료 페이지로 보내기 -->
@@ -89,20 +95,26 @@
 
 
 <!-- 장바구니 개별 항목 삭제 (메인 메뉴 항목과 그에 연결된 모든 옵션 삭제) -->
-    <delete id="deleteCartItemAndOptions" parameterType="map">
-	DELETE FROM cart
-	WHERE
-	(ca_id = #{caId} OR ca_pid = #{caId}) AND (
-	<if test="userId != null and userId.trim() != ''">
-		id = #{userId}
-	</if>
-	<if test="guestId != null and guestId.trim() != ''">
-		<if test="userId != null and userId.trim() != ''">
-			OR
-		</if>
-		guest_id = #{guestId}
-	</if>
-	)
+
+<delete id="deleteCartItemAndOptions" parameterType="map">
+  DELETE FROM cart
+  WHERE (ca_id = #{caId} OR ca_pid = #{caId})
+    AND (
+      <choose>
+        <when test="userId != null and userId.trim() != '' and guestId != null and guestId.trim() != ''">
+          (id = #{userId} OR guest_id = #{guestId})
+        </when>
+        <when test="userId != null and userId.trim() != ''">
+          id = #{userId}
+        </when>
+        <when test="guestId != null and guestId.trim() != ''">
+          guest_id = #{guestId}
+        </when>
+        <otherwise>
+          1 = 0  
+        </otherwise>
+      </choose>
+    )
 </delete>
 
 
@@ -147,6 +159,7 @@
     c.total_price,        m.name AS menuName,
     m.price AS menuPrice, mo.content AS optionName,
     mo.price AS optionPrice,
+     mo.m_option AS optionGroupName,
     CASE
         WHEN c.mo_id IS NULL THEN m.price  -- Main menu item
         ELSE mo.price                     -- Option item
@@ -180,7 +193,7 @@
   INNER JOIN menu m ON c.m_id = m.m_id
   LEFT JOIN menu_option mo ON c.mo_id = mo.mo_id
   <where>
-    c.ca_pid IS NULL <!-- ca_pid가 NULL인 항목만 선택 = 메인 메뉴 항목 -->
+    c.ca_pid IS NULL 
     AND (
       <if test="userId != null and userId.trim() != ''">
         c.id = #{userId}

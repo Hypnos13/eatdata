@@ -44,6 +44,10 @@ public class BobService {
 
 	@Autowired
 	private LoginService loginService;
+	
+	public Menu getMenuCal(int mId) {
+	    return bobMapper.getMenuCal(mId);
+	}
 
 
 	 public List<Addressbook> getAddressesByUserId(String userId) { // 반환 타입 변경
@@ -121,10 +125,8 @@ public class BobService {
 	    // 5. 삭제 후 업데이트된 전체 장바구니 목록 반환 (여기서도 Map 사용)
 	    return bobMapper.selectCartByUserOrGuest(params);
 	}
-    /**
-     * 사용자 또는 비회원의 모든 장바구니 항목을 삭제합니다.
    
-     */
+	
 	@Transactional
 	public List<Cart> deleteAllCartItems(String userId, String guestId) {
 	    Map<String, Object> params = new HashMap<>();
@@ -240,69 +242,73 @@ public class BobService {
 
 	}
 	
-	/**
-     * 장바구니 항목을 처리하고 DB에 추가합니다.
-     * 전달받은 각 메뉴 선택에 대해 메인 메뉴 항목을 먼저 삽입하고,
-     * 생성된 ca_id를 옵션 항목의 ca_pid로 사용하여 옵션들을 삽입합니다.
-     */
+	
 	@Transactional
 	public void processAndAddCartItems(List<Cart> cartItems, String userId, String guestId) {
-		Integer parentCaId = null; // 메인 메뉴의 ca_id를 저장할 변수
+	    Integer parentCaId = null; // 메인 메뉴의 ca_id를 저장할 변수
 
-		for (Cart c : cartItems) {
-			// 메인 메뉴 항목인지, 옵션 항목인지 구분
-			if (c.getMoIds() == null || c.getMoIds().isEmpty()) { // moIds가 없으면 메인 메뉴 항목으로 간주
-				// --- 수정된 부분 시작 ---
-				// 1) 메인 메뉴 아이템 삽입 (ca_pid는 NULL)
-				Cart mainMenuCart = new Cart();
-				mainMenuCart.setMId(c.getMId());
-				mainMenuCart.setMoId(null);
-				mainMenuCart.setCaPid(null); // 메인 메뉴는 최상위 항목
-				mainMenuCart.setQuantity(c.getQuantity());
-				mainMenuCart.setSId(c.getSId());
+	    for (Cart c : cartItems) {
+	        if (c.getMoIds() == null || c.getMoIds().isEmpty()) {
+	            // ✅ 메인 메뉴 처리
+	            Cart mainMenuCart = new Cart();
+	            mainMenuCart.setMId(c.getMId());
+	            mainMenuCart.setMoId(null);
+	            mainMenuCart.setCaPid(null);
+	            mainMenuCart.setQuantity(c.getQuantity());
+	            mainMenuCart.setSId(c.getSId());
 
-				// 프론트에서 계산된 순수 메뉴 단가와 총 가격을 그대로 사용
-				mainMenuCart.setUnitPrice(c.getMenuPrice()); // mainMenuCart의 unitPrice는 순수 메뉴 단가
-				mainMenuCart.setTotalPrice(c.getMenuPrice() * c.getQuantity()); // mainMenuCart의 totalPrice는 순수 메뉴 가격 * 수량
+	            mainMenuCart.setUnitPrice(c.getMenuPrice());
+	            mainMenuCart.setTotalPrice(c.getMenuPrice() * c.getQuantity());
 
-				mainMenuCart.setId(userId);
-				mainMenuCart.setGuestId(guestId);
+	            mainMenuCart.setId(userId);
+	            mainMenuCart.setGuestId(guestId);
 
-				bobMapper.insertCart(mainMenuCart);
-				parentCaId = mainMenuCart.getCaId(); // 생성된 ca_id를 부모 ID로 저장
-			
-			} else {
-			
-				// 2) 옵션 아이템 삽입 (ca_pid는 메인 메뉴의 ca_id)
-				if (parentCaId == null) {
-					log.error("옵션 항목을 추가하기 전에 부모 메인 메뉴 항목의 caId를 찾을 수 없습니다. (mId: {})", c.getMId());
-					throw new IllegalStateException("옵션 항목은 메인 메뉴 없이 추가될 수 없습니다.");
-				}
+	            // 로그 출력
+	            log.info("[메인 메뉴] mId: {}, quantity: {}, unitPrice: {}, totalPrice: {}", 
+	                     c.getMId(), c.getQuantity(), c.getMenuPrice(), mainMenuCart.getTotalPrice());
 
-				// 프론트에서 넘어온 첫 번째 moId와 optionPrice를 사용 (각 옵션별로 별도의 Cart 객체가 넘어온다고 가정)
-				Integer moId = c.getMoIds().get(0); // 첫 번째 (유일한) 옵션 ID
-				Integer optionPrice = c.getOptionPrices().get(0); // 첫 번째 (유일한) 옵션 가격
+	            // DB 삽입
+	            bobMapper.insertCart(mainMenuCart);
+	            parentCaId = mainMenuCart.getCaId(); 
 
-				Cart optionCart = new Cart();
-				optionCart.setMId(c.getMId()); // 어떤 메뉴의 옵션인지 mId를 가집니다.
-				optionCart.setMoId(moId);
-				optionCart.setCaPid(parentCaId); // 부모 ca_id를 설정하여 메인 메뉴와 연결
-				optionCart.setQuantity(c.getQuantity());
-				optionCart.setSId(c.getSId());
+	        } else {
+	            // ✅ 옵션 처리
+	            if (parentCaId == null) {
+	                log.error("옵션 항목을 추가하기 전에 메인 메뉴 항목이 필요합니다. (mId: {})", c.getMId());
+	                throw new IllegalStateException("옵션 항목은 메인 메뉴 없이 추가될 수 없습니다.");
+	            }
 
-				// 프론트에서 계산된 순수 옵션 단가와 총 가격을 그대로 사용
-				optionCart.setUnitPrice(optionPrice); // optionCart의 unitPrice는 순수 옵션 단가
-				optionCart.setTotalPrice(optionPrice * c.getQuantity()); // optionCart의 totalPrice는 순수 옵션 단가 * 수량
+	            // 첫 번째 옵션만 처리 (프론트에서 옵션당 1건씩 보낸다고 가정)
+	            Integer moId = c.getMoIds().get(0);
+	            Integer optionPrice = c.getOptionPrices().get(0);
 
-				optionCart.setId(userId);
-				optionCart.setGuestId(guestId);
+	            Cart optionCart = new Cart();
+	            optionCart.setMId(c.getMId());
+	            optionCart.setMoId(moId);
+	            optionCart.setCaPid(parentCaId);
+	            optionCart.setQuantity(c.getQuantity());
+	            optionCart.setSId(c.getSId());
 
-				bobMapper.insertCart(optionCart);
-			}
-		}
-		log.info("Cart items processed and added to DB.");
+	            optionCart.setUnitPrice(optionPrice);
+	            optionCart.setTotalPrice(optionPrice * c.getQuantity());
+
+	            optionCart.setId(userId);
+	            optionCart.setGuestId(guestId);
+
+	            // 로그 출력
+	            log.info("[옵션] moId: {}, quantity: {}, unitPrice: {}, totalPrice: {}, parentCaId: {}", 
+	                     moId, c.getQuantity(), optionPrice, optionCart.getTotalPrice(), parentCaId);
+
+	            // DB 삽입
+	            bobMapper.insertCart(optionCart);
+
+	            // ✅ 옵션 처리 완료 후 parentCaId 초기화
+	            parentCaId = null;
+	        }
+	    }
+
+	    log.info("Cart items processed and added to DB.");
 	}
-		
 	  
 	
 	

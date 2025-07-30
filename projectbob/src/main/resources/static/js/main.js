@@ -15,37 +15,15 @@ const defaultMenuImage = "https://i.imgur.com/Sg4b61a.png";
 // 주문하기 버튼 클릭 이벤트
 // ==============================
 $('#btnOrderNow').on('click', function() {
-    // 서버로 보낼 주문 데이터 객체 구성
-    const orderData = {
-        cartList: currentCartData,       // 현재 장바구니의 모든 아이템 상세 정보
-        totalPrice: currentTotalPrice,   // 장바구니 총 가격
-        totalQuantity: currentTotalQuantity, // 장바구니 총 수량 (메인 메뉴 기준)
-        userId: window.currentUserId,    // 전역 변수 userId 사용
-        guestId: window.currentGuestId,  // 전역 변수 guestId 사용
-        // shopId는 장바구니 아이템이 하나라도 있다면 첫 번째 아이템의 sId를 사용
-        shopId: currentCartData[0] ? currentCartData[0].sId : null
-    };
+    
+    // 중복 클릭 방지
+    if (!currentCartData || currentCartData.length == 0){
+			console.log("장바구니를 추가해주세요.");
+			return;
+		}
 
-    // AJAX POST 요청으로 서버에 데이터 전송
-    $.ajax({
-        url: '/payjs', // POST 요청을 보낼 URL
-        type: 'POST', // POST 메소드 사용
-        contentType: 'application/json', // JSON 형식으로 데이터 전송
-        data: JSON.stringify(orderData), // JavaScript 객체를 JSON 문자열로 변환
-        success: function(response) {
-            if (response.success && response.redirectUrl) {
-                // 서버가 지시하는 URL로 페이지를 리디렉션합니다.
-                window.location.href = response.redirectUrl;
-            } else {
-                alert('주문 처리 중 오류가 발생했습니다.');
-            }
-        },
-        error: function(xhr, status, error) {
-            // AJAX 요청 자체에서 오류가 발생한 경우 (네트워크 문제, 서버 응답 없음 등)
-            console.error("주문 처리 AJAX 오류:", status, error, xhr.responseText);
-            alert('주문 처리 중 서버 통신 오류가 발생했습니다.');
-        }
-    });
+    window.location.href='/pay';
+
 });
 
 // ==============================
@@ -67,33 +45,42 @@ $(document).on("click", ".menu-card", function () {
   currentQuantity = 1; // 모달 열릴 때 수량 초기화
   $("#modalCount").val(currentQuantity);
   $("#optionArea").empty(); // 옵션 영역 초기화
+	
+	$("#nutritionInfo tbody tr").addClass("d-none");
+	  $(`#nutritionInfo tbody tr[data-mid='${selectedMenuId}']`).removeClass("d-none");
 
   // 메뉴 옵션 비동기 로드
-  $.ajax({
-    url: "/ajax/menu/options", // 이 URL은 해당 메뉴의 옵션을 반환해야 합니다.
-    data: { mId: selectedMenuId },
-    success: function (options) {
-      if (options && options.length > 0) {
-        const html = options.map(option => `
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="option-${option.moId}" value="${option.moId}" data-price="${option.price}">
-            <label class="form-check-label" for="option-${option.moId}">
-              ${option.content} (+${option.price.toLocaleString()}원)
-            </label>
-          </div>
-        `).join('');
-        $("#optionArea").html(html);
-      } else {
-        $("#optionArea").html("<p class='text-muted small'>선택 가능한 옵션이 없습니다.</p>");
-      }
-      new bootstrap.Modal(document.getElementById("addMenuModal")).show(); // 모달 표시
-    },
-    error: function(xhr, status, error) {
-      console.error("옵션을 불러오는데 실패했습니다:", error);
-      alert("옵션을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
-    },
-  });
-});
+	$.ajax({
+	    url: "/ajax/menu/options",
+	    data: { mId: selectedMenuId },
+			success: function (options) {
+			  console.log("옵션 목록 전체:", options);
+			  if (options && options.length > 0) {
+			    options.forEach(option => {
+			      console.log(`moId: ${option.moId}, content: ${option.content}, mOption: ${option.moption}, price: ${option.price}`);
+			    });
+
+					const html = options.map(option => `
+					  <div class="form-check">
+					    <input class="form-check-input" type="checkbox" id="option-${option.moId}" value="${option.moId}" data-price="${option.price}">
+							<label class="form-check-label" for="option-${option.moId}">
+							  ${option.moption} [ ${option.content} ] - ${option.price.toLocaleString()}원
+							</label>
+					  </div>
+					`).join('');
+			    $("#optionArea").html(html);
+			  } else {
+			    $("#optionArea").html("<p class='text-muted small'>선택 가능한 옵션이 없습니다.</p>");
+			  }
+
+			  new bootstrap.Modal(document.getElementById("addMenuModal")).show();
+			},
+	    error: function(xhr, status, error) {
+	      console.error("옵션을 불러오는데 실패했습니다:", error);
+	      alert("옵션을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
+	    },
+	  });
+	});
 
 // ==============================
 // 모달 내 수량 조절 버튼 로직
@@ -194,14 +181,15 @@ $(document).on("click", "#btnAddExtras", function () {
     contentType: "application/json",
     data: JSON.stringify(cartItemsToSend),
     success: function (response) {
+			
       if (response.success && response.cartList) {
         console.log("장바구니에 추가되었습니다.");
+        console.log(response);
  
-        // 전역 변수 currentCartData와 currentTotalPrice, currentTotalQuantity 업데이트
+      
         currentCartData = response.cartList;
         currentTotalPrice = response.totalPrice;
-        // 서버 응답에 totalQuantity가 있다면 여기서 업데이트:
-        // currentTotalQuantity = response.totalQuantity;
+     
 
         updateOrderSummary(currentCartData, currentTotalPrice);
 
@@ -241,6 +229,9 @@ $(document).ready(function() {
 // totalCartPrice: 서버에서 계산된 전체 장바구니의 총 가격
 // ==============================
 function updateOrderSummary(cartList, totalCartPrice) {
+	console.log(" cartList 전체 확인:", cartList); 
+	orderListContainer.empty();
+	
     const $orderItemList = $(".order-item-list");
     const $emptyOrderMessage = $(".empty-order-message"); // 클래스 선택자로 변경
     const $orderSummaryInfo = $("#orderSummaryInfo");
@@ -259,21 +250,27 @@ function updateOrderSummary(cartList, totalCartPrice) {
 
     // 메인 메뉴만 필터링 (ca_pid가 null)
     const mainMenus = cartList.filter(item => item.caPid == null);
+		console.log(" 메인 메뉴 목록 가져오기:", mainMenus);
 
     mainMenus.forEach(mainItem => {
         // 해당 메인 메뉴에 딸린 옵션 필터링
         const options = cartList.filter(opt => opt.caPid != null && opt.caPid === mainItem.caId);
 
         let optionHtml = "";
-        options.forEach(opt => {
-            const optName = opt.optionName || "옵션명 없음";
-            const optPrice = opt.unitPrice || 0;
-            optionHtml += `
-                <div class="text-muted small ms-3 mb-1 cart-option-item" data-ca-id="${opt.caId}">
-                  └ 옵션: ${optName} (+${optPrice.toLocaleString()}원)
-                </div>
-            `;
-        });
+				options.forEach(opt => {
+				    const optName = opt.optionName || "옵션명 없음";
+				    const optPrice = opt.unitPrice || 0;
+				    const moption = opt.moption || "";
+				    const optionGroup = opt.optionGroupName || ""; // ✅ 새로 추가
+
+				    console.log(`   └ 옵션명: ${optName}, moption: ${moption}, 옵션그룹: ${optionGroup}, 가격: ${optPrice}`);
+
+				    optionHtml += `
+				        <div class="text-muted small ms-3 mb-1 cart-option-item" data-ca-id="${opt.caId}">
+				          └ 옵션: ${optName} ${optionGroup ? `[${optionGroup}]` : ''} (+${optPrice.toLocaleString()}원)
+				        </div>
+				    `;
+				});
 
 
         const quantity = mainItem.quantity || 0;
@@ -302,7 +299,6 @@ function updateOrderSummary(cartList, totalCartPrice) {
     updateOverallTotalPriceDisplay(totalCartPrice);
 
 }
-
 // ==============================
 // 전체 삭제 버튼 (#btnRemoveAllItems)
 // ==============================
@@ -458,12 +454,6 @@ function deleteCartItem(caId) {
 // ==============================
 // 전체 장바구니 총 결제 금액만 업데이트하는 함수
 // ==============================
-function updateOverallTotalPriceDisplay(totalCartPrice) {
-    const $totalOrderPriceDisplay = $("#totalOrderPrice");
-    $totalOrderPriceDisplay.text(`총 결제 금액: ${totalCartPrice.toLocaleString()}원`).removeClass("d-none").show();
-}
-
-//장바구니 새로고침해주는 함수
 function loadCartItems() {
     const requestData = {};
     if (window.currentUserId && String(window.currentUserId).trim() !== '') {
@@ -503,7 +493,6 @@ function loadCartItems() {
         }
     });
 }
-
 // =========================================================================
 // DOMContentLoaded 이벤트 리스너 통합 및 카카오 지도 API 로드 개선
 // =========================================================================
