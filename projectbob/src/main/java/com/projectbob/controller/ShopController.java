@@ -533,19 +533,11 @@ public class ShopController {
         return "redirect:/shopNotice?s_id=" + sId;
     }
     
-<<<<<<< HEAD
  // ── 리뷰 관리 화면 (페이징 지원) ─────────────────────────────
     @GetMapping("/shop/reviewManage")
     public String shopReviewManage(
             @SessionAttribute(name="loginId", required=false) String loginId,
             @RequestParam("s_id") Integer sId,
-=======
-    // ── 리뷰 관리 (페이징 포함) ────────────────────
-    @GetMapping("/shop/shopReviewManage")
-    public String shopReviewManage(
-            @SessionAttribute(name="loginId", required=false) String loginId,
-            @RequestParam("sId") Integer sId,                 // <-- 템플릿과 일치시킴
->>>>>>> b2203503987d7ee4d87dfde61762206f9f6ab893
             @RequestParam(value="page", defaultValue="1") int page,
             @RequestParam(value="size", defaultValue="10") int size,
             HttpSession session,
@@ -555,11 +547,7 @@ public class ShopController {
             return "redirect:/login";
         }
 
-<<<<<<< HEAD
         // 1) 사장님 가게 목록 & currentShop 결정
-=======
-        // 1) 내 가게 목록 + 권한 체크
->>>>>>> b2203503987d7ee4d87dfde61762206f9f6ab893
         List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
         if (shopListMain.isEmpty()) {
             return "redirect:/shopInfo";
@@ -569,7 +557,6 @@ public class ShopController {
             return "redirect:/shopMain";
         }
 
-<<<<<<< HEAD
         // 2) 전체 리뷰 개수 & 총 페이지 수
         int totalReviews = shopService.countReviewsByShopId(currentShop.getSId());
         int totalPages   = (int) Math.ceil((double) totalReviews / size);
@@ -601,26 +588,6 @@ public class ShopController {
         return "shop/shopReviewManage";
     }
 
-=======
-        // 2) 페이징 리뷰 조회
-        Map<String,Object> pr = shopService.getPagedReviews(currentShop.getSId(), page, size);
-
-        // 3) 모델에 담기
-        model.addAttribute("shopListMain", shopListMain);
-        model.addAttribute("currentShop",   currentShop);
-        model.addAttribute("shop",          currentShop);
-        model.addAttribute("reviews",       pr.get("reviews"));
-        model.addAttribute("currentPage",   pr.get("currentPage"));
-        model.addAttribute("totalPages",    pr.get("totalPages"));
-        model.addAttribute("startPage",     pr.get("startPage"));
-        model.addAttribute("endPage",       pr.get("endPage"));
-        model.addAttribute("pageList",      pr.get("pageList"));
-        model.addAttribute("sizeOptions",   List.of(10,20,30));
-        model.addAttribute("selectedSize",  pr.get("size"));
-
-        return "shop/shopReviewManage";
-    }
->>>>>>> b2203503987d7ee4d87dfde61762206f9f6ab893
 	
 	// 리뷰 등록 
 	@PostMapping("/review/add")
@@ -708,5 +675,3 @@ public class ShopController {
     }
 		
 }
-
-

@@ -45,16 +45,6 @@ public interface ShopMapper {
     // 리뷰 목록 (XML 의 <select id="findReviewsByShopId">)
     List<Review> findReviewsByShopId(@Param("sId") int sId);
     
-    // 전체 리뷰 개수 조회 (페이징 계산용)
-    int countReviewsByShopId(@Param("sId") int sId);
-
-    // 페이징 처리된 리뷰 목록 조회
-    List<Review> findReviewsByShopIdWithPaging(
-	    @Param("sId")    int sId,
-	    @Param("offset") int offset,
-	    @Param("size")   int size
-	);
-    
     // 리뷰 등록
     void insertReview(Review review);
 
