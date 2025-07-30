@@ -224,6 +224,7 @@ public class BobController {
 		          Member member = loginService.getMember(userId); // LoginService에 getMember(String id) 메서드 필요
 		          log.info("Pay Page - Retrieved Member: {}", member); // 이 로그를 추가
 		          model.addAttribute("member", member);
+		          session.removeAttribute("guestId"); // 로그인한 사용자가 있다면 guestId 제거
 		      }
 
 		      // 세션 기준 주문 내역 조회
@@ -304,6 +305,9 @@ public class BobController {
     @PostMapping("/completePayment")
     @ResponseBody
     public Map<String, Object> completePayment(@RequestBody Map<String, Object> req, HttpSession session) {
+        String userId = (String) session.getAttribute("loginId");
+        String guestId = (String) session.getAttribute("guestId");
+        log.info("completePayment - userId: {}, guestId: {}", userId, guestId);
     	boolean verified = portoneService.verifyPayment(
     			(String) req.get("paymentId"),
     			(String) req.get("orderId")

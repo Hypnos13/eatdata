@@ -9,6 +9,7 @@ var currentCartData = [];
 var currentTotalPrice = 0;
 var currentTotalQuantity = 0;
 
+
 var defaultMenuImage = "https://i.imgur.com/Sg4b61a.png";
 
 // ==============================
@@ -73,6 +74,7 @@ $(document).on("click", ".menu-card", function () {
         $("#optionArea").html("<p class='text-muted small'>선택 가능한 옵션이 없습니다.</p>");
       }
       new bootstrap.Modal(document.getElementById("addMenuModal")).show(); // 모달 표시
+      console.log("모달이 표시되었습니다."); // 추가: 모달 표시 시점 로그
     },
     error: function(xhr, status, error) {
       console.error("옵션을 불러오는데 실패했습니다:", error);
@@ -102,6 +104,13 @@ $(document).ready(function () {
     currentQuantity = 1;
     $('#modalCount').val(currentQuantity);
   });
+});
+
+// 모달이 완전히 숨겨진 후 이벤트 리스너 추가
+$('#addMenuModal').on('hidden.bs.modal', function () {
+  console.log("모달이 완전히 숨겨졌습니다. 포커스 관련 문제 확인."); // 추가: 모달 완전 숨김 시점 로그
+  // 필요하다면 여기에 포커스를 다른 요소로 옮기는 로직 추가
+  // 예: $(document.body).focus();
 });
 
 
@@ -174,6 +183,9 @@ $(document).on("click", "#btnAddExtras", function () {
 
   console.log("장바구니에 담기는 데이터 (프론트엔드에서 전송):", cartItemsToSend);
 
+  const $btnAddExtras = $(this);
+  $btnAddExtras.prop('disabled', true); // 버튼 비활성화
+
   $.ajax({
     type: "POST",
     url: "/addCart", 
@@ -194,6 +206,8 @@ $(document).on("click", "#btnAddExtras", function () {
         const modalEl = document.getElementById("addMenuModal");
         const modal = bootstrap.Modal.getInstance(modalEl);
         modal.hide(); 
+        console.log("모달이 숨겨졌습니다."); // 추가: 모달 숨김 시점 로그
+        $("#btnAddExtras").blur(); // 버튼에서 포커스 제거 
       } else {
         console.error("장바구니 추가 실패:", response.message || "알 수 없는 오류");
         alert("장바구니 추가 실패: " + (response.message || "알 수 없는 오류"));
@@ -202,6 +216,9 @@ $(document).on("click", "#btnAddExtras", function () {
     error: function (xhr, status, error) {
       console.error("서버 오류:", status, error, xhr.responseText);
       alert("서버 오류로 인해 장바구니 추가 실패. 잠시 후 다시 시도해주세요.");
+    },
+    complete: function() {
+      $btnAddExtras.prop('disabled', false); // 요청 완료 후 버튼 다시 활성화
     }
   });
 });
@@ -1785,7 +1802,7 @@ $("#rPicture").on("change", function () { // ID를 rPicture로 변경
 
 
 // 결제 수단 및 버튼 클릭시
-let selectedMethod = null;
+var selectedMethod = null;
 
 $('.payment-method').on('click', function(){
 	
@@ -1918,7 +1935,13 @@ $(document).on("click", "#btnPayNow", function() {
                                 data: JSON.stringify({
                                     paymentId: payment.paymentId, // PortOne SDK가 반환한 paymentId 사용
                                     orderId: response.orderId, // 백엔드에서 미리 생성한 orderId 사용
-                                    paymentMethod: selectedMethod // 선택된 결제 수단 추가
+                                    paymentMethod: selectedMethod, // 선택된 결제 수단 추가
+                                    // 새로 추가할 필드들
+                                    address1: address1,
+                                    address2: address2,
+                                    phone: phone,
+                                    orderRequest: orderRequest,
+                                    safeNum: safeNum
                                 }),
                                 success: function(completeResponse) {
                                     if (completeResponse.success) {
