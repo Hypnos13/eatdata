@@ -9,13 +9,16 @@
     <div layout:fragment="content">
         <div class="complete-box text-center my-4">
             <h3 class="mb-3 text-success fw-bold">🎉 결제가 완료되었습니다!</h3>
-            <p>주문번호 <strong>#A20250704</strong>로 주문이 정상적으로 접수되었습니다.</p>
+            <p>주문번호 <strong th:text="${order.orderId}">#A20250704</strong>로 주문이 정상적으로 접수되었습니다.</p>
             <hr />
             <h5 class="text-start">주문 정보</h5>
             <ul class="list-group text-start mb-3">
-                <li class="list-group-item">가게명: <strong>맥도날드 - 신림점</strong></li>
-                <li class="list-group-item">메뉴: 더블 맥스파이시® 상하이 버거 세트 x 1</li>
-                <li class="list-group-item">결제금액: 12,200원</li>
+                <li class="list-group-item">가게명: 
+                	<strong th:text="${order.shopName}">맥도날드 - 신림점</strong></li>
+                <li class="list-group-item">
+                	<span th:text="${order.menus}">메뉴: 더블 맥스파이시® 상하이 버거 세트 x 1</span></li>
+                <li class="list-group-item">
+                	<span th:text="${order.totalPrice} + '원'">결제금액: 12,200원</span></li>
                 <li class="list-group-item">배달비: 3,000원</li>
                 <li class="list-group-item">총 결제금액: <strong>15,200원</strong></li>
             </ul>
@@ -24,7 +27,8 @@
             <ul class="list-group text-start mb-4">
                 <li class="list-group-item">배달 주소: 서울특별시 관악구 신림로 123</li>
                 <li class="list-group-item">전화번호: 010-1234-5678</li>
-                <li class="list-group-item">요청사항: 초인종 누르지 말고 문자주세요</li>
+                <li class="list-group-item">요청사항: 
+                	<span th:text="${order.request}">초인종 누르지 말고 문자주세요</span></li>
             </ul>
 
             <a href="/" class="btn btn-success px-4">다른 메뉴 보러가기</a>

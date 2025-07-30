@@ -1,7 +1,8 @@
 package com.projectbob.domain;
 
-import java.sql.Timestamp;
+import java.util.List;
 
+import groovy.transform.ToString;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,11 +12,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Addressbook {
-
-	String id, aName, address1, address2, status;
-	int no;
-	Timestamp regDate, modiDate;
-	
-
+@ToString
+public class CartSummaryDto {
+	 private List<Cart> cartList;
+	    private int totalQuantity;
+	    private int totalPrice;
 }

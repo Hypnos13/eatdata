@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
+
+
+<!-- 주문 페이지에서 주문 완료 페이지로 보내기 -->
+<insert id="insertOrder" parameterType="com.projectbob.domain.Orders" useGeneratedKeys="true" keyProperty="oNo">
+	INSERT INTO orders (s_id, id, total_price, payment, payment_uid, o_address, request, status, quantity, menus, reg_date)
+	VALUES (#{sId}, #{id}, #{totalPrice}, #{payment}, #{paymentUid}, #{oAddress}, #{request}, #{status}, #{quantity}, #{menus}, NOW())
+</insert>
+
+<!-- 주문 번호에 해당하는 주문 레코드를 DB에서 가져오기 -->
+<select id="selectOrderId" parameterType="int" resultType="com.projectbob.domain.Orders">
+	SELECT * FROM orders WHERE o_no = #{orderId}
+</select>
+
+<!-- payment_uid에 해당하는 주문 레코드를 DB에서 가져오기 -->
+<select id="selectOrderByPaymentUid" parameterType="string" resultType="com.projectbob.domain.Orders">
+	SELECT * FROM orders WHERE payment_uid = #{paymentUid}
+</select>
 
 <!-- 대댓글 개수 조회 -->
 <select id="countReviewReply" parameterType="int" resultType="int">
@@ -23,6 +42,160 @@
 	INSERT INTO review_reply(r_no, s_id, id, content, status)
 	VALUES(#{rNo}, #{sId}, #{id}, #{content}, #{status})
 </insert>
+
+
+	<!-- 주소내용 가져오기  -->
+    <select id="findAddressesById" resultType="com.projectbob.domain.Addressbook"> SELECT
+            no,
+            id,
+            a_name AS aName,    
+            address1,
+            address2
+        FROM
+            addressbook
+        WHERE
+            id = #{userId}
+    </select>
+	
+
+    <!-- 장바구니 항목 수량 업데이트 -->
+ <update id="updateCartItemQuantity" parameterType="map">
+    UPDATE cart
+    SET
+        quantity = #{quantity},
+        total_price = #{totalPrice}
+    WHERE ca_id = #{caId}
+    AND (
+        (id = #{userId} AND #{userId} IS NOT NULL) OR
+        (guest_id = #{guestId} AND #{guestId} IS NOT NULL)
+    )
+</update>
+
+  <!-- 사용자 또는 비회원의 모든 장바구니 항목 삭제 -->
+    <delete id="deleteAllCartItemsByUserOrGuest" parameterType="map">
+        DELETE FROM cart
+        <where>
+            <if test="userId != null and userId.trim() != ''">
+                id = #{userId}
+            </if>
+            <if test="guestId != null and guestId.trim() != ''">
+                <if test="userId != null and userId.trim() != ''">
+                    OR
+                </if>
+                guest_id = #{guestId}
+            </if>
+        </where>
+    </delete>
+
+
+<!-- 장바구니 개별 항목 삭제 (메인 메뉴 항목과 그에 연결된 모든 옵션 삭제) -->
+    <delete id="deleteCartItemAndOptions" parameterType="map">
+	DELETE FROM cart
+	WHERE
+	(ca_id = #{caId} OR ca_pid = #{caId}) AND (
+	<if test="userId != null and userId.trim() != ''">
+		id = #{userId}
+	</if>
+	<if test="guestId != null and guestId.trim() != ''">
+		<if test="userId != null and userId.trim() != ''">
+			OR
+		</if>
+		guest_id = #{guestId}
+	</if>
+	)
+</delete>
+
+
+ <resultMap id="CartDetailResultMap" type="com.projectbob.domain.Cart">
+        <id property="caId" column="ca_id"/>
+        <result property="caPid" column="ca_pid"/>
+        <result property="mId" column="m_id"/>
+        <result property="moId" column="mo_id"/>
+        <result property="id" column="id"/>
+        <result property="guestId" column="guest_id"/>
+        <result property="sId" column="s_id"/>
+        <result property="quantity" column="quantity"/>
+        <result property="regDate" column="reg_date"/>
+        <result property="modiDate" column="modi_date"/>
+        <result property="status" column="status"/>
+        <result property="totalPrice" column="total_price"/>
+        <!-- 조인하여 가져오는 필드들 -->
+        <result property="menuName" column="menuName"/>
+        <result property="menuPrice" column="menuPrice"/>
+        <result property="optionName" column="optionName"/>
+        <result property="optionPrice" column="optionPrice"/>
+    </resultMap>
+
+<insert id="insertCart" parameterType="com.projectbob.domain.Cart" useGeneratedKeys="true" keyProperty="caId">
+  INSERT INTO cart (m_id, mo_id, id, guest_id, s_id, quantity, total_price, reg_date, ca_pid)
+  VALUES (#{mId}, #{moId}, #{id}, #{guestId}, #{sId}, #{quantity}, #{totalPrice}, NOW(), #{caPid})
+</insert>
+
+<!-- 사용자 또는 비회원 ID로 모든 장바구니 항목 조회 (메인 메뉴 및 옵션 포함) -->
+<!-- ca_pid 컬럼도 함께 조회합니다. -->
+<select id="selectCartByUserOrGuest" resultType="com.projectbob.domain.Cart" parameterType="map">
+  SELECT
+    c.ca_id,
+    c.ca_pid,
+    c.m_id,
+    c.mo_id,
+    c.id,
+    c.guest_id,
+    c.s_id,
+    c.quantity,
+    c.status,
+    c.total_price,        m.name AS menuName,
+    m.price AS menuPrice, mo.content AS optionName,
+    mo.price AS optionPrice,
+    CASE
+        WHEN c.mo_id IS NULL THEN m.price  -- Main menu item
+        ELSE mo.price                     -- Option item
+    END AS unitPrice FROM cart c
+  INNER JOIN menu m ON c.m_id = m.m_id
+  LEFT JOIN menu_option mo ON c.mo_id = mo.mo_id
+  WHERE (c.id = #{userId} AND #{userId} IS NOT NULL)
+     OR (c.guest_id = #{guestId} AND #{guestId} IS NOT NULL)
+  ORDER BY c.ca_id ASC
+</select>
+
+<!-- 사용자 또는 비회원 ID로 메인 메뉴 장바구니 항목만 조회 (ca_pid가 NULL인 항목) -->
+<!-- 이 쿼리는 메인 메뉴 항목만 필터링하여 가져올 때 사용됩니다. -->
+<select id="selectMainCartItemsByUserOrGuest" resultMap="CartDetailResultMap" parameterType="map">
+  SELECT
+    c.ca_id,
+    c.ca_pid,
+    c.m_id,
+    c.mo_id,
+    c.id,
+    c.guest_id,
+    c.s_id,
+    c.quantity,
+    c.status,
+    c.total_price,
+    m.name AS menuName,
+    m.price AS menuPrice,
+    mo.content AS optionName,
+    mo.price AS optionPrice
+  FROM cart c
+  INNER JOIN menu m ON c.m_id = m.m_id
+  LEFT JOIN menu_option mo ON c.mo_id = mo.mo_id
+  <where>
+    c.ca_pid IS NULL <!-- ca_pid가 NULL인 항목만 선택 = 메인 메뉴 항목 -->
+    AND (
+      <if test="userId != null and userId.trim() != ''">
+        c.id = #{userId}
+      </if>
+      <if test="guestId != null and guestId.trim() != ''">
+        <if test="userId != null and userId.trim() != ''">
+          OR
+        </if>
+        c.guest_id = #{guestId}
+      </if>
+    )
+  </where>
+</select>
+
+
 
 <!-- 대댓글 -->
 <select id="reviewreplyList" parameterType="int" resultType="ReviewReply">
@@ -63,6 +236,11 @@
 	INSERT INTO review(id, s_id, m_id, content, rating, r_picture, liked, status, reg_date, modi_date)
 	VALUES(#{id}, #{sId}, #{mId}, #{content}, #{rating}, #{rPicture}, #{liked}, #{status}, SYSDATE(), SYSDATE())
 </insert>
+
+<!-- 내가 찜한 가게 목록 -->
+<select id="getLikeShopList" parameterType="string" resultType="int">
+	SELECT s_id FROM likeList WHERE id = #{id}
+</select>
 
 <!-- 찜 추가 시 shop.heart + 1 -->
 <update id="incrementHeart" parameterType="int">
@@ -133,8 +311,9 @@
 <select id="getMenuOptionsByMenuId" resultType="com.projectbob.domain.MenuOption">
 	SELECT
 	*
-	FROM menu_Option
-	WHERE m_id = #{mId} ORDER BY price
+	FROM menu_option
+	WHERE m_id = #{mId}
+	 ORDER BY price
 </select>
 <select id="getMenuCategoriesByShopId" resultType="java.lang.String">
 	SELECT DISTINCT category FROM menu
@@ -150,18 +329,24 @@
 	WHERE s_id = #{s_id}
 </select>
 
-<!-- 메인에서 버튼 누를때 -->
+<!-- 메인에서 가게 리스트로  -->
 <select id="shopList" resultType="com.projectbob.domain.Shop" parameterType="map">
-	SELECT	*	FROM shop
+	SELECT
+		s.s_id AS sId, s.id AS id, s.name AS name, s.phone AS phone, s.zipcode AS zipcode, 
+		s.address1 AS address1, s.address2 AS address2, s.owner AS owner, 
+		s.s_number AS sNumber, s.category AS category, s.s_pictureURL AS sPicture,
+		COALESCE(ROUND(( SELECT AVG(r.rating) FROM review r WHERE r.s_id = s.s_id
+		), 1), 0.0) AS rating,
+		s.heart AS heart, s.min_price AS minPrice, s.reg_date AS regDate, s.modi_date AS modiDate
+			FROM shop s
 		where 1=1
 		<if test="category != null and category != '전체보기'">
-			AND category = #{category}
+			AND s.category = #{category}
 		</if>
 		<if test="keyword != null and keyword != ''">
-			AND name like concat('%', #{keyword} ,'%')
-		</if>
-	
-	ORDER BY s_id DESC
+			AND s.name LIKE CONCAT('%', #{keyword} ,'%')
+		</if>	
+	ORDER BY s.s_id DESC
 </select>
 
 </mapper>

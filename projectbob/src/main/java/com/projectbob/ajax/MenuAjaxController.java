@@ -4,12 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -21,14 +27,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.projectbob.domain.LikeList;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.projectbob.domain.Cart;
+import com.projectbob.domain.CartSummaryDto;
 import com.projectbob.domain.MenuOption;
+import com.projectbob.domain.OrderData;
 import com.projectbob.domain.Review;
 import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 import com.projectbob.service.BobService;
-
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -38,10 +48,225 @@ public class MenuAjaxController {
 	@Autowired
 	private BobService bobService;
 	
+	
+	@PostMapping("/getCart")
+    public ResponseEntity<Map<String, Object>> getCart(@RequestBody Map<String, String> request, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        String userId = request.get("id");
+        String guestId = request.get("guestId");
+
+        // 요청 본문에서 ID가 없으면 세션에서도 확인
+        if (userId == null || userId.isEmpty()) {
+            userId = (String) session.getAttribute("id");
+        }
+        if (guestId == null || guestId.isEmpty()) {
+            guestId = (String) session.getAttribute("guestId");
+        }
+
+        if ((userId == null || userId.isEmpty()) && (guestId == null || guestId.isEmpty())) {
+            response.put("success", true);
+            response.put("message", "사용자 정보가 없어 장바구니를 가져올 수 없습니다.");
+            response.put("cartList", new ArrayList<>());
+            response.put("totalPrice", 0);
+            response.put("totalQuantity", 0);
+            return ResponseEntity.ok(response);
+        }
+
+        try {
+            // BobService의 공통 메서드 활용
+            CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
+
+            response.put("success", true);
+            response.put("message", "장바구니 로드 성공");
+            response.put("cartList", cartSummary.getCartList());
+            response.put("totalPrice", cartSummary.getTotalPrice());
+            response.put("totalQuantity", cartSummary.getTotalQuantity());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "장바구니 로드 중 오류 발생: " + e.getMessage());
+            response.put("cartList", new ArrayList<>());
+            response.put("totalPrice", 0);
+            response.put("totalQuantity", 0);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+	
+	 /**
+     * 장바구니에 항목을 추가합니다.
+     * 클라이언트로부터 받은 장바구니 항목 리스트를 처리하고,
+     * 회원/비회원 ID를 관리하며, 최종 장바구니 상태와 총 가격을 반환합니다.
+
+     */
+	 @PostMapping("/addCart")
+	    public Map<String, Object> addCart(@RequestBody List<Cart> cartItems, HttpSession session) {
+	        Map<String, Object> result = new HashMap<>();
+
+	        try {
+	        	String userId = null; // <- 이 부분이 반드시 있어야 합니다!
+	            String guestId = null; // <- 이 부분도 마찬가지
+
+	            if (!cartItems.isEmpty()) {
+	                userId = cartItems.get(0).getId();
+	                guestId = cartItems.get(0).getGuestId();
+	            }
+
+	            if ((userId == null || userId.trim().isEmpty()) && (guestId == null || guestId.trim().isEmpty())) {
+	                guestId = (String) session.getAttribute("guestId");
+	                if (guestId == null) {
+	                    guestId = "guest-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+	                            + "-" + UUID.randomUUID().toString().substring(0, 8);
+	                    session.setAttribute("guestId", guestId);
+	                }
+	                for (Cart cart : cartItems) {
+	                    cart.setGuestId(guestId);
+	                }
+	            } else {
+	                System.out.println("User ID: " + userId + ", Guest ID: " + guestId);
+	            }
+
+	            bobService.processAndAddCartItems(cartItems, userId, guestId);
+	            System.out.println("Cart items processed and added to DB.");
+
+	            // Get CartSummaryDto directly
+	            CartSummaryDto cartSummary = bobService.getCartByUser(userId, guestId); // Use the DTO returning method
+
+	            List<Cart> updatedCartList = cartSummary.getCartList();
+	            int totalPrice = cartSummary.getTotalPrice();
+	            int totalQuantity = cartSummary.getTotalQuantity();
+
+	            System.out.println("Updated cart list retrieved. Size: " + updatedCartList.size());
+	            System.out.println("Calculated total price: " + totalPrice);
+	            System.out.println("Calculated total quantity: " + totalQuantity);
+
+	            result.put("success", true);
+	            result.put("cartList", updatedCartList);
+	            result.put("guestId", guestId);
+	            result.put("totalPrice", totalPrice);
+	            result.put("totalQuantity", totalQuantity);
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            result.put("success", false);
+	            result.put("message", "장바구니 추가 중 오류가 발생했습니다: " + e.getMessage());
+	            System.err.println("Error adding cart items: " + e.getMessage());
+	        }
+
+	        return result;
+	    }
+
+
+
+    /**
+     * 장바구니 항목의 수량을 업데이트합니다.
+     */
+    @PostMapping("/updateQuantity")
+    public Map<String, Object> updateCartQuantity(@RequestBody Map<String, Object> requestBody) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Integer caId = (Integer) requestBody.get("caId");
+            Integer quantity = (Integer) requestBody.get("quantity");
+            String userId = (String) requestBody.get("id");
+            String guestId = (String) requestBody.get("guestId");
+
+            if (caId == null || quantity == null || (userId == null && guestId == null)) {
+                throw new IllegalArgumentException("필수 파라미터(caId, quantity, id/guestId)가 누락되었습니다.");
+            }
+
+            List<Cart> updatedCartList = bobService.updateCartItemQuantity(caId, quantity, userId, guestId);
+            int totalPrice = updatedCartList.stream().mapToInt(Cart::getTotalPrice).sum();
+
+            result.put("success", true);
+            result.put("cartList", updatedCartList);
+            result.put("totalPrice", totalPrice);
+        } catch (IllegalArgumentException e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", "수량 업데이트 중 오류가 발생했습니다: " + e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 장바구니 개별 항목(메인 메뉴)과 그에 연결된 모든 옵션 항목을 삭제합니다.
+     */
+    @PostMapping("/deleteCart")
+    public Map<String, Object> deleteCartItem(@RequestBody Map<String, Object> requestBody) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Integer caId = (Integer) requestBody.get("caId");
+            String userId = (String) requestBody.get("id");
+            String guestId = (String) requestBody.get("guestId");
+
+            if (caId == null || (userId == null && guestId == null)) {
+                throw new IllegalArgumentException("필수 파라미터(caId, id/guestId)가 누락되었습니다.");
+            }
+
+            List<Cart> updatedCartList = bobService.deleteCartItem(caId, userId, guestId);
+            int totalPrice = updatedCartList.stream().mapToInt(Cart::getTotalPrice).sum();
+
+            result.put("success", true);
+            result.put("cartList", updatedCartList);
+            result.put("totalPrice", totalPrice);
+        } catch (IllegalArgumentException e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", "항목 삭제 중 오류가 발생했습니다: " + e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 사용자 또는 비회원의 모든 장바구니 항목을 삭제합니다.
+     */
+    @PostMapping("/removeAll")
+    public Map<String, Object> removeAllCartItems(@RequestBody Map<String, Object> requestBody) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            String userId = (String) requestBody.get("userId");
+            String guestId = (String) requestBody.get("guestId");
+
+            if (userId == null && guestId == null) {
+                throw new IllegalArgumentException("삭제할 사용자 또는 게스트 정보가 없습니다.");
+            }
+
+            // Perform the actual deletion
+            List<Cart> updatedCartList = bobService.deleteAllCartItems(userId, guestId);
+            
+            // Calculate total price from the (now updated/empty) cart list
+            int totalPrice = updatedCartList.stream().mapToInt(Cart::getTotalPrice).sum();
+
+            result.put("success", true);
+            result.put("cartList", updatedCartList); // Return the updated (likely empty) cart list
+            result.put("totalPrice", totalPrice);   // Return the new total price (likely 0)
+            result.put("message", "장바구니의 모든 상품이 성공적으로 삭제되었습니다."); // Add a success message
+
+        } catch (IllegalArgumentException e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace(); // Print stack trace for debugging on the server
+            result.put("success", false);
+            result.put("message", "전체 장바구니 삭제 중 오류가 발생했습니다: " + e.getMessage());
+        }
+        return result; // Returns a JSON response
+    }
+
+
+
+	 
+	
 	// 메뉴 옵션 목록
 	@GetMapping("/ajax/menu/options")
-	public List<MenuOption> getMenuOptions(@RequestParam("mId") int mId){
-		log.info("MenuAjaxController: getMenuOptions() called, mId={}", mId);
+	public List<MenuOption> getMenuOptions(@RequestParam("mId") int mId ){
+		//log.info("MenuAjaxController: getMenuOptions() called, mId={}", mId);
 		return bobService.getMenuOptionsByMenuId(mId);
 	}
 	
@@ -235,8 +460,6 @@ public class MenuAjaxController {
 		result.put("shopOwnerId", shopOwnerId);
 		return result;
 	}
-	
-	
 	
 	
 	

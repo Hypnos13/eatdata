@@ -37,6 +37,15 @@ dependencies {
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+	
+	//--- 웹소켓---
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.webjars.npm:sockjs-client:1.5.0'
+	implementation 'org.webjars:stomp-websocket:2.3.4'
+	implementation 'org.webjars:webjars-locator-core:0.50'
+
+
 
 // --- 메일 연동 ---	
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
@@ -47,3 +56,5 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+

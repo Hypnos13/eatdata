@@ -39,11 +39,11 @@
 			    <span class="fw-bold ms-1" th:text="${currentShop != null ? currentShop.name : shopListMain[0].name}">선택된 가게명</span>
 			  </span>
 			  <span>
-			    <span th:if="${currentShop != null and currentShop.status == 'Y'}" class="badge bg-success ms-2">영업중</span>
-			    <span th:if="${currentShop != null and currentShop.status != 'Y'}" class="badge bg-secondary ms-2">휴점</span>
+			    <span th:if="${currentShop != null and currentShop.status == 'Y'}" class="badge bg-success ms-2">Open</span>
+			    <span th:if="${currentShop != null and currentShop.status != 'Y'}" class="badge bg-secondary ms-2">Close</span>
 			    <!-- shopListMain[0] fallback -->
-			    <span th:if="${currentShop == null and shopListMain[0].status == 'Y'}" class="badge bg-success ms-2">영업중</span>
-			    <span th:if="${currentShop == null and shopListMain[0].status != 'Y'}" class="badge bg-secondary ms-2">휴점</span>
+			    <span th:if="${currentShop == null and shopListMain[0].status == 'Y'}" class="badge bg-success ms-2">Open</span>
+			    <span th:if="${currentShop == null and shopListMain[0].status != 'Y'}" class="badge bg-secondary ms-2">Close</span>
 			    <i class="bi bi-chevron-down ms-2"></i>
 			  </span>
 			</button>
@@ -56,8 +56,8 @@
         			<span class="text-muted" th:text="'#' + ${shop.sId}" style="font-size:0.97em;"></span>
 			        <span class="ms-1" th:text="${shop.name}">가게이름</span>
 			        </span>
-			        <span th:if="${shop.status == 'Y'}" class="badge bg-success">영업중</span>
-			        <span th:if="${shop.status != 'Y'}" class="badge bg-secondary">휴점</span>
+			        <span th:if="${shop.status == 'Y'}" class="badge bg-success">Open</span>
+			        <span th:if="${shop.status != 'Y'}" class="badge bg-secondary">Close</span>
 			      </a>
 			    </li>
 			  </ul>
@@ -146,12 +146,7 @@
 	            영업 시간
 	          </a>
 	        </li>
-	        <li>
-	          <a th:href="@{|/shopStatus?s_id=${currentShop.sId}|}"
-	             class="sidebar-sub-link">
-	            영업 상태
-	          </a>
-	        </li>
+	        
 	      </ul>
 	    </div>
 	  </div>
