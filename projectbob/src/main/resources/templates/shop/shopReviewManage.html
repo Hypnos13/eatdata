@@ -10,10 +10,15 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
+<<<<<<< HEAD
+=======
+
+>>>>>>> b2203503987d7ee4d87dfde61762206f9f6ab893
   <div layout:fragment="content">
     <div class="content-card">
       <h2 class="text-center mb-4">리뷰 관리</h2>
       
+<<<<<<< HEAD
       <!-- 페이지당 댓글 개수 선택 -->
 		<form id="pageSizeForm" th:action="@{/shop/reviewManage}" method="get" class="d-flex mb-3">
 		  <input type="hidden" name="s_id"   th:value="${currentShop.sId}" />
@@ -26,6 +31,23 @@
 		    <option th:value="30" th:selected="${pageSize==30}">30개</option>
 		  </select>
 		</form>
+=======
+      <!-- 페이지당 개수 선택 폼 -->
+	  <form th:action="@{/shop/shopReviewManage}" method="get"
+	    class="mb-3 d-flex justify-content-end align-items-center">
+		<input type="hidden" name="sId" th:value="${shop.sId}" />
+        <label class="me-2">한 페이지에</label>
+        <select name="size"
+                class="form-select form-select-sm w-auto"
+                onchange="this.form.submit()">
+          <option th:each="opt : ${sizeOptions}"
+                  th:value="${opt}"
+                  th:text="${opt + '개 보기'}"
+                  th:selected="${opt == selectedSize}">
+          </option>
+        </select>
+      </form>
+>>>>>>> b2203503987d7ee4d87dfde61762206f9f6ab893
 
       <!-- 리뷰가 하나도 없을 때 -->
       <div th:if="${#lists.isEmpty(reviews)}">
@@ -92,6 +114,7 @@
 		    </div>
 		  </form>
 		</div>
+<<<<<<< HEAD
 	  	<!-- 페이지네이션 -->
 		<nav aria-label="Page navigation">
 		  <ul class="pagination justify-content-center">
@@ -130,5 +153,43 @@
     </div>
   </div>
   
+=======
+		
+		<!-- 페이징 네비게이션 -->
+		<nav aria-label="Page navigation">
+		  <ul class="pagination justify-content-center">
+		    <!-- 이전 블록 -->
+		    <li class="page-item" th:classappend="${startPage > 1} ? '' : 'disabled'">
+		      <a class="page-link"
+		         th:if="${startPage > 1}"
+		         th:href="@{/shop/shopReviewManage(sId=${shop.sId}, page=${startPage-1}, size=${selectedSize})}">
+		        «
+		      </a>
+		      <span class="page-link" th:unless="${startPage > 1}">«</span>
+		    </li>
+		
+		    <!-- 페이지 번호 -->
+		    <li class="page-item" th:each="i : ${pageList}" th:classappend="${i == currentPage} ? 'active'">
+		      <a class="page-link"
+		         th:href="@{/shop/shopReviewManage(sId=${shop.sId}, page=${i}, size=${selectedSize})}"
+		         th:text="${i}">1</a>
+		    </li>
+		
+		    <!-- 다음 블록 -->
+		    <li class="page-item" th:classappend="${endPage < totalPages} ? '' : 'disabled'">
+		      <a class="page-link"
+		         th:if="${endPage < totalPages}"
+		         th:href="@{/shop/shopReviewManage(sId=${shop.sId}, page=${endPage+1}, size=${selectedSize})}">
+		        »
+		      </a>
+		      <span class="page-link" th:unless="${endPage < totalPages}">»</span>
+		    </li>
+		  </ul>
+		</nav>
+		
+    </div>
+  </div>
+
+>>>>>>> b2203503987d7ee4d87dfde61762206f9f6ab893
 </body>
 </html>
