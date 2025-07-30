@@ -524,15 +524,16 @@ public class BobService {
 		 // 로그인한 사용자가 있다면 guestId를 무시 (임시 방편)
 		 if (userId != null) {
 			 guestId = null;
-		 } else if (guestId != null) {
-			// 비회원인 경우, client 테이블에 guestId를 삽입 (이미 존재하면 무시)
-			loginService.insertGuestClientIfNotExist(guestId);
 		 }
 		 String address = req.get("address1") + " " + req.get("address2");
 		 String phone = (String) req.get("phone");
 		 String request = (String) req.get("orderRequest");
 		 
 		 CartSummaryDto cartSummary =getCartSummaryForUserOrGuest(userId, guestId);
+
+		 if (cartSummary == null || cartSummary.getCartList().isEmpty()) {
+			 throw new IllegalStateException("주문할 상품이 장바구니에 없습니다.");
+		 }
 		 
 		 Orders order = new Orders();
 		 order.setSId(cartSummary.getCartList().get(0).getSId());

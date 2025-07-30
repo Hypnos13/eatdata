@@ -1,51 +1,37 @@
-let selectedMenuId = null;
-let selectedMenuName = '';
-let selectedMenuPrice = 0;
-let selectedShopId = null;
-let currentQuantity = 1; // 'count' 대신 'currentQuantity'로 변수명 변경 (혼동 방지)
+var selectedMenuId = null;
+var selectedMenuName = '';
+var selectedMenuPrice = 0;
+var selectedShopId = null;
+var currentQuantity = 1; // 'count' 대신 'currentQuantity'로 변수명 변경 (혼동 방지)
 window.currentUserId = null;  // 로그인 시 서버에서 주입 (예: Thymeleaf)
 window.currentGuestId = null; // 서버에서 발급받아 세션에 있으면 가져옴
-let currentCartData = []; 
-let currentTotalPrice = 0;
-let currentTotalQuantity = 0;
+var currentCartData = []; 
+var currentTotalPrice = 0;
+var currentTotalQuantity = 0;
 
-const defaultMenuImage = "https://i.imgur.com/Sg4b61a.png";
+var defaultMenuImage = "https://i.imgur.com/Sg4b61a.png";
 
 // ==============================
 // 주문하기 버튼 클릭 이벤트
 // ==============================
 $('#btnOrderNow').on('click', function() {
-    // 서버로 보낼 주문 데이터 객체 구성
-    const orderData = {
-        cartList: currentCartData,       // 현재 장바구니의 모든 아이템 상세 정보
-        totalPrice: currentTotalPrice,   // 장바구니 총 가격
-        totalQuantity: currentTotalQuantity, // 장바구니 총 수량 (메인 메뉴 기준)
-        userId: window.currentUserId,    // 전역 변수 userId 사용
-        guestId: window.currentGuestId,  // 전역 변수 guestId 사용
-        // shopId는 장바구니 아이템이 하나라도 있다면 첫 번째 아이템의 sId를 사용
-        shopId: currentCartData[0] ? currentCartData[0].sId : null
-    };
+    // 1. 비회원(로그인하지 않은 사용자)인지 확인
+    // window.currentUserId는 페이지 로드 시 세션의 loginId 값으로 설정됨
+    if (!window.currentUserId || window.currentUserId.trim() === '') {
+        alert('로그인이 필요합니다.');
+        // 필요하다면 로그인 페이지로 이동시킬 수 있습니다.
+        // window.location.href = '/login'; 
+        return; // 함수 실행 중단
+    }
 
-    // AJAX POST 요청으로 서버에 데이터 전송
-    $.ajax({
-        url: '/payjs', // POST 요청을 보낼 URL
-        type: 'POST', // POST 메소드 사용
-        contentType: 'application/json', // JSON 형식으로 데이터 전송
-        data: JSON.stringify(orderData), // JavaScript 객체를 JSON 문자열로 변환
-        success: function(response) {
-            if (response.success && response.redirectUrl) {
-                // 서버가 지시하는 URL로 페이지를 리디렉션합니다.
-                window.location.href = response.redirectUrl;
-            } else {
-                alert('주문 처리 중 오류가 발생했습니다.');
-            }
-        },
-        error: function(xhr, status, error) {
-            // AJAX 요청 자체에서 오류가 발생한 경우 (네트워크 문제, 서버 응답 없음 등)
-            console.error("주문 처리 AJAX 오류:", status, error, xhr.responseText);
-            alert('주문 처리 중 서버 통신 오류가 발생했습니다.');
-        }
-    });
+    // 2. 장바구니가 비어있는지 확인
+    if (!currentCartData || currentCartData.length === 0) {
+        alert('장바구니가 비어있습니다. 메뉴를 추가해주세요.');
+        return;
+    }
+
+    // 3. 모든 검사를 통과하면 결제 페이지로 이동
+    window.location.href = '/pay';
 });
 
 // ==============================
@@ -229,7 +215,9 @@ $(document).ready(function() {
   const guestInfoElem = document.getElementById('guestInfo');
   if (guestInfoElem) {
     window.currentGuestId = guestInfoElem.dataset.guestId;
-    window.currentUserId = guestInfoElem.dataset.userId; // userId도 HTML에서 주입된다고 가정
+    window.currentUserId = guestInfoElem.dataset.userId; 
+    console.log("DEBUG: window.currentUserId after init: ", window.currentUserId);
+    console.log("DEBUG: window.currentGuestId after init: ", window.currentGuestId);
   }
   loadCartItems();
 });
@@ -828,16 +816,16 @@ function populateAddressTabs(addresses) {
 		        </div>
 		    `;
 		    
-				if (aNameTrimmed === '집') {
-				       console.log('집 주소 → home-addresses 탭에 추가');
-				       $homeAddressesTab.append(addressHtml);
-				   } else if (aNameTrimmed === '회사') {
-				       console.log('회사 주소 → company-addresses 탭에 추가');
-				       $companyAddressesTab.append(addressHtml);
-				   } else {
-				       console.log('그 외 주소 → etc-addresses 탭에 추가');
-				       $etcAddressesTab.append(addressHtml);
-				   }
+			if (aNameTrimmed === '집') {
+			       console.log('집 주소 → home-addresses 탭에 추가');
+			       $homeAddressesTab.append(addressHtml);
+			   } else if (aNameTrimmed === '회사') {
+			       console.log('회사 주소 → company-addresses 탭에 추가');
+			       $companyAddressesTab.append(addressHtml);
+			   } else {
+			       console.log('그 외 주소 → etc-addresses 탭에 추가');
+			       $etcAddressesTab.append(addressHtml);
+			   }
 		});
 
     // 각 탭에 내용이 없으면 "저장된 주소가 없습니다." 메시지 다시 표시
@@ -1633,11 +1621,11 @@ function recallReviewList(reviewArr, reviewreplyMap){
 		}
 		let date = new Date(r.regDate);
 							let strDate = date.getFullYear() + "-" + ((date.getMonth() + 1 < 10)
-															? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
-															+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
-															+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
-															+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
-															+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
+											? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
+											+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
+											+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
+											+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
+											+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
 	
 		
 		let ownerReplyHtml = '';
@@ -1664,12 +1652,12 @@ function recallReviewList(reviewArr, reviewreplyMap){
 												</div>
 												<div class="reviewReplyForm d-none mt-2">
 													<form>			
-												   <input type="hidden" name="rNo"  value="${r.rno}">
+													   <input type="hidden" name="rNo"  value="${r.rno}">
 													 <input type="hidden" name="sId"  value="${shopId}">
 													 <input type="hidden" name="rrNo" value="${reply.rrNo}">											
 														<textarea name="content" class="form-control fs-5 py-3 mb-2" rows="3" maxlength="250" placeholder="사장님 댓글 수정"></textarea>
 														<div class="text-end">
-															<button type="submit" class="btn btn-success px-4 me-1">수정완료</button>															
+															<button type="submit" class="btn btn-success px-4 me-1">수정완료</button>											
 														</div>
 													</form>
 												</div>

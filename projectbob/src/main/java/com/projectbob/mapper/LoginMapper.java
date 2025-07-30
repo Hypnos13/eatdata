@@ -27,10 +27,9 @@ public interface LoginMapper {
 	void updateAddress(Addressbook addressbook);
 	void deleteAddress(@Param("id") String id, @Param("no") int no);
 	
-	// 비회원 ID를 client 테이블에 삽입
-    void insertClient(String id);
-    // ID로 client 정보 조회
-    Member getClientById(String id);
+	
+
+	void updateCartOwner(@Param("guestId") String guestId, @Param("userId") String userId);
 
 	List<Member> clientList();
 	void addBirthdayCoupon(String id);
