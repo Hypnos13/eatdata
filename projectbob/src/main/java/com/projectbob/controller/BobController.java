@@ -182,7 +182,7 @@ public class BobController {
 		 Map<Integer, ReviewReply> reviewReplyMap = bobService.getReviewReplyMap(sId);
 		 model.addAttribute("reviewReplyMap", reviewReplyMap);
 		 
-		  String userId = (String) session.getAttribute("userId");
+		  String userId = (String) session.getAttribute("loginId");
 		    String guestId = (String) session.getAttribute("guestId"); // 비회원 guestId
 
 		    CartSummaryDto cartSummary = bobService.getCartByUser(userId, guestId);
@@ -210,55 +210,13 @@ public class BobController {
 			  return bobService.getMenuOptionsByMenuId(mId);
 		  }
 		  
-		  
+		
 
-
-		  // menudetail 에서 pay로 
-		  /*
-		  @PostMapping("/pay")		  
-		  public String payPage(
-				  @RequestParam("menuId") Long menuId,
-				  @RequestParam("count") int count,
-				  @RequestParam("optionIds") String optionIds,
-				  @RequestParam("totalPrice") int totalPrice,
-				  HttpSession session,
-				  Model model) {
-			  System.out.println("menuId=" + menuId + " count=" + count + " optionIds=" + optionIds + " totalPrice=" + totalPrice);
-			  model.addAttribute("menuId", menuId);
-			  model.addAttribute("count", count);
-			  model.addAttribute("optionIds", optionIds);
-			  model.addAttribute("totalPrice", totalPrice);
-			  
-			  String loginId = (String) session.getAttribute("loginId");
-			  if(loginId != null) {
-				  Member member = loginService.getMember(loginId);
-				  model.addAttribute("member", member);
-			  }
-			  
-			  return "views/pay";			  
-		  }
-		  */
-		  
-			/*
-			 * @PostMapping("/pay") public String doPayment(@ModelAttribute NewOrder form,
-			 * HttpSession session,Model model) {
-			 * 
-			 * int orderId = bobService.createOrder(form);
-			 * WebsocketService.sendNewOrder(form.getShopId(), form.getOrderId());
-			 * 
-			 * model.addAttribute("orderId", orderId); model.addAttribute("shopId",
-			 * form.getShopId());
-			 * 
-			 * return "views/ordercheckout"; }
-			 * 
-			 * @GetMapping("/end") public String completed() { return "views/completed"; }
-			 */
-	
-		  
-		  //데이터저장용  임시방편
+		
+		  //주문표에 담아서 주문하기 페이지로
 		  @GetMapping("/pay")
 		  public String payPageGet(HttpSession session, Model model) {
-		      String userId = (String) session.getAttribute("userId");
+		      String userId = (String) session.getAttribute("loginId");
 		      String guestId = (String) session.getAttribute("guestId");
 
 		      // 로그인한 사용자 정보 조회 및 모델에 추가
@@ -266,6 +224,7 @@ public class BobController {
 		          Member member = loginService.getMember(userId); // LoginService에 getMember(String id) 메서드 필요
 		          log.info("Pay Page - Retrieved Member: {}", member); // 이 로그를 추가
 		          model.addAttribute("member", member);
+		          session.removeAttribute("guestId"); // 로그인한 사용자가 있다면 guestId 제거
 		      }
 
 		      // 세션 기준 주문 내역 조회
@@ -285,7 +244,7 @@ public class BobController {
 		  @PostMapping("/payjs")
 			@ResponseBody
 			public ResponseEntity<Map<String, Object>> payJsPage(@RequestBody OrderData orderData, HttpSession session) {
-			    String userId = (String) session.getAttribute("userId");
+			    String userId = (String) session.getAttribute("loginId");
 			    String guestId = (String) session.getAttribute("guestId");
 
 			    // 주문 처리 (DB 저장)
@@ -306,7 +265,7 @@ public class BobController {
     public ResponseEntity<Map<String, Object>> preparePayment(@RequestBody Map<String, Object> requestData, HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         try {
-            String userId = (String) session.getAttribute("userId");
+            String userId = (String) session.getAttribute("loginId");
             String guestId = (String) session.getAttribute("guestId");
 
             // BobService를 통해 현재 장바구니 정보 가져오기
@@ -346,6 +305,9 @@ public class BobController {
     @PostMapping("/completePayment")
     @ResponseBody
     public Map<String, Object> completePayment(@RequestBody Map<String, Object> req, HttpSession session) {
+        String userId = (String) session.getAttribute("loginId");
+        String guestId = (String) session.getAttribute("guestId");
+        log.info("completePayment - userId: {}, guestId: {}", userId, guestId);
     	boolean verified = portoneService.verifyPayment(
     			(String) req.get("paymentId"),
     			(String) req.get("orderId")

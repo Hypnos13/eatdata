@@ -377,7 +377,7 @@
 				        <button class="btn btn-danger w-100 btn-sm mb-2" id="btnRemoveAllItems">주문 전체 취소</button>
 				        <button class="btn btn-sm w-100 text-white" type="button"  id="btnOrderNow" style="background-color: #43d091;">주문하기</button>
 
-				        <div id="guestInfo" th:data-guest-id="${session.guestId}"></div>
+				        <div id="guestInfo" th:data-guest-id="${session.guestId}" th:data-user-id="${session.loginId}"></div>
 				    </div>
 				</div>
 

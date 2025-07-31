@@ -60,6 +60,8 @@ public class BobService {
 	        params.put("guestId", guestId);
 
 	        List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params);
+            log.info("getCartSummaryForUserOrGuest - userId: {}, guestId: {}, retrieved cart items size: {}",
+                     userId, guestId, allCartItems != null ? allCartItems.size() : 0);
 
 	        // 각 Cart 항목의 totalPrice를 해당 항목의 단가 * 수량으로 재계산
 	        allCartItems.forEach(item -> {
@@ -516,23 +518,28 @@ public class BobService {
 	 // 주문페이지에서 결제완료 페이지로 보내기
 	 @Transactional
 	 public int createOrder(Map<String, Object> req, HttpSession session, String paymentUid) {
-		 String userId = (String) session.getAttribute("userId");
+		 String userId = (String) session.getAttribute("loginId");
 		 String guestId = (String) session.getAttribute("guestId");
+		 log.info("createOrder (after session retrieval) - userId: {}, guestId: {}", userId, guestId);
 		 String payment = (String) req.get("paymentMethod");
 		 System.out.println("BobService - paymentMethod from request: " + payment);
 
 		 // 로그인한 사용자가 있다면 guestId를 무시 (임시 방편)
 		 if (userId != null) {
 			 guestId = null;
-		 } else if (guestId != null) {
-			// 비회원인 경우, client 테이블에 guestId를 삽입 (이미 존재하면 무시)
-			loginService.insertGuestClientIfNotExist(guestId);
 		 }
 		 String address = req.get("address1") + " " + req.get("address2");
 		 String phone = (String) req.get("phone");
 		 String request = (String) req.get("orderRequest");
 		 
 		 CartSummaryDto cartSummary =getCartSummaryForUserOrGuest(userId, guestId);
+
+		 log.info("createOrder - userId: {}, guestId: {}, cartSummary is null: {}, cartList size: {}",
+		          userId, guestId, (cartSummary == null), (cartSummary != null ? cartSummary.getCartList().size() : "N/A"));
+
+		 if (cartSummary == null || cartSummary.getCartList().isEmpty()) {
+			 throw new IllegalStateException("주문할 상품이 장바구니에 없습니다.");
+		 }
 		 
 		 Orders order = new Orders();
 		 order.setSId(cartSummary.getCartList().get(0).getSId());
@@ -543,12 +550,43 @@ public class BobService {
 		 order.setPaymentUid(paymentUid); // paymentUid 설정
 		 order.setOAddress(address);
 		 order.setRequest(request);
+		 log.info("createOrder - Setting OAddress: '{}', Request: '{}'", order.getOAddress(), order.getRequest());
 		 order.setStatus("PENDING");
 		 // quantity와 menus 정보 설정
 		 order.setQuantity(cartSummary.getTotalQuantity());
-		 String orderedMenus = cartSummary.getCartList().stream()
-		                                 .map(cartItem -> cartItem.getMenuName() + " x " + cartItem.getQuantity())
-		                                 .collect(Collectors.joining(", "));
+		 
+		 // 주문 메뉴 문자열 생성 로직 개선
+		 Map<Integer, List<Cart>> groupedCartItems = cartSummary.getCartList().stream()
+		         .collect(Collectors.groupingBy(Cart::getMId)); // mId로 그룹화
+
+		 StringBuilder orderedMenusBuilder = new StringBuilder();
+		 for (Map.Entry<Integer, List<Cart>> entry : groupedCartItems.entrySet()) {
+		     List<Cart> menuItems = entry.getValue();
+		     Cart mainMenu = menuItems.stream()
+		                             .filter(item -> item.getCaPid() == null)
+		                             .findFirst()
+		                             .orElse(null);
+
+		     if (mainMenu != null) {
+		         orderedMenusBuilder.append(mainMenu.getMenuName());
+		         orderedMenusBuilder.append(" x ").append(mainMenu.getQuantity());
+
+		         List<String> options = menuItems.stream()
+		                                         .filter(item -> item.getCaPid() != null && item.getCaPid().equals(mainMenu.getCaId()))
+		                                         .map(Cart::getOptionName)
+		                                         .collect(Collectors.toList());
+
+		         if (!options.isEmpty()) {
+		             orderedMenusBuilder.append(" (").append(String.join(", ", options)).append(")");
+		         }
+		         orderedMenusBuilder.append(", ");
+		     }
+		 }
+		 // 마지막 ", " 제거
+		 String orderedMenus = orderedMenusBuilder.toString();
+		 if (orderedMenus.endsWith(", ")) {
+		     orderedMenus = orderedMenus.substring(0, orderedMenus.length() - 2);
+		 }
 		 order.setMenus(orderedMenus);
 		 
 		 bobMapper.insertOrder(order);

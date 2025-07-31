@@ -96,10 +96,17 @@ public class LoginController {
 		
 		Member member = loginService.getMember(id);
 		
+		// 비회원 장바구니를 회원 장바구니로 이전
+        String guestId = (String) session.getAttribute("guestId");
+        if (guestId != null) {
+            loginService.transferCart(guestId, id);
+        }
+		
 		session.setAttribute("isLogin", true);
 		session.setAttribute("loginId", id);
 		session.setAttribute("loginNickname", member.getNickname());
 		session.setAttribute("loginDivision", member.getDivision());
+		session.removeAttribute("guestId");
 		
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 		LocalDate birthday = LocalDate.parse(member.getBirthday(), dateFormatter);
