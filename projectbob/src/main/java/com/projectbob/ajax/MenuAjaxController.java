@@ -117,13 +117,10 @@ public class MenuAjaxController {
 	        Map<String, Object> result = new HashMap<>();
 
 	        try {
-<<<<<<< HEAD
-	        	String userId = null; 
-	            String guestId = null; 
-=======
+
 	        	String userId = (String) session.getAttribute("loginId"); // 세션에서 userId 가져오기
 	            String guestId = (String) session.getAttribute("guestId"); // 세션에서 guestId 가져오기
->>>>>>> hong
+
 
 	            // cartItems에 userId나 guestId가 포함되어 있다면 사용 (우선순위 높음)
 	            if (!cartItems.isEmpty()) {

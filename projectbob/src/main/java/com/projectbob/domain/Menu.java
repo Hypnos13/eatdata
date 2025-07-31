@@ -25,7 +25,7 @@ public class Menu {
 
 	private List<MenuOption> options;
 	
-<<<<<<< HEAD
+
 	 private BigDecimal calories; // 열량
 	 private BigDecimal carbs;    // 탄수화물
 	 private BigDecimal protein;  // 단백질
@@ -34,15 +34,8 @@ public class Menu {
 	 private BigDecimal sugar;    // 당
 	 private BigDecimal sodium;   // 나트륨
 	 private BigDecimal servingSize; // 제공량
-=======
-	private Double calories;
-    private Double carbs;
-    private Double protein;
-    private Double fat;
-    private Double sfa;
-    private Double sugar;
-    private Double sodium;
-    private Integer servingSize;
->>>>>>> hong
+
+
+
 
 }

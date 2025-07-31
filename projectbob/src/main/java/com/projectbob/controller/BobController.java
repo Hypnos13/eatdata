@@ -29,18 +29,11 @@ public class BobController {
 	@Autowired
 	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	
-<<<<<<< HEAD
-	@Autowired
-	private LoginService loginService;
-
-=======
 
 	@Autowired
 	private LoginService loginService;
 
 
-
->>>>>>> hong
 	
 	@PostMapping("/getAddress")
 	public ResponseEntity<Map<String, Object>> getAddresses(HttpSession session) {
@@ -225,17 +218,8 @@ public class BobController {
 			  return bobService.getMenuOptionsByMenuId(mId);
 		  }
 		  
-<<<<<<< HEAD
-		  
-	
-		  
-		  //데이터저장용  임시방편
-=======
-		
 
-		
 		  //주문표에 담아서 주문하기 페이지로
->>>>>>> hong
 		  @GetMapping("/pay")
 		  public String payPageGet(HttpSession session, Model model) {
 		      String userId = (String) session.getAttribute("loginId");

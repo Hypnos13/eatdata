@@ -38,10 +38,6 @@ public class BobService {
 	// DB작업에 필요한 BobMapper 객체 의존성 주입 설정
 	@Autowired
 	private BobMapper bobMapper;
-<<<<<<< HEAD
-=======
-	
->>>>>>> hong
 
 	@Autowired
 	private LoginService loginService;
@@ -62,13 +58,11 @@ public class BobService {
 		params.put("userId", userId);
 		params.put("guestId", guestId);
 
-<<<<<<< HEAD
-		List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params);
-=======
+
 	        List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params);
             log.info("getCartSummaryForUserOrGuest - userId: {}, guestId: {}, retrieved cart items size: {}",
                      userId, guestId, allCartItems != null ? allCartItems.size() : 0);
->>>>>>> hong
+
 
 		// 각 Cart 항목의 totalPrice를 해당 항목의 단가 * 수량으로 재계산
 		allCartItems.forEach(item -> {
@@ -296,11 +290,7 @@ public class BobService {
 		}
 		log.info("Cart items processed and added to DB.");
 	}
-<<<<<<< HEAD
-=======
-		
-	  
-	
+
 
 	@Autowired
     private ShopMapper shopMapper;
@@ -309,8 +299,6 @@ public class BobService {
 //		return bobMapper.searchList(keyword);
 //	}
 
->>>>>>> hong
-	
 
 	// 전체 게시글을 읽어와 반환하는 메서드
 
@@ -419,28 +407,19 @@ public class BobService {
 		bobMapper.addReview(review);
 		shopMapper.updateShopRatingBySId(review.getSId());
 	}
-<<<<<<< HEAD
 
-	// 댓글 수정하는 메서드
-=======
-	
 	//댓글 수정하는 메서드
 	@Transactional
->>>>>>> hong
 	public void updateReview(Review review) {
 		bobMapper.updateReview(review);
 		shopMapper.updateShopRatingBySId(review.getSId());
 	}
-<<<<<<< HEAD
 
-	// 댓글 삭제하는 메서드
-	public void deleteReview(int rNo) {
-=======
-	
+
+
 	//댓글 삭제하는 메서드
 	@Transactional
 	public void deleteReview(int rNo, int sId) {
->>>>>>> hong
 		bobMapper.deleteReview(rNo);
 		shopMapper.updateShopRatingBySId(sId);
 	}
@@ -480,86 +459,7 @@ public class BobService {
 	public void deleteReviewReply(int rrNo) {
 		bobMapper.deleteReviewReply(rrNo);
 	}
-<<<<<<< HEAD
 
-	// 결제정보 가져오기
-
-	public NewOrder getNewOrder(int orderId) {
-		Orders o = bobMapper.selectOrderId(orderId);
-		if (o == null) {
-			throw new IllegalArgumentException("해당 주문을 못찾음: " + orderId);
-		}
-		String shopName = this.getShopDetail(o.getSId()).getName();
-
-		NewOrder newo = new NewOrder();
-		newo.setOrderId(o.getONo());
-		newo.setShopId(o.getSId());
-		newo.setShopName(shopName);
-		newo.setMenus(o.getMenus());
-		newo.setTotalPrice(o.getTotalPrice());
-		newo.setPayment(o.getPayment());
-		newo.setAddress(o.getOAddress());
-		newo.setPhone(loginService.getMember(o.getId()).getPhone());
-		newo.setRequest(o.getRequest());
-		newo.setStatus(o.getStatus());
-		newo.setRegDate(o.getRegDate());
-		return newo;
-	}
-
-	// 주문 번호로 실제 주문 금액을 가져오는 메서드
-	public int getActualOrderAmount(String orderId) {
-		Orders order = bobMapper.selectOrderByPaymentUid(orderId);
-		if (order != null) {
-			return order.getTotalPrice();
-		}
-		throw new IllegalArgumentException("해당 주문 ID(" + orderId + ")에 대한 주문을 찾을 수 없습니다.");
-	}
-
-	// 주문페이지에서 결제완료 페이지로 보내기
-	@Transactional
-	public int createOrder(Map<String, Object> req, HttpSession session, String paymentUid) {
-		String userId = (String) session.getAttribute("userId");
-		String guestId = (String) session.getAttribute("guestId");
-		String payment = (String) req.get("paymentMethod");
-		System.out.println("BobService - paymentMethod from request: " + payment);
-
-		// 로그인한 사용자가 있다면 guestId를 무시 (임시 방편)
-		if (userId != null) {
-			guestId = null;
-		} else if (guestId != null) {
-			// 비회원인 경우, client 테이블에 guestId를 삽입 (이미 존재하면 무시)
-			loginService.insertGuestClientIfNotExist(guestId);
-		}
-		String address = req.get("address1") + " " + req.get("address2");
-		String phone = (String) req.get("phone");
-		String request = (String) req.get("orderRequest");
-
-		CartSummaryDto cartSummary = getCartSummaryForUserOrGuest(userId, guestId);
-
-		Orders order = new Orders();
-		order.setSId(cartSummary.getCartList().get(0).getSId());
-		order.setId(userId != null ? userId : guestId); // 이 라인 바로 다음
-		System.out.println("BobService - Setting Order ID to: " + order.getId()); // 이 로그를 추가
-		order.setTotalPrice(cartSummary.getTotalPrice());
-		order.setPayment(payment);
-		order.setPaymentUid(paymentUid); // paymentUid 설정
-		order.setOAddress(address);
-		order.setRequest(request);
-		order.setStatus("PENDING");
-		// quantity와 menus 정보 설정
-		order.setQuantity(cartSummary.getTotalQuantity());
-		String orderedMenus = cartSummary.getCartList().stream()
-				.map(cartItem -> cartItem.getMenuName() + " x " + cartItem.getQuantity())
-				.collect(Collectors.joining(", "));
-		order.setMenus(orderedMenus);
-
-		bobMapper.insertOrder(order);
-		int newOrderNo = order.getONo();
-
-		return newOrderNo;
-	}
-
-=======
 	
 	
 	// 결제정보 가져오기
@@ -676,9 +576,5 @@ public class BobService {
 	 }
 	 
 
-	 
-	 
-	 
 
->>>>>>> hong
 }

@@ -16,17 +16,7 @@ var defaultMenuImage = "https://i.imgur.com/Sg4b61a.png";
 // 주문하기 버튼 클릭 이벤트
 // ==============================
 $('#btnOrderNow').on('click', function() {
-<<<<<<< HEAD
-    
-    // 중복 클릭 방지
-    if (!currentCartData || currentCartData.length == 0){
-			console.log("장바구니를 추가해주세요.");
-			return;
-		}
 
-    window.location.href='/pay';
-
-=======
     // 1. 비회원(로그인하지 않은 사용자)인지 확인
     // window.currentUserId는 페이지 로드 시 세션의 loginId 값으로 설정됨
     if (!window.currentUserId || window.currentUserId.trim() === '') {
@@ -44,7 +34,6 @@ $('#btnOrderNow').on('click', function() {
 
     // 3. 모든 검사를 통과하면 결제 페이지로 이동
     window.location.href = '/pay';
->>>>>>> hong
 });
 
 // ==============================
@@ -71,7 +60,6 @@ $(document).on("click", ".menu-card", function () {
 	  $(`#nutritionInfo tbody tr[data-mid='${selectedMenuId}']`).removeClass("d-none");
 
   // 메뉴 옵션 비동기 로드
-<<<<<<< HEAD
 	$.ajax({
 	    url: "/ajax/menu/options",
 	    data: { mId: selectedMenuId },
@@ -103,34 +91,7 @@ $(document).on("click", ".menu-card", function () {
 	    },
 	  });
 	});
-=======
-  $.ajax({
-    url: "/ajax/menu/options", // 이 URL은 해당 메뉴의 옵션을 반환해야 합니다.
-    data: { mId: selectedMenuId },
-    success: function (options) {
-      if (options && options.length > 0) {
-        const html = options.map(option => `
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="option-${option.moId}" value="${option.moId}" data-price="${option.price}">
-            <label class="form-check-label" for="option-${option.moId}">
-              ${option.content} (+${option.price.toLocaleString()}원)
-            </label>
-          </div>
-        `).join('');
-        $("#optionArea").html(html);
-      } else {
-        $("#optionArea").html("<p class='text-muted small'>선택 가능한 옵션이 없습니다.</p>");
-      }
-      new bootstrap.Modal(document.getElementById("addMenuModal")).show(); // 모달 표시
-      console.log("모달이 표시되었습니다."); // 추가: 모달 표시 시점 로그
-    },
-    error: function(xhr, status, error) {
-      console.error("옵션을 불러오는데 실패했습니다:", error);
-      alert("옵션을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
-    },
-  });
-});
->>>>>>> hong
+
 
 // ==============================
 // 모달 내 수량 조절 버튼 로직
@@ -256,6 +217,10 @@ $(document).on("click", "#btnAddExtras", function () {
         const modalEl = document.getElementById("addMenuModal");
         const modal = bootstrap.Modal.getInstance(modalEl);
         modal.hide(); 
+				
+				$(".modal-backdrop").remove();
+				$("body").removeClass("modal-open");
+				
         console.log("모달이 숨겨졌습니다."); // 추가: 모달 숨김 시점 로그
         $("#btnAddExtras").blur(); // 버튼에서 포커스 제거 
       } else {
@@ -442,11 +407,12 @@ $(document).on("click", ".btn-quantity-plus", function() {
     updateCartItemQuantity(caId, currentQty);
 });
 
-$(document).on("click", ".btn-delete-main-item", function() {
-    const caId = $(this).data("ca-id");
-    if (confirm("이 메뉴 항목과 모든 옵션을 장바구니에서 삭제하시겠습니까?")) {
-        deleteCartItem(caId);
-    }
+$(document).off("click", ".btn-delete-main-item").on("click", ".btn-delete-main-item", function () {
+  const caId = $(this).data("ca-id");
+
+  if (confirm("이 메뉴 항목과 모든 옵션을 장바구니에서 삭제하시겠습니까?")) {
+    deleteCartItem(caId);
+  }
 });
 
 
@@ -508,12 +474,12 @@ function deleteCartItem(caId) {
 				loadCartItems();  // 장바구니 전체를 다시 로드하여 빈 상태를 정확히 반영
             } else {
                 console.error("항목 삭제 실패:", response.message || "알 수 없는 오류");
-                alert("항목 삭제 실패: " + (response.message || "알 수 없는 오류"));
+                console.log("항목 삭제 실패: " + (response.message || "알 수 없는 오류"));
             }
         },
         error: function(xhr, status, error) {
             console.error("항목 삭제 서버 오류:", status, error, xhr.responseText);
-            alert("항목 삭제 중 서버 오류가 발생했습니다.");
+            console.log("항목 삭제 중 서버 오류가 발생했습니다.");
         }
     });
 }
