@@ -311,24 +311,26 @@ public class BobController {
         String guestId = (String) session.getAttribute("guestId");
         log.info("completePayment - userId: {}, guestId: {}", userId, guestId);
 
-        String paymentId = (String) req.get("paymentId");
-        String orderId = (String) req.get("orderId");
+        String paymentId = (String) req.get("paymentId");           // SDK 내부 추적용
+        String merchantUid = (String) req.get("merchant_uid");     // 검증용 orderId
 
-        boolean verified = portoneService.verifyPayment(paymentId, orderId);
+        if (merchantUid == null) {
+            return Map.of("success", false, "message", "merchant_uid(주문 ID)가 없습니다.");
+        }
+
+        boolean verified = portoneService.verifyPayment(merchantUid);
         if (!verified) {
             return Map.of("success", false, "message", "결제 검증 실패");
         }
 
-        // 주문 생성 시 필요한 모든 정보 전달
         int newOrderNo = bobService.createOrder(req, session, paymentId);
 
-        bobService.deleteAllCartItems(
-                (String) session.getAttribute("userId"),
-                (String) session.getAttribute("guestId")
-        );
+        // 장바구니 삭제: loginId를 기준으로
+        bobService.deleteAllCartItems(userId, guestId);
 
         return Map.of("success", true, "orderNo", newOrderNo);
     }
+
 
 
 }
