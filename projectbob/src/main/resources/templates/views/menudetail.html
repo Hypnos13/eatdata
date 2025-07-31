@@ -290,10 +290,24 @@
 
 						<!-- 정보 탭 -->
 						<div class="tab-pane fade" id="info">
+							  <p><strong>영업시간:</strong></p>
+							  <ul class="list-unstyled ms-3">
+							    <!-- shop.sId에 맞는 openTextMap 리스트를 순회 -->
+							    <li th:each="line : ${openLines}"
+							        th:text="${line}">
+							      <!-- 출력 예: 월요일 : 10:30 ~ 20:30 -->
+							    </li>
+							  </ul>
+							
 							<p>
 								<strong>영업시간:</strong>[[${shop.opTime}]]<br /> <strong>위치:</strong>
 								<span id="storeAddress">[[${shop.address1}]] -
 									[[${shop.address2}]]</span><br /> <strong>전화:</strong>
+
+								<strong>위치:</strong> 
+								<span id="storeAddress">[[${shop.address1}]] - [[${shop.address2}]]</span><br /> 
+								<strong>전화:</strong>
+
 								[[${shop.phone}]]
 							</p>
 
@@ -363,7 +377,7 @@
 				        <button class="btn btn-danger w-100 btn-sm mb-2" id="btnRemoveAllItems">주문 전체 취소</button>
 				        <button class="btn btn-sm w-100 text-white" type="button"  id="btnOrderNow" style="background-color: #43d091;">주문하기</button>
 
-				        <div id="guestInfo" th:data-guest-id="${session.guestId}"></div>
+				        <div id="guestInfo" th:data-guest-id="${session.guestId}" th:data-user-id="${session.loginId}"></div>
 				    </div>
 				</div>
 

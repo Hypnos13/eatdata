@@ -29,9 +29,18 @@ public class BobController {
 	@Autowired
 	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	
+<<<<<<< HEAD
 	@Autowired
 	private LoginService loginService;
 
+=======
+
+	@Autowired
+	private LoginService loginService;
+
+
+
+>>>>>>> hong
 	
 	@PostMapping("/getAddress")
 	public ResponseEntity<Map<String, Object>> getAddresses(HttpSession session) {
@@ -67,6 +76,14 @@ public class BobController {
 	        return ResponseEntity.internalServerError().body(responseBody);
 	    }
 	}
+
+
+	@Autowired
+    private ShopService shopService;
+	
+    BobController(LoginController loginController) {
+        this.loginController = loginController;
+    }
 
 
 	@GetMapping({"/", "/main"})
@@ -180,7 +197,7 @@ public class BobController {
 		 Map<Integer, ReviewReply> reviewReplyMap = bobService.getReviewReplyMap(sId);
 		 model.addAttribute("reviewReplyMap", reviewReplyMap);
 		 
-		  String userId = (String) session.getAttribute("userId");
+		  String userId = (String) session.getAttribute("loginId");
 		    String guestId = (String) session.getAttribute("guestId"); // 비회원 guestId
 
 		    CartSummaryDto cartSummary = bobService.getCartByUser(userId, guestId);
@@ -195,6 +212,9 @@ public class BobController {
 		  log.info("장바구니 총 수량: {}, 총액: {}", totalQuantity, totalPrice); 
 		 
 		  
+		 List<String> openLines = shopService.buildOpenTextLines(shop);
+         model.addAttribute("openLines", openLines);
+		 
 		  return "views/MenuDetail"; 
 		  }
 		  
@@ -205,13 +225,20 @@ public class BobController {
 			  return bobService.getMenuOptionsByMenuId(mId);
 		  }
 		  
+<<<<<<< HEAD
 		  
 	
 		  
 		  //데이터저장용  임시방편
+=======
+		
+
+		
+		  //주문표에 담아서 주문하기 페이지로
+>>>>>>> hong
 		  @GetMapping("/pay")
 		  public String payPageGet(HttpSession session, Model model) {
-		      String userId = (String) session.getAttribute("userId");
+		      String userId = (String) session.getAttribute("loginId");
 		      String guestId = (String) session.getAttribute("guestId");
 
 		      // 로그인한 사용자 정보 조회 및 모델에 추가
@@ -219,6 +246,7 @@ public class BobController {
 		          Member member = loginService.getMember(userId); // LoginService에 getMember(String id) 메서드 필요
 		          log.info("Pay Page - Retrieved Member: {}", member); // 이 로그를 추가
 		          model.addAttribute("member", member);
+		          session.removeAttribute("guestId"); // 로그인한 사용자가 있다면 guestId 제거
 		      }
 
 		      // 세션 기준 주문 내역 조회
@@ -238,7 +266,7 @@ public class BobController {
 		  @PostMapping("/payjs")
 			@ResponseBody
 			public ResponseEntity<Map<String, Object>> payJsPage(@RequestBody OrderData orderData, HttpSession session) {
-			    String userId = (String) session.getAttribute("userId");
+			    String userId = (String) session.getAttribute("loginId");
 			    String guestId = (String) session.getAttribute("guestId");
 
 			    // 주문 처리 (DB 저장)
@@ -259,7 +287,7 @@ public class BobController {
     public ResponseEntity<Map<String, Object>> preparePayment(@RequestBody Map<String, Object> requestData, HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         try {
-            String userId = (String) session.getAttribute("userId");
+            String userId = (String) session.getAttribute("loginId");
             String guestId = (String) session.getAttribute("guestId");
 
             // BobService를 통해 현재 장바구니 정보 가져오기
@@ -299,6 +327,9 @@ public class BobController {
     @PostMapping("/completePayment")
     @ResponseBody
     public Map<String, Object> completePayment(@RequestBody Map<String, Object> req, HttpSession session) {
+        String userId = (String) session.getAttribute("loginId");
+        String guestId = (String) session.getAttribute("guestId");
+        log.info("completePayment - userId: {}, guestId: {}", userId, guestId);
     	boolean verified = portoneService.verifyPayment(
     			(String) req.get("paymentId"),
     			(String) req.get("orderId")

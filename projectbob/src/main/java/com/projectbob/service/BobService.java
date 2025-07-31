@@ -26,6 +26,7 @@ import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 import com.projectbob.domain.NewOrder;
 import com.projectbob.mapper.BobMapper;
+import com.projectbob.mapper.ShopMapper;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,10 @@ public class BobService {
 	// DB작업에 필요한 BobMapper 객체 의존성 주입 설정
 	@Autowired
 	private BobMapper bobMapper;
+<<<<<<< HEAD
+=======
+	
+>>>>>>> hong
 
 	@Autowired
 	private LoginService loginService;
@@ -57,7 +62,13 @@ public class BobService {
 		params.put("userId", userId);
 		params.put("guestId", guestId);
 
+<<<<<<< HEAD
 		List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params);
+=======
+	        List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params);
+            log.info("getCartSummaryForUserOrGuest - userId: {}, guestId: {}, retrieved cart items size: {}",
+                     userId, guestId, allCartItems != null ? allCartItems.size() : 0);
+>>>>>>> hong
 
 		// 각 Cart 항목의 totalPrice를 해당 항목의 단가 * 수량으로 재계산
 		allCartItems.forEach(item -> {
@@ -285,6 +296,20 @@ public class BobService {
 		}
 		log.info("Cart items processed and added to DB.");
 	}
+<<<<<<< HEAD
+=======
+		
+	  
+	
+
+	@Autowired
+    private ShopMapper shopMapper;
+	//가게 검색하기
+//	public List<Shop> searchList(String keyword){
+//		return bobMapper.searchList(keyword);
+//	}
+
+>>>>>>> hong
 	
 
 	// 전체 게시글을 읽어와 반환하는 메서드
@@ -389,18 +414,35 @@ public class BobService {
 	}
 
 	// 댓글 등록하는 메서드
+	@Transactional
 	public void addReview(Review review) {
 		bobMapper.addReview(review);
+		shopMapper.updateShopRatingBySId(review.getSId());
 	}
+<<<<<<< HEAD
 
 	// 댓글 수정하는 메서드
+=======
+	
+	//댓글 수정하는 메서드
+	@Transactional
+>>>>>>> hong
 	public void updateReview(Review review) {
 		bobMapper.updateReview(review);
+		shopMapper.updateShopRatingBySId(review.getSId());
 	}
+<<<<<<< HEAD
 
 	// 댓글 삭제하는 메서드
 	public void deleteReview(int rNo) {
+=======
+	
+	//댓글 삭제하는 메서드
+	@Transactional
+	public void deleteReview(int rNo, int sId) {
+>>>>>>> hong
 		bobMapper.deleteReview(rNo);
+		shopMapper.updateShopRatingBySId(sId);
 	}
 
 	// 대댓글 리스트
@@ -438,6 +480,7 @@ public class BobService {
 	public void deleteReviewReply(int rrNo) {
 		bobMapper.deleteReviewReply(rrNo);
 	}
+<<<<<<< HEAD
 
 	// 결제정보 가져오기
 
@@ -516,4 +559,126 @@ public class BobService {
 		return newOrderNo;
 	}
 
+=======
+	
+	
+	// 결제정보 가져오기
+	
+	 public NewOrder getNewOrder(int orderId) {
+		 Orders o =	 bobMapper.selectOrderId(orderId);
+		 if (o == null) {
+			 throw new IllegalArgumentException("해당 주문을 못찾음: " + orderId);
+		 }
+		 String shopName = this.getShopDetail(o.getSId()).getName();
+		 
+		 NewOrder newo = new NewOrder();
+		 newo.setOrderId(o.getONo());
+		 newo.setShopId(o.getSId());
+		 newo.setShopName(shopName);
+		 newo.setMenus(o.getMenus());
+		 newo.setTotalPrice(o.getTotalPrice());
+		 newo.setPayment(o.getPayment());
+		 newo.setAddress(o.getOAddress());
+		 newo.setPhone(loginService.getMember(o.getId()).getPhone());
+		 newo.setRequest(o.getRequest());
+		 newo.setStatus(o.getStatus());
+		 newo.setRegDate(o.getRegDate());
+		 return newo;
+	 }
+	 
+	 // 주문 번호로 실제 주문 금액을 가져오는 메서드
+	 public int getActualOrderAmount(String orderId) {
+		 Orders order = bobMapper.selectOrderByPaymentUid(orderId);
+		 if (order != null) {
+			 return order.getTotalPrice();
+		 }
+		 throw new IllegalArgumentException("해당 주문 ID(" + orderId + ")에 대한 주문을 찾을 수 없습니다.");
+	 }
+	 
+	 // 주문페이지에서 결제완료 페이지로 보내기
+	 @Transactional
+	 public int createOrder(Map<String, Object> req, HttpSession session, String paymentUid) {
+		 String userId = (String) session.getAttribute("loginId");
+		 String guestId = (String) session.getAttribute("guestId");
+		 log.info("createOrder (after session retrieval) - userId: {}, guestId: {}", userId, guestId);
+		 String payment = (String) req.get("paymentMethod");
+		 System.out.println("BobService - paymentMethod from request: " + payment);
+
+		 // 로그인한 사용자가 있다면 guestId를 무시 (임시 방편)
+		 if (userId != null) {
+			 guestId = null;
+		 }
+		 String address = req.get("address1") + " " + req.get("address2");
+		 String phone = (String) req.get("phone");
+		 String request = (String) req.get("orderRequest");
+		 
+		 CartSummaryDto cartSummary =getCartSummaryForUserOrGuest(userId, guestId);
+
+		 log.info("createOrder - userId: {}, guestId: {}, cartSummary is null: {}, cartList size: {}",
+		          userId, guestId, (cartSummary == null), (cartSummary != null ? cartSummary.getCartList().size() : "N/A"));
+
+		 if (cartSummary == null || cartSummary.getCartList().isEmpty()) {
+			 throw new IllegalStateException("주문할 상품이 장바구니에 없습니다.");
+		 }
+		 
+		 Orders order = new Orders();
+		 order.setSId(cartSummary.getCartList().get(0).getSId());
+		 order.setId(userId != null ? userId : guestId); // 이 라인 바로 다음
+		 System.out.println("BobService - Setting Order ID to: " + order.getId()); // 이 로그를 추가
+		 order.setTotalPrice(cartSummary.getTotalPrice());
+		 order.setPayment(payment);
+		 order.setPaymentUid(paymentUid); // paymentUid 설정
+		 order.setOAddress(address);
+		 order.setRequest(request);
+		 log.info("createOrder - Setting OAddress: '{}', Request: '{}'", order.getOAddress(), order.getRequest());
+		 order.setStatus("PENDING");
+		 // quantity와 menus 정보 설정
+		 order.setQuantity(cartSummary.getTotalQuantity());
+		 
+		 // 주문 메뉴 문자열 생성 로직 개선
+		 Map<Integer, List<Cart>> groupedCartItems = cartSummary.getCartList().stream()
+		         .collect(Collectors.groupingBy(Cart::getMId)); // mId로 그룹화
+
+		 StringBuilder orderedMenusBuilder = new StringBuilder();
+		 for (Map.Entry<Integer, List<Cart>> entry : groupedCartItems.entrySet()) {
+		     List<Cart> menuItems = entry.getValue();
+		     Cart mainMenu = menuItems.stream()
+		                             .filter(item -> item.getCaPid() == null)
+		                             .findFirst()
+		                             .orElse(null);
+
+		     if (mainMenu != null) {
+		         orderedMenusBuilder.append(mainMenu.getMenuName());
+		         orderedMenusBuilder.append(" x ").append(mainMenu.getQuantity());
+
+		         List<String> options = menuItems.stream()
+		                                         .filter(item -> item.getCaPid() != null && item.getCaPid().equals(mainMenu.getCaId()))
+		                                         .map(Cart::getOptionName)
+		                                         .collect(Collectors.toList());
+
+		         if (!options.isEmpty()) {
+		             orderedMenusBuilder.append(" (").append(String.join(", ", options)).append(")");
+		         }
+		         orderedMenusBuilder.append(", ");
+		     }
+		 }
+		 // 마지막 ", " 제거
+		 String orderedMenus = orderedMenusBuilder.toString();
+		 if (orderedMenus.endsWith(", ")) {
+		     orderedMenus = orderedMenus.substring(0, orderedMenus.length() - 2);
+		 }
+		 order.setMenus(orderedMenus);
+		 
+		 bobMapper.insertOrder(order);
+		 int newOrderNo = order.getONo();
+		 
+		 return newOrderNo;
+	 }
+	 
+
+	 
+	 
+	 
+
+>>>>>>> hong
 }

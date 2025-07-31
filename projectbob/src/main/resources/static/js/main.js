@@ -1,20 +1,22 @@
-let selectedMenuId = null;
-let selectedMenuName = '';
-let selectedMenuPrice = 0;
-let selectedShopId = null;
-let currentQuantity = 1; // 'count' 대신 'currentQuantity'로 변수명 변경 (혼동 방지)
+var selectedMenuId = null;
+var selectedMenuName = '';
+var selectedMenuPrice = 0;
+var selectedShopId = null;
+var currentQuantity = 1; // 'count' 대신 'currentQuantity'로 변수명 변경 (혼동 방지)
 window.currentUserId = null;  // 로그인 시 서버에서 주입 (예: Thymeleaf)
 window.currentGuestId = null; // 서버에서 발급받아 세션에 있으면 가져옴
-let currentCartData = []; 
-let currentTotalPrice = 0;
-let currentTotalQuantity = 0;
+var currentCartData = []; 
+var currentTotalPrice = 0;
+var currentTotalQuantity = 0;
 
-const defaultMenuImage = "https://i.imgur.com/Sg4b61a.png";
+
+var defaultMenuImage = "https://i.imgur.com/Sg4b61a.png";
 
 // ==============================
 // 주문하기 버튼 클릭 이벤트
 // ==============================
 $('#btnOrderNow').on('click', function() {
+<<<<<<< HEAD
     
     // 중복 클릭 방지
     if (!currentCartData || currentCartData.length == 0){
@@ -24,6 +26,25 @@ $('#btnOrderNow').on('click', function() {
 
     window.location.href='/pay';
 
+=======
+    // 1. 비회원(로그인하지 않은 사용자)인지 확인
+    // window.currentUserId는 페이지 로드 시 세션의 loginId 값으로 설정됨
+    if (!window.currentUserId || window.currentUserId.trim() === '') {
+        alert('로그인이 필요합니다.');
+        // 필요하다면 로그인 페이지로 이동시킬 수 있습니다.
+        // window.location.href = '/login'; 
+        return; // 함수 실행 중단
+    }
+
+    // 2. 장바구니가 비어있는지 확인
+    if (!currentCartData || currentCartData.length === 0) {
+        alert('장바구니가 비어있습니다. 메뉴를 추가해주세요.');
+        return;
+    }
+
+    // 3. 모든 검사를 통과하면 결제 페이지로 이동
+    window.location.href = '/pay';
+>>>>>>> hong
 });
 
 // ==============================
@@ -50,6 +71,7 @@ $(document).on("click", ".menu-card", function () {
 	  $(`#nutritionInfo tbody tr[data-mid='${selectedMenuId}']`).removeClass("d-none");
 
   // 메뉴 옵션 비동기 로드
+<<<<<<< HEAD
 	$.ajax({
 	    url: "/ajax/menu/options",
 	    data: { mId: selectedMenuId },
@@ -81,6 +103,34 @@ $(document).on("click", ".menu-card", function () {
 	    },
 	  });
 	});
+=======
+  $.ajax({
+    url: "/ajax/menu/options", // 이 URL은 해당 메뉴의 옵션을 반환해야 합니다.
+    data: { mId: selectedMenuId },
+    success: function (options) {
+      if (options && options.length > 0) {
+        const html = options.map(option => `
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="option-${option.moId}" value="${option.moId}" data-price="${option.price}">
+            <label class="form-check-label" for="option-${option.moId}">
+              ${option.content} (+${option.price.toLocaleString()}원)
+            </label>
+          </div>
+        `).join('');
+        $("#optionArea").html(html);
+      } else {
+        $("#optionArea").html("<p class='text-muted small'>선택 가능한 옵션이 없습니다.</p>");
+      }
+      new bootstrap.Modal(document.getElementById("addMenuModal")).show(); // 모달 표시
+      console.log("모달이 표시되었습니다."); // 추가: 모달 표시 시점 로그
+    },
+    error: function(xhr, status, error) {
+      console.error("옵션을 불러오는데 실패했습니다:", error);
+      alert("옵션을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
+    },
+  });
+});
+>>>>>>> hong
 
 // ==============================
 // 모달 내 수량 조절 버튼 로직
@@ -103,6 +153,13 @@ $(document).ready(function () {
     currentQuantity = 1;
     $('#modalCount').val(currentQuantity);
   });
+});
+
+// 모달이 완전히 숨겨진 후 이벤트 리스너 추가
+$('#addMenuModal').on('hidden.bs.modal', function () {
+  console.log("모달이 완전히 숨겨졌습니다. 포커스 관련 문제 확인."); // 추가: 모달 완전 숨김 시점 로그
+  // 필요하다면 여기에 포커스를 다른 요소로 옮기는 로직 추가
+  // 예: $(document.body).focus();
 });
 
 
@@ -175,6 +232,9 @@ $(document).on("click", "#btnAddExtras", function () {
 
   console.log("장바구니에 담기는 데이터 (프론트엔드에서 전송):", cartItemsToSend);
 
+  const $btnAddExtras = $(this);
+  $btnAddExtras.prop('disabled', true); // 버튼 비활성화
+
   $.ajax({
     type: "POST",
     url: "/addCart", 
@@ -196,6 +256,8 @@ $(document).on("click", "#btnAddExtras", function () {
         const modalEl = document.getElementById("addMenuModal");
         const modal = bootstrap.Modal.getInstance(modalEl);
         modal.hide(); 
+        console.log("모달이 숨겨졌습니다."); // 추가: 모달 숨김 시점 로그
+        $("#btnAddExtras").blur(); // 버튼에서 포커스 제거 
       } else {
         console.error("장바구니 추가 실패:", response.message || "알 수 없는 오류");
         alert("장바구니 추가 실패: " + (response.message || "알 수 없는 오류"));
@@ -204,6 +266,9 @@ $(document).on("click", "#btnAddExtras", function () {
     error: function (xhr, status, error) {
       console.error("서버 오류:", status, error, xhr.responseText);
       alert("서버 오류로 인해 장바구니 추가 실패. 잠시 후 다시 시도해주세요.");
+    },
+    complete: function() {
+      $btnAddExtras.prop('disabled', false); // 요청 완료 후 버튼 다시 활성화
     }
   });
 });
@@ -217,7 +282,9 @@ $(document).ready(function() {
   const guestInfoElem = document.getElementById('guestInfo');
   if (guestInfoElem) {
     window.currentGuestId = guestInfoElem.dataset.guestId;
-    window.currentUserId = guestInfoElem.dataset.userId; // userId도 HTML에서 주입된다고 가정
+    window.currentUserId = guestInfoElem.dataset.userId; 
+    console.log("DEBUG: window.currentUserId after init: ", window.currentUserId);
+    console.log("DEBUG: window.currentGuestId after init: ", window.currentGuestId);
   }
   loadCartItems();
 });
@@ -822,16 +889,16 @@ function populateAddressTabs(addresses) {
 		        </div>
 		    `;
 		    
-				if (aNameTrimmed === '집') {
-				       console.log('집 주소 → home-addresses 탭에 추가');
-				       $homeAddressesTab.append(addressHtml);
-				   } else if (aNameTrimmed === '회사') {
-				       console.log('회사 주소 → company-addresses 탭에 추가');
-				       $companyAddressesTab.append(addressHtml);
-				   } else {
-				       console.log('그 외 주소 → etc-addresses 탭에 추가');
-				       $etcAddressesTab.append(addressHtml);
-				   }
+			if (aNameTrimmed === '집') {
+			       console.log('집 주소 → home-addresses 탭에 추가');
+			       $homeAddressesTab.append(addressHtml);
+			   } else if (aNameTrimmed === '회사') {
+			       console.log('회사 주소 → company-addresses 탭에 추가');
+			       $companyAddressesTab.append(addressHtml);
+			   } else {
+			       console.log('그 외 주소 → etc-addresses 탭에 추가');
+			       $etcAddressesTab.append(addressHtml);
+			   }
 		});
 
     // 각 탭에 내용이 없으면 "저장된 주소가 없습니다." 메시지 다시 표시
@@ -1627,11 +1694,11 @@ function recallReviewList(reviewArr, reviewreplyMap){
 		}
 		let date = new Date(r.regDate);
 							let strDate = date.getFullYear() + "-" + ((date.getMonth() + 1 < 10)
-															? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
-															+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
-															+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
-															+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
-															+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
+											? "0" + (date.getMonth() + 1) : (date.getMonth() + 1)) + "-"
+											+ (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + " "
+											+ (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":"
+											+ (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ":"
+											+ (date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds());
 	
 		
 		let ownerReplyHtml = '';
@@ -1658,12 +1725,12 @@ function recallReviewList(reviewArr, reviewreplyMap){
 												</div>
 												<div class="reviewReplyForm d-none mt-2">
 													<form>			
-												   <input type="hidden" name="rNo"  value="${r.rno}">
+													   <input type="hidden" name="rNo"  value="${r.rno}">
 													 <input type="hidden" name="sId"  value="${shopId}">
 													 <input type="hidden" name="rrNo" value="${reply.rrNo}">											
 														<textarea name="content" class="form-control fs-5 py-3 mb-2" rows="3" maxlength="250" placeholder="사장님 댓글 수정"></textarea>
 														<div class="text-end">
-															<button type="submit" class="btn btn-success px-4 me-1">수정완료</button>															
+															<button type="submit" class="btn btn-success px-4 me-1">수정완료</button>											
 														</div>
 													</form>
 												</div>
@@ -1791,7 +1858,7 @@ $("#rPicture").on("change", function () { // ID를 rPicture로 변경
 
 
 // 결제 수단 및 버튼 클릭시
-let selectedMethod = null;
+var selectedMethod = null;
 
 $('.payment-method').on('click', function(){
 	
@@ -1924,7 +1991,13 @@ $(document).on("click", "#btnPayNow", function() {
                                 data: JSON.stringify({
                                     paymentId: payment.paymentId, // PortOne SDK가 반환한 paymentId 사용
                                     orderId: response.orderId, // 백엔드에서 미리 생성한 orderId 사용
-                                    paymentMethod: selectedMethod // 선택된 결제 수단 추가
+                                    paymentMethod: selectedMethod, // 선택된 결제 수단 추가
+                                    // 새로 추가할 필드들
+                                    address1: address1,
+                                    address2: address2,
+                                    phone: phone,
+                                    orderRequest: orderRequest,
+                                    safeNum: safeNum
                                 }),
                                 success: function(completeResponse) {
                                     if (completeResponse.success) {

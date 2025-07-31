@@ -59,7 +59,7 @@ public class MenuAjaxController {
 
         // 요청 본문에서 ID가 없으면 세션에서도 확인
         if (userId == null || userId.isEmpty()) {
-            userId = (String) session.getAttribute("id");
+            userId = (String) session.getAttribute("loginId");
         }
         if (guestId == null || guestId.isEmpty()) {
             guestId = (String) session.getAttribute("guestId");
@@ -117,26 +117,49 @@ public class MenuAjaxController {
 	        Map<String, Object> result = new HashMap<>();
 
 	        try {
+<<<<<<< HEAD
 	        	String userId = null; 
 	            String guestId = null; 
+=======
+	        	String userId = (String) session.getAttribute("loginId"); // 세션에서 userId 가져오기
+	            String guestId = (String) session.getAttribute("guestId"); // 세션에서 guestId 가져오기
+>>>>>>> hong
 
+	            // cartItems에 userId나 guestId가 포함되어 있다면 사용 (우선순위 높음)
 	            if (!cartItems.isEmpty()) {
-	                userId = cartItems.get(0).getId();
-	                guestId = cartItems.get(0).getGuestId();
+	                if (cartItems.get(0).getId() != null && !cartItems.get(0).getId().trim().isEmpty()) {
+	                    userId = cartItems.get(0).getId();
+	                }
+	                if (cartItems.get(0).getGuestId() != null && !cartItems.get(0).getGuestId().trim().isEmpty()) {
+	                    guestId = cartItems.get(0).getGuestId();
+	                }
 	            }
 
+	            // userId와 guestId가 모두 없는 경우에만 새로운 guestId 생성
 	            if ((userId == null || userId.trim().isEmpty()) && (guestId == null || guestId.trim().isEmpty())) {
-	                guestId = (String) session.getAttribute("guestId");
-	                if (guestId == null) {
-	                    guestId = "guest-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+	                guestId = "guest-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
 	                            + "-" + UUID.randomUUID().toString().substring(0, 8);
-	                    session.setAttribute("guestId", guestId);
+	                session.setAttribute("guestId", guestId);
+	            }
+
+	            // --- 기존 장바구니에 다른 가게 상품이 있는지 확인하는 로직 추가 시작 ---
+	            CartSummaryDto currentCartSummary = bobService.getCartByUser(userId, guestId);
+	            if (currentCartSummary != null && !currentCartSummary.getCartList().isEmpty()) {
+	                Integer existingShopId = currentCartSummary.getCartList().get(0).getSId();
+	                Integer newShopId = cartItems.get(0).getSId();
+
+	                if (!existingShopId.equals(newShopId)) {
+	                    result.put("success", false);
+	                    result.put("message", "장바구니에는 한 가게의 상품만 담을 수 있습니다. 기존 장바구니를 비우고 다시 시도해주세요.");
+	                    return result;
 	                }
-	                for (Cart cart : cartItems) {
-	                    cart.setGuestId(guestId);
-	                }
-	            } else {
-	                System.out.println("User ID: " + userId + ", Guest ID: " + guestId);
+	            }
+	            // --- 기존 장바구니에 다른 가게 상품이 있는지 확인하는 로직 추가 끝 ---
+
+	            // cartItems의 모든 항목에 최종 결정된 userId 또는 guestId 설정
+	            for (Cart cart : cartItems) {
+	                cart.setId(userId);
+	                cart.setGuestId(guestId);
 	            }
 
 	            bobService.processAndAddCartItems(cartItems, userId, guestId);
@@ -381,7 +404,7 @@ public class MenuAjaxController {
 	@DeleteMapping("/reviewDelete.ajax")
 	public Map<String, Object> deleteReview(@RequestParam("rNo") int rNo,
 			@RequestParam("sId")int sId){
-		bobService.deleteReview(rNo);
+		bobService.deleteReview(rNo, sId);
 		
 		Map<String, Object> result = new HashMap<>();
 		result.put("reviewList", bobService.getReviewList(sId));

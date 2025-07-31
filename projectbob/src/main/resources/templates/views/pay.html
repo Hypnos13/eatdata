@@ -33,7 +33,7 @@
 					<div class="mb-3">
 						<label class="form-label">주문시 요청사항</label>
 						<textarea id="orderRequest" class="form-control" rows="3" maxlength="100"
-							placeholder="예: 배달 시 초인종 누르지 말아주세요."></textarea>
+							name="orderRequest" placeholder="예: 배달 시 초인종 누르지 말아주세요."></textarea>
 					</div>
 					<div class="section-title">결제수단 선택</div>
 					<div class="row g-2">
@@ -113,7 +113,7 @@
 				            결제하기
 				        </button>
 
-				        <div id="guestInfo" th:data-guest-id="${session.guestId}"></div>
+				        <div id="guestInfo" th:data-guest-id="${session.guestId}" th:data-user-id="${session.loginId}"></div>
 				    </div>
 				</div>
 

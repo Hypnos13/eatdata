@@ -202,9 +202,13 @@
 							<div class="card h-100 shadow-sm rounded-4 border-0">
 								<div class="row g-0">
 									<div class="col-4">
-										<img src="https://via.placeholder.com/100"
-											class="img-fluid rounded-start h-100 object-fit-cover"
-											alt="가게 이미지" />
+									  <!-- 업로드된 이미지가 있으면 그 경로를, 없으면 기본 플레이스홀더를 보여줌 -->
+									  <img
+									    th:src="${shop.sPictureUrl} != null
+									             ? @{${shop.sPictureUrl}}
+									             : @{/images/default-shop.png}"
+									    class="img-fluid rounded-start h-100 object-fit-cover"
+									    th:alt="${shop.name} + ' 이미지'" />
 									</div>
 									<div class="col-8">
 										<div class="card-body">

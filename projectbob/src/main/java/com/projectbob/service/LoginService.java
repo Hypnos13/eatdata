@@ -2,11 +2,10 @@ package com.projectbob.service;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.projectbob.domain.Addressbook;
+import com.projectbob.domain.Coupon;
 import com.projectbob.domain.Member;
 import com.projectbob.mapper.LoginMapper;
 
@@ -75,31 +74,30 @@ public class LoginService {
 		loginMapper.updateIsuse(id, isuse);
 	}
 	
-	public List<Addressbook> getMyAddress(String id){
-		return loginMapper.getMyAddress(id);
+	public List<Member> clientList(){
+		return loginMapper.clientList();
 	}
 	
-	public void addAddress(Addressbook addressbook) {
-		loginMapper.addAddress(addressbook);
+	public void addBirthdayCoupon(String id){
+		loginMapper.addBirthdayCoupon(id);
 	}
 	
-	public Addressbook getAddress(int no) {
-		return loginMapper.getAddress(no);
+	public int checkbirthdayCoupon(String id){
+		int result = -1;  // 쿠폰 없음
+		
+		Coupon coupon = loginMapper.checkbirthdayCoupon(id);
+		
+		if(coupon == null) { return result; }
+		
+		result = 1 ; // 쿠폰 있음
+		
+		return result;
+	}
+
+	public void transferCart(String guestId, String userId) {
+		loginMapper.updateCartOwner(guestId, userId);
 	}
 	
-	public void updateAddress(Addressbook addressbook) {
-		loginMapper.updateAddress(addressbook);
-	}
 	
-	public void deleteAddress(String id, int no) {
-		loginMapper.deleteAddress(id, no);
-	}
-	
-	// 비회원 ID를 client 테이블에 삽입 (이미 존재하면 무시)
-    public void insertGuestClientIfNotExist(String guestId) {
-        if (guestId != null && loginMapper.getClientById(guestId) == null) {
-            loginMapper.insertClient(guestId);
-        }
-    }
 }
 

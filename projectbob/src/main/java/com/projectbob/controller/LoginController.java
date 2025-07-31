@@ -3,6 +3,9 @@ package com.projectbob.controller;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.SecureRandom;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
-import com.projectbob.domain.Addressbook;
 import com.projectbob.domain.Member;
 import com.projectbob.service.LoginService;
 
@@ -94,12 +96,33 @@ public class LoginController {
 		
 		Member member = loginService.getMember(id);
 		
+		// 비회원 장바구니를 회원 장바구니로 이전
+        String guestId = (String) session.getAttribute("guestId");
+        if (guestId != null) {
+            loginService.transferCart(guestId, id);
+        }
+		
 		session.setAttribute("isLogin", true);
 		session.setAttribute("loginId", id);
 		session.setAttribute("loginNickname", member.getNickname());
 		session.setAttribute("loginDivision", member.getDivision());
+		session.removeAttribute("guestId");
+		
+		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+		LocalDate birthday = LocalDate.parse(member.getBirthday(), dateFormatter);
+		LocalDate today = LocalDate.now();
+		
 		if(member.getDivision().equals("owner")){
 			return "redirect:/shopMain";
+		}else if (member.getDivision().equals("client")) {
+			if((birthday.getMonth() == today.getMonth()) && (birthday.getDayOfMonth() == today.getDayOfMonth())) {
+				if(loginService.checkbirthdayCoupon(id) == -1) {
+					System.out.println("생일 쿠폰 없음");
+					loginService.addBirthdayCoupon(id);
+				}else{
+					System.out.println("생일 쿠폰 이미받음");
+				}
+			}	
 		}
 		
 		return "redirect:/main";
@@ -571,73 +594,4 @@ public class LoginController {
 		return null;	
 	}
 	
-	// 마이페이지
-	@GetMapping("/myPage")
-	public String myPage(Model model, HttpSession session){
-			
-	 String id = (String)session.getAttribute("loginId");  
-	 Member member =  loginService.getMember(id);
-	 
-	 model.addAttribute("member", member);
-		  
-	 return "members/myPage";			  
-	}
-	
-	// 주소 관리
-	@GetMapping("/myAddressbook")
-	public String myAddressbook(Model model, HttpSession session){
-			
-	 String id = (String)session.getAttribute("loginId");  
-	 List<Addressbook> addressbook = loginService.getMyAddress(id);
-	 
-	 model.addAttribute("addressbook", addressbook);
-		  
-	 return "members/myAddressbook";			  
-	}
-	
-	// 주소 관리 - 주소 등록
-	@PostMapping("/addAddress")
-	public String addAddress(Model model,Addressbook addressbook ,HttpSession session){
-				
-		String id = (String)session.getAttribute("loginId");
-		addressbook.setId(id);
-		
-		loginService.addAddress(addressbook);
-			  
-		return "redirect:myAddressbook";			  
-	}
-	
-	// 주소 관리 - 주소 수정 폼
-	@GetMapping("/updateAddressbookform")
-	public String updateAddressbookform(Model model, @RequestParam("no") int no){
-		
-		Addressbook addressbook = loginService.getAddress(no);
-		model.addAttribute("addressbook", addressbook);
-			  
-		return "members/updateAddressbookForm";			  
-	}
-	
-	// 주소 관리 - 주소 수정
-	@PostMapping("/updateAddress")
-	public String updateAddress(Model model,Addressbook addressbook ,HttpSession session){
-				
-		String id = (String)session.getAttribute("loginId");
-		addressbook.setId(id);
-		
-		loginService.updateAddress(addressbook);
-			  
-		return "redirect:myAddressbook";			  
-	}
-	
-	// 주소 관리 - 주소 삭제
-	@PostMapping("/deleteAddressbook")
-	public String deleteAddressbook( @RequestParam("no") int no, HttpSession session){
-				
-		String id = (String)session.getAttribute("loginId");
-		
-		loginService.deleteAddress(id, no);
-			  
-		return "redirect:myAddressbook";			  
-	}
-		
 }
