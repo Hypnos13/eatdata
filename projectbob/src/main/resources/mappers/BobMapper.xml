@@ -239,7 +239,7 @@
 
 <!-- 내가 찜한 가게 목록 -->
 <select id="getLikeShopList" parameterType="string" resultType="int">
-	SELECT s_id FROM likeList WHERE id = #{id}
+	SELECT s_id FROM likelist WHERE id = #{id}
 </select>
 
 <!-- 찜 추가 시 shop.heart + 1 -->
@@ -252,18 +252,18 @@
 
 <!-- 찜목록 버튼 -->
 <select id="isLiked" parameterType="LikeList" resultType="int">
-	SELECT COUNT(*) FROM likeList
+	SELECT COUNT(*) FROM likelist
 	WHERE id = #{id} AND s_id = #{sId}
 </select>
 <insert id="addLikeList" parameterType="LikeList">
-	INSERT INTO likeList(id, s_id, status, reg_date)
+	INSERT INTO likelist(id, s_id, status, reg_date)
 	VALUES(#{id}, #{sId}, 'Y', NOW())
 </insert>
 <delete id="deleteLikeList" parameterType="LikeList">
-	DELETE FROM likeList WHERE id = #{id} AND s_id = #{sId}
+	DELETE FROM likelist WHERE id = #{id} AND s_id = #{sId}
 </delete>
 <select id="shopCountLike" parameterType="int" resultType="int">
-	SELECT COUNT(*) FROM likeList WHERE s_id = #{sId}	
+	SELECT COUNT(*) FROM likelist WHERE s_id = #{sId}	
 </select>
 
 <!-- 하트 버튼 증가시키는 쿼리 -->
