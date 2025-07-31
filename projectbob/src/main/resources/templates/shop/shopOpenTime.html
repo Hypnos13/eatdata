@@ -11,9 +11,16 @@
 </head>
 <body>
 <div layout:fragment="content">
-  <div class="content-card">
-    <h2 class="text-center fw-bold mb-4">영업시간</h2>
+	<h2 class="text-center fw-bold mb-4">영업시간</h2>
     <form id="openTimeForm" th:action="@{|/shopOpenTimeUpdate?s_id=${shop.sId}|}" method="post" autocomplete="off">
+    <div class="text-end me-5">
+    	<span th:if="${shop.status == 'Y'}" class="badge bg-success">Open</span>
+    	<span th:if="${shop.status != 'Y'}" class="badge bg-secondary">Close</span> 
+    	<label class="switch">
+    	<input id="shopStat" type="checkbox" th:checked="${shop.status == 'Y'}" th:data-sid="${shop.sId}">
+    	<span class="slider"></span>
+    	</label>
+    </div>
 	  <table class="shop-opentime-table table align-middle">
 	    <thead>
 	      <tr>
@@ -78,7 +85,7 @@
 			    <span th:id="|openLabel${i.index}|"
 			          class="ms-2 badge"
 			          th:classappend="${isOpenList[i.index] == '1'} ? 'bg-success' : 'bg-secondary'"
-			          th:text="${isOpenList[i.index] == '1'} ? '영업중' : '휴무'"></span>
+			          th:text="${isOpenList[i.index] == '1'} ? '영업일' : '휴무일'"></span>
 			  </td>
 			</tr>
 	  </tbody>
@@ -89,7 +96,7 @@
 	    </button>
 	  </div>
 	</form>
-  </div>
+  
 </div>
 </body>
 </html>

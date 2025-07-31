@@ -318,8 +318,25 @@ function showMap(address) {
 }
 
 // 영업상태 ON/OFF 토글
-$(function() {
+/*$(function() {
     $('.shop-status-table input[type="checkbox"]').on('change', function() {
+        const $checkbox = $(this);
+        const sId = $checkbox.data('sid');
+        const isChecked = $checkbox.is(':checked');
+        // AJAX로 상태 변경 요청
+        $.post('/shop/statusUpdate', { sId: sId, status: isChecked ? 'Y' : 'N' })
+            .done(function() {
+                location.reload(); // 새로고침(동적으로 UI만 바꿔도 됨)
+            })
+            .fail(function() {
+                alert('상태 변경에 실패했습니다.');
+                // 실패 시 체크박스 원복
+                $checkbox.prop('checked', !isChecked);
+            });
+    });
+});*/
+$(function() {
+    $('#shopStat').on('change', function() {
         const $checkbox = $(this);
         const sId = $checkbox.data('sid');
         const isChecked = $checkbox.is(':checked');
@@ -366,7 +383,7 @@ $(function () {
     $tr.find(".allDay-check").prop("disabled", !on);
 
     $label
-      .text(on ? "영업중" : "휴무")
+      .text(on ? "영업일" : "휴무일")
       .toggleClass("bg-success", on)
       .toggleClass("bg-secondary", !on);
   };

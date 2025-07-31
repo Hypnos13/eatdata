@@ -6,7 +6,7 @@
 <script th:src="@{js/faq.js}"></script>
 
 <div class ="container">
-	<th:block th:if="${session.loginDisivion == 'master'}">
+	<th:block th:if="${session.loginDivision == 'master'}">
 		<div class="row mt-2">
 			<div class="col-12 text-end ">
 				<a th:href="@{writeNoticeForm}" class="btn btn-success">공지작성</a>
