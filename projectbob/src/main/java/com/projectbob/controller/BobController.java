@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @Slf4j
 public class BobController {
+
+    private final WebsocketService websocketService;
 	
     
     @Autowired
@@ -74,8 +76,9 @@ public class BobController {
 	@Autowired
     private ShopService shopService;
 	
-    BobController(LoginController loginController) {
+    BobController(LoginController loginController, WebsocketService websocketService) {
         this.loginController = loginController;
+        this.websocketService = websocketService;
     }
 
 
@@ -323,6 +326,18 @@ public class BobController {
                 }
                 int newOrderNo = bobService.createOrder(req, session, (String) req.get("paymentId"));
                 
+                //알림용 데이터 준비
+                Map<String, Object> payload = new HashMap<>();
+				/* payload.put("orderId", newOrderNo); */
+                payload.put("oNo", newOrderNo);
+                payload.put("regDate", System.currentTimeMillis());
+                payload.put("shopId", req.get("shopId"));
+                payload.put("totalPrice", req.get("totalPrice"));
+                
+                //WebSocket 알림 전송
+                websocketService.sendNewOrder((Integer) req.get("shopId"), payload);
+                
+                //장바구니 비우기
                 bobService.deleteAllCartItems(
                 		(String) session.getAttribute("userId"),
                 		(String) session.getAttribute("guestId")

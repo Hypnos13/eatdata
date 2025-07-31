@@ -67,37 +67,26 @@
         <div class="sidebar-icon-list mb-3 mt-2">
 		  <div class="row g-2">
 		    <div class="col-4">
-		      <a href="/orders" class="card text-center py-3 border-0 bg-light">
-		        <i class="bi bi-receipt fs-3 text-primary"></i>
-		        <div style="font-size:13px;">주문내역</div>
+		      <a href="/shop/orderManage?status=PENDING"
+		         class="card text-center py-3 border-0 bg-light">
+		        <i class="bi bi-bell fs-3 text-warning"></i>
+		        <div style="font-size:13px;">신규 주문</div>
 		      </a>
 		    </div>
 		    <div class="col-4">
-		      <a href="#" class="card text-center py-3 border-0 bg-light position-relative" id="btn-new-notify">
-			  <i class="bi bi-bell fs-3 text-warning"></i>
-			  <div style="font-size:13px;">신규 배달</div>
-			  <!-- 실시간 카운트 뱃지 -->
-			  <span id="newNotifyBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;">
-			    0
-			  </span>
-			</a>
-			
-			<div class="dropdown-menu p-2" id="newNotifyMenu" style="min-width: 250px;">
-			  <h6 class="dropdown-header">새로운 알림</h6>
-			  <div id="newNotifyList">
-			    <!-- JS 로 각 알림 항목을 <a class="dropdown-item" href="…">로 추가 -->
-			    <p class="text-muted">알림이 없습니다.</p>
-			  </div>
-			</div>
-			
+		      <a href="/orders"
+		         class="card text-center py-3 border-0 bg-light">
+		        <i class="bi bi-receipt fs-3 text-primary"></i>
+		        <div style="font-size:13px;">주문 내역</div>
+		      </a>
 		    </div>
 		    <div class="col-4">
-		      <a href="/delivery/assign" class="card text-center py-3 border-0 bg-light">
+		      <a href="/delivery/assign"
+		         class="card text-center py-3 border-0 bg-light">
 		        <i class="bi bi-people fs-3 text-success"></i>
 		        <div style="font-size:13px;">배차 관리</div>
 		      </a>
 		    </div>
-		    
 		  </div>
 		</div>
         
@@ -191,18 +180,25 @@
 		  </div>
 		</div>
 		
-		<!-- 통계 -->
+		<!-- 주문 관리 추가 -->
 		<div class="mb-2">
 		  <button class="btn w-100 text-start sidebar-group-btn fw-bold"
-		          data-bs-toggle="collapse" data-bs-target="#collapseStatMenu" aria-expanded="false">
-		    <i class="bi bi-graph-up-arrow me-2"></i> 통계
+		          data-bs-toggle="collapse"
+		          data-bs-target="#collapseOrderManage"
+		          aria-expanded="false">
+		    <i class="bi bi-list-check me-2"></i> 주문 관리
 		    <i class="bi bi-chevron-down float-end"></i>
 		  </button>
-		  <div class="collapse" id="collapseStatMenu">
+		  <div class="collapse" id="collapseOrderManage">
 		    <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
-		      <li><a href="/stat/order" class="sidebar-sub-link">주문 통계</a></li>
-		      <li><a href="/stat/review" class="sidebar-sub-link">리뷰 통계</a></li>
-		      <li><a href="/stat/sales" class="sidebar-sub-link">매출 통계</a></li>
+		      <li>
+		        <a th:href="@{/shop/orderManage(status='PENDING')}"
+		           class="sidebar-sub-link">신규 주문</a>
+		      </li>
+		      <li>
+		        <a th:href="@{/orders}"
+		           class="sidebar-sub-link">주문 내역</a>
+		      </li>
 		    </ul>
 		  </div>
 		</div>
@@ -240,7 +236,9 @@
     <!-- 푸터 fragment include -->
     <th:block th:replace="~{fragments/shopFooter :: shopFooter}" />
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     </div>
 </body>
 </html>

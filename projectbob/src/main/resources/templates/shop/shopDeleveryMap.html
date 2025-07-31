@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/shop_layout}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>배달 경로</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Leaflet.js 예시 -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+</head>
+<body class="bg-light">
+
+  <div id="map" style="height:100vh;"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // 예시 좌표: 매장 위치 → 고객 위치
+    var storeLatLng = [37.493, 126.929];
+    var custLatLng  = [37.490, 126.930];
+
+    var map = L.map('map').setView(storeLatLng, 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    
+    L.marker(storeLatLng).addTo(map).bindPopup('가게');
+    L.marker(custLatLng).addTo(map).bindPopup('고객');
+
+    // 폴리라인(단순 경로)
+    L.polyline([storeLatLng, custLatLng], {weight:5}).addTo(map);
+  </script>
+</body>
+</html>

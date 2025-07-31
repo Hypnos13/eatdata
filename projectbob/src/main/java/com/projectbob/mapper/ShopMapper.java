@@ -90,6 +90,23 @@ public interface ShopMapper {
         @Param("limit")  int limit
       );
     
+    //주문내역 조회
+    List<Orders> selectOrdersByShopId(@Param("sId") int sId);
+    
+    // 상태별 & 가게별 주문 리스트 조회
+    List<Orders> selectOrdersByStatusAndShop(
+        @Param("status") String status,
+        @Param("sId")    int sId
+    );
+
+    // 단일 주문 상세 조회
+    Orders selectOrderByNo(@Param("oNo") int oNo);
+
+    // 주문 상태 변경
+    void updateOrderStatus(
+        @Param("oNo") int oNo,
+        @Param("status") String status);
+    
 	/* === Menu === */
 	// 메뉴 관련 메서드
     void insertMenu(Menu menu);                  // 메뉴 등록
