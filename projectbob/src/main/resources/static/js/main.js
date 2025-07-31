@@ -2131,17 +2131,15 @@ $(document).on("click", "#btnPayNow", function() {
                                     paymentId: payment.paymentId, // PortOne SDK가 반환한 paymentId 사용
                                     orderId: response.orderId, // 백엔드에서 미리 생성한 orderId 사용
                                     paymentMethod: selectedMethod, // 선택된 결제 수단 추가
-<<<<<<< HEAD
+
                                     // 새로 추가할 필드들
                                     address1: address1,
                                     address2: address2,
                                     phone: phone,
                                     orderRequest: orderRequest,
-                                    safeNum: safeNum
-=======
+                                    safeNum: safeNum,
 									shopId: shopId,
 									totalPrice: finalTotalPrice
->>>>>>> Hyeok
                                 }),
                                 success: function(completeResponse) {
                                     if (completeResponse.success) {
