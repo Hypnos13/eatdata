@@ -230,7 +230,6 @@ $(document).ready(function() {
 // ==============================
 function updateOrderSummary(cartList, totalCartPrice) {
 	console.log(" cartList 전체 확인:", cartList); 
-	orderListContainer.empty();
 	
     const $orderItemList = $(".order-item-list");
     const $emptyOrderMessage = $(".empty-order-message"); // 클래스 선택자로 변경
@@ -417,6 +416,7 @@ function updateCartItemQuantity(caId, newQuantity) {
     });
 }
 
+
 // ==============================
 // 장바구니 개별 항목 삭제 함수 (AJAX)
 // ==============================
@@ -449,6 +449,11 @@ function deleteCartItem(caId) {
             alert("항목 삭제 중 서버 오류가 발생했습니다.");
         }
     });
+}
+
+function updateOverallTotalPriceDisplay(totalCartPrice){
+	const $totalOrderPriceDisplay = $("#totalOrderPrice");
+	$totalOrderPriceDisplay.text(`총 결제 금액 : ${totalCartPrice.toLocaleString()}원`).removeClass("d-none").show();
 }
 
 // ==============================

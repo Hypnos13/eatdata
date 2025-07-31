@@ -161,13 +161,27 @@
     mo.price AS optionPrice,
      mo.m_option AS optionGroupName,
     CASE
-        WHEN c.mo_id IS NULL THEN m.price  -- Main menu item
-        ELSE mo.price                     -- Option item
+        WHEN c.mo_id IS NULL THEN m.price 
+        ELSE mo.price                     
     END AS unitPrice FROM cart c
   INNER JOIN menu m ON c.m_id = m.m_id
   LEFT JOIN menu_option mo ON c.mo_id = mo.mo_id
-  WHERE (c.id = #{userId} AND #{userId} IS NOT NULL)
-     OR (c.guest_id = #{guestId} AND #{guestId} IS NOT NULL)
+  
+ WHERE
+  <choose>
+    <when test="userId != null and userId.trim() != '' and guestId != null and guestId.trim() != ''">
+      (c.id = #{userId} OR c.guest_id = #{guestId})
+    </when>
+    <when test="userId != null and userId.trim() != ''">
+      c.id = #{userId}
+    </when>
+    <when test="guestId != null and guestId.trim() != ''">
+      c.guest_id = #{guestId}
+    </when>
+    <otherwise>
+      1 = 0
+    </otherwise>
+  </choose>
   ORDER BY c.ca_id ASC
 </select>
 

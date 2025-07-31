@@ -1,6 +1,5 @@
 package com.projectbob.service;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,6 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import com.projectbob.domain.LikeList;
 import com.projectbob.domain.Member;
@@ -39,107 +37,94 @@ public class BobService {
 	// DB작업에 필요한 BobMapper 객체 의존성 주입 설정
 	@Autowired
 	private BobMapper bobMapper;
-	
-
 
 	@Autowired
 	private LoginService loginService;
-	
+
 	public Menu getMenuCal(int mId) {
-	    return bobMapper.getMenuCal(mId);
+		return bobMapper.getMenuCal(mId);
 	}
 
+	public List<Addressbook> getAddressesByUserId(String userId) { // 반환 타입 변경
+		System.out.println("[DEBUG] 서비스에 전달된 userId: " + userId);
+		List<Addressbook> addresses = bobMapper.findAddressesById(userId);
+		System.out.println("[DEBUG] 서비스에서 조회된 주소 개수: " + (addresses == null ? 0 : addresses.size()));
+		return addresses;
+	}
 
-	 public List<Addressbook> getAddressesByUserId(String userId) { // 반환 타입 변경
-		  System.out.println("[DEBUG] 서비스에 전달된 userId: " + userId);
-		    List<Addressbook> addresses = bobMapper.findAddressesById(userId);
-		    System.out.println("[DEBUG] 서비스에서 조회된 주소 개수: " + (addresses == null ? 0 : addresses.size()));
-		    return addresses;
-	    }
-	
+	public CartSummaryDto getCartSummaryForUserOrGuest(String userId, String guestId) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("userId", userId);
+		params.put("guestId", guestId);
 
-	 public CartSummaryDto getCartSummaryForUserOrGuest(String userId, String guestId) {
-	        Map<String, Object> params = new HashMap<>();
-	        params.put("userId", userId);
-	        params.put("guestId", guestId);
+		List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params);
 
-	        List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params);
+		// 각 Cart 항목의 totalPrice를 해당 항목의 단가 * 수량으로 재계산
+		allCartItems.forEach(item -> {
+			int unitPrice = 0;
+			if (item.getCaPid() == null) { // 메인 메뉴
+				unitPrice = item.getMenuPrice();
+			} else { // 옵션
+				unitPrice = item.getOptionPrice();
+			}
+			item.setTotalPrice(unitPrice * item.getQuantity());
+		});
 
-	        // 각 Cart 항목의 totalPrice를 해당 항목의 단가 * 수량으로 재계산
-	        allCartItems.forEach(item -> {
-	            int unitPrice = 0;
-	            if (item.getCaPid() == null) { // 메인 메뉴
-	                unitPrice = item.getMenuPrice();
-	            } else { // 옵션
-	                unitPrice = item.getOptionPrice();
-	            }
-	            item.setTotalPrice(unitPrice * item.getQuantity());
-	        });
+		int totalQuantity = 0;
+		int totalPrice = 0;
 
-	        int totalQuantity = 0;
-	        int totalPrice = 0;
+		if (allCartItems != null && !allCartItems.isEmpty()) {
+			// 메인 메뉴 항목의 수량만 총 수량에 합산
+			totalQuantity = allCartItems.stream().filter(item -> item.getCaPid() == null) // ca_pid가 없는 것이 메인 메뉴
+					.mapToInt(Cart::getQuantity).sum();
+			// 모든 장바구니 항목의 totalPrice 합산 (메인 메뉴 + 옵션)
+			totalPrice = allCartItems.stream().mapToInt(Cart::getTotalPrice).sum();
+		}
 
-	        if (allCartItems != null && !allCartItems.isEmpty()) {
-	            // 메인 메뉴 항목의 수량만 총 수량에 합산
-	            totalQuantity = allCartItems.stream()
-	                                        .filter(item -> item.getCaPid() == null) // ca_pid가 없는 것이 메인 메뉴
-	                                        .mapToInt(Cart::getQuantity)
-	                                        .sum();
-	            // 모든 장바구니 항목의 totalPrice 합산 (메인 메뉴 + 옵션)
-	            totalPrice = allCartItems.stream()
-	                                     .mapToInt(Cart::getTotalPrice)
-	                                     .sum();
-	        }
+		return new CartSummaryDto(allCartItems, totalQuantity, totalPrice);
+	}
 
-	        return new CartSummaryDto(allCartItems, totalQuantity, totalPrice);
-	    }
-
-	
 	@Transactional
 	public List<Cart> deleteCartItem(Integer caId, String userId, String guestId) {
-	    // 1. 매퍼에 전달할 파라미터 맵 생성
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("userId", userId);
-	    params.put("guestId", guestId);
+		// 1. 매퍼에 전달할 파라미터 맵 생성
+		Map<String, Object> params = new HashMap<>();
+		params.put("userId", userId);
+		params.put("guestId", guestId);
 
-	    // 2. 현재 사용자/게스트의 장바구니 항목 조회
-	    List<Cart> currentCartItems = bobMapper.selectCartByUserOrGuest(params);
+		// 2. 현재 사용자/게스트의 장바구니 항목 조회
+		List<Cart> currentCartItems = bobMapper.selectCartByUserOrGuest(params);
 
-	    
-	    Cart itemToDelete = currentCartItems.stream()
-	                                        .filter(item -> caId != null && item.getCaId() != null && item.getCaId().equals(caId))
-	                                        .findFirst()
-	                                        .orElse(null);
+		Cart itemToDelete = currentCartItems.stream()
+				.filter(item -> caId != null && item.getCaId() != null && item.getCaId().equals(caId)).findFirst()
+				.orElse(null);
 
-	    if (itemToDelete == null) {
-	        throw new IllegalArgumentException("삭제할 장바구니 항목을 찾을 수 없습니다.");
-	    }
-	    // 옵션 항목은 독립적으로 삭제할 수 없다는 비즈니스 로직 확인
-	    if (itemToDelete.getCaPid() != null) { // ca_pid가 있으면 옵션 항목임
-	        throw new IllegalArgumentException("옵션 항목은 단독으로 삭제할 수 없습니다. 메인 메뉴 항목을 삭제해주세요.");
-	    }
+		if (itemToDelete == null) {
+			throw new IllegalArgumentException("삭제할 장바구니 항목을 찾을 수 없습니다.");
+		}
+		// 옵션 항목은 독립적으로 삭제할 수 없다는 비즈니스 로직 확인
+		if (itemToDelete.getCaPid() != null) { // ca_pid가 있으면 옵션 항목임
+			throw new IllegalArgumentException("옵션 항목은 단독으로 삭제할 수 없습니다. 메인 메뉴 항목을 삭제해주세요.");
+		}
 
-	    params.put("caId",caId);
-	    bobMapper.deleteCartItemAndOptions(params);
+		params.put("caId", caId);
+		bobMapper.deleteCartItemAndOptions(params);
 
-	    // 5. 삭제 후 업데이트된 전체 장바구니 목록 반환 (여기서도 Map 사용)
-	    return bobMapper.selectCartByUserOrGuest(params);
+		// 5. 삭제 후 업데이트된 전체 장바구니 목록 반환 (여기서도 Map 사용)
+		return bobMapper.selectCartByUserOrGuest(params);
 	}
-   
-	
+
 	@Transactional
 	public List<Cart> deleteAllCartItems(String userId, String guestId) {
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("userId", userId);
-	    params.put("guestId", guestId);
+		Map<String, Object> params = new HashMap<>();
+		params.put("userId", userId);
+		params.put("guestId", guestId);
 
-	    // Mybatis 매퍼에 Map 형태로 파라미터 전달
-	    bobMapper.deleteAllCartItemsByUserOrGuest(params);
+		// Mybatis 매퍼에 Map 형태로 파라미터 전달
+		bobMapper.deleteAllCartItemsByUserOrGuest(params);
 
-	    return bobMapper.selectCartByUserOrGuest(params);
+		return bobMapper.selectCartByUserOrGuest(params);
 	}
 
-	
 	@Transactional
 	public List<Cart> updateCartItemQuantity(Integer caId, Integer newQuantity, String userId, String guestId) {
 		if (caId == null || newQuantity == null || (userId == null && guestId == null)) {
@@ -155,9 +140,7 @@ public class BobService {
 		List<Cart> currentFullCartItems = bobMapper.selectCartByUserOrGuest(selectParams);
 
 		Cart itemToUpdate = currentFullCartItems.stream()
-				.filter(item -> item.getCaId() != null && item.getCaId().equals(caId))
-				.findFirst()
-				.orElse(null);
+				.filter(item -> item.getCaId() != null && item.getCaId().equals(caId)).findFirst().orElse(null);
 
 		if (itemToUpdate == null) {
 			throw new IllegalArgumentException("업데이트할 장바구니 항목을 찾을 수 없습니다.");
@@ -202,117 +185,108 @@ public class BobService {
 		// 최종적으로 업데이트된 전체 장바구니 목록을 다시 조회하여 반환
 		return bobMapper.selectCartByUserOrGuest(selectParams);
 	}
-	
-	 /**
-     * 사용자 또는 비회원 ID로 메인 메뉴 장바구니 항목만 조회합니다.
-     */
-	public List<Cart> getMainCartItemsByUser(String userId, String guestId) {
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("userId", userId);
-	    params.put("guestId", guestId);
-	    return bobMapper.selectMainCartItemsByUserOrGuest(params); // Map 형태로 파라미터 전달
-	}
-	
-	 /* 사용자 또는 비회원 ID로 모든 장바구니 항목을 조회합니다.
-     */
-	public CartSummaryDto getCartByUser(String userId, String guestId) {
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("userId", userId);
-	    params.put("guestId", guestId);
-	    
 
-	    List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params);
-	    
-	    int totalQuantity = allCartItems.stream()
-				.filter(item -> item.getCaPid() == null)
-				.mapToInt(Cart::getQuantity)
+	/**
+	 * 사용자 또는 비회원 ID로 메인 메뉴 장바구니 항목만 조회합니다.
+	 */
+	public List<Cart> getMainCartItemsByUser(String userId, String guestId) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("userId", userId);
+		params.put("guestId", guestId);
+		return bobMapper.selectMainCartItemsByUserOrGuest(params); // Map 형태로 파라미터 전달
+	}
+
+	/*
+	 * 사용자 또는 비회원 ID로 모든 장바구니 항목을 조회합니다.
+	 */
+	public CartSummaryDto getCartByUser(String userId, String guestId) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("userId", userId);
+		params.put("guestId", guestId);
+
+		List<Cart> allCartItems = bobMapper.selectCartByUserOrGuest(params);
+
+		int totalQuantity = allCartItems.stream().filter(item -> item.getCaPid() == null).mapToInt(Cart::getQuantity)
 				.sum();
 
 		// 전체 총액은 각 카트 항목의 totalPrice를 모두 합산합니다.
 		// 이 totalPrice는 DB에 (단가 * 수량)으로 정확히 저장되어 있다고 가정합니다.
-		int overallTotalPrice = allCartItems.stream()
-				.mapToInt(Cart::getTotalPrice)
-				.sum();
+		int overallTotalPrice = allCartItems.stream().mapToInt(Cart::getTotalPrice).sum();
 
 		log.info("장바구니 총 수량: {}, 계산된 최종 총액: {}", totalQuantity, overallTotalPrice);
 		// --- 수정된 부분 끝 ---
 
 		return new CartSummaryDto(allCartItems, totalQuantity, overallTotalPrice);
-	    
 
 	}
-	
-	
+
 	@Transactional
 	public void processAndAddCartItems(List<Cart> cartItems, String userId, String guestId) {
-	    Integer parentCaId = null; // 메인 메뉴의 ca_id를 저장할 변수
+		Integer parentCaId = null; // 메인 메뉴의 ca_id를 저장할 변수
 
-	    for (Cart c : cartItems) {
-	        if (c.getMoIds() == null || c.getMoIds().isEmpty()) {
-	            // ✅ 메인 메뉴 처리
-	            Cart mainMenuCart = new Cart();
-	            mainMenuCart.setMId(c.getMId());
-	            mainMenuCart.setMoId(null);
-	            mainMenuCart.setCaPid(null);
-	            mainMenuCart.setQuantity(c.getQuantity());
-	            mainMenuCart.setSId(c.getSId());
+		for (Cart c : cartItems) {
+			if (c.getMoIds() == null || c.getMoIds().isEmpty()) {
 
-	            mainMenuCart.setUnitPrice(c.getMenuPrice());
-	            mainMenuCart.setTotalPrice(c.getMenuPrice() * c.getQuantity());
+				Cart mainMenuCart = new Cart();
+				mainMenuCart.setMId(c.getMId());
+				mainMenuCart.setMoId(null);
+				mainMenuCart.setCaPid(null);
+				mainMenuCart.setQuantity(c.getQuantity());
+				mainMenuCart.setSId(c.getSId());
 
-	            mainMenuCart.setId(userId);
-	            mainMenuCart.setGuestId(guestId);
+				mainMenuCart.setUnitPrice(c.getMenuPrice());
+				mainMenuCart.setTotalPrice(c.getMenuPrice() * c.getQuantity());
 
-	            // 로그 출력
-	            log.info("[메인 메뉴] mId: {}, quantity: {}, unitPrice: {}, totalPrice: {}", 
-	                     c.getMId(), c.getQuantity(), c.getMenuPrice(), mainMenuCart.getTotalPrice());
+				mainMenuCart.setId(userId);
+				mainMenuCart.setGuestId(guestId);
 
-	            // DB 삽입
-	            bobMapper.insertCart(mainMenuCart);
-	            parentCaId = mainMenuCart.getCaId(); 
+				// 로그 출력
+				log.info("[메인 메뉴] mId: {}, quantity: {}, unitPrice: {}, totalPrice: {}", c.getMId(), c.getQuantity(),
+						c.getMenuPrice(), mainMenuCart.getTotalPrice());
 
-	        } else {
-	            // ✅ 옵션 처리
-	            if (parentCaId == null) {
-	                log.error("옵션 항목을 추가하기 전에 메인 메뉴 항목이 필요합니다. (mId: {})", c.getMId());
-	                throw new IllegalStateException("옵션 항목은 메인 메뉴 없이 추가될 수 없습니다.");
-	            }
+				// DB 삽입
+				bobMapper.insertCart(mainMenuCart);
+				parentCaId = mainMenuCart.getCaId();
 
-	            // 첫 번째 옵션만 처리 (프론트에서 옵션당 1건씩 보낸다고 가정)
-	            Integer moId = c.getMoIds().get(0);
-	            Integer optionPrice = c.getOptionPrices().get(0);
+			} else {
+				// ✅ 옵션 처리
+				if (parentCaId == null) {
+					log.error("옵션 항목을 추가하기 전에 메인 메뉴 항목이 필요합니다. (mId: {})", c.getMId());
+					throw new IllegalStateException("옵션 항목은 메인 메뉴 없이 추가될 수 없습니다.");
+				}
 
-	            Cart optionCart = new Cart();
-	            optionCart.setMId(c.getMId());
-	            optionCart.setMoId(moId);
-	            optionCart.setCaPid(parentCaId);
-	            optionCart.setQuantity(c.getQuantity());
-	            optionCart.setSId(c.getSId());
+				List<Integer> moIds = c.getMoIds();
+				List<Integer> optionPrices = c.getOptionPrices();
 
-	            optionCart.setUnitPrice(optionPrice);
-	            optionCart.setTotalPrice(optionPrice * c.getQuantity());
+				for (int i = 0; i < moIds.size(); i++) {
+					Integer moId = moIds.get(i);
+					Integer optionPrice = optionPrices.get(i);
 
-	            optionCart.setId(userId);
-	            optionCart.setGuestId(guestId);
+					Cart optionCart = new Cart();
+					optionCart.setMId(c.getMId());
+					optionCart.setMoId(moId);
+					optionCart.setCaPid(parentCaId);
+					optionCart.setQuantity(c.getQuantity());
+					optionCart.setSId(c.getSId());
 
-	            // 로그 출력
-	            log.info("[옵션] moId: {}, quantity: {}, unitPrice: {}, totalPrice: {}, parentCaId: {}", 
-	                     moId, c.getQuantity(), optionPrice, optionCart.getTotalPrice(), parentCaId);
+					optionCart.setUnitPrice(optionPrice);
+					optionCart.setTotalPrice(optionPrice * c.getQuantity());
 
-	            // DB 삽입
-	            bobMapper.insertCart(optionCart);
+					optionCart.setId(userId);
+					optionCart.setGuestId(guestId);
 
-	            // ✅ 옵션 처리 완료 후 parentCaId 초기화
-	            parentCaId = null;
-	        }
-	    }
+					log.info("[옵션] moId: {}, quantity: {}, unitPrice: {}, totalPrice: {}, parentCaId: {}", moId,
+							c.getQuantity(), optionPrice, optionCart.getTotalPrice(), parentCaId);
 
-	    log.info("Cart items processed and added to DB.");
+					bobMapper.insertCart(optionCart);
+				}
+			}
+
+		}
+		log.info("Cart items processed and added to DB.");
 	}
-	  
 	
-	
-	
+
 	// 전체 게시글을 읽어와 반환하는 메서드
 
 	public List<Shop> shopList(String category, String keyword) {
@@ -348,12 +322,11 @@ public class BobService {
 
 	/*
 	 * public List<Review> reviewList(int sId){ return bobMapper.reviewList(sId); }
-	 */	
-			public List<Review> getReviewList(int sId){
-	    return bobMapper.getReviewList(sId);
+	 */
+	public List<Review> getReviewList(int sId) {
+		return bobMapper.getReviewList(sId);
 	}
 
-	
 	// 가게 (하트) 증가
 
 	public List<Review> reviewList(int sId) {
@@ -370,96 +343,90 @@ public class BobService {
 		return bobMapper.getHeartCount(sId);
 	}
 
-	
 	// 가게 찜하기
 	public int isLiked(LikeList likeList) {
 		return bobMapper.isLiked(likeList);
 	}
-	
+
 	// 찜 등록
 	public int addLikeList(LikeList likeList) {
 		return bobMapper.addLikeList(likeList);
 	}
-	
+
 	// 찜 삭제
 	public int deleteLikeList(LikeList likeList) {
 		return bobMapper.deleteLikeList(likeList);
 	}
-	
+
 	// 가게 찜
 	public int shopCountLike(int sId) {
 		return bobMapper.shopCountLike(sId);
 	}
-			
+
 	// 찜 버튼 토글
 	@Transactional
 	public Map<String, Object> toggleLike(LikeList likeList) {
 		boolean exists = bobMapper.isLiked(likeList) > 0;
 		int sId = likeList.getSId();
 		int newCount;
-		
+
 		if (exists) {
 			bobMapper.deleteLikeList(likeList);
 			bobMapper.decrementHeart(likeList.getSId());
-			
+
 		} else {
 			bobMapper.addLikeList(likeList);
 			bobMapper.incrementHeart(likeList.getSId());
-			
-		}		
+
+		}
 		newCount = bobMapper.getHeartCount(likeList.getSId());
-		return Map.of(
-				"liked", !exists,
-				"heartCount", newCount
-				);
+		return Map.of("liked", !exists, "heartCount", newCount);
 	}
-	
+
 	// 내가 찜한 가게 목록
-	public List<Integer> getLikeShopList(String userId){
+	public List<Integer> getLikeShopList(String userId) {
 		return bobMapper.getLikeShopList(userId);
 	}
-	
-	
 
 	// 댓글 등록하는 메서드
 	public void addReview(Review review) {
 		bobMapper.addReview(review);
 	}
-	
-	//댓글 수정하는 메서드
+
+	// 댓글 수정하는 메서드
 	public void updateReview(Review review) {
 		bobMapper.updateReview(review);
 	}
-	
-	//댓글 삭제하는 메서드
+
+	// 댓글 삭제하는 메서드
 	public void deleteReview(int rNo) {
 		bobMapper.deleteReview(rNo);
 	}
-	
+
 	// 대댓글 리스트
 	/*
 	 * public ReviewReply reviewreplyList(int rNo){ return
 	 * bobMapper.reviewreplyList(rNo); }
 	 */
-	
-	// 대댓글 등록/수정하는 메서드	
-	  public void addReviewReply(ReviewReply reviewreply) {
-		  int count = bobMapper.countReviewReply(reviewreply.getRNo());
-		  if (count == 0) {
-			  bobMapper.addReviewReply(reviewreply);
-		  } else {
-			  bobMapper.updateReviewReply(reviewreply);
-		  }
-	   }
-	 
+
+	// 대댓글 등록/수정하는 메서드
+	public void addReviewReply(ReviewReply reviewreply) {
+		int count = bobMapper.countReviewReply(reviewreply.getRNo());
+		if (count == 0) {
+			bobMapper.addReviewReply(reviewreply);
+		} else {
+			bobMapper.updateReviewReply(reviewreply);
+		}
+	}
+
 	// 가게 번호에 해당하는 전체 대댓글을 rNo(리뷰 번호) 기준으로 Map에 담아 반환
 	public Map<Integer, ReviewReply> getReviewReplyMap(int sId) {
-	    List<ReviewReply> replyList = bobMapper.getReviewReplyList(sId); // getReviewReplyList는 sId(가게) 전체 대댓글 가져옴
-	    Map<Integer, ReviewReply> map = new HashMap<>();
-	    for (ReviewReply reply : replyList) {
-	        map.put(reply.getRNo(), reply); // rNo 기준 맵핑
-	    }
-	    return map;
+		List<ReviewReply> replyList = bobMapper.getReviewReplyList(sId); // getReviewReplyList는 sId(가게) 전체 대댓글 가져옴
+		Map<Integer, ReviewReply> map = new HashMap<>();
+		for (ReviewReply reply : replyList) {
+			map.put(reply.getRNo(), reply); // rNo 기준 맵핑
+		}
+		return map;
 	}
 
 	// 대댓글 수정하기
@@ -471,94 +438,82 @@ public class BobService {
 	public void deleteReviewReply(int rrNo) {
 		bobMapper.deleteReviewReply(rrNo);
 	}
-	
-	
-	// 결제정보 가져오기
-	
-	 public NewOrder getNewOrder(int orderId) {
-		 Orders o =	 bobMapper.selectOrderId(orderId);
-		 if (o == null) {
-			 throw new IllegalArgumentException("해당 주문을 못찾음: " + orderId);
-		 }
-		 String shopName = this.getShopDetail(o.getSId()).getName();
-		 
-		 NewOrder newo = new NewOrder();
-		 newo.setOrderId(o.getONo());
-		 newo.setShopId(o.getSId());
-		 newo.setShopName(shopName);
-		 newo.setMenus(o.getMenus());
-		 newo.setTotalPrice(o.getTotalPrice());
-		 newo.setPayment(o.getPayment());
-		 newo.setAddress(o.getOAddress());
-		 newo.setPhone(loginService.getMember(o.getId()).getPhone());
-		 newo.setRequest(o.getRequest());
-		 newo.setStatus(o.getStatus());
-		 newo.setRegDate(o.getRegDate());
-		 return newo;
-	 }
-	 
-	 // 주문 번호로 실제 주문 금액을 가져오는 메서드
-	 public int getActualOrderAmount(String orderId) {
-		 Orders order = bobMapper.selectOrderByPaymentUid(orderId);
-		 if (order != null) {
-			 return order.getTotalPrice();
-		 }
-		 throw new IllegalArgumentException("해당 주문 ID(" + orderId + ")에 대한 주문을 찾을 수 없습니다.");
-	 }
-	 
-	 // 주문페이지에서 결제완료 페이지로 보내기
-	 @Transactional
-	 public int createOrder(Map<String, Object> req, HttpSession session, String paymentUid) {
-		 String userId = (String) session.getAttribute("userId");
-		 String guestId = (String) session.getAttribute("guestId");
-		 String payment = (String) req.get("paymentMethod");
-		 System.out.println("BobService - paymentMethod from request: " + payment);
 
-		 // 로그인한 사용자가 있다면 guestId를 무시 (임시 방편)
-		 if (userId != null) {
-			 guestId = null;
-		 } else if (guestId != null) {
+	// 결제정보 가져오기
+
+	public NewOrder getNewOrder(int orderId) {
+		Orders o = bobMapper.selectOrderId(orderId);
+		if (o == null) {
+			throw new IllegalArgumentException("해당 주문을 못찾음: " + orderId);
+		}
+		String shopName = this.getShopDetail(o.getSId()).getName();
+
+		NewOrder newo = new NewOrder();
+		newo.setOrderId(o.getONo());
+		newo.setShopId(o.getSId());
+		newo.setShopName(shopName);
+		newo.setMenus(o.getMenus());
+		newo.setTotalPrice(o.getTotalPrice());
+		newo.setPayment(o.getPayment());
+		newo.setAddress(o.getOAddress());
+		newo.setPhone(loginService.getMember(o.getId()).getPhone());
+		newo.setRequest(o.getRequest());
+		newo.setStatus(o.getStatus());
+		newo.setRegDate(o.getRegDate());
+		return newo;
+	}
+
+	// 주문 번호로 실제 주문 금액을 가져오는 메서드
+	public int getActualOrderAmount(String orderId) {
+		Orders order = bobMapper.selectOrderByPaymentUid(orderId);
+		if (order != null) {
+			return order.getTotalPrice();
+		}
+		throw new IllegalArgumentException("해당 주문 ID(" + orderId + ")에 대한 주문을 찾을 수 없습니다.");
+	}
+
+	// 주문페이지에서 결제완료 페이지로 보내기
+	@Transactional
+	public int createOrder(Map<String, Object> req, HttpSession session, String paymentUid) {
+		String userId = (String) session.getAttribute("userId");
+		String guestId = (String) session.getAttribute("guestId");
+		String payment = (String) req.get("paymentMethod");
+		System.out.println("BobService - paymentMethod from request: " + payment);
+
+		// 로그인한 사용자가 있다면 guestId를 무시 (임시 방편)
+		if (userId != null) {
+			guestId = null;
+		} else if (guestId != null) {
 			// 비회원인 경우, client 테이블에 guestId를 삽입 (이미 존재하면 무시)
 			loginService.insertGuestClientIfNotExist(guestId);
-		 }
-		 String address = req.get("address1") + " " + req.get("address2");
-		 String phone = (String) req.get("phone");
-		 String request = (String) req.get("orderRequest");
-		 
-		 CartSummaryDto cartSummary =getCartSummaryForUserOrGuest(userId, guestId);
-		 
-		 Orders order = new Orders();
-		 order.setSId(cartSummary.getCartList().get(0).getSId());
-		 order.setId(userId != null ? userId : guestId); // 이 라인 바로 다음
-		 System.out.println("BobService - Setting Order ID to: " + order.getId()); // 이 로그를 추가
-		 order.setTotalPrice(cartSummary.getTotalPrice());
-		 order.setPayment(payment);
-		 order.setPaymentUid(paymentUid); // paymentUid 설정
-		 order.setOAddress(address);
-		 order.setRequest(request);
-		 order.setStatus("PENDING");
-		 // quantity와 menus 정보 설정
-		 order.setQuantity(cartSummary.getTotalQuantity());
-		 String orderedMenus = cartSummary.getCartList().stream()
-		                                 .map(cartItem -> cartItem.getMenuName() + " x " + cartItem.getQuantity())
-		                                 .collect(Collectors.joining(", "));
-		 order.setMenus(orderedMenus);
-		 
-		 bobMapper.insertOrder(order);
-		 int newOrderNo = order.getONo();
-		 
-		 return newOrderNo;
-	 }
-	 
+		}
+		String address = req.get("address1") + " " + req.get("address2");
+		String phone = (String) req.get("phone");
+		String request = (String) req.get("orderRequest");
 
-	 
-	 
-	 
-	 
+		CartSummaryDto cartSummary = getCartSummaryForUserOrGuest(userId, guestId);
+
+		Orders order = new Orders();
+		order.setSId(cartSummary.getCartList().get(0).getSId());
+		order.setId(userId != null ? userId : guestId); // 이 라인 바로 다음
+		System.out.println("BobService - Setting Order ID to: " + order.getId()); // 이 로그를 추가
+		order.setTotalPrice(cartSummary.getTotalPrice());
+		order.setPayment(payment);
+		order.setPaymentUid(paymentUid); // paymentUid 설정
+		order.setOAddress(address);
+		order.setRequest(request);
+		order.setStatus("PENDING");
+		// quantity와 menus 정보 설정
+		order.setQuantity(cartSummary.getTotalQuantity());
+		String orderedMenus = cartSummary.getCartList().stream()
+				.map(cartItem -> cartItem.getMenuName() + " x " + cartItem.getQuantity())
+				.collect(Collectors.joining(", "));
+		order.setMenus(orderedMenus);
+
+		bobMapper.insertOrder(order);
+		int newOrderNo = order.getONo();
+
+		return newOrderNo;
+	}
+
 }
-
-
-
-
-
-
