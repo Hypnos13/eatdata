@@ -1822,6 +1822,7 @@ $('.payment-method').on('click', function(){
 
 // pay.html의 결제하기 버튼 클릭 이벤트
 $(document).on("click", "#btnPayNow", function() {
+	console.log("DEBUG: selectedMethod:", selectedMethod); // 이 줄 추가
 	if(!selectedMethod){
 		alert('결제 수단을 선택해주세요');
 		return;
@@ -1917,7 +1918,20 @@ $(document).on("click", "#btnPayNow", function() {
                 // response.orderId를 merchant_uid로 사용
                 response.paymentData.merchant_uid = response.orderId; 
                 
-                PortOne.requestPayment(response.paymentData)
+                PortOne.requestPayment({
+                    storeId: response.paymentData.storeId,
+                    channelKey: response.paymentData.channelKey,
+                    merchant_uid: response.orderId, // merchant_uid 추가!
+										payMethod: 'EASY_PAY',
+										easyPayProvider: selectedMethod == 'KAKAO'
+											? 'EASY_PAY_PROVIDER_KAKAO' : 'EASY_PAY_PROVIDER_TOSS',
+                    paymentId: response.paymentData.paymentId,
+                    orderName: response.paymentData.orderName,
+                    totalAmount: response.paymentData.totalAmount,
+                    currency: response.paymentData.currency,
+                   
+                    customData: response.paymentData.customData
+                })
                     .then(function(payment) {
                         console.log("Payment object from PortOne.requestPayment:", payment); // 추가된 로그
                         console.log("imp_uid:", payment.imp_uid); // imp_uid 확인
