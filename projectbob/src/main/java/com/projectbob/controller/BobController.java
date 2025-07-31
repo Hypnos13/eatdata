@@ -213,7 +213,7 @@ public class BobController {
 		
 
 		
-		  //데이터저장용  임시방편
+		  //주문표에 담아서 주문하기 페이지로
 		  @GetMapping("/pay")
 		  public String payPageGet(HttpSession session, Model model) {
 		      String userId = (String) session.getAttribute("loginId");
