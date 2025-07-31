@@ -374,4 +374,42 @@
     <result property="rating" column="rating"/>
 </resultMap>
 
+<!-- 주문내역 조회 -->
+<select id="selectOrdersByShopId"
+        parameterType="int"
+        resultType="com.projectbob.domain.Orders">
+  SELECT
+    o_no         AS oNo,
+    s_id         AS sId,
+    id           AS id,
+    total_price  AS totalPrice,
+    payment      AS payment,
+    o_address    AS oAddress,
+    request      AS request,
+    reg_date     AS regDate,
+    modi_date    AS modiDate,
+    status       AS status,
+    quantity     AS quantity,
+    menus        AS menus,
+    payment_uid  AS paymentUid
+  FROM orders
+  WHERE s_id = #{sId}
+  ORDER BY reg_date DESC
+</select>
+
+<!-- 상태별 & 가게별 주문 리스트 조회 -->
+<select id="selectOrdersByStatusAndShop" parameterType="map" resultType="com.projectbob.domain.Orders">
+  SELECT * FROM orders WHERE status = #{status} AND s_id = #{sId} ORDER BY reg_date DESC
+</select>
+
+<!-- 단일 주문 상세 조회 -->
+<select id="selectOrderByNo" parameterType="int" resultType="com.projectbob.domain.Orders">
+  SELECT * FROM orders WHERE o_no = #{oNo}
+</select>
+  
+<!-- 주문 상태 변경 -->
+<update id="updateOrderStatus" parameterType="map">
+  UPDATE orders SET status = #{status}, modi_date = SYSDATE() WHERE o_no = #{oNo}
+</update>
+
 </mapper>	

@@ -12,15 +12,31 @@
     </div>
     
     <nav class="d-flex align-items-center">
-	    <!-- 로그인 상태일 때, 알림 아이콘 먼저 -->
+	    <!-- 로그인 상태일 때 -->
 	    <th:block th:if="${session.isLogin}">
-	      <div class="position-relative me-3">
-	        <a href="#" id="headerNotifyBtn" class="text-decoration-none text-dark">
-	          <i class="bi bi-bell-fill fs-4"></i>
-	        </a>
-	        <span th:text="${session.notifyCount}" 
-	              class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1">0</span>
-	      </div>
+	    	<!-- 알림 아이콘 + 뱃지 -->
+		      <div class="position-relative me-3 dropdown"
+		       id="notifyContainer"
+		       th:attr="data-shop-id=${currentShop.sId}">
+		    <a href="#" id="headerNotifyBtn" class="text-decoration-none text-dark"
+		       data-bs-toggle="dropdown" aria-expanded="false">
+		      <i class="bi bi-bell-fill fs-4"></i>
+		    </a>
+		    <span id="headerNotifyBadge"
+		          th:text="${session.notifyCount}"
+		          class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1"
+		          th:classappend="${session.notifyCount == 0} ? 'd-none' : ''">0</span>
+		
+		        <!-- 드롭다운 메뉴 -->
+		        <ul class="dropdown-menu p-2" id="headerNotifyMenu" aria-labelledby="headerNotifyBtn"
+		        style="min-width: 250px;">
+		      <li><h6 class="dropdown-header">새로운 알림</h6></li>
+		      <div id="headerNotifyList">
+		        <p class="text-muted mb-0">알림이 없습니다.</p>
+		      </div>
+		    </ul>
+		  </div>
+      
 	      <a class="me-2 fw-bold">[[${session.loginNickname}]] 님 어서오세요.</a>
 	      <a href="logout" class="btn-login">로그아웃</a>
 	      <a href="myProfile" class="btn-login">내정보수정</a>
@@ -39,5 +55,6 @@
 	    	<a href="shopManage" class="btn-register">가게관리</a>
 	    </th:block>
     </nav>
+    
 </header>
 </html>

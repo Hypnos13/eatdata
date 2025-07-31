@@ -1,0 +1,53 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/shop_layout}">
+  <head>
+    <title>🔔 신규 주문</title>
+  </head>
+  <body>
+    <!-- 이 div가 반드시 필요합니다 -->
+    <div layout:fragment="content">
+      <div class="container py-3">
+        <h4 class="mb-3">🔔 신규 주문</h4>
+        <ul id="newOrderList" class="list-group" th:data-shop-id="${currentShop.sId}">
+		  <li th:each="o : ${orders}"
+		      class="list-group-item d-flex align-items-start mb-3 p-3">
+		
+		    <!-- 1) 왼쪽: 주문 내용 -->
+		    <div class="flex-grow-1 pe-3">
+		      <div class="mb-1">🛒 <span th:text="${o.menus}">치킨 x1, 콜라 x1</span></div>
+		      <div class="mb-1">💬 <span th:text="${o.request != null ? o.request : '요청사항 없음'}">초인종 금지</span></div>
+		      <div class="text-muted small"><i class="bi bi-clock"></i>
+		        <span th:text="${#dates.format(o.regDate,'HH:mm')}">11:07</span>
+		      </div>
+		    </div>
+		
+		    <!-- 2) 오른쪽: 버튼 그룹 -->
+			<div class="d-flex flex-column justify-content-between" style="min-width: 5rem;">
+			  <button
+			    type="button"
+			    class="btn btn-success btn-sm mb-2"
+			    th:onclick="|acceptOrder(${o.oNo})|">
+			    수락
+			  </button>
+			  <button
+			    type="button"
+			    class="btn btn-outline-danger btn-sm"
+			    th:onclick="|rejectOrder(${o.oNo})|">
+			    거절
+			  </button>
+			</div>
+		  </li>
+		
+		  <li th:if="${#lists.isEmpty(orders)}"
+		      class="list-group-item text-center text-muted">
+		    대기 중인 주문이 없습니다.
+		  </li>
+		</ul>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script th:src="@{/js/shop.js}"></script>
+  </body>
+</html>

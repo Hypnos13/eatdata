@@ -1827,7 +1827,7 @@ $(document).on("click", "#btnPayNow", function() {
     const phone = $("#phone").val();
     const orderRequest = $("#orderRequest").val();
     const safeNum = $("#safeNum").is(":checked");
-
+	
     // 2. 필수 입력 값 검증
     if (!address1 || !address2 || !phone) {
         alert("필수 입력 항목(주소, 상세주소, 휴대전화번호)을 모두 입력해주세요.");
@@ -1922,6 +1922,7 @@ $(document).on("click", "#btnPayNow", function() {
                             alert("결제 실패: " + payment.message);
                             console.error("PortOne Error:", payment);
                         } else {
+							const shopId = parseInt($('#shopId').val(), 10);
                             // 결제 성공 시 서버에 최종 확인 요청
                             $.ajax({
                                 url: "/completePayment", // 서버의 결제 완료 엔드포인트
@@ -1930,7 +1931,9 @@ $(document).on("click", "#btnPayNow", function() {
                                 data: JSON.stringify({
                                     paymentId: payment.paymentId, // PortOne SDK가 반환한 paymentId 사용
                                     orderId: response.orderId, // 백엔드에서 미리 생성한 orderId 사용
-                                    paymentMethod: selectedMethod // 선택된 결제 수단 추가
+                                    paymentMethod: selectedMethod, // 선택된 결제 수단 추가
+									shopId: shopId,
+									totalPrice: finalTotalPrice
                                 }),
                                 success: function(completeResponse) {
                                     if (completeResponse.success) {

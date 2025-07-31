@@ -13,6 +13,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import jakarta.servlet.http.*;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,9 @@ public class ShopController {
 	
 	@Autowired
 	private FileUploadService fileUploadService;
+	
+	@Autowired
+    private SimpMessagingTemplate messagingTemplate;
 	
 	// 식품영양성분DB API 검색
 	@GetMapping("/api/nutrition-search")
@@ -653,9 +658,76 @@ public class ShopController {
         return "redirect:/shop/reviewManage?s_id=" + sId;
     }
 	
+	/* ----------------------- 상태별 주문 리스트 ----------------------- */
+	@GetMapping("/shop/orderManage")
+	public String orderManage(
+	        @RequestParam(value = "status", defaultValue = "PENDING") String status,
+	        @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	        @SessionAttribute(name = "loginId",   required = false) String loginId,
+	        Model model) {
 
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+	    List<Orders> orders = shopService.findOrdersByStatusAndShop(status, sId);
+	    model.addAttribute("orders", orders);
+	    model.addAttribute("status", status);
+	    model.addAttribute("currentShop",
+	        shopService.findByShopIdAndOwnerId(sId, loginId));
+	    return "shop/shopNewOrders";
+	}
 
- 
+    /* ----------------------- 주문 상세 보기 ----------------------- */
+	@GetMapping("/shop/orderDetail")
+	public String orderDetail(
+	        @RequestParam("oNo") int oNo,
+	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        @SessionAttribute(name = "currentSId",required = false) Integer sId,
+	        Model model) {
+
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+	    Orders order = shopService.findOrderByNo(oNo);
+	    model.addAttribute("order", order);
+	    model.addAttribute("currentShop",
+	        shopService.findByShopIdAndOwnerId(sId, loginId));
+	    return "shop/shopOrderDetail";
+	}
+
+    /* ----------------------- 주문 상태 변경 (수락/거절/완료) ----------------------- */
+	@PostMapping("/shop/orderManage/{oNo}/status")
+	@ResponseBody
+	@Transactional
+	public ResponseEntity<Map<String, Object>> changeOrderStatus(
+	        @PathVariable int oNo,
+	        @RequestParam("newStatus") String newStatus) {
+
+	    shopService.updateOrderStatus(oNo, newStatus);
+	    messagingTemplate.convertAndSend(
+	        "/topic/orderStatus/" + oNo,
+	        Map.of("oNo", oNo, "newStatus", newStatus)
+	    );
+	    return ResponseEntity.ok(Map.of("success", true));
+	}
+
+    /* ----------------------- 기존 주문 내역 보기 ----------------------- */
+	@GetMapping("/orders")
+	public String viewOrders(
+	        @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	        @SessionAttribute(name = "loginId",   required = false) String loginId,
+	        Model model) {
+
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+	    List<Orders> orders = shopService.findOrdersByShopId(sId);
+	    model.addAttribute("orders", orders);
+	    model.addAttribute("currentShop",
+	        shopService.findByShopIdAndOwnerId(sId, loginId));
+	    return "shop/shopOrders";
+	}
+	
 	/* ----------------------- 전역 타이틀 ----------------------- */
     @ControllerAdvice
     public static class GlobalModelAdvice {
