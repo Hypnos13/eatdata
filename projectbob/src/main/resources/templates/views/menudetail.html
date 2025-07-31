@@ -32,7 +32,7 @@
 							<h5 class="mb-0">[[ ${shop.name} ]] - [[ ${shop.address1} ]]</h5>
 							<small>★ [[${#numbers.formatDecimal(reviewAvg, 1, 1)}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원</small>
 						</div>
-						
+						<input type="hidden" class="shopMinPrice" th:value="${shop.minPrice}"  />
 						<!-- 찜버튼 -->
 							<div class="ms-auto">									
 								<button type="button" id="btnLikeList" th:data-sid="${shop.sId}" 
@@ -300,7 +300,7 @@
 							  </ul>
 							
 							<p>
-								<strong>영업시간:</strong>[[${shop.opTime}]]<br /> <strong>위치:</strong>
+							 <strong>위치:</strong>
 								<span id="storeAddress">[[${shop.address1}]] -
 									[[${shop.address2}]]</span><br /> <strong>전화:</strong>
 

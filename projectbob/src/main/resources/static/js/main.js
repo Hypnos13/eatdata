@@ -15,25 +15,53 @@ var defaultMenuImage = "https://i.imgur.com/Sg4b61a.png";
 // ==============================
 // 주문하기 버튼 클릭 이벤트
 // ==============================
-$('#btnOrderNow').on('click', function() {
+$(document).ready(function() {
+  $('#btnOrderNow').on('click', function(e) {
+    e.preventDefault();
 
-    // 1. 비회원(로그인하지 않은 사용자)인지 확인
-    // window.currentUserId는 페이지 로드 시 세션의 loginId 값으로 설정됨
+    console.log('주문하기 버튼 클릭 이벤트 시작');
+
     if (!window.currentUserId || window.currentUserId.trim() === '') {
-        alert('로그인이 필요합니다.');
-        // 필요하다면 로그인 페이지로 이동시킬 수 있습니다.
-        // window.location.href = '/login'; 
-        return; // 함수 실행 중단
+      alert('로그인이 필요합니다.');
+      console.log('로그인 필요 - currentUserId:', window.currentUserId);
+      return;
     }
 
-    // 2. 장바구니가 비어있는지 확인
     if (!currentCartData || currentCartData.length === 0) {
-        alert('장바구니가 비어있습니다. 메뉴를 추가해주세요.');
-        return;
+      alert('장바구니가 비어있습니다. 메뉴를 추가해주세요.');
+      console.log('장바구니 비어있음 - currentCartData:', currentCartData);
+      return;
     }
 
-    // 3. 모든 검사를 통과하면 결제 페이지로 이동
+    const totalText = $('#totalOrderPrice').text();
+    console.log('총 결제 금액 텍스트:', totalText);
+    const totalMatch = totalText.match(/([\d,]+)원/);
+    const totalPrice = totalMatch ? parseInt(totalMatch[1].replace(/,/g, '')) : NaN;
+    console.log('파싱된 총 결제 금액 (숫자):', totalPrice);
+
+    const shopMinPriceStr = $('.shopMinPrice').val();
+    const shopMinPrice = parseInt(shopMinPriceStr);
+    console.log('최소 주문 금액 (문자열):', shopMinPriceStr);
+    console.log('최소 주문 금액 (숫자):', shopMinPrice);
+
+    if (isNaN(shopMinPrice)) {
+      alert('최소 주문 금액이 맞지 않습니다.');
+      return;
+    }
+    if (isNaN(totalPrice)) {
+      alert('총 결제 금액이 올바르지 않습니다.');
+      return;
+    }
+
+    if (totalPrice < shopMinPrice) {
+      alert(`최소 주문 금액은 ${shopMinPrice.toLocaleString()}원입니다.\n결제 금액을 추가해주세요.`);
+      console.log(`최소 주문 금액 미만 - totalPrice: ${totalPrice}, shopMinPrice: ${shopMinPrice}`);
+      return;
+    }
+
+    console.log('모든 조건 충족 - 결제 페이지로 이동');
     window.location.href = '/pay';
+  });
 });
 
 // ==============================
@@ -531,6 +559,150 @@ function loadCartItems() {
         }
     });
 }
+
+// =====================
+//거리정렬 버튼
+// =====================
+
+$(document).ready(function () {
+  // 정렬 버튼 클릭 이벤트
+  $('.sort-distance-option').click(function (e) {
+    e.preventDefault();
+    const sortOrder = $(this).data('sort'); // 'asc' 또는 'desc'
+
+    // 거리 리스트가 있는 영역으로 스크롤 이동
+    const scrollTarget = $('.row.g-4');
+    if (scrollTarget.length) {
+      $('html, body').animate({
+        scrollTop: scrollTarget.offset().top - 70
+      }, 400);
+    }
+
+    // 카드 컨테이너 안의 가게들
+    const container = $('.row.g-4');
+    const shops = container.children('.col-12.col-md-6.col-lg-4');
+
+    // 배열로 변환 후 거리 기준 정렬
+    const sortedShops = shops.toArray().sort((a, b) => {
+      const distA = parseDistance($(a).find('.distance-info').text());
+      const distB = parseDistance($(b).find('.distance-info').text());
+
+      if (sortOrder === 'asc') {
+        return distA - distB;
+      } else {
+        return distB - distA;
+      }
+    });
+
+    // 정렬 결과를 다시 컨테이너에 삽입
+    container.empty();
+    sortedShops.forEach(el => container.append(el));
+  });
+
+  // 거리 텍스트를 숫자(km 단위)로 변환하는 함수
+  function parseDistance(text) {
+    if (!text || typeof text !== 'string') return Number.MAX_VALUE;
+
+    const mMatch = text.match(/([\d.,]+)\s*m/);
+    const kmMatch = text.match(/([\d.,]+)\s*km/);
+
+    if (mMatch) {
+      return parseFloat(mMatch[1].replace(',', '.')) / 1000;
+    } else if (kmMatch) {
+      return parseFloat(kmMatch[1].replace(',', '.'));
+    }
+
+    return Number.MAX_VALUE; // 거리 정보 없으면 정렬 맨 뒤로 보내기
+  }
+});
+
+// =========================================================================
+// #location-input 값으로 가게와의 거리 구하기 
+// =========================================================================
+$(document).ready(function() {
+    const geocoder = new kakao.maps.services.Geocoder();
+
+    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = deg2rad(lat2 - lat1);
+        const dLon = deg2rad(lon2 - lon1);
+        const a = 
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c;
+        return distance;
+    }
+
+    function deg2rad(deg) {
+        return deg * (Math.PI / 180);
+    }
+
+    function updateDistances(userLat, userLng) {
+        const $shops = $('[data-address]');
+        let processedCount = 0;
+
+        $shops.each(function() {
+            const $shop = $(this);
+            const shopAddress = $shop.attr('data-address');
+            if (!shopAddress) {
+                $shop.find('.distance-info').text('주소 정보 없음');
+                processedCount++;
+                if(processedCount === $shops.length) {
+                    console.log('모든 거리 계산 완료');
+                }
+                return true; // continue
+            }
+
+            geocoder.addressSearch(shopAddress, function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    const shopLat = parseFloat(result[0].y);
+                    const shopLng = parseFloat(result[0].x);
+
+                    const distanceKm = getDistanceFromLatLonInKm(userLat, userLng, shopLat, shopLng);
+                    const distanceText = distanceKm < 1
+                        ? Math.round(distanceKm * 1000) + ' m'
+                        : distanceKm.toFixed(2) + ' km';
+
+                    $shop.find('.distance-info').text('거리: ' + distanceText);
+                } else {
+                    $shop.find('.distance-info').text('거리 계산 실패');
+                }
+                processedCount++;
+                if(processedCount === $shops.length) {
+                    console.log('모든 거리 계산 완료');
+                }
+            });
+        });
+    }
+
+    function searchAddressAndUpdateDistance() {
+        const address = $('#location-input').val().trim();
+        if (!address) {
+            alert('주소를 입력해주세요.');
+            return;
+        }
+
+        geocoder.addressSearch(address, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                const userLat = parseFloat(result[0].y);
+                const userLng = parseFloat(result[0].x);
+                updateDistances(userLat, userLng);
+            } else {
+                alert('주소를 찾을 수 없습니다.');
+            }
+        });
+    }
+
+		if ($('#location-input').length > 0 && $('#location-input').val() && $('#location-input').val().trim() !== '') {
+		    searchAddressAndUpdateDistance();
+		}
+
+    $('#addressInputSearchBtn').click(function() {
+        searchAddressAndUpdateDistance();
+    });
+});
 // =========================================================================
 // DOMContentLoaded 이벤트 리스너 통합 및 카카오 지도 API 로드 개선
 // =========================================================================
