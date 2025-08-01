@@ -223,32 +223,31 @@ public class BobController {
 		  
 
 		  //주문표에 담아서 주문하기 페이지로
-			  @GetMapping("/pay")
-			  public String payPageGet(HttpSession session, Model model) {
-			      String userId = (String) session.getAttribute("loginId");
-			      String guestId = (String) session.getAttribute("guestId");
+		  @GetMapping("/pay")
+		  public String payPageGet(HttpSession session, Model model) {
+		      String userId = (String) session.getAttribute("loginId");
+		      String guestId = (String) session.getAttribute("guestId");
 
-			      // 로그인한 사용자 정보 조회 및 모델에 추가
-			      if (userId != null) {
-			          Member member = loginService.getMember(userId);
-			          log.info("Pay Page - Retrieved Member: {}", member);
-			          model.addAttribute("member", member);
-			          session.removeAttribute("guestId"); // 로그인 시 guestId를 세션에서 제거
-			          guestId = null; // guestId 변수도 null로 설정
-			      }
+		      // 로그인한 사용자 정보 조회 및 모델에 추가
+		      if (userId != null) {
+		          Member member = loginService.getMember(userId); // LoginService에 getMember(String id) 메서드 필요
+		          log.info("Pay Page - Retrieved Member: {}", member); // 이 로그를 추가
+		          model.addAttribute("member", member);
+		          // session.removeAttribute("guestId"); // 로그인한 사용자가 있다면 guestId 제거
+		      }
 
-			      // 세션 기준 주문 내역 조회
-			      CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
+		      // 세션 기준 주문 내역 조회
+		      CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
 
-				  log.info("Pay Page - Total Price from Service: {}", cartSummary.getTotalPrice());
+			  log.info("Pay Page - Total Price from Service: {}", cartSummary.getTotalPrice());
 
-			      // 뷰에 데이터 전달
-			      model.addAttribute("orderSummary", cartSummary);
-			      model.addAttribute("orderedItems", cartSummary.getCartList());
-			      model.addAttribute("finalTotalPrice", cartSummary.getTotalPrice());
+		      // 뷰에 데이터 전달
+		      model.addAttribute("orderSummary", cartSummary);
+		      model.addAttribute("orderedItems", cartSummary.getCartList());
+		      model.addAttribute("finalTotalPrice", cartSummary.getTotalPrice());
 
-			      return "views/pay";
-			  }
+		      return "views/pay";
+		  }
 		  
 		  //스크립트ajax
 		  @PostMapping("/payjs")
@@ -290,13 +289,12 @@ public class BobController {
             // 실제 구현에서는 PortoneService가 PortOne API를 호출하고 필요한 정보를 반환합니다.
             Map<String, Object> paymentInfo = portoneService.preparePayment(
                 cartSummary.getTotalPrice(), // 총 결제 금액
-                "Bob 주문", // 실제 상품명으로 대체 필요
+                "주문 상품명", // 실제 상품명으로 대체 필요
                 userId != null ? userId : guestId, // 주문자 ID
                 (String) requestData.get("address1"),
                 (String) requestData.get("address2"),
                 (String) requestData.get("phone"),
-                (String) requestData.get("orderRequest"),
-                (String) requestData.get("paymentMethod") // payMethod 추가
+                (String) requestData.get("orderRequest")
             );
 
             response.put("success", true);
@@ -319,8 +317,6 @@ public class BobController {
         String userId = (String) session.getAttribute("loginId");
         String guestId = (String) session.getAttribute("guestId");
         log.info("completePayment - userId: {}, guestId: {}", userId, guestId);
-<<<<<<< HEAD
-=======
     	boolean verified = portoneService.verifyPayment(
     			(String) req.get("paymentId"),
     			(String) req.get("orderId")
@@ -346,28 +342,9 @@ public class BobController {
                 		(String) session.getAttribute("userId"),
                 		(String) session.getAttribute("guestId")
                 		);
->>>>>>> develop
 
-        String paymentId = (String) req.get("paymentId");           // SDK 내부 추적용
-        String merchantUid = (String) req.get("merchant_uid");     // 검증용 orderId
-
-        if (merchantUid == null) {
-            return Map.of("success", false, "message", "merchant_uid(주문 ID)가 없습니다.");
+            return Map.of("success", true, "orderNo", newOrderNo);
         }
-
-        boolean verified = portoneService.verifyPayment(merchantUid);
-        if (!verified) {
-            return Map.of("success", false, "message", "결제 검증 실패");
-        }
-
-        int newOrderNo = bobService.createOrder(req, session, paymentId);
-
-        // 장바구니 삭제: loginId를 기준으로
-        bobService.deleteAllCartItems(userId, guestId);
-
-        return Map.of("success", true, "orderNo", newOrderNo);
     }
 
 
-
-}

@@ -549,7 +549,7 @@ public class BobService {
 
 		     if (mainMenu != null) {
 		         orderedMenusBuilder.append(mainMenu.getMenuName());
-		         orderedMenusBuilder.append(" x ").append(mainMenu.getQuantity());
+		         orderedMenusBuilder.append(" * ").append(mainMenu.getQuantity());
 
 		         List<String> options = menuItems.stream()
 		                                         .filter(item -> item.getCaPid() != null && item.getCaPid().equals(mainMenu.getCaId()))

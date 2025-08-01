@@ -1968,7 +1968,7 @@ function resetReviewForm(){
 
 
 
-
+// 없애면 메뉴 모달창 안뜸
   const reader = new FileReader();
   reader.onload = function (e) {
     $imgPreview.attr('src', e.target.result).show();
