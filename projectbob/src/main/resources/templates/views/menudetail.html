@@ -164,6 +164,14 @@
 								<option th:each="menu : ${menuList}" th:value="${menu.mId}" th:text="${menu.name}"></option>
 							</select>
 						</div>
+						<!-- 주문했던 메뉴 선택 (리뷰 가능한 주문) -->
+						<div class="mb-2">
+							<label class="form-label">리뷰할 주문 선택</label>
+								<select name="oNo" id="reviewOrdersSelect" class="form-select" required>
+									<option value="">주문을 선택하세요</option>
+								</select>
+						</div>
+						
 											<!-- 별점 영역 -->
 						<div class="mb-2">
 							<label class="form-label">별점</label>

@@ -332,6 +332,24 @@
 	WHERE review.s_id = #{sId} ORDER BY review.r_no DESC
 </select>
 
+<!-- 회원이 특정 가게에서 리뷰 가능한 주문 목록 조회 -->
+<select id="getReviewableOrders" resultType="com.projectbob.domain.Orders">
+	SELECT o.o_no, o.s_id, o.id, o.total_price, o.payment, o.payment_uid, o.o_address,
+		o.request, o.status, o.quantity, o.menus, o.reg_date
+	FROM orders o
+	WHERE o.id = #{userId}
+		AND o.s_id = #{sId}
+		<!-- AND o.status = 'COMPLETED'   __완료된 주문만 -->
+		AND NOT EXISTS (SELECT 1 FROM review r WHERE r.o_no = o.o_no)
+			ORDER BY o.reg_date DESC
+</select>
+
+<!-- 특정 주문 번호에 대한 리뷰 개수 조회 -->
+<select id="countReviewByOrderNo" resultType="int">
+	SELECT COUNT(*) FROM review WHERE o_no = #{oNo}
+</select>
+
+
 <!-- 가게 상세 페이지에 필요한 xml -->
 <select id="getMenuListByShopId" resultType="com.projectbob.domain.Menu">
 	SELECT

@@ -36,6 +36,7 @@ import com.projectbob.domain.Cart;
 import com.projectbob.domain.CartSummaryDto;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.OrderData;
+import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
 import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
@@ -329,6 +330,9 @@ public class MenuAjaxController {
 	public Map<String, Object> addReview(@ModelAttribute Review review,
 			@RequestParam(value="reviewUploadFile", required=false) MultipartFile rPicture){
 		
+		log.info("addReview 호출됨 - review 객체: {}", review);
+		log.info("addReview - review.oNo: {}", review.getONo());
+		
 		String uploadDir = "C:/projectbob/images/review/";
 		File dir = new File(uploadDir);
 		if (!dir.exists()) dir.mkdirs();		
@@ -495,6 +499,17 @@ public class MenuAjaxController {
 		return result;
 	}
 	
+	
+	// 특정 가게에서 리뷰 가능한 주문 목록을 가져오는 메서드
+	
+	public ResponseEntity<List<Orders>> getReviewableOrders(@RequestParam("sId") int sId, HttpSession session){
+		String userId = (String) session.getAttribute("loginId");
+		if(userId = null || userId.trim().isEmpty()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+		List<Orders> reviewableOrders = bobService.getReviewableOrdersForShop(userId, sId);
+		return ResponseEntity.ok(reviewableOrders);
+	}
 	
 	
 	

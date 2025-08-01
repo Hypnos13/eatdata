@@ -158,6 +158,11 @@ public interface BobMapper {
 	// 회원이 특정 가게에서 주문한 내역이 있는지 확인
 	public int countOrdersByUserIdAndShopId(@Param("userId") String userId, @Param("sId") int sId);
 
+	// 회원이 특정 가게에서 리뷰 가능한 주문 목록 조회
+	public List<Orders> getReviewableOrders(@Param("userId") String userId, @Param("sId") int sId);
+	
+	// 특정 주문 번호에 대한 리뷰 개수 조회
+	public int countReviewByOrderNo(@Param("oNo") int oNo);
 	
 
 }

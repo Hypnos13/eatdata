@@ -30,6 +30,7 @@ public class Review {
 	private Timestamp regDate;
 	private Timestamp modiDate;
 	private String status;
+	private Integer oNo;
 	
 	private String menuName;
 	

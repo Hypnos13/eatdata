@@ -1433,19 +1433,60 @@ $("#reviewWrite").on("click", function(){
 		$("#imgPreview").hide().attr('src', '');
 		if(previewUrl){URL.revokeObjectURL(previewUrl); previewUrl = null;}
 		lastEditRno = null;
+		
+		// 주문 했던 목록 꺼내기
+		const sId = $("#shopId").val();
+		const userId = window.currentUserId;
+
+		if (userId && sId){
+			$.ajax({
+				url: "/ajax/reviewableOrders",
+				type: "GET",
+				data: {sId:sId},
+				success: function(response){
+					const $orderSelect = $("#reviewOrderSelect");
+					$orderSelect.empty();
+					$orderSelect.append('<option value="">주문을 선택하세요</option>');
+					
+					if (response && response.length > 0){
+						response.forEach(order => {
+							const orderText = `${order.menus} (${new Date(order.regDate).toLocaleDateString()})`;
+																					$orderSelect.append(`<option value="${order.oNo}">${orderText}</option>`);
+						});
+					}
+						else{
+							$orderSelect.append('<option value="">리뷰 가능한 주문이 없습니다.</option>');
+						}
+					},
+					error: function(xhr, status, error){
+						console.error("리뷰 가능한 주문을 불러오는데 실패했습니다.:", error);
+						alert("리뷰 가능한 주문을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
+					}
+				})
+		}else{
+			console.warn("리뷰 가능한 주문을 불러오기 위한 사용자 ID  또는 가게 ID가 없습니다.");
+			"#reviewOrderSelect").empty().append('<option value="">로그인 후 이용해주세요.</option>');
+		}	
+
+
+		
 	});
 	
+
+	
+	// 댓글쓰기 submit
 	$(document).on("submit", "#reviewWriteForm", function(e){
 		e.preventDefault();
-		/*if($("#reviewContent").val().length < 5){
-			alert("댓글은 5자 이상 입력하세요~");
+		/*if($("#reviewContent").val().length < 1){
+			alert("댓글은 1자 이상 입력하세요~");
 			return false;
-		}*/
+		}*/							
 		if (!$('input[name="rating"]:checked').val()){
 			alert("별점을 선택하세요~!");
 			return false;
 		}
 		let formData = new FormData(this);
+		formData.append("oNo", $("#reviewOrderSelect").val());
 		
 		let params = $(this).serialize();
 		console.log(params);

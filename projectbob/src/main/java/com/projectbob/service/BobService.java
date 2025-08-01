@@ -404,6 +404,12 @@ public class BobService {
 	// 댓글 등록하는 메서드
 	@Transactional
 	public void addReview(Review review) {
+		if(review.getONo() != null) {
+			int existingReviewCount = bobMapper.countReviewByOrderNo(review.getONo());
+			if(existingReviewCount > 0) {
+				throw new IllegalStateException("해당 주문에 대한 리뷰가 이미 존재합니다.");
+			}
+		}
 		bobMapper.addReview(review);
 		shopMapper.updateShopRatingBySId(review.getSId());
 	}
@@ -471,6 +477,14 @@ public class BobService {
 		int orderCount = bobMapper.countOrdersByUserIdAndShopId(userId, sId);
 		log.info("bobMapper.countOrdersByUserIdAndShopId 결과 : {} (userId: {}, sId: {})", orderCount, userId, sId);
 		return orderCount > 0;
+	}
+	
+	// 회원이 특정 가게에서 아직 리뷰를 작성하지 않은 주문 목록을 가져오는 메서드
+	public List<com.projectbob.domain.Orders> getReviewableOrdersForShop(String userId, int sId){
+		if (userId == null || userId.trim().isEmpty()) {
+			return new ArrayList<>();
+		}
+		return bobMapper.getReviewableOrders(userId, sId);
 	}
 	
 	
