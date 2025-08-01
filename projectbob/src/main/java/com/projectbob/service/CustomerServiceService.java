@@ -1,7 +1,11 @@
 package com.projectbob.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,7 @@ import com.projectbob.domain.Coupon;
 import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.LikeList;
 import com.projectbob.domain.NoticeBoard;
+import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
 import com.projectbob.domain.Shop;
 import com.projectbob.mapper.CustomerServiceMapper;
@@ -173,5 +178,69 @@ public class CustomerServiceService {
 	
 	public List<Map<String, Object>> myReviewList(String id){
 		return csMapper.myReviewList(id);
+	}
+	
+	public List<Map<String, Object>> myOrderList(String id){
+		
+		List<Map<String, Object>> myOrderList = csMapper.myOrderList(id);
+		
+		for(Map<String, Object> order : myOrderList) {
+			String menuStr = (String) order.get("menu");
+			String sId = (String) order.get("sId").toString();
+			
+			List<Map<String, Object>> parsedMenus = new ArrayList<>();
+			
+			for (String item : menuStr.split("\\s*,\\s*")) {
+			   Matcher m = Pattern.compile("(.+?)\\s*\\*\\s*(\\d+)(?:\\s*\\((.+?)\\))?").matcher(item);
+	           Map<String, Object> parsed = new HashMap<>();
+
+	           if (m.matches()) {
+	        	   String menuName = m.group(1).trim();
+	               int count = Integer.parseInt(m.group(2).trim());
+	               String option = m.group(3) != null ? m.group(3).trim() : "";
+	               
+	               parsed.put("menu", menuName);
+	               parsed.put("count", count);
+	               parsed.put("option", option);
+	               parsed.put("sId", sId);
+	               
+	               List<Map<String, Object>> menuPriceList = csMapper.getMenuPrice(sId, menuName);
+	               
+	               if (menuPriceList != null) {
+	            	   	Map<String, Object> menuInfo = menuPriceList.get(0);
+	            	    String mId = menuInfo.get("m_id").toString();       
+	            	    int menuPrice = Integer.parseInt(menuInfo.get("price").toString());
+
+	            	    parsed.put("menuPrice", menuPrice);
+
+	            	    if (!option.isEmpty()) {
+	            	        int optionPrice = csMapper.getMenuOptionPrice(mId, option);
+	            	        parsed.put("optionPrice", optionPrice);
+	            	    } else {
+	            	        parsed.put("optionPrice", 0);
+	            	    }
+	                } else {
+	                    parsed.put("menuPrice", 0);
+	                    parsed.put("optionPrice", 0);
+	                }
+	               
+	           } else {
+	        	   parsed.put("menu", item.trim());
+	               parsed.put("count", 1);
+	               parsed.put("option", "");
+	               parsed.put("sId", sId);
+	               parsed.put("menuPrice", 0);
+	               parsed.put("optionPrice", 0);
+	           }
+	            System.out.println("parsed : " + parsed);
+	            
+	            parsedMenus.add(parsed);
+	        }
+			
+			 order.put("parsedMenus", parsedMenus);
+		}
+		
+		
+		return myOrderList;
 	}
 }

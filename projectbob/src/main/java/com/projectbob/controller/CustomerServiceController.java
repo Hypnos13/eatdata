@@ -21,6 +21,7 @@ import com.projectbob.domain.Coupon;
 import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.Member;
 import com.projectbob.domain.NoticeBoard;
+import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
 import com.projectbob.domain.Shop;
 import com.projectbob.service.CustomerServiceService;
@@ -444,5 +445,17 @@ public class CustomerServiceController {
 		model.addAttribute("reviewList", reviewList);
 		
 		return "members/myReview";
+	}
+	
+	// 마이페이지 - 주문내역  
+	@GetMapping("/myOrders")
+	public String myOrders(Model model, HttpSession session) {
+		
+		String id = (String) session.getAttribute("loginId");
+		
+		List<Map<String, Object>> orderList = csService.myOrderList(id);
+		model.addAttribute("orderList", orderList);
+		
+		return "members/myOrders";
 	}
 }
