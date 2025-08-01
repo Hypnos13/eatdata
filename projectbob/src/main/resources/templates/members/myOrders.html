@@ -33,7 +33,7 @@
 					    </div>
 					    <div class="col-3 text-end">[[${menuItem.count}]]</div>
 					    <div class="col-3 text-end">
-					      [[${#numbers.formatInteger(menuItem.menuPrice , 0, 'COMMA')}]] 원
+					      [[${#numbers.formatInteger(menuItem.menuPrice * menuItem.count , 0, 'COMMA')}]] 원
 					    </div>
 					  </div>
 					  <div class="row mb-1 text-muted small align-items-center" th:if="${menuItem.option != ''}">
