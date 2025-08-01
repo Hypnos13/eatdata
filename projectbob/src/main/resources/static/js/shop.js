@@ -5,8 +5,11 @@ $(function() {
 	$("#menuJoinForm").on("submit", menuJoinFormCheck);
 
 	//우편번호찾기
-	$("#btnZipcode").click(findZipcode);
-	
+	//$("#btnZipcode").click(findZipcode);
+	const $btnZip = $("#btnZipcode");
+	  if ($btnZip.length && typeof findZipcode === 'function') {
+	    $btnZip.click(findZipcode);
+	  }
 });
 
 function shopJoinFormCheck(isShopJoinForm) {
@@ -371,50 +374,52 @@ $('.reply-box')
   });
 });
 
-// ==== 7. WebSocket 초기화 & 이벤트 처리 ==================  
-// 알림버튼 깜박임 기능
+// ==== 7. WebSocket 초기화 & 이벤트 처리 =================
+// 페이지 로드 후 한 번만 실행됩니다.
 document.addEventListener('DOMContentLoaded', () => {
-  const socket = new SockJS('/ws');
-  const stomp  = Stomp.over(socket);
+  // 7.0: shopId 조회 (헤더 알림 컨테이너에서)
+  const notifyContainer = document.getElementById('notifyContainer');
+  if (!notifyContainer) return;
+  const shopId = notifyContainer.dataset.shopId;
 
-  stomp.connect({}, () => {
-    // 1) 신규주문 구독
-    const newOrderList = document.getElementById('newOrderList');
-    if (newOrderList) {
-      const shopId = newOrderList.dataset.shopId;
-      stomp.subscribe('/topic/newOrder/' + shopId, renderNewOrderItem);
-    }
+  // 7.1: SockJS & STOMP 클라이언트 생성
+  const socket      = new SockJS('/ws');
+  const stompClient = Stomp.over(socket);
 
-    // 2) 헤더 알림용 주문 상태 변경 구독
-	const notifyContainer = document.getElementById('notifyContainer');
-	if (notifyContainer) {
-	  const shopId = notifyContainer.dataset.shopId;
-	  stomp.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
-	    const { oNo } = JSON.parse(msg.body);
-	    // 헤더 알림에서 해당 주문 제거 (뱃지 카운트도 갱신)
-	    removeHeaderNotification(oNo);
-	  });
-	}
-	
-	// 3) 주문내역 테이블용 주문 상태 변경 구독
-	document.querySelectorAll('tr[data-order-no]').forEach(row => {
-	  const oNo = row.dataset.orderNo;
-	  stomp.subscribe(`/topic/orderStatus/order/${oNo}`, msg => {
-	    const { newStatus } = JSON.parse(msg.body);
-	    const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
-	    if (cell) cell.textContent = newStatus;
-	  });
-	});
-	
-	// 드롭다운이 “완전히 열린(shown)” 시점에 깜박임 제거
-	  const notifyBtn = document.getElementById('headerNotifyBtn');
-	  if (notifyBtn) {
-	    notifyBtn.addEventListener('shown.bs.dropdown', () => {
-	      clearBellBlink();
-	      // (선택) 서버에 읽음 처리 API 호출 등 추가 가능
-	    });
-	  }
-   });
+  // 7.2: STOMP 연결 후 구독 시작
+  stompClient.connect({}, () => {
+    console.log('[shop.js] STOMP connected, shopId=', shopId);
+
+    // 7.2.1: 신규 주문 알림 구독
+    stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
+      console.log('[WS 新주문]', msg.body);
+      renderNewOrderItem(msg);          // 주문 리스트에 추가
+      renderHeaderNotification(msg);    // 헤더 알림 추가
+      markBellAsUnread();               // 벨 아이콘 깜빡임
+    });
+
+    // 7.2.2: 주문 상태 변경 구독 (헤더 알림 제거)
+    stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
+      console.log('[WS 상태변경_헤더]', msg.body);
+      const { oNo } = JSON.parse(msg.body);
+      removeHeaderNotification(oNo);
+    });
+
+    // 7.2.3: 주문 상태 변경 구독 (테이블 업데이트)
+    document.querySelectorAll('tr[data-order-no]').forEach(row => {
+      const oNo = row.dataset.orderNo;
+      stompClient.subscribe(`/topic/orderStatus/order/${oNo}`, msg => {
+        console.log('[WS 상태변경_테이블]', msg.body);
+        const { newStatus } = JSON.parse(msg.body);
+        const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
+        if (cell) cell.textContent = newStatus;
+      });
+    });
+
+    // 7.2.4: 드롭다운 열림 시 깜빡임 해제
+    document.getElementById('headerNotifyBtn')
+      ?.addEventListener('shown.bs.dropdown', clearBellBlink);
+  });
 });
 
 // ==== 8. 알림 아이콘 깜박임 제어 ===========================
@@ -440,16 +445,10 @@ window.acceptOrder = function(oNo) {
   })
   .then(res => {
     if (!res.ok) throw new Error('상태 변경 실패');
-    // ① 목록에서 해당 주문 항목(li) 제거
-    const btn = document.querySelector(`button[onclick="acceptOrder(${oNo})"]`);
-    if (btn) btn.closest('li').remove();
-    // ② 진행 중 화면으로 이동
+    document.querySelector(`button[onclick="acceptOrder(${oNo})"]`)?.closest('li').remove();
     location.href = '/shop/orderManage?status=IN_PROGRESS';
   })
-  .catch(err => {
-    console.error(err);
-    alert('주문 수락에 실패했습니다.');
-  });
+  .catch(() => alert('주문 수락에 실패했습니다.'));
 };
 
 // 주문 거절 함수 (추가)
@@ -461,26 +460,27 @@ window.rejectOrder = function(oNo) {
   })
   .then(res => {
     if (!res.ok) throw new Error('거절 실패');
-    // 거절된 주문 li 제거
-    const btn = document.querySelector(`button[onclick="rejectOrder(${oNo})"]`);
-    if (btn) btn.closest('li').remove();
+    document.querySelector(`button[onclick="rejectOrder(${oNo})"]`)?.closest('li').remove();
   })
   .catch(() => alert('주문 거절에 실패했습니다.'));
 };
 
 // ==== 10. 렌더링 헬퍼 =====================================
 function renderNewOrderItem(msg) {
-  const o = JSON.parse(msg.body);
   const ul = document.getElementById('newOrderList');
-  const li = document.createElement('li');
-  li.className = 'list-group-item d-flex align-items-start mb-3 p-3';
+    // placeholder 제거 (클래스명이 다르면 알맞게 조정)
+    const empty = ul.querySelector('li.text-center.text-muted');
+    if (empty) empty.remove();
 
+    const o  = JSON.parse(msg.body);
+    const li = document.createElement('li');
+  li.className = 'list-group-item d-flex align-items-start mb-3 p-3';
   li.innerHTML = `
     <div class="flex-grow-1 pe-3">
       <div class="mb-1">🛒 ${o.menus}</div>
       <div class="mb-1">💬 ${o.request || '요청사항 없음'}</div>
-      <div class="text-muted small"><i class="bi bi-clock"></i>
-        ${new Date(o.regDate).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+      <div class="text-muted small">
+        <i class="bi bi-clock"></i>${new Date(o.regDate).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
       </div>
     </div>
     <div class="d-flex flex-column justify-content-between" style="min-width: 5rem;">
@@ -488,86 +488,43 @@ function renderNewOrderItem(msg) {
       <button class="btn btn-outline-danger btn-sm" onclick="rejectOrder(${o.oNo})">거절</button>
     </div>
   `;
-
   ul.prepend(li);
 }
 
 function renderHeaderNotification(msg) {
-  const data = JSON.parse(msg.body);
-  const badge = document.getElementById('headerNotifyBadge');
-  const list  = document.getElementById('headerNotifyList');
-  // 뱃지 카운트 증가
-  let cnt = parseInt(badge.textContent) || 0;
-  badge.textContent = ++cnt;
+  const data  = JSON.parse(msg.body);
+  const badge = document.getElementById('header-notif-badge');
+  const list  = document.getElementById('header-notif-list');
+
+  // 뱃지 증가
+  badge.textContent  = parseInt(badge.textContent || '0',10) + 1;
   badge.classList.remove('d-none');
-  // 알림 리스트에 항목 추가
-  if (cnt === 1 && list.firstElementChild.tagName === 'P') {
-    list.innerHTML = '';  // “알림이 없습니다.” 문구 제거
-  }
+
+  // “알림이 없습니다.” 제거
+  list.querySelector('li.text-muted')?.remove();
+
+  // 새 알림 아이템 추가
   const item = document.createElement('li');
-  item.innerHTML = `
-    <a class="dropdown-item text-truncate"
-       href="/shop/orderDetail?oNo=${data.oNo}">
-      새 주문 알림이 도착했습니다.
-    </a>
-  `;
+  item.className         = 'notif-item';
+  item.dataset.orderNo   = data.oNo;
+  item.innerHTML         = `<a class="dropdown-item text-truncate" href="/shop/orderDetail?oNo=${data.oNo}">
+    새 주문 알림이 도착했습니다.
+  </a>`;
   list.prepend(item);
 }
 
 //헤더 알림에서 아이템 제거 함수
 function removeHeaderNotification(oNo) {
-  // 1) 드롭다운 아이템 제거
-  const notifItem = document.querySelector(`#header-notif-list .notif-item[data-order-no="${oNo}"]`);
-  if (notifItem) notifItem.remove();
-
-  // 2) 뱃지 카운트 감소
-  const badge = document.querySelector('#header-notif-badge');
-  let count = parseInt(badge.textContent, 10) || 0;
-  if (count > 0) badge.textContent = --count;
-
-  // 3) (선택) 뱃지가 0이면 숨기기
-  if (count === 0) badge.classList.add('d-none');
+  // 아이템 제거
+  document.querySelector(`#header-notif-list .notif-item[data-order-no="${oNo}"]`)?.remove();
+  // 뱃지 감소
+  const badge = document.getElementById('header-notif-badge');
+  const cnt   = Math.max(0, parseInt(badge.textContent||'0',10) - 1);
+  badge.textContent = cnt;
+  if (cnt === 0) badge.classList.add('d-none');
 }
 
-// ==== 11. 주문내역 페이지 실시간 업데이트 ================
-// shopOrders.html 전용: 주문 상태 실시간 업데이트
-document.addEventListener('DOMContentLoaded', () => {
-  // 주문내역 테이블이 없으면 바로 종료
-  const rows = document.querySelectorAll('tr[data-order-no]');
-  if (rows.length === 0) return;
-
-  const socket = new SockJS('/ws');
-  const stomp  = Stomp.over(socket);
-
-  stomp.connect({}, () => {
-    rows.forEach(row => {
-      const oNo = row.dataset.orderNo;
-      stomp.subscribe(`/topic/orderStatus/order/${oNo}`, msg => {
-        const { newStatus } = JSON.parse(msg.body);
-        const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
-        if (cell) {
-          cell.textContent = newStatus;
-        }
-      });
-    });
-  });
-});
-
-// ----- 영업시간 관리 (휴무/전체휴무 토글 등) -----
-$(function () {
-
-  // 전체휴무 체크박스
-  $(".allDay-check").on("change", function () {
-    const $tr = $(this).closest("tr");
-    if (this.checked) {
-      $tr.find("select[name^='openHour']").val("00");
-      $tr.find("select[name^='openMin']").val("00");
-      $tr.find("select[name^='closeHour']").val("23");
-      $tr.find("select[name^='closeMin']").val("59");
-    }
-    // disabled 절대 쓰지 않음
-  });
-
+  // ==== 11. 휴무/영업 버튼 ================
   // 휴무/영업 스위치
   const updateDayRow = ($chk) => {
     const $tr = $chk.closest("tr");
@@ -595,22 +552,22 @@ $(function () {
   $("#openTimeForm").on("submit", function () {
     $(this).find("select:disabled").prop("disabled", false);
   });
-});
 
-document.querySelectorAll('tr[data-order-no]').forEach(row => {
-  const oNo = row.dataset.orderNo;
-  stompClient.subscribe(`/topic/orderStatus/${oNo}`, msg => {
-  	const { oNo: incomingONo, newStatus } = JSON.parse(msg.body);
-    // (a) 주문내역 테이블이 보이는 페이지라면 상태 셀 업데이트
-	const cell = document.querySelector(`.status-cell[data-order-no="${incomingONo}"]`);
-	    if (cell) {
-	      cell.textContent = newStatus;
-	    }
-    // (b) 헤더 알림에서 해당 주문 항목 제거
-    removeHeaderNotification(incomingONo);
-  });
-});
+  // ----- 영업시간 관리 (휴무/전체휴무 토글 등) -----
+  $(function () {
 
+    // 전체휴무 체크박스
+    $(".allDay-check").on("change", function () {
+      const $tr = $(this).closest("tr");
+      if (this.checked) {
+        $tr.find("select[name^='openHour']").val("00");
+        $tr.find("select[name^='openMin']").val("00");
+        $tr.find("select[name^='closeHour']").val("23");
+        $tr.find("select[name^='closeMin']").val("59");
+      }
+      // disabled 절대 쓰지 않음
+    });
+	
 // ==== 12. 주문 상세 페이지 픽업/배달 버튼 ================
 // 픽업·배달 버튼 처리
 document.addEventListener('DOMContentLoaded', () => {
@@ -647,4 +604,5 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(r => r.json())
     .then(d => { if (d.success) cb(); });
   }
+});
 });

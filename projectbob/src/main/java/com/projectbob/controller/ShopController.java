@@ -42,6 +42,7 @@ public class ShopController {
 	@Autowired
     private SimpMessagingTemplate messagingTemplate;
 	
+	
 	// 식품영양성분DB API 검색
 	@GetMapping("/api/nutrition-search")
 	@ResponseBody
@@ -727,6 +728,13 @@ public class ShopController {
 	        shopService.findByShopIdAndOwnerId(sId, loginId));
 	    return "shop/shopOrders";
 	}
+	
+	//주문정보 출력
+	@PostMapping("/order")
+    public ResponseEntity<?> createOrder(@RequestBody Map<String,Object> req) {
+        Orders saved = shopService.placeOrder(req);
+        return ResponseEntity.ok(Map.of("oNo", saved.getONo()));
+    }
 	
 	/* ----------------------- 전역 타이틀 ----------------------- */
     @ControllerAdvice
