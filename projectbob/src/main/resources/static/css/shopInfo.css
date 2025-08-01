@@ -547,3 +547,18 @@ body {
 
 /* 카드 간 간격 */
 .review-card + .review-card { margin-top: 42px; }
+
+/* 알림 아이콘 깜박임 키프레임 정의 */
+@keyframes bell-red-blink {
+  0%, 100% {
+    color: inherit;      /* 원래 색 */
+  }
+  50% {
+    color: #fe2961;      /* 깜박일 때 빨간색 */
+  }
+}
+
+/* blink 클래스를 달면 깜박이도록 설정 */
+.blink {
+  animation: bell-red-blink 1s ease-in-out infinite;
+}

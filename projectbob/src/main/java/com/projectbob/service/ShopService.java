@@ -1,7 +1,6 @@
 package com.projectbob.service;
 
 import java.io.*;
-import java.sql.Timestamp;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.*;
@@ -401,5 +400,5 @@ public class ShopService {
     public void updateOrderStatus(int oNo, String newStatus) {
         shopMapper.updateOrderStatus(oNo, newStatus);
     }
-
+    
 }

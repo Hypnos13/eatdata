@@ -455,7 +455,7 @@ $('.reply-box')
   });
 });
 
-// shop.js
+// 알림버튼 깜박임 기능
 document.addEventListener('DOMContentLoaded', () => {
   const socket = new SockJS('/ws');
   const stomp  = Stomp.over(socket);
@@ -469,15 +469,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2) 헤더 알림 구독
-    const notifyContainer = document.getElementById('notifyContainer');
-    if (notifyContainer) {
-      const shopId = notifyContainer.dataset.shopId;
-      stomp.subscribe('/topic/newOrder/' + shopId, renderHeaderNotification);
+	const notifyContainer = document.getElementById('notifyContainer');
+	if (notifyContainer) {
+	  const shopId = notifyContainer.dataset.shopId;
+	  // 변경: 알림 도착 시 렌더링 + 깜박임 시작
+	    stomp.subscribe('/topic/newOrder/' + shopId, msg => {
+	      renderHeaderNotification(msg);
+	      markBellAsUnread();
+	    });
     }
-  });
+	
+// 3) 주문 상태 변경 구독 (자동 거절, 수락/거절 후 푸시)
+ const shopId = newOrderList ? newOrderList.dataset.shopId : null;
+ if (shopId) {
+   stomp.subscribe('/topic/orderStatus/' + shopId, msg => {
+     const { oNo, newStatus } = JSON.parse(msg.body);
+     // TODO: 실제 화면 업데이트 로직
+     // 예: 테이블 셀 업데이트, 혹은 팝업 띄우기 등
+     document.querySelector(`.status-cell[data-order-no="${oNo}"]`).textContent = newStatus;
+   });
+ }
+
+	
+	// 드롭다운이 “완전히 열린(shown)” 시점에 깜박임 제거
+	  const notifyBtn = document.getElementById('headerNotifyBtn');
+	  if (notifyBtn) {
+	    notifyBtn.addEventListener('shown.bs.dropdown', () => {
+	      clearBellBlink();
+	      // (선택) 서버에 읽음 처리 API 호출 등 추가 가능
+	    });
+	  }
+   });
 });
 
-// window에 노출해야 HTML onclick="acceptOrder(...)"에서 동작합니다.
+//알림 아이콘 깜박임 시작
+function markBellAsUnread() {
+  const icon = document.getElementById('notifyIcon');
+  if (icon) icon.classList.add('blink');
+}
+
+//알림 아이콘 깜박임 종료
+function clearBellBlink() {
+  const icon = document.getElementById('notifyIcon');
+  if (icon) icon.classList.remove('blink');
+}
+
+// 주문 수락 함수 (기존)
 window.acceptOrder = function(oNo) {
   fetch(`/shop/orderManage/${oNo}/status`, {
     method: 'POST',
@@ -486,16 +523,32 @@ window.acceptOrder = function(oNo) {
   })
   .then(res => {
     if (!res.ok) throw new Error('상태 변경 실패');
-    // (1) 목록 li 제거
+    // ① 목록에서 해당 주문 항목(li) 제거
     const btn = document.querySelector(`button[onclick="acceptOrder(${oNo})"]`);
     if (btn) btn.closest('li').remove();
-    // (2) 진행 중 화면으로 이동
+    // ② 진행 중 화면으로 이동
     location.href = '/shop/orderManage?status=IN_PROGRESS';
   })
   .catch(err => {
     console.error(err);
     alert('주문 수락에 실패했습니다.');
   });
+};
+
+// 주문 거절 함수 (추가)
+window.rejectOrder = function(oNo) {
+  fetch(`/shop/orderManage/${oNo}/status`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: 'newStatus=REJECTED'
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('거절 실패');
+    // 거절된 주문 li 제거
+    const btn = document.querySelector(`button[onclick="rejectOrder(${oNo})"]`);
+    if (btn) btn.closest('li').remove();
+  })
+  .catch(() => alert('주문 거절에 실패했습니다.'));
 };
 
 function renderNewOrderItem(msg) {
@@ -545,12 +598,29 @@ function renderHeaderNotification(msg) {
 
 document.querySelectorAll('tr[data-order-no]').forEach(row => {
   const oNo = row.dataset.orderNo;
-  stomp.subscribe(`/topic/orderStatus/${oNo}`, msg => {
-    const { newStatus } = JSON.parse(msg.body);
-    document.querySelector(`.status-cell[data-order-no="${oNo}"]`)
-            .textContent = newStatus;
+  stomp.subscribe(`/topic/orderStatus/${shopId}`, msg => {
+    const { oNo, newStatus } = JSON.parse(msg.body);
+    // (a) 주문내역 테이블이 보이는 페이지라면 상태 셀 업데이트
+    const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
+    if (cell) {
+      cell.textContent = newStatus;
+    }
+    // (b) 헤더 알림에서 해당 주문 항목 제거
+    removeHeaderNotification(oNo);
   });
 });
+
+//헤더 알림에서 아이템 제거 함수
+function removeHeaderNotification(oNo) {
+  const list = document.getElementById('headerNotifyList');
+  const anchor = list.querySelector(`a[href*="oNo=${oNo}"]`);
+  if (anchor) anchor.closest('li').remove();
+
+  const badge = document.getElementById('headerNotifyBadge');
+  let cnt = Math.max((parseInt(badge.textContent) || 1) - 1, 0);
+  badge.textContent = cnt;
+  if (cnt === 0) badge.classList.add('d-none');
+}
 
 // ===== shopOrders.html 전용: 주문 상태 실시간 업데이트 =====
 document.addEventListener('DOMContentLoaded', () => {
