@@ -64,7 +64,7 @@ public class LoginController {
 	// 로그인
 	@PostMapping("/login")
 	public String login(Model model, @RequestParam("id") String id, @RequestParam("pass") String pass, HttpSession session,
-			HttpServletResponse response )throws ServletException, IOException {
+			HttpServletResponse response, @RequestParam(name = "redirectURL", required = false) String redirectURL )throws ServletException, IOException {
 		
 		int login = loginService.login(id, pass);
 		
@@ -112,20 +112,23 @@ public class LoginController {
 		LocalDate birthday = LocalDate.parse(member.getBirthday(), dateFormatter);
 		LocalDate today = LocalDate.now();
 		
-		if(member.getDivision().equals("owner")){
+				if (redirectURL != null && !redirectURL.isEmpty()) {
+			return "redirect:" + redirectURL;
+		} else if (member.getDivision().equals("owner")) {
 			return "redirect:/shopMain";
-		}else if (member.getDivision().equals("client")) {
-			if((birthday.getMonth() == today.getMonth()) && (birthday.getDayOfMonth() == today.getDayOfMonth())) {
-				if(loginService.checkbirthdayCoupon(id) == -1) {
-					System.out.println("생일 쿠폰 없음");
-					loginService.addBirthdayCoupon(id);
-				}else{
-					System.out.println("생일 쿠폰 이미받음");
+		} else { // This covers client and any other division not explicitly handled
+			if (member.getDivision().equals("client")) { // Keep client-specific logic
+				if((birthday.getMonth() == today.getMonth()) && (birthday.getDayOfMonth() == today.getDayOfMonth())) {
+					if(loginService.checkbirthdayCoupon(id) == -1) {
+						System.out.println("생일 쿠폰 없음");
+						loginService.addBirthdayCoupon(id);
+					}else{
+						System.out.println("생일 쿠폰 이미받음");
+					}
 				}
-			}	
+			}
+			return "redirect:/main"; // Default redirect for clients and others
 		}
-		
-		return "redirect:/main";
 	}
 	
 	// 회원가입

@@ -1968,7 +1968,7 @@ function resetReviewForm(){
 
 
 
-
+// 없애면 메뉴 모달창 안뜸
   const reader = new FileReader();
   reader.onload = function (e) {
     $imgPreview.attr('src', e.target.result).show();
@@ -2016,6 +2016,7 @@ $('.payment-method').on('click', function(){
 
 // pay.html의 결제하기 버튼 클릭 이벤트
 $(document).on("click", "#btnPayNow", function() {
+	console.log("DEBUG: selectedMethod:", selectedMethod); // 이 줄 추가
 	if(!selectedMethod){
 		alert('결제 수단을 선택해주세요');
 		return;
@@ -2106,30 +2107,40 @@ $(document).on("click", "#btnPayNow", function() {
             guestId: window.currentGuestId  // 게스트 ID 명시적으로 전달
         }),
         success: function(response) {
+					console.log("DEBUG: /preparePayment 응답 전체:", response);
             if (response.success && response.paymentData) {
+							console.log("DEBUG: paymentData 전달되는 값:", response.paymentData);
                 // PortOne 결제 시작
-                // response.orderId를 merchant_uid로 사용
-                response.paymentData.merchant_uid = response.orderId; 
+                // response.orderId를 merchant_uid로 사용 (이전 코드 주석 처리 또는 삭제)
+                 response.paymentData.merchant_uid = response.orderId; 
                 
+								console.log("DEBUG: PortOne.requestPayment에 넘길 config:", response.paymentData);
+								
                 PortOne.requestPayment(response.paymentData)
                     .then(function(payment) {
                         console.log("Payment object from PortOne.requestPayment:", payment); // 추가된 로그
                         console.log("imp_uid:", payment.imp_uid); // imp_uid 확인
                         console.log("merchant_uid:", payment.merchant_uid); // merchant_uid 확인
+												console.log("response.orderId(merchan_uid):", response.orderId);
+												console.log("SDK payment object:", payment);
+												const merchantUid = response.orderId;
+												const paymentId = payment.paymentId;
 
                         if (payment.code !== undefined) {
                             alert("결제 실패: " + payment.message);
-                            console.error("PortOne Error:", payment);
+                            console.error("PortOne Error:", payment);														
                         } else {
 							const shopId = parseInt($('#shopId').val(), 10);
                             // 결제 성공 시 서버에 최종 확인 요청
+														
                             $.ajax({
                                 url: "/completePayment", // 서버의 결제 완료 엔드포인트
                                 type: "POST",
                                 contentType: "application/json",
                                 data: JSON.stringify({
+																	merchant_uid: response.orderId,
                                     paymentId: payment.paymentId, // PortOne SDK가 반환한 paymentId 사용
-                                    orderId: response.orderId, // 백엔드에서 미리 생성한 orderId 사용
+                                    //orderId: response.orderId, // 백엔드에서 미리 생성한 orderId 사용
                                     paymentMethod: selectedMethod, // 선택된 결제 수단 추가
 
                                     // 새로 추가할 필드들
@@ -2171,7 +2182,7 @@ $(document).on("click", "#btnPayNow", function() {
         },
         beforeSend: function(xhr) { // 요청 보내기 직전
             const requestData = JSON.parse(this.data); // 보내려는 데이터를 파싱
-            console.log("Sending to /preparePayment:", requestData); // 이 로그를 추가
+            console.log("Sending to /preparePayment:", requestData); 
         }
     });
 });

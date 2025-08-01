@@ -40,7 +40,8 @@
 						</div>
 						<div class="col-md-6">
 							<button type="button"
-							 class="btn btn-outline-secondary w-100" data-method="MOBILE">휴대폰</button>
+							 class="payment-method btn btn-outline-primary w-100" 
+							 data-method="TOSSPAY">토스페이</button>
 						</div>
 						<div class="col-md-6">
 							<button type="button"
@@ -109,7 +110,7 @@
 				        		disabled>
 				            결제하기
 				        </button>
-				        <div id="guestInfo" th:data-guest-id="${session.guestId}"></div>
+				        <div id="guestInfo" th:data-guest-id="${session.guestId}" th:data-user-id="${session.loginId}"></div>
 				        <input type="hidden" id="shopId" th:value="${orderedItems[0].sId}" />
 				    </div>
 				</div>
