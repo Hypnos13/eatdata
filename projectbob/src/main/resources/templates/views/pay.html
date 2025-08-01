@@ -25,10 +25,7 @@
 						<label class="form-label">휴대전화번호</label> <input type="text"
 							id="phone" class="form-control" placeholder="(필수) 휴대전화 번호 입력"
 							th:value="${member != null ? member.phone : ''}" />
-						<div class="form-check mt-2">
-							<input class="form-check-input" type="checkbox" id="safeNum" />
-							<label class="form-check-label" for="safeNum">안심번호 사용</label>
-						</div>
+				
 					</div>
 					<div class="mb-3">
 						<label class="form-label">주문시 요청사항</label>
@@ -113,8 +110,8 @@
 				        		disabled>
 				            결제하기
 				        </button>
-
-				        <div id="guestInfo" th:data-guest-id="${session.guestId}" th:data-user-id="${session.loginId}"></div>
+				        <div id="guestInfo" th:data-guest-id="${session.guestId}"></div>
+				        <input type="hidden" id="shopId" th:value="${orderedItems[0].sId}" />
 				    </div>
 				</div>
 

@@ -3,6 +3,12 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
+<!-- 메뉴 성분표  -->
+<select id="getMenuCal" resultType="com.projectbob.domain.Menu">
+        SELECT m_id, calories, carbs, protein, fat, sfa, sugar, sodium, serving_size
+        FROM menu
+        WHERE m_id = #{mId}
+    </select>
 
 
 <!-- 주문 페이지에서 주문 완료 페이지로 보내기 -->
@@ -89,20 +95,26 @@
 
 
 <!-- 장바구니 개별 항목 삭제 (메인 메뉴 항목과 그에 연결된 모든 옵션 삭제) -->
-    <delete id="deleteCartItemAndOptions" parameterType="map">
-	DELETE FROM cart
-	WHERE
-	(ca_id = #{caId} OR ca_pid = #{caId}) AND (
-	<if test="userId != null and userId.trim() != ''">
-		id = #{userId}
-	</if>
-	<if test="guestId != null and guestId.trim() != ''">
-		<if test="userId != null and userId.trim() != ''">
-			OR
-		</if>
-		guest_id = #{guestId}
-	</if>
-	)
+
+<delete id="deleteCartItemAndOptions" parameterType="map">
+  DELETE FROM cart
+  WHERE (ca_id = #{caId} OR ca_pid = #{caId})
+    AND (
+      <choose>
+        <when test="userId != null and userId.trim() != '' and guestId != null and guestId.trim() != ''">
+          (id = #{userId} OR guest_id = #{guestId})
+        </when>
+        <when test="userId != null and userId.trim() != ''">
+          id = #{userId}
+        </when>
+        <when test="guestId != null and guestId.trim() != ''">
+          guest_id = #{guestId}
+        </when>
+        <otherwise>
+          1 = 0  
+        </otherwise>
+      </choose>
+    )
 </delete>
 
 
@@ -147,14 +159,29 @@
     c.total_price,        m.name AS menuName,
     m.price AS menuPrice, mo.content AS optionName,
     mo.price AS optionPrice,
+     mo.m_option AS optionGroupName,
     CASE
-        WHEN c.mo_id IS NULL THEN m.price  -- Main menu item
-        ELSE mo.price                     -- Option item
+        WHEN c.mo_id IS NULL THEN m.price 
+        ELSE mo.price                     
     END AS unitPrice FROM cart c
   INNER JOIN menu m ON c.m_id = m.m_id
   LEFT JOIN menu_option mo ON c.mo_id = mo.mo_id
-  WHERE (c.id = #{userId} AND #{userId} IS NOT NULL)
-     OR (c.guest_id = #{guestId} AND #{guestId} IS NOT NULL)
+  
+ WHERE
+  <choose>
+    <when test="userId != null and userId.trim() != '' and guestId != null and guestId.trim() != ''">
+      (c.id = #{userId} OR c.guest_id = #{guestId})
+    </when>
+    <when test="userId != null and userId.trim() != ''">
+      c.id = #{userId}
+    </when>
+    <when test="guestId != null and guestId.trim() != ''">
+      c.guest_id = #{guestId}
+    </when>
+    <otherwise>
+      1 = 0
+    </otherwise>
+  </choose>
   ORDER BY c.ca_id ASC
 </select>
 
@@ -180,7 +207,7 @@
   INNER JOIN menu m ON c.m_id = m.m_id
   LEFT JOIN menu_option mo ON c.mo_id = mo.mo_id
   <where>
-    c.ca_pid IS NULL <!-- ca_pid가 NULL인 항목만 선택 = 메인 메뉴 항목 -->
+    c.ca_pid IS NULL 
     AND (
       <if test="userId != null and userId.trim() != ''">
         c.id = #{userId}
@@ -239,7 +266,7 @@
 
 <!-- 내가 찜한 가게 목록 -->
 <select id="getLikeShopList" parameterType="string" resultType="int">
-	SELECT s_id FROM likeList WHERE id = #{id}
+	SELECT s_id FROM likelist WHERE id = #{id}
 </select>
 
 <!-- 찜 추가 시 shop.heart + 1 -->
@@ -252,18 +279,18 @@
 
 <!-- 찜목록 버튼 -->
 <select id="isLiked" parameterType="LikeList" resultType="int">
-	SELECT COUNT(*) FROM likeList
+	SELECT COUNT(*) FROM likelist
 	WHERE id = #{id} AND s_id = #{sId}
 </select>
 <insert id="addLikeList" parameterType="LikeList">
-	INSERT INTO likeList(id, s_id, status, reg_date)
+	INSERT INTO likelist(id, s_id, status, reg_date)
 	VALUES(#{id}, #{sId}, 'Y', NOW())
 </insert>
 <delete id="deleteLikeList" parameterType="LikeList">
-	DELETE FROM likeList WHERE id = #{id} AND s_id = #{sId}
+	DELETE FROM likelist WHERE id = #{id} AND s_id = #{sId}
 </delete>
 <select id="shopCountLike" parameterType="int" resultType="int">
-	SELECT COUNT(*) FROM likeList WHERE s_id = #{sId}	
+	SELECT COUNT(*) FROM likelist WHERE s_id = #{sId}	
 </select>
 
 <!-- 하트 버튼 증가시키는 쿼리 -->

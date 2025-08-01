@@ -318,8 +318,25 @@ function showMap(address) {
 }
 
 // 영업상태 ON/OFF 토글
-$(function() {
+/*$(function() {
     $('.shop-status-table input[type="checkbox"]').on('change', function() {
+        const $checkbox = $(this);
+        const sId = $checkbox.data('sid');
+        const isChecked = $checkbox.is(':checked');
+        // AJAX로 상태 변경 요청
+        $.post('/shop/statusUpdate', { sId: sId, status: isChecked ? 'Y' : 'N' })
+            .done(function() {
+                location.reload(); // 새로고침(동적으로 UI만 바꿔도 됨)
+            })
+            .fail(function() {
+                alert('상태 변경에 실패했습니다.');
+                // 실패 시 체크박스 원복
+                $checkbox.prop('checked', !isChecked);
+            });
+    });
+});*/
+$(function() {
+    $('#shopStat').on('change', function() {
         const $checkbox = $(this);
         const sId = $checkbox.data('sid');
         const isChecked = $checkbox.is(':checked');
@@ -366,7 +383,7 @@ $(function () {
     $tr.find(".allDay-check").prop("disabled", !on);
 
     $label
-      .text(on ? "영업중" : "휴무")
+      .text(on ? "영업일" : "휴무일")
       .toggleClass("bg-success", on)
       .toggleClass("bg-secondary", !on);
   };
@@ -438,3 +455,159 @@ $('.reply-box')
   });
 });
 
+// shop.js
+document.addEventListener('DOMContentLoaded', () => {
+  const socket = new SockJS('/ws');
+  const stomp  = Stomp.over(socket);
+
+  stomp.connect({}, () => {
+    // 1) 신규주문 구독
+    const newOrderList = document.getElementById('newOrderList');
+    if (newOrderList) {
+      const shopId = newOrderList.dataset.shopId;
+      stomp.subscribe('/topic/newOrder/' + shopId, renderNewOrderItem);
+    }
+
+    // 2) 헤더 알림 구독
+    const notifyContainer = document.getElementById('notifyContainer');
+    if (notifyContainer) {
+      const shopId = notifyContainer.dataset.shopId;
+      stomp.subscribe('/topic/newOrder/' + shopId, renderHeaderNotification);
+    }
+  });
+});
+
+// window에 노출해야 HTML onclick="acceptOrder(...)"에서 동작합니다.
+window.acceptOrder = function(oNo) {
+  fetch(`/shop/orderManage/${oNo}/status`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: 'newStatus=ACCEPTED'
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('상태 변경 실패');
+    // (1) 목록 li 제거
+    const btn = document.querySelector(`button[onclick="acceptOrder(${oNo})"]`);
+    if (btn) btn.closest('li').remove();
+    // (2) 진행 중 화면으로 이동
+    location.href = '/shop/orderManage?status=IN_PROGRESS';
+  })
+  .catch(err => {
+    console.error(err);
+    alert('주문 수락에 실패했습니다.');
+  });
+};
+
+function renderNewOrderItem(msg) {
+  const o = JSON.parse(msg.body);
+  const ul = document.getElementById('newOrderList');
+  const li = document.createElement('li');
+  li.className = 'list-group-item d-flex align-items-start mb-3 p-3';
+
+  li.innerHTML = `
+    <div class="flex-grow-1 pe-3">
+      <div class="mb-1">🛒 ${o.menus}</div>
+      <div class="mb-1">💬 ${o.request || '요청사항 없음'}</div>
+      <div class="text-muted small"><i class="bi bi-clock"></i>
+        ${new Date(o.regDate).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+      </div>
+    </div>
+    <div class="d-flex flex-column justify-content-between" style="min-width: 5rem;">
+      <button class="btn btn-success btn-sm mb-2" onclick="acceptOrder(${o.oNo})">수락</button>
+      <button class="btn btn-outline-danger btn-sm" onclick="rejectOrder(${o.oNo})">거절</button>
+    </div>
+  `;
+
+  ul.prepend(li);
+}
+
+function renderHeaderNotification(msg) {
+  const data = JSON.parse(msg.body);
+  const badge = document.getElementById('headerNotifyBadge');
+  const list  = document.getElementById('headerNotifyList');
+  // 뱃지 카운트 증가
+  let cnt = parseInt(badge.textContent) || 0;
+  badge.textContent = ++cnt;
+  badge.classList.remove('d-none');
+  // 알림 리스트에 항목 추가
+  if (cnt === 1 && list.firstElementChild.tagName === 'P') {
+    list.innerHTML = '';  // “알림이 없습니다.” 문구 제거
+  }
+  const item = document.createElement('li');
+  item.innerHTML = `
+    <a class="dropdown-item text-truncate"
+       href="/shop/orderDetail?oNo=${data.oNo}">
+      새 주문 알림이 도착했습니다.
+    </a>
+  `;
+  list.prepend(item);
+}
+
+document.querySelectorAll('tr[data-order-no]').forEach(row => {
+  const oNo = row.dataset.orderNo;
+  stomp.subscribe(`/topic/orderStatus/${oNo}`, msg => {
+    const { newStatus } = JSON.parse(msg.body);
+    document.querySelector(`.status-cell[data-order-no="${oNo}"]`)
+            .textContent = newStatus;
+  });
+});
+
+// ===== shopOrders.html 전용: 주문 상태 실시간 업데이트 =====
+document.addEventListener('DOMContentLoaded', () => {
+  // 주문내역 테이블이 없으면 바로 종료
+  const rows = document.querySelectorAll('tr[data-order-no]');
+  if (rows.length === 0) return;
+
+  const socket = new SockJS('/ws');
+  const stomp  = Stomp.over(socket);
+
+  stomp.connect({}, () => {
+    rows.forEach(row => {
+      const oNo = row.dataset.orderNo;
+      stomp.subscribe('/topic/orderStatus/' + oNo, msg => {
+        const { newStatus } = JSON.parse(msg.body);
+        const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
+        if (cell) {
+          cell.textContent = newStatus;
+        }
+      });
+    });
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 픽업·배달 버튼 처리
+  const btnPickup  = document.getElementById('btnPickup');
+  const btnDeliver = document.getElementById('btnDeliver');
+
+  if (btnPickup) {
+    btnPickup.addEventListener('click', () => {
+      updateStatus('IN_PROGRESS', () => {
+        btnPickup.disabled  = true;
+        btnDeliver.disabled = false;
+      });
+    });
+  }
+
+  if (btnDeliver) {
+    btnDeliver.addEventListener('click', () => {
+      updateStatus('COMPLETED', () => {
+        window.location.href = '/shop/orderManage?status=PENDING';
+      });
+    });
+  }
+
+  function updateStatus(newStatus, cb) {
+    // Thymeleaf 가 주입한 order.oNo 가 필요하므로 data-* 에 담아두면 좋습니다.
+    const container = document.querySelector('[data-order-no]');
+    const oNo       = container ? container.dataset.orderNo : 0;
+
+    fetch(`/shop/orderManage/${oNo}/status`, {
+      method:  'POST',
+      headers: { 'Content-Type':'application/x-www-form-urlencoded' },
+      body:    'newStatus=' + newStatus
+    })
+    .then(r => r.json())
+    .then(d => { if (d.success) cb(); });
+  }
+});

@@ -35,5 +35,8 @@ public class Shop {
 	private String sInfo;
 	private Timestamp regDate;
 	private Timestamp modiDate;
+	
+	 private double latitude;   // 위도
+	    private double longitude;  // 경도
 
 }

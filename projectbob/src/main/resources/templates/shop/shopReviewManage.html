@@ -10,10 +10,22 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <!-- 헤더는 layout:decorate로 포함됨 -->
   <div layout:fragment="content">
     <div class="content-card">
       <h2 class="text-center mb-4">리뷰 관리</h2>
+      
+      <!-- 페이지당 댓글 개수 선택 -->
+		<form id="pageSizeForm" th:action="@{/shop/reviewManage}" method="get" class="d-flex mb-3">
+		  <input type="hidden" name="s_id"   th:value="${currentShop.sId}" />
+		  <input type="hidden" name="page"   value="1" /> <!-- 사이즈 변경 시 항상 1페이지로 -->
+		  <label class="me-2">댓글 개수:</label>
+		  <select name="size" class="form-select w-auto"
+		          onchange="this.form.submit()">
+		    <option th:value="10" th:selected="${pageSize==10}">10개</option>
+		    <option th:value="20" th:selected="${pageSize==20}">20개</option>
+		    <option th:value="30" th:selected="${pageSize==30}">30개</option>
+		  </select>
+		</form>
 
       <!-- 리뷰가 하나도 없을 때 -->
       <div th:if="${#lists.isEmpty(reviews)}">
@@ -21,7 +33,7 @@
       </div>
 
       <!-- 리뷰 목록 반복 -->
-      <div th:each="rev : ${reviews}" class="review-card">
+      <div th:each="rev : ${reviews}" th:id="'review-' + ${rev.rNo}" class="review-card">
 		  <div class="review-header">
 		    <span class="review-menu-badge" th:text="${rev.menuName}">메뉴명</span>
 		    <span class="review-writer" th:text="${rev.id}">ID</span>
@@ -71,15 +83,52 @@
 		  <form th:action="@{/shop/review/reply}" method="post" class="reply-form">
 		    <input type="hidden" name="rNo" th:value="${rev.rNo}">
 		    <input type="hidden" name="sId" th:value="${shop.sId}">
+	        <!-- 현재 페이지/사이즈 유지 -->
+		    <input type="hidden" name="page" value="<!--/*[[${currentPage}]]*/-->">
+		    <input type="hidden" name="size" value="<!--/*[[${pageSize}]]*/-->">
 		    <div class="input-group">
 		      <input type="text" name="content" class="form-control" placeholder="사장님 답글을 입력하세요." required>
 		      <button class="btn btn-submit" type="submit">등록</button>
 		    </div>
 		  </form>
 		</div>
+	  	<!-- 페이지네이션 -->
+		<nav aria-label="Page navigation">
+		  <ul class="pagination justify-content-center">
+		    <!-- 이전 그룹 버튼 -->
+		    <li class="page-item" th:classappend="${startPageGroup>1} ? '' : 'disabled'">
+		      <a class="page-link"
+		         th:href="@{/shop/reviewManage(
+		             s_id=${currentShop.sId},
+		             page=${startPageGroup-1},
+		             size=${pageSize}
+		         )}">«</a>
+		    </li>
+		    <!-- 페이지 번호 -->
+		    <li class="page-item"
+		        th:each="i: ${#numbers.sequence(startPageGroup, endPageGroup)}"
+		        th:classappend="${i==currentPage} ? 'active'">
+		      <a class="page-link"
+		         th:href="@{/shop/reviewManage(
+		             s_id=${currentShop.sId},
+		             page=${i},
+		             size=${pageSize}
+		         )}"
+		         th:text="${i}">1</a>
+		    </li>
+		    <!-- 다음 그룹 버튼 -->
+		    <li class="page-item" th:classappend="${endPageGroup<totalPages} ? '' : 'disabled'">
+		      <a class="page-link"
+		         th:href="@{/shop/reviewManage(
+		             s_id=${currentShop.sId},
+		             page=${endPageGroup+1},
+		             size=${pageSize}
+		         )}">»</a>
+		    </li>
+		  </ul>
+		</nav>
     </div>
   </div>
-
-  <!-- 푸터도 layout:decorate에 포함 -->
+  
 </body>
 </html>

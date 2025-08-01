@@ -131,8 +131,8 @@
 
 			<nav class="navbar px-0">
 				<div class="d-flex align-items-center overflow-auto w-100">
-
-
+					
+					
 
 					<!-- 🔍 돋보기 버튼 -->
 					<button class="btn btn-outline-secondary me-3 flex-shrink-0"
@@ -185,7 +185,17 @@
 
 				</div>
 			</nav>
-
+				
+	<div class="ms-auto me-3 dropdown mb-2">
+  <button class="btn btn-sm btn-outline-primary dropdown-toggle py-1" type="button" id="distanceSortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    거리순 정렬
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="distanceSortDropdown">
+    <li><a class="dropdown-item sort-distance-option" href="#" data-sort="asc">거리 가까운 순 ↑</a></li>
+    <li><a class="dropdown-item sort-distance-option" href="#" data-sort="desc">거리 먼 순 ↓</a></li>
+  </ul>
+</div>
+				
 
 			<div id="searchBox" class="d-none w-100 px-3 my-2">
 				<input type="text" id="location-input" class="form-control"
@@ -196,32 +206,39 @@
 			<th:block th:if="${not #lists.isEmpty(sList)}">
 				<div class="row g-4">
 					<div class="col-12 col-md-6 col-lg-4"
-						th:each="shop, status: ${sList}">
+						th:each="shop, status: ${sList}" th:attr="data-lat=${shop.latitude}, data-lng=${shop.longitude}">
 						<a th:href="@{/MenuDetail(sId=${shop.sId})}"
 							class="text-decoration-none text-dark">
 							<div class="card h-100 shadow-sm rounded-4 border-0">
 								<div class="row g-0">
 									<div class="col-4">
-									  <!-- 업로드된 이미지가 있으면 그 경로를, 없으면 기본 플레이스홀더를 보여줌 -->
-									  <img
-									    th:src="${shop.sPictureUrl} != null
+										<!-- 업로드된 이미지가 있으면 그 경로를, 없으면 기본 플레이스홀더를 보여줌 -->
+										<img
+											th:src="${shop.sPictureUrl} != null
 									             ? @{${shop.sPictureUrl}}
 									             : @{/images/default-shop.png}"
-									    class="img-fluid rounded-start h-100 object-fit-cover"
-									    th:alt="${shop.name} + ' 이미지'" />
+											class="img-fluid rounded-start h-100 object-fit-cover"
+											th:alt="${shop.name} + ' 이미지'" />
 									</div>
-									<div class="col-8">
+
+									<div class="col-8" th:attr="data-address=${shop.address1}">
 										<div class="card-body">
 											<h5 class="card-title fw-bold mb-1">[[${shop.name}]]</h5>
 											<p class="card-text text-muted small mb-1">[[${shop.address1}]],
 												[[${shop.address2}]]</p>
-											<p class="card-text text-success fw-semibold mb-0">평점
-												★[[${shop.rating}]]
-													<i class="bi bi-heart-fill text-danger ms-1"
-														th:if="${likeShopList != null and likeShopList.contains(shop.sId)}"></i>
-												</p>
+
+											<!-- 거리 표시 -->
+											<p class="card-text text-muted small mb-1 distance-info">거리
+												계산 중...</p>
+
+											<p class="card-text text-success fw-semibold mb-0">
+												평점 ★[[${shop.rating}]] <i
+													class="bi bi-heart-fill text-danger ms-1"
+													th:if="${likeShopList != null and likeShopList.contains(shop.sId)}"></i>
+											</p>
 										</div>
 									</div>
+
 								</div>
 							</div>
 						</a>
@@ -231,9 +248,8 @@
 
 
 			<th:block th:unless="${not #lists.isEmpty(sList)}">
-				<div class="alert alert-info text-center">아직 등록된 음식점이 없습니다.
-빠른 시일 내에 서비스를
-제공할 수 있도록 하겠습니다.</div>
+				<div class="alert alert-info text-center">아직 등록된 음식점이 없습니다. 빠른
+					시일 내에 서비스를 제공할 수 있도록 하겠습니다.</div>
 				<p>no 식당 no 먹을거</p>
 			</th:block>
 

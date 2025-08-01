@@ -13,6 +13,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import jakarta.servlet.http.*;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,9 @@ public class ShopController {
 	
 	@Autowired
 	private FileUploadService fileUploadService;
+	
+	@Autowired
+    private SimpMessagingTemplate messagingTemplate;
 	
 	// 식품영양성분DB API 검색
 	@GetMapping("/api/nutrition-search")
@@ -533,42 +538,61 @@ public class ShopController {
         return "redirect:/shopNotice?s_id=" + sId;
     }
     
-	// 리뷰 관리 화면
-	@GetMapping("/shop/reviewManage")
-	public String shopReviewManage(
-	        @SessionAttribute(name="loginId", required=false) String loginId,
-	        @RequestParam("s_id") Integer sId,
-	        HttpSession session,
-	        Model model) {
-	
-	    if (loginId == null) {
-	        return "redirect:/login";
-	    }
-	
-	    // 1) 사장님이 가진 가게 목록 조회
-	    List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
-	    if (shopListMain.isEmpty()) {
-	        // 가게가 하나도 없으면 기본 페이지로
-	        return "redirect:/shopInfo";
-	    }
-	
-	    // 2) currentShop 결정 (세션 or 파라미터 기반)
-	    Shop currentShop = resolveCurrentShop(sId, loginId, session, shopListMain);
-	    if (currentShop == null) {
-	        return "redirect:/shopMain";
-	    }
-	
-	    // 3) 리뷰+답글 조회
-	    List<Review> reviews = shopService.getReviewsWithReplies(currentShop.getSId());
-	
-	    // 4) 모델에 담기 (사이드바용 shopListMain/currentShop, 뷰용 shop/reviews)
-	    model.addAttribute("shopListMain", shopListMain);
-	    model.addAttribute("currentShop", currentShop);
-	    model.addAttribute("shop", currentShop);
-	    model.addAttribute("reviews", reviews);
-	
-	    return "shop/shopReviewManage";
-	}
+ // ── 리뷰 관리 화면 (페이징 지원) ─────────────────────────────
+    @GetMapping("/shop/reviewManage")
+    public String shopReviewManage(
+            @SessionAttribute(name="loginId", required=false) String loginId,
+            @RequestParam("s_id") Integer sId,
+            @RequestParam(value="page", defaultValue="1") int page,
+            @RequestParam(value="size", defaultValue="10") int size,
+            HttpSession session,
+            Model model) {
+
+        if (loginId == null) {
+            return "redirect:/login";
+        }
+
+        // 1) 사장님 가게 목록 & currentShop 결정
+        List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+        if (shopListMain.isEmpty()) {
+            return "redirect:/shopInfo";
+        }
+        Shop currentShop = resolveCurrentShop(sId, loginId, session, shopListMain);
+        if (currentShop == null) {
+            return "redirect:/shopMain";
+        }
+
+        // 2) 전체 리뷰 개수 & 총 페이지 수
+        int totalReviews = shopService.countReviewsByShopId(currentShop.getSId());
+        int totalPages   = (int) Math.ceil((double) totalReviews / size);
+        // 페이지번호 범위 안전 처리
+        page = Math.max(1, Math.min(page, totalPages));
+
+        // 3) 페이징된 리뷰+답글 조회
+        List<Review> reviews = shopService.getReviewsWithRepliesPaged(
+            currentShop.getSId(), page, size
+        );
+
+        // 4) 페이지 그룹 (1~10, 11~20…)
+        int groupSize      = 10;
+        int startPageGroup = ((page - 1) / groupSize) * groupSize + 1;
+        int endPageGroup   = Math.min(startPageGroup + groupSize - 1, totalPages);
+
+        // 5) 모델에 담기
+        model.addAttribute("shopListMain",   shopListMain);
+        model.addAttribute("currentShop",    currentShop);
+        model.addAttribute("shop",           currentShop);
+        model.addAttribute("reviews",        reviews);
+        model.addAttribute("currentPage",    page);
+        model.addAttribute("pageSize",       size);
+        model.addAttribute("totalReviews",   totalReviews);
+        model.addAttribute("totalPages",     totalPages);
+        model.addAttribute("startPageGroup", startPageGroup);
+        model.addAttribute("endPageGroup",   endPageGroup);
+
+        return "shop/shopReviewManage";
+    }
+
 	
 	// 리뷰 등록 
 	@PostMapping("/review/add")
@@ -584,6 +608,8 @@ public class ShopController {
 	public String postReviewReply(
 	        @SessionAttribute(name="loginId") String loginId,
 	        @ModelAttribute ReviewReply reply,
+	        @RequestParam(value="page", defaultValue="1") int page,
+	        @RequestParam(value="size", defaultValue="10") int size,
 	        RedirectAttributes ra) {
 	
 	    // 로그인 체크
@@ -603,7 +629,11 @@ public class ShopController {
 	    shopService.addReply(reply);
 	
 	    ra.addFlashAttribute("msg", "답글이 등록되었습니다.");
-	    return "redirect:/shop/reviewManage?s_id=" + reply.getSId();
+	    return "redirect:/shop/reviewManage" 
+				    + "?s_id=" + reply.getSId() 
+				    + "&page=" + page  
+				    + "&size=" + size 
+				    + "#review-" + reply.getRNo();
 	}
 	
 	// 답글 수정 처리
@@ -627,8 +657,77 @@ public class ShopController {
         ra.addFlashAttribute("msg", "답글이 삭제되었습니다.");
         return "redirect:/shop/reviewManage?s_id=" + sId;
     }
+	
+	/* ----------------------- 상태별 주문 리스트 ----------------------- */
+	@GetMapping("/shop/orderManage")
+	public String orderManage(
+	        @RequestParam(value = "status", defaultValue = "PENDING") String status,
+	        @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	        @SessionAttribute(name = "loginId",   required = false) String loginId,
+	        Model model) {
 
- 
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+	    List<Orders> orders = shopService.findOrdersByStatusAndShop(status, sId);
+	    model.addAttribute("orders", orders);
+	    model.addAttribute("status", status);
+	    model.addAttribute("currentShop",
+	        shopService.findByShopIdAndOwnerId(sId, loginId));
+	    return "shop/shopNewOrders";
+	}
+
+    /* ----------------------- 주문 상세 보기 ----------------------- */
+	@GetMapping("/shop/orderDetail")
+	public String orderDetail(
+	        @RequestParam("oNo") int oNo,
+	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        @SessionAttribute(name = "currentSId",required = false) Integer sId,
+	        Model model) {
+
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+	    Orders order = shopService.findOrderByNo(oNo);
+	    model.addAttribute("order", order);
+	    model.addAttribute("currentShop",
+	        shopService.findByShopIdAndOwnerId(sId, loginId));
+	    return "shop/shopOrderDetail";
+	}
+
+    /* ----------------------- 주문 상태 변경 (수락/거절/완료) ----------------------- */
+	@PostMapping("/shop/orderManage/{oNo}/status")
+	@ResponseBody
+	@Transactional
+	public ResponseEntity<Map<String, Object>> changeOrderStatus(
+	        @PathVariable int oNo,
+	        @RequestParam("newStatus") String newStatus) {
+
+	    shopService.updateOrderStatus(oNo, newStatus);
+	    messagingTemplate.convertAndSend(
+	        "/topic/orderStatus/" + oNo,
+	        Map.of("oNo", oNo, "newStatus", newStatus)
+	    );
+	    return ResponseEntity.ok(Map.of("success", true));
+	}
+
+    /* ----------------------- 기존 주문 내역 보기 ----------------------- */
+	@GetMapping("/orders")
+	public String viewOrders(
+	        @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	        @SessionAttribute(name = "loginId",   required = false) String loginId,
+	        Model model) {
+
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+	    List<Orders> orders = shopService.findOrdersByShopId(sId);
+	    model.addAttribute("orders", orders);
+	    model.addAttribute("currentShop",
+	        shopService.findByShopIdAndOwnerId(sId, loginId));
+	    return "shop/shopOrders";
+	}
+	
 	/* ----------------------- 전역 타이틀 ----------------------- */
     @ControllerAdvice
     public static class GlobalModelAdvice {
@@ -648,5 +747,3 @@ public class ShopController {
     }
 		
 }
-
-

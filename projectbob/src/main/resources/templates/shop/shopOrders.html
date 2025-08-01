@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/shop_layout}">
+<head>
+  <title>주문내역</title>
+</head>
+<body>
+  <div layout:fragment="content">
+    <h3 class="mb-4">📦 주문내역</h3>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>주문번호</th>
+          <th>주문일시</th>
+          <th>총금액</th>
+          <th>상태</th>
+          <th>상세보기</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="order : ${orders}" data-order-no="${order.oNo}">
+		  <td th:text="${order.oNo}">123</td>
+		  <td th:text="${#dates.format(order.regDate,'yyyy-MM-dd HH:mm')}">2025-07-31 10:00</td>
+		  <td th:text="${#numbers.formatInteger(order.totalPrice,0,'COMMA')} + '원'">15,200원</td>
+		  
+			<!-- ② 상태 셀에 class 와 data-order-no 추가 -->
+		    <td class="status-cell"
+		        data-order-no="${order.oNo}"
+		        th:text="${order.status}">접수완료</td>
+		        
+		  <td>
+		    <a th:href="@{|/shop/orderDetail?oNo=${order.oNo}|}"
+   				class="btn btn-sm btn-outline-primary">보기</a>
+		  </td>
+		</tr>
+        <tr th:if="${#lists.isEmpty(orders)}">
+          <td colspan="5" class="text-center text-muted">
+            주문내역이 없습니다.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <script th:src="@{/js/shop.js}"></script>
+  </div>
+</body>
+</html>

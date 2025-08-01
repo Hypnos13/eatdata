@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @Slf4j
 public class BobController {
+
+    private final WebsocketService websocketService;
 	
     
     @Autowired
@@ -32,7 +34,6 @@ public class BobController {
 
 	@Autowired
 	private LoginService loginService;
-
 
 
 	
@@ -75,8 +76,9 @@ public class BobController {
 	@Autowired
     private ShopService shopService;
 	
-    BobController(LoginController loginController) {
+    BobController(LoginController loginController, WebsocketService websocketService) {
         this.loginController = loginController;
+        this.websocketService = websocketService;
     }
 
 
@@ -150,6 +152,15 @@ public class BobController {
 		  List<Review> reviewList = bobService.getReviewList(sId);
 		  model.addAttribute("reviewList", reviewList);
 		  
+		  Map<Integer, Menu> menuCalMap = new HashMap<>();
+		  for (Menu menu : menuList) {
+		      Menu menuCal = bobService.getMenuCal(menu.getMId());
+		      if (menuCal != null) {
+		    	  menuCalMap.put(menu.getMId(), menuCal);
+		      }
+		  }
+		  model.addAttribute("menuCalMap", menuCalMap);
+		  
 		  // 회원 정보 세팅
 		  String loginId = (String) session.getAttribute("loginId");
 		  Member member = null;
@@ -210,9 +221,7 @@ public class BobController {
 			  return bobService.getMenuOptionsByMenuId(mId);
 		  }
 		  
-		
 
-		
 		  //주문표에 담아서 주문하기 페이지로
 			  @GetMapping("/pay")
 			  public String payPageGet(HttpSession session, Model model) {
@@ -310,6 +319,34 @@ public class BobController {
         String userId = (String) session.getAttribute("loginId");
         String guestId = (String) session.getAttribute("guestId");
         log.info("completePayment - userId: {}, guestId: {}", userId, guestId);
+<<<<<<< HEAD
+=======
+    	boolean verified = portoneService.verifyPayment(
+    			(String) req.get("paymentId"),
+    			(String) req.get("orderId")
+    			);
+                if (!verified) {
+                	return Map.of("success", false, "message", "결제 검증 실패");
+                }
+                int newOrderNo = bobService.createOrder(req, session, (String) req.get("paymentId"));
+                
+                //알림용 데이터 준비
+                Map<String, Object> payload = new HashMap<>();
+				/* payload.put("orderId", newOrderNo); */
+                payload.put("oNo", newOrderNo);
+                payload.put("regDate", System.currentTimeMillis());
+                payload.put("shopId", req.get("shopId"));
+                payload.put("totalPrice", req.get("totalPrice"));
+                
+                //WebSocket 알림 전송
+                websocketService.sendNewOrder((Integer) req.get("shopId"), payload);
+                
+                //장바구니 비우기
+                bobService.deleteAllCartItems(
+                		(String) session.getAttribute("userId"),
+                		(String) session.getAttribute("guestId")
+                		);
+>>>>>>> develop
 
         String paymentId = (String) req.get("paymentId");           // SDK 내부 추적용
         String merchantUid = (String) req.get("merchant_uid");     // 검증용 orderId

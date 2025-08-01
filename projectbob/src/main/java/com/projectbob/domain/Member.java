@@ -16,7 +16,6 @@ import lombok.ToString;
 public class Member {
 
 	private String id, name, nickname, pass, phone, address1, address2, email, birthday, division, isuse;
-	private int point;
 	private Timestamp regDate, modiDate;
 	
 }

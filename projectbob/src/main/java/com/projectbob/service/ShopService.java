@@ -315,7 +315,7 @@ public class ShopService {
         shopMapper.updateShopInfo(sId, sInfo);
     }
     
-    /** 리뷰 + 답글 함께 불러오기 */
+    // 리뷰 + 답글 함께 불러오기
     public List<Review> getReviewsWithReplies(int sId) {
         List<Review> reviews = shopMapper.findReviewsByShopId(sId);
         for (Review r : reviews) {
@@ -326,41 +326,80 @@ public class ShopService {
         return reviews;
     }
 
-    /** 리뷰 등록 */
+    // 리뷰 등록
     @Transactional
     public void addReview(Review review) {
         shopMapper.insertReview(review);              // 리뷰 등록
         shopMapper.updateShopRatingBySId(review.getSId()); // ★ 평점 갱신
     }
 
-    /** 리뷰 수정 */
+    // 리뷰 수정
     @Transactional
     public void updateReview(Review review) {
         shopMapper.updateReview(review);              // 리뷰 수정
         shopMapper.updateShopRatingBySId(review.getSId()); // ★ 평점 갱신
     }
     
-    /** 리뷰 삭제 */
+    // 리뷰 삭제 
     @Transactional
     public void deleteReview(int rNo, int sId) {
         shopMapper.deleteReview(rNo);                 // 리뷰 삭제
         shopMapper.updateShopRatingBySId(sId);             // ★ 평점 갱신
     }
 
-    /** 답글 등록 */
+    // 답글 등록
     public void addReply(ReviewReply reply) {
         shopMapper.insertReviewReply(reply);
     }
     
-    /** 답글 수정 */
+    //답글 수정 
     @Transactional
     public void updateReply(ReviewReply reply) {
         shopMapper.updateReviewReply(reply);
     }
     
-    /** 답글 삭제(soft-delete) */
+    // 답글 삭제(soft-delete) 
     @Transactional
     public void deleteReply(int rrNo) {
         shopMapper.deleteReviewReply(rrNo);
     }
+    
+    // 전체 리뷰 개수 조회 (필수)
+    public int countReviewsByShopId(int sId) {
+        return shopMapper.countReviewsByShopId(sId);
+    }
+
+    // 페이징된 리뷰 + 답글 조회 (필수)
+    public List<Review> getReviewsWithRepliesPaged(int sId, int page, int size) {
+        int offset = (page - 1) * size;
+        List<Review> reviews = shopMapper.findReviewsByShopIdPaged(sId, offset, size);
+        for (Review r : reviews) {
+            r.getReplies().addAll(
+                shopMapper.findRepliesByReviewNo(r.getRNo())
+            );
+        }
+        return reviews;
+    }
+    
+    //주문 조회
+    public List<Orders> findOrdersByShopId(int sId) {
+        return shopMapper.selectOrdersByShopId(sId);
+    }
+    
+    // 상태별 & 가게별 주문 조회 
+    public List<Orders> findOrdersByStatusAndShop(String status, int sId) {
+        return shopMapper.selectOrdersByStatusAndShop(status, sId);
+    }
+
+    // 단일 주문 상세 조회 
+    public Orders findOrderByNo(int oNo) {
+        return shopMapper.selectOrderByNo(oNo);
+    }
+
+    // 주문 상태 변경 
+    @Transactional
+    public void updateOrderStatus(int oNo, String newStatus) {
+        shopMapper.updateOrderStatus(oNo, newStatus);
+    }
+
 }

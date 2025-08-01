@@ -23,7 +23,8 @@ import com.projectbob.domain.Shop;
 @Mapper
 public interface BobMapper {
 	
-
+	Menu getMenuCal(int mId);
+	
 	// 주문페이지에서 주문완료 페이지로 보내기
 	public int insertOrder(Orders order);
 	
