@@ -35,14 +35,16 @@ public class WebsocketService {
      * @param shopId 해당 주문의 shopId
      * @param newStatus "REJECTED" 또는 "IN_PROGRESS" 등
      */
-    public void sendOrderStatusChange(int orderNo, int shopId, String newStatus) {
+    public void sendOrderStatusChange(int oNo, int shopId, String newStatus) {
         Map<String,Object> payload = Map.of(
-            "oNo",       orderNo,
-            "newStatus", newStatus
+          "oNo", oNo,
+          "newStatus", newStatus
         );
-        // ↓ 주문번호(oNo) 로 구독하는 클라이언트가 받을 수 있게 수정
-        template.convertAndSend("/topic/orderStatus/" + orderNo, payload);
-    }
+        // 헤더 알림
+        template.convertAndSend("/topic/orderStatus/shop/" + shopId, payload);
+        // 주문내역 테이블용
+        template.convertAndSend("/topic/orderStatus/order/" + oNo, payload);
+      }
     
 	/*
 	 * public void sendNewOrder(int shopId, int orderId) { NewOrder msg = new

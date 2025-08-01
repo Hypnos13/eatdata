@@ -22,11 +22,14 @@ public class OrderTimeoutService {
     @Autowired private ShopMapper shopMapper;
     @Autowired private WebsocketService websocketService;
 
-    @Scheduled(fixedRate = 60_000)
+    @Scheduled(initialDelay = 20_000, fixedRate = 20_000)
     @Transactional
     public void autoRejectStaleOrders() {
-        Timestamp cutoff = new Timestamp(System.currentTimeMillis() - 1 * 60_000);
+        // ▶ 20초 이전의 PENDING 주문만 거절 대상으로 삼음
+        Timestamp cutoff = new Timestamp(System.currentTimeMillis() - 20_000);
 
+        log.info("autoRejectStaleOrders triggered – cutoff={}", cutoff);
+        
         List<Orders> stale = shopMapper.findOrdersByStatusAndRegDate("PENDING", cutoff);
         if (stale.isEmpty()) return;
 
@@ -42,6 +45,6 @@ public class OrderTimeoutService {
             );
         }
 
-        log.info("자동 만료 처리된 주문 갯수: {}건", updated);
+        log.info("자동 만료 처리된 주문 갯수: {}건 (cutoff={})", updated, cutoff);
     }
 }
