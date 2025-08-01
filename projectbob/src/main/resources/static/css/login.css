@@ -273,3 +273,26 @@ label {
   font-size: 14px;
   text-align: center;  
 }
+
+.receipt-box {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 15px;
+    background: #fdfdfd;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    border-radius: 6px;
+  }
+  
+.menu-name {
+  font-weight: 500;
+}
+
+.menu-count {
+  margin-left: 6px;
+  color: #666;
+  font-size: 14px;
+}
+
+.menu-price {
+  font-weight: bold;
+}
