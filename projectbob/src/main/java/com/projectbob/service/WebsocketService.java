@@ -8,6 +8,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.projectbob.dto.NewOrder;
+import com.projectbob.mapper.ShopMapper;
 
 @Service
 public class WebsocketService {
@@ -28,8 +29,24 @@ public class WebsocketService {
         template.convertAndSend("/topic/newOrder/" + shopId, orderInfo);
     }
 	
+    /**
+     * 주문 상태 변경을 구독자(가게 뷰)에게 푸시
+     * @param oNo 변경된 주문 번호
+     * @param shopId 해당 주문의 shopId
+     * @param newStatus "REJECTED" 또는 "IN_PROGRESS" 등
+     */
+    public void sendOrderStatusChange(int orderNo, int shopId, String newStatus) {
+        Map<String,Object> payload = Map.of(
+            "oNo",       orderNo,
+            "newStatus", newStatus
+        );
+        // ↓ 주문번호(oNo) 로 구독하는 클라이언트가 받을 수 있게 수정
+        template.convertAndSend("/topic/orderStatus/" + orderNo, payload);
+    }
+    
 	/*
 	 * public void sendNewOrder(int shopId, int orderId) { NewOrder msg = new
 	 * NewOrder(orderId); template.convertAndSend("/topic/orders/" + shopId, msg); }
 	 */
+    
 }

@@ -20,7 +20,7 @@
 		       th:attr="data-shop-id=${currentShop.sId}">
 		    <a href="#" id="headerNotifyBtn" class="text-decoration-none text-dark"
 		       data-bs-toggle="dropdown" aria-expanded="false">
-		      <i class="bi bi-bell-fill fs-4"></i>
+		      <i id="notifyIcon" class="bi bi-bell-fill fs-4"></i>
 		    </a>
 		    <span id="headerNotifyBadge"
 		          th:text="${session.notifyCount}"

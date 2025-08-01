@@ -3,6 +3,7 @@ package com.projectbob.configurations;
 import com.projectbob.service.ShopService;
 import com.projectbob.domain.Shop;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
