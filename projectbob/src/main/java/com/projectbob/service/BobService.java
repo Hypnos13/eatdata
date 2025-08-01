@@ -461,6 +461,18 @@ public class BobService {
 	}
 
 	
+	// 회원이 특정 가게에서 주문한 내역이 있는지 확인하는 메서드
+	public boolean hasUserOrderedFromShop(String userId, int sId) {
+		log.info("hasUserOrderedFromShop 호출됨 - userId: {}, sId: {}", userId, sId);
+		if (userId == null || userId.trim().isEmpty()) {
+			log.info("hasUserOrderedFromShop: userId가 null 또는 비어있어 false 반환");
+			return false;
+		}
+		int orderCount = bobMapper.countOrdersByUserIdAndShopId(userId, sId);
+		log.info("bobMapper.countOrdersByUserIdAndShopId 결과 : {} (userId: {}, sId: {})", orderCount, userId, sId);
+		return orderCount > 0;
+	}
+	
 	
 	// 결제정보 가져오기
 	

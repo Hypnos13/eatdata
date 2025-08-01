@@ -126,18 +126,23 @@
 							</div>
 						</div>
 						
-						<!-- 댓글쓰기 -->
+												<!-- 댓글쓰기 -->
 						<div class="row my-3">
 						<div class="col border p-1 text-center">
-						<span id="reviewWrite" class="text-success" style="cursor: pointer;">
-							<i class="bi bi-file-earmark-text-fill" style="color: cornflowerblue;"></i>리뷰쓰기
-						</span>
+						<th:block th:if="${hasOrdered}">
+							<span id="reviewWrite" class="text-success" style="cursor: pointer;">
+								<i class="bi bi-file-earmark-text-fill" style="color: cornflowerblue;"></i>리뷰쓰기
+							</span>
+						</th:block>
+						<th:block th:unless="${hasOrdered}">
+							<p class="text-muted">리뷰는 구매 내역이 있는 고객만 작성할 수 있습니다.</p>
+						</th:block>
 						</div>
 						</div>
 						<!-- 댓글 헤더 영역 -->						
 			<div id="reviewFormOriginalContainer">
 						<!-- 댓글 쓰기 폼 -->
-					<div class="row my-3 d-none" id="reviewForm" th:if="${member != null}">
+					<div class="row my-3 d-none" id="reviewForm" th:if="${member != null and hasOrdered}">
 						<div class="col">
 							<form name="reviewWriteForm" id="reviewWriteForm" enctype="multipart/form-data">
 								<input type="hidden" name="sId" th:value="${shop.sId}">

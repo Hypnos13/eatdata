@@ -11,6 +11,12 @@
     </select>
 
 
+<!-- 회원이 특정 가게에서 주문한 내역이 있는지 확인 -->
+<select id="countOrdersByUserIdAndShopId" resultType="int">
+	select COUNT(*) FROM orders 
+	WHERE id = #{userId} AND s_id = #{sId} <!-- AND status = 'COMPLETED'  주문 완료처리하면 주석풀기-->
+</select>
+
 <!-- 주문 페이지에서 주문 완료 페이지로 보내기 -->
 <insert id="insertOrder" parameterType="com.projectbob.domain.Orders" useGeneratedKeys="true" keyProperty="oNo">
 	INSERT INTO orders (s_id, id, total_price, payment, payment_uid, o_address, request, status, quantity, menus, reg_date)

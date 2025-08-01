@@ -154,6 +154,9 @@ public interface BobMapper {
 	// 주문 번호에 해당하는 주문 레코드를 DB에서 가져오기
 	public Orders selectOrderId(@Param("orderId") int orderId);
 	public Orders selectOrderByPaymentUid(@Param("paymentUid") String paymentUid);
+	
+	// 회원이 특정 가게에서 주문한 내역이 있는지 확인
+	public int countOrdersByUserIdAndShopId(@Param("userId") String userId, @Param("sId") int sId);
 
 	
 
