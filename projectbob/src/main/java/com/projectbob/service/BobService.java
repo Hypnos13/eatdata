@@ -41,6 +41,9 @@ public class BobService {
 
 	@Autowired
 	private LoginService loginService;
+	
+	@Autowired
+	private WebsocketService websocketService;
 
 	public Menu getMenuCal(int mId) {
 		return bobMapper.getMenuCal(mId);
@@ -569,8 +572,29 @@ public class BobService {
 		 }
 		 order.setMenus(orderedMenus);
 		 
+		// 1) DB에 주문 저장
 		 bobMapper.insertOrder(order);
 		 int newOrderNo = order.getONo();
+		 
+	 	// 2) NewOrder DTO 생성
+	    Shop shop = shopMapper.findBySId(order.getSId());
+	    String shopName = shop.getName();
+	    NewOrder dto = new NewOrder(
+	        /* orderId    */ newOrderNo,
+	        /* shopId     */ order.getSId(),
+	        /* shopName   */  shopName,
+	        /* menus      */ order.getMenus(),
+	        /* totalPrice */ order.getTotalPrice(),
+	        /* payment    */ order.getPayment(),
+	        /* address    */ order.getOAddress(),
+	        /* phone      */ (String) req.get("phone"),
+	        /* request    */ order.getRequest(),
+	        /* status     */ order.getStatus(),
+	        /* regDate    */ order.getRegDate()
+	    );
+
+	    // ★ 3) WebSocket 알림 전송 ★
+	    websocketService.sendNewOrder(dto);
 		 
 		 return newOrderNo;
 	 }

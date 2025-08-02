@@ -1,5 +1,6 @@
 package com.projectbob.mapper;
 
+import java.sql.Timestamp;
 import java.util.*;
 
 import org.apache.ibatis.annotations.*;
@@ -107,6 +108,22 @@ public interface ShopMapper {
         @Param("oNo") int oNo,
         @Param("status") String status);
     
+    // 3분 지난 PENDING 주문 조회
+    List<Orders> findOrdersByStatusAndRegDate(
+        @Param("status") String status,
+        @Param("cutoff") Timestamp cutoff
+    );
+
+    // 상태 일괄 변경
+    int updateStatusByStatusAndRegDate(
+        @Param("oldStatus") String oldStatus,
+        @Param("cutoff")     Timestamp cutoff,
+        @Param("newStatus")  String newStatus
+    );
+    
+    //주문 저장 (useGeneratedKeys로 oNo 설정)
+    int insertOrder(Orders order);
+    
 	/* === Menu === */
 	// 메뉴 관련 메서드
     void insertMenu(Menu menu);                  // 메뉴 등록
@@ -127,7 +144,7 @@ public interface ShopMapper {
     List<Menu> getMenusByShopId(@Param("sId") int sId, @Param("category") String category);
     List<String> getMenuCategoriesByShopId(int sId); //카테고리 목록 조회를 위한 메서드 추가
 	
-    /** 특정 가게의 메뉴 개수 조회 */
+    // 특정 가게의 메뉴 개수 조회
     @Select("SELECT COUNT(*) FROM menu WHERE s_id = #{sId}")
     int countMenusByShopId(@Param("sId") int sId);
 

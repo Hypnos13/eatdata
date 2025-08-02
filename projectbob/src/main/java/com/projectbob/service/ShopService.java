@@ -1,7 +1,6 @@
 package com.projectbob.service;
 
 import java.io.*;
-import java.sql.Timestamp;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.*;
@@ -18,12 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class ShopService {
+
+    private final WebsocketService websocketService;
 	
 	@Autowired
 	private ShopMapper shopMapper;
 	
 	@Autowired
 	private FileUploadService fileUploadService;
+
+    ShopService(WebsocketService websocketService) {
+        this.websocketService = websocketService;
+    }
 	
     /* ---------- Menu ---------- */
 	// 메뉴 등록
@@ -400,6 +405,53 @@ public class ShopService {
     @Transactional
     public void updateOrderStatus(int oNo, String newStatus) {
         shopMapper.updateOrderStatus(oNo, newStatus);
+    }
+    
+    @Transactional
+    public Orders placeOrder(Map<String,Object> req) {
+        // 1. 주문 정보 객체 생성 (모든 필드 세팅)
+        Orders order = new Orders();
+        order.setSId((Integer) req.get("sId"));
+        order.setId((String) req.get("id"));
+        order.setTotalPrice((Integer) req.get("totalPrice"));
+        order.setPayment((String) req.get("payment"));
+        order.setOAddress((String) req.get("oAddress"));
+        order.setRequest((String) req.get("request"));
+        order.setStatus("PENDING");
+        order.setQuantity((Integer) req.getOrDefault("quantity", 1));
+        order.setMenus((String) req.get("menus"));
+        order.setPaymentUid((String) req.get("paymentUid"));
+        // regDate, modiDate는 DB에서 SYSDATE()로 자동 설정
+
+        // 2. DB에 주문 insert
+        shopMapper.insertOrder(order);
+        // order의 oNo, regDate 등 자동 세팅됨 (useGeneratedKeys="true"일 때)
+
+        // 3. 추가 정보 조회
+        Shop shop = shopMapper.findBySId(order.getSId());
+        String shopName = shop.getName();
+        String customerPhone = (String) req.get("phone");
+
+        // 4. WebSocket용 NewOrder DTO 생성
+        NewOrder newOrder = new NewOrder(
+            order.getONo(),           // orderId
+            order.getSId(),           // shopId
+            shopName,                 // shopName
+            order.getMenus(),         // menus
+            order.getTotalPrice(),    // totalPrice
+            order.getPayment(),       // payment
+            order.getOAddress(),      // address
+            customerPhone,            // phone
+            order.getRequest(),       // request
+            order.getStatus(),        // status
+            order.getRegDate()        // regDate
+        );
+
+        // 5. WebSocket 알림
+        websocketService.sendNewOrder(newOrder);
+
+        // 6. 주문 엔티티 반환
+        return order;
     }
 
 }

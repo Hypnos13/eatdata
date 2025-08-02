@@ -1,31 +1,16 @@
+// ==== 1. Shop / Menu 가입 폼 검증 ============================
 $(function() {
 	
 	$("#shopJoinForm").on("submit", shopJoinFormCheck);
 	$("#menuJoinForm").on("submit", menuJoinFormCheck);
 
 	//우편번호찾기
-	$("#btnZipcode").click(findZipcode);
-	
+	//$("#btnZipcode").click(findZipcode);
+	const $btnZip = $("#btnZipcode");
+	  if ($btnZip.length && typeof findZipcode === 'function') {
+	    $btnZip.click(findZipcode);
+	  }
 });
-
-function menuJoinFormCheck() {
-	if($("#category").val().length ==0 ) {
-		alert("카테고리를 입력해주세요.")
-		return false;
-	}
-	if($("#name").val().length ==0 ) {
-		alert("메뉴 이름을 입력해주세요.")
-		return false;
-	}
-	if($("#price").val().length ==0 ) {
-		alert("가격을 입력해주세요.")
-		return false;
-	}
-	if($("#mInfo").val().length ==0 ) {
-		alert("메뉴 설명을 입력해주세요.")
-		return false;
-	}
-}
 
 function shopJoinFormCheck(isShopJoinForm) {
 	if($("#sNumber").val().length != 10 ) {
@@ -61,32 +46,26 @@ function shopJoinFormCheck(isShopJoinForm) {
 	}
 }
 
-// 카카오 우편번호 API
-function findZipcode() {
-	new daum.Postcode({
-		oncomplete: function(data) {
-			var addr = data.roadAddress; // 도로명 주소 변수
-			var extraAddr = '';
-			if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
-					extraAddr += data.bname;
-				}
-        // 건물명이 있고, 공동주택일 경우 추가한다.
-        if(data.buildingName !== '' && data.apartment === 'Y'){
-           extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-        }
-        // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
-        if(extraAddr !== ''){
-            extraAddr = ' (' + extraAddr + ')';
-        }
-				addr+=extraAddr;
-				$("#zipcode").val(data.zonecode);
-				$("#address1").val(addr);
-				$("#address2").focus();
-				showMap(addr); // 지도 AIP 때문에 한줄 추가함
-    	}
-	}).open();
+function menuJoinFormCheck() {
+	if($("#category").val().length ==0 ) {
+		alert("카테고리를 입력해주세요.")
+		return false;
+	}
+	if($("#name").val().length ==0 ) {
+		alert("메뉴 이름을 입력해주세요.")
+		return false;
+	}
+	if($("#price").val().length ==0 ) {
+		alert("가격을 입력해주세요.")
+		return false;
+	}
+	if($("#mInfo").val().length ==0 ) {
+		alert("메뉴 설명을 입력해주세요.")
+		return false;
+	}
 }
 
+// ==== 2. 입력값 포맷팅 유틸 ================================
 document.addEventListener('DOMContentLoaded', function() {
     
     // ===== 1. 입력 시 하이픈(-) 자동 생성 기능 =====
@@ -152,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		        });
 		    }
 				
-		// 영양성분 검색
+		// ==== 3. 영양성분 검색 =====================================
 		const btnSearch = document.getElementById('btnSearchNutrition');
 		const menuNameInput = document.getElementById('name');
 		const resultsList = document.getElementById('nutrition-results');
@@ -230,25 +209,28 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 });
 
-// ---------- [출력/뷰(shopBasicView) 페이지 전용 지도 표시 코드] ----------
-$(function() {
-    var $map = $("#shop-map");
-    var $addr1 = $("#address1");
-    var $addr2 = $("#address2");
-    if ($map.length && $addr1.length && !$addr1.is("input")) {
-        var addr = $addr1.text().trim();
-        var addr2 = ($addr2.length && !$addr2.is("input")) ? $addr2.text().trim() : '';
-        if (addr2) addr += " " + addr2;
-        //console.log("지도에 넘기는 주소:", addr); // ★이 줄 추가
-        setTimeout(function() {
-            if (addr && window.kakao && kakao.maps) {
-                shopViewShowMap(addr);
-            } else {
-                console.log("카카오맵 준비 안됨 또는 주소 없음");
-            }
-        }, 300);
-    }
-});
+// ==== 4. 카카오맵 표시 =====================================
+// 폼 전용 지도 표시 함수
+function showMap(address) {
+    if (!(window.kakao && kakao.maps && kakao.maps.services)) return;
+    var mapContainer = document.getElementById('shop-map');
+    var mapOption = {
+        center: new kakao.maps.LatLng(37.566826, 126.9786567),
+        level: 3
+    };
+    var map = new kakao.maps.Map(mapContainer, mapOption);
+    var geocoder = new kakao.maps.services.Geocoder();
+    geocoder.addressSearch(address, function(result, status) {
+        if (status === kakao.maps.services.Status.OK) {
+            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+            var marker = new kakao.maps.Marker({
+                map: map,
+                position: coords
+            });
+            map.setCenter(coords);
+        }
+    });
+}
 
 // 뷰 페이지 전용 지도 함수 (폼에서 사용하는 showMap과 이름 다름)
 function shopViewShowMap(address) {
@@ -280,7 +262,27 @@ function shopViewShowMap(address) {
     });
 }
 
-// ---------- [수정/입력(shopBasicSet) 폼 전용 지도 표시 코드] ----------
+// 출력/뷰(shopBasicView) 페이지 전용 지도 표시 코드
+$(function() {
+    var $map = $("#shop-map");
+    var $addr1 = $("#address1");
+    var $addr2 = $("#address2");
+    if ($map.length && $addr1.length && !$addr1.is("input")) {
+        var addr = $addr1.text().trim();
+        var addr2 = ($addr2.length && !$addr2.is("input")) ? $addr2.text().trim() : '';
+        if (addr2) addr += " " + addr2;
+        //console.log("지도에 넘기는 주소:", addr); // ★이 줄 추가
+        setTimeout(function() {
+            if (addr && window.kakao && kakao.maps) {
+                shopViewShowMap(addr);
+            } else {
+                console.log("카카오맵 준비 안됨 또는 주소 없음");
+            }
+        }, 300);
+    }
+});
+
+// 수정/입력(shopBasicSet) 폼 전용 지도 표시 코드
 $(function() {
     // 1. 페이지 로드시 초기 지도 표시 (입력폼은 input이니까 .val())
     var addr = $("#address1").val() || "";
@@ -295,46 +297,7 @@ $(function() {
     });
 });
 
-// 폼 전용 지도 표시 함수
-function showMap(address) {
-    if (!(window.kakao && kakao.maps && kakao.maps.services)) return;
-    var mapContainer = document.getElementById('shop-map');
-    var mapOption = {
-        center: new kakao.maps.LatLng(37.566826, 126.9786567),
-        level: 3
-    };
-    var map = new kakao.maps.Map(mapContainer, mapOption);
-    var geocoder = new kakao.maps.services.Geocoder();
-    geocoder.addressSearch(address, function(result, status) {
-        if (status === kakao.maps.services.Status.OK) {
-            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-            var marker = new kakao.maps.Marker({
-                map: map,
-                position: coords
-            });
-            map.setCenter(coords);
-        }
-    });
-}
-
-// 영업상태 ON/OFF 토글
-/*$(function() {
-    $('.shop-status-table input[type="checkbox"]').on('change', function() {
-        const $checkbox = $(this);
-        const sId = $checkbox.data('sid');
-        const isChecked = $checkbox.is(':checked');
-        // AJAX로 상태 변경 요청
-        $.post('/shop/statusUpdate', { sId: sId, status: isChecked ? 'Y' : 'N' })
-            .done(function() {
-                location.reload(); // 새로고침(동적으로 UI만 바꿔도 됨)
-            })
-            .fail(function() {
-                alert('상태 변경에 실패했습니다.');
-                // 실패 시 체크박스 원복
-                $checkbox.prop('checked', !isChecked);
-            });
-    });
-});*/
+// ==== 5. 가게 상태 ON/OFF 토글 =============================
 $(function() {
     $('#shopStat').on('change', function() {
         const $checkbox = $(this);
@@ -353,51 +316,7 @@ $(function() {
     });
 });
 
-
-// ----- 영업시간 관리 (휴무/전체휴무 토글 등) -----
-$(function () {
-
-  // 전체휴무 체크박스
-  $(".allDay-check").on("change", function () {
-    const $tr = $(this).closest("tr");
-    if (this.checked) {
-      $tr.find("select[name^='openHour']").val("00");
-      $tr.find("select[name^='openMin']").val("00");
-      $tr.find("select[name^='closeHour']").val("23");
-      $tr.find("select[name^='closeMin']").val("59");
-    }
-    // disabled 절대 쓰지 않음
-  });
-
-  // 휴무/영업 스위치
-  const updateDayRow = ($chk) => {
-    const $tr = $chk.closest("tr");
-    const idx = $chk.attr("id")
-      ? $chk.attr("id").replace("isOpen", "")
-      : $chk.attr("name").match(/\[(\d+)\]/)[1];
-    const $label = $("#openLabel" + idx);
-    const on = $chk.is(":checked");
-
-    // 값 전송은 그대로, UI만 막기
-    $tr.find("select").toggleClass("disabled-look", !on);
-    $tr.find(".allDay-check").prop("disabled", !on);
-
-    $label
-      .text(on ? "영업일" : "휴무일")
-      .toggleClass("bg-success", on)
-      .toggleClass("bg-secondary", !on);
-  };
-
-  $(".switch input[type='checkbox'][name^='isOpen']")
-    .each(function () { updateDayRow($(this)); })
-    .on("change", function () { updateDayRow($(this)); });
-
-  // 혹시라도 다른 스크립트가 disabled 걸면 제출 전에 해제
-  $("#openTimeForm").on("submit", function () {
-    $(this).find("select:disabled").prop("disabled", false);
-  });
-});
-
+// ==== 6. 리뷰 답글 수정/삭제 모드 토글 =====================
 // # 리뷰 답글 “수정/삭제” 바로가기 토글 & AJAX 처리
 $(function () {
 $('.reply-box')
@@ -455,29 +374,81 @@ $('.reply-box')
   });
 });
 
-// shop.js
+// ==== 7. WebSocket 초기화 & 이벤트 처리 =================
+// 페이지 로드 후 한 번만 실행됩니다.
 document.addEventListener('DOMContentLoaded', () => {
-  const socket = new SockJS('/ws');
-  const stomp  = Stomp.over(socket);
+  // 7.0: shopId 조회 (헤더 알림 컨테이너에서)
+  const notifyContainer = document.getElementById('notifyContainer');
+  if (!notifyContainer) return;
+  const shopId = notifyContainer.dataset.shopId;
 
-  stomp.connect({}, () => {
-    // 1) 신규주문 구독
-    const newOrderList = document.getElementById('newOrderList');
-    if (newOrderList) {
-      const shopId = newOrderList.dataset.shopId;
-      stomp.subscribe('/topic/newOrder/' + shopId, renderNewOrderItem);
-    }
+  // 7.1: SockJS & STOMP 클라이언트 생성
+  const socket      = new SockJS('/ws');
+  const stompClient = Stomp.over(socket);
 
-    // 2) 헤더 알림 구독
-    const notifyContainer = document.getElementById('notifyContainer');
-    if (notifyContainer) {
-      const shopId = notifyContainer.dataset.shopId;
-      stomp.subscribe('/topic/newOrder/' + shopId, renderHeaderNotification);
-    }
+  // 7.2: STOMP 연결 후 구독 시작
+  stompClient.connect({}, () => {
+    console.log('[shop.js] STOMP connected, shopId=', shopId);
+
+	// 7.2.1: 신규 주문 알림 구독
+	stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
+	  console.log('[WS 新주문 콜백]', msg, typeof msg.body, msg.body);
+	  try {
+	    const o = JSON.parse(msg.body);
+	    console.log('[WS 新주문] 주문 객체:', o);
+	  } catch(e) {
+	    console.error('JSON parse error:', e, msg.body);
+	  }
+
+	  // 1) 헤더 알림 + 벨 아이콘 깜빡임 (모든 페이지 공통)
+	  renderHeaderNotification(msg);
+	  markBellAsUnread();
+
+	  // 2) 신규 주문 리스트가 있는 페이지에서만 렌더링
+	  if (document.getElementById('newOrderList')) {
+	    renderNewOrderItem(msg);
+	  }
+	});
+
+    // 7.2.2: 주문 상태 변경 구독 (헤더 알림 제거)
+    stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
+      console.log('[WS 상태변경_헤더]', msg.body);
+      const { oNo } = JSON.parse(msg.body);
+      removeHeaderNotification(oNo);
+    });
+
+    // 7.2.3: 주문 상태 변경 구독 (테이블 업데이트)
+    document.querySelectorAll('tr[data-order-no]').forEach(row => {
+      const oNo = row.dataset.orderNo;
+      stompClient.subscribe(`/topic/orderStatus/order/${oNo}`, msg => {
+        console.log('[WS 상태변경_테이블]', msg.body);
+        const { newStatus } = JSON.parse(msg.body);
+        const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
+        if (cell) cell.textContent = newStatus;
+      });
+    });
+
+    // 7.2.4: 드롭다운 열림 시 깜빡임 해제
+    document.getElementById('headerNotifyBtn')
+      ?.addEventListener('shown.bs.dropdown', clearBellBlink);
   });
 });
 
-// window에 노출해야 HTML onclick="acceptOrder(...)"에서 동작합니다.
+// ==== 8. 알림 아이콘 깜박임 제어 ===========================
+//알림 아이콘 깜박임 시작
+function markBellAsUnread() {
+  const icon = document.getElementById('notifyIcon');
+  if (icon) icon.classList.add('blink');
+}
+
+//알림 아이콘 깜박임 종료
+function clearBellBlink() {
+  const icon = document.getElementById('notifyIcon');
+  if (icon) icon.classList.remove('blink');
+}
+
+// ==== 9. 주문 관리 함수 (수락 / 거절) =====================
+// 주문 수락 함수 (기존)
 window.acceptOrder = function(oNo) {
   fetch(`/shop/orderManage/${oNo}/status`, {
     method: 'POST',
@@ -486,97 +457,144 @@ window.acceptOrder = function(oNo) {
   })
   .then(res => {
     if (!res.ok) throw new Error('상태 변경 실패');
-    // (1) 목록 li 제거
-    const btn = document.querySelector(`button[onclick="acceptOrder(${oNo})"]`);
-    if (btn) btn.closest('li').remove();
-    // (2) 진행 중 화면으로 이동
+    document.querySelector(`button[onclick="acceptOrder(${oNo})"]`)?.closest('li').remove();
     location.href = '/shop/orderManage?status=IN_PROGRESS';
   })
-  .catch(err => {
-    console.error(err);
-    alert('주문 수락에 실패했습니다.');
-  });
+  .catch(() => alert('주문 수락에 실패했습니다.'));
 };
 
+// 주문 거절 함수 (추가)
+window.rejectOrder = function(oNo) {
+  fetch(`/shop/orderManage/${oNo}/status`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: 'newStatus=REJECTED'
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('거절 실패');
+    document.querySelector(`button[onclick="rejectOrder(${oNo})"]`)?.closest('li').remove();
+  })
+  .catch(() => alert('주문 거절에 실패했습니다.'));
+};
+
+// ==== 10. 렌더링 헬퍼 =====================================
 function renderNewOrderItem(msg) {
-  const o = JSON.parse(msg.body);
   const ul = document.getElementById('newOrderList');
+  if (!ul) return;
+
+  // placeholder 제거
+  ul.querySelector('li.text-center.text-muted')?.remove();
+
+  const o = JSON.parse(msg.body);
+  const orderId = o.orderId;
+
   const li = document.createElement('li');
   li.className = 'list-group-item d-flex align-items-start mb-3 p-3';
-
   li.innerHTML = `
     <div class="flex-grow-1 pe-3">
       <div class="mb-1">🛒 ${o.menus}</div>
       <div class="mb-1">💬 ${o.request || '요청사항 없음'}</div>
-      <div class="text-muted small"><i class="bi bi-clock"></i>
-        ${new Date(o.regDate).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+      <div class="text-muted small">
+        <i class="bi bi-clock"></i>${new Date(o.regDate).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
       </div>
     </div>
     <div class="d-flex flex-column justify-content-between" style="min-width: 5rem;">
-      <button class="btn btn-success btn-sm mb-2" onclick="acceptOrder(${o.oNo})">수락</button>
-      <button class="btn btn-outline-danger btn-sm" onclick="rejectOrder(${o.oNo})">거절</button>
+      <button class="btn btn-success btn-sm mb-2" onclick="acceptOrder(${orderId})">수락</button>
+      <button class="btn btn-outline-danger btn-sm" onclick="rejectOrder(${orderId})">거절</button>
     </div>
   `;
-
   ul.prepend(li);
 }
 
 function renderHeaderNotification(msg) {
-  const data = JSON.parse(msg.body);
-  const badge = document.getElementById('headerNotifyBadge');
-  const list  = document.getElementById('headerNotifyList');
-  // 뱃지 카운트 증가
-  let cnt = parseInt(badge.textContent) || 0;
-  badge.textContent = ++cnt;
+  const data  = JSON.parse(msg.body);
+  const badge = document.getElementById('header-notif-badge');
+  const list  = document.getElementById('header-notif-list');
+
+  // 뱃지 증가
+  badge.textContent  = parseInt(badge.textContent || '0',10) + 1;
   badge.classList.remove('d-none');
-  // 알림 리스트에 항목 추가
-  if (cnt === 1 && list.firstElementChild.tagName === 'P') {
-    list.innerHTML = '';  // “알림이 없습니다.” 문구 제거
-  }
+
+  // “알림이 없습니다.” 제거
+  list.querySelector('li.text-muted')?.remove();
+
+  // 알림 아이템 생성
   const item = document.createElement('li');
-  item.innerHTML = `
-    <a class="dropdown-item text-truncate"
-       href="/shop/orderDetail?oNo=${data.oNo}">
-      새 주문 알림이 도착했습니다.
-    </a>
-  `;
-  list.prepend(item);
+  item.className       = 'notif-item';
+  // ↓ JSON 필드명이 orderId 로 넘어오므로 oNo 대신 orderId 사용
+  const id             = data.orderId;
+  item.dataset.orderNo = id;
+
+  // 링크 구성
+  const a = document.createElement('a');
+  a.className = 'dropdown-item text-truncate';
+  a.href      = `/shop/orderDetail?oNo=${id}`;
+  a.textContent = '새 주문 알림이 도착했습니다.';
+
+  item.appendChild(a);
+
+  // ↓ prepend → append 로 바꿔서 새 알림이 아래로 쌓이도록
+  list.appendChild(item);
 }
 
-document.querySelectorAll('tr[data-order-no]').forEach(row => {
-  const oNo = row.dataset.orderNo;
-  stomp.subscribe(`/topic/orderStatus/${oNo}`, msg => {
-    const { newStatus } = JSON.parse(msg.body);
-    document.querySelector(`.status-cell[data-order-no="${oNo}"]`)
-            .textContent = newStatus;
+//헤더 알림에서 아이템 제거 함수
+function removeHeaderNotification(oNo) {
+  // 아이템 제거
+  document.querySelector(`#header-notif-list .notif-item[data-order-no="${oNo}"]`)?.remove();
+  // 뱃지 감소
+  const badge = document.getElementById('header-notif-badge');
+  const cnt   = Math.max(0, parseInt(badge.textContent||'0',10) - 1);
+  badge.textContent = cnt;
+  if (cnt === 0) badge.classList.add('d-none');
+}
+
+  // ==== 11. 휴무/영업 버튼 ================
+  // 휴무/영업 스위치
+  const updateDayRow = ($chk) => {
+    const $tr = $chk.closest("tr");
+    const idx = $chk.attr("id")
+      ? $chk.attr("id").replace("isOpen", "")
+      : $chk.attr("name").match(/\[(\d+)\]/)[1];
+    const $label = $("#openLabel" + idx);
+    const on = $chk.is(":checked");
+
+    // 값 전송은 그대로, UI만 막기
+    $tr.find("select").toggleClass("disabled-look", !on);
+    $tr.find(".allDay-check").prop("disabled", !on);
+
+    $label
+      .text(on ? "영업일" : "휴무일")
+      .toggleClass("bg-success", on)
+      .toggleClass("bg-secondary", !on);
+  };
+
+  $(".switch input[type='checkbox'][name^='isOpen']")
+    .each(function () { updateDayRow($(this)); })
+    .on("change", function () { updateDayRow($(this)); });
+
+  // 혹시라도 다른 스크립트가 disabled 걸면 제출 전에 해제
+  $("#openTimeForm").on("submit", function () {
+    $(this).find("select:disabled").prop("disabled", false);
   });
-});
 
-// ===== shopOrders.html 전용: 주문 상태 실시간 업데이트 =====
-document.addEventListener('DOMContentLoaded', () => {
-  // 주문내역 테이블이 없으면 바로 종료
-  const rows = document.querySelectorAll('tr[data-order-no]');
-  if (rows.length === 0) return;
+  // ----- 영업시간 관리 (휴무/전체휴무 토글 등) -----
+  $(function () {
 
-  const socket = new SockJS('/ws');
-  const stomp  = Stomp.over(socket);
-
-  stomp.connect({}, () => {
-    rows.forEach(row => {
-      const oNo = row.dataset.orderNo;
-      stomp.subscribe('/topic/orderStatus/' + oNo, msg => {
-        const { newStatus } = JSON.parse(msg.body);
-        const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
-        if (cell) {
-          cell.textContent = newStatus;
-        }
-      });
+    // 전체휴무 체크박스
+    $(".allDay-check").on("change", function () {
+      const $tr = $(this).closest("tr");
+      if (this.checked) {
+        $tr.find("select[name^='openHour']").val("00");
+        $tr.find("select[name^='openMin']").val("00");
+        $tr.find("select[name^='closeHour']").val("23");
+        $tr.find("select[name^='closeMin']").val("59");
+      }
+      // disabled 절대 쓰지 않음
     });
-  });
-});
-
+	
+// ==== 12. 주문 상세 페이지 픽업/배달 버튼 ================
+// 픽업·배달 버튼 처리
 document.addEventListener('DOMContentLoaded', () => {
-  // 픽업·배달 버튼 처리
   const btnPickup  = document.getElementById('btnPickup');
   const btnDeliver = document.getElementById('btnDeliver');
 
@@ -610,4 +628,5 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(r => r.json())
     .then(d => { if (d.success) cb(); });
   }
+});
 });

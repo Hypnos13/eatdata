@@ -7,8 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import com.projectbob.dto.NewOrder;
+import com.projectbob.domain.NewOrder;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class WebsocketService {
 	
@@ -19,17 +22,28 @@ public class WebsocketService {
 		this.template = template;
 	}
 	
-	/** 
-     * shopId별로 구독자에게 주문 정보를 푸시합니다. 
-     * @param shopId : 가게 고유번호
-     * @param orderInfo : 전송할 주문 요약 DTO (orderId, shopName 등)
-     */
-    public void sendNewOrder(int shopId, Map<String, Object> orderInfo) {
-        template.convertAndSend("/topic/newOrder/" + shopId, orderInfo);
-    }
 	
+	// 주문정보 푸시
+	public void sendNewOrder(NewOrder order) {
+		log.info("[WebSocket] sendNewOrder: {}", order);
+		template.convertAndSend("/topic/newOrder/" + order.getShopId(), order);
+	}
+	
+    //주문 상태 변경 푸시
+    public void sendOrderStatusChange(int oNo, int shopId, String newStatus) {
+        Map<String,Object> payload = Map.of(
+          "oNo", oNo,
+          "newStatus", newStatus
+        );
+        // 헤더 알림
+        template.convertAndSend("/topic/orderStatus/shop/" + shopId, payload);
+        // 테이블 업데이트
+        template.convertAndSend("/topic/orderStatus/order/" + oNo, payload);
+    }
+    
 	/*
 	 * public void sendNewOrder(int shopId, int orderId) { NewOrder msg = new
 	 * NewOrder(orderId); template.convertAndSend("/topic/orders/" + shopId, msg); }
 	 */
+    
 }

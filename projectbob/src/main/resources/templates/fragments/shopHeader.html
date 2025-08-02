@@ -15,27 +15,27 @@
 	    <!-- 로그인 상태일 때 -->
 	    <th:block th:if="${session.isLogin}">
 	    	<!-- 알림 아이콘 + 뱃지 -->
-		      <div class="position-relative me-3 dropdown"
-		       id="notifyContainer"
-		       th:attr="data-shop-id=${currentShop.sId}">
-		    <a href="#" id="headerNotifyBtn" class="text-decoration-none text-dark"
-		       data-bs-toggle="dropdown" aria-expanded="false">
-		      <i class="bi bi-bell-fill fs-4"></i>
-		    </a>
-		    <span id="headerNotifyBadge"
-		          th:text="${session.notifyCount}"
-		          class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1"
-		          th:classappend="${session.notifyCount == 0} ? 'd-none' : ''">0</span>
+			<div id="notifyContainer"
+			     th:attr="data-shop-id=${currentShop.sId}"
+			     class="position-relative me-3 dropdown">
+			  <a href="#" id="headerNotifyBtn" data-bs-toggle="dropdown" aria-expanded="false">
+			    <i id="notifyIcon" class="bi bi-bell-fill fs-4"></i>
+			  </a>
+			  <!-- badge ID -->
+			  <span id="header-notif-badge"
+			        th:text="${session.notifyCount}"
+			        class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1"
+			        th:classappend="${session.notifyCount == 0} ? 'd-none' : ''">
+			    0
+			  </span>
 		
 		        <!-- 드롭다운 메뉴 -->
-		        <ul class="dropdown-menu p-2" id="headerNotifyMenu" aria-labelledby="headerNotifyBtn"
-		        style="min-width: 250px;">
-		      <li><h6 class="dropdown-header">새로운 알림</h6></li>
-		      <div id="headerNotifyList">
-		        <p class="text-muted mb-0">알림이 없습니다.</p>
-		      </div>
-		    </ul>
-		  </div>
+				<ul id="header-notif-list" class="dropdown-menu dropdown-menu-end p-2" style="min-width:300px; max-width:500px;" aria-labelledby="headerNotifyBtn">
+			    <li><h6 class="dropdown-header">새로운 알림</h6></li>
+			    <!-- 초기 “알림이 없습니다.” -->
+			    <li class="text-muted mb-0">알림이 없습니다.</li>
+			  </ul>
+			</div>
       
 	      <a class="me-2 fw-bold">[[${session.loginNickname}]] 님 어서오세요.</a>
 	      <a href="logout" class="btn-login">로그아웃</a>

@@ -235,13 +235,6 @@
         WHERE s_id = #{sId}
     </update>
 	
-	<!-- 가게 상태 업데이트 -->
-	<update id="updateStatus">
-	    UPDATE shop
-	    SET status = #{status}
-	    WHERE s_id = #{sId}
-	</update>
-	
 	<!-- 영업시간 업데이트 -->
 	<update id="updateShopOpenTime" parameterType="com.projectbob.domain.Shop">
 	    UPDATE shop
@@ -411,5 +404,39 @@
 <update id="updateOrderStatus" parameterType="map">
   UPDATE orders SET status = #{status}, modi_date = SYSDATE() WHERE o_no = #{oNo}
 </update>
+
+<!-- 조회 매핑 (select) -->
+  <select id="findOrdersByStatusAndRegDate" resultType="com.projectbob.domain.Orders"
+          parameterType="map">
+    SELECT *
+      FROM orders
+     WHERE status    = #{status}
+       AND reg_date &lt;  #{cutoff}
+     ORDER BY reg_date DESC
+  </select>
+
+  <!-- 변경 매핑 (update) -->
+  <update id="updateStatusByStatusAndRegDate" parameterType="map">
+    UPDATE orders
+       SET status    = #{newStatus},
+           modi_date = SYSDATE()
+     WHERE status    = #{oldStatus}
+       AND reg_date &lt; #{cutoff}
+  </update>
+
+<!-- 주문정보 전달 -->
+<insert id="insertOrder" parameterType="com.projectbob.domain.Orders"
+        useGeneratedKeys="true" keyProperty="oNo" keyColumn="o_no">
+  INSERT INTO orders
+    (s_id, id, total_price, payment,
+     o_address, request,
+     reg_date, modi_date,
+     status, quantity, menus, payment_uid)
+  VALUES
+    (#{sId}, #{id}, #{totalPrice}, #{payment},
+     #{oAddress}, #{request},
+     SYSDATE(), SYSDATE(),
+     #{status}, #{quantity}, #{menus}, #{paymentUid})
+</insert>
 
 </mapper>	
