@@ -15,9 +15,9 @@
 	    <!-- 로그인 상태일 때 -->
 	    <th:block th:if="${session.isLogin}">
 	    	<!-- 알림 아이콘 + 뱃지 -->
-		      <div id="notifyContainer" 
-				      data-shop-id="${currentShop.sId}" 
-				      class="position-relative me-3 dropdown">
+			<div id="notifyContainer"
+			     th:attr="data-shop-id=${currentShop.sId}"
+			     class="position-relative me-3 dropdown">
 			  <a href="#" id="headerNotifyBtn" data-bs-toggle="dropdown" aria-expanded="false">
 			    <i id="notifyIcon" class="bi bi-bell-fill fs-4"></i>
 			  </a>
@@ -30,7 +30,7 @@
 			  </span>
 		
 		        <!-- 드롭다운 메뉴 -->
-				<ul id="header-notif-list" class="dropdown-menu p-2" style="min-width:300px; max-width:500px;" aria-labelledby="headerNotifyBtn">
+				<ul id="header-notif-list" class="dropdown-menu dropdown-menu-end p-2" style="min-width:300px; max-width:500px;" aria-labelledby="headerNotifyBtn">
 			    <li><h6 class="dropdown-header">새로운 알림</h6></li>
 			    <!-- 초기 “알림이 없습니다.” -->
 			    <li class="text-muted mb-0">알림이 없습니다.</li>

@@ -390,13 +390,25 @@ document.addEventListener('DOMContentLoaded', () => {
   stompClient.connect({}, () => {
     console.log('[shop.js] STOMP connected, shopId=', shopId);
 
-    // 7.2.1: 신규 주문 알림 구독
-    stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
-      console.log('[WS 新주문]', msg.body);
-      renderNewOrderItem(msg);          // 주문 리스트에 추가
-      renderHeaderNotification(msg);    // 헤더 알림 추가
-      markBellAsUnread();               // 벨 아이콘 깜빡임
-    });
+	// 7.2.1: 신규 주문 알림 구독
+	stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
+	  console.log('[WS 新주문 콜백]', msg, typeof msg.body, msg.body);
+	  try {
+	    const o = JSON.parse(msg.body);
+	    console.log('[WS 新주문] 주문 객체:', o);
+	  } catch(e) {
+	    console.error('JSON parse error:', e, msg.body);
+	  }
+
+	  // 1) 헤더 알림 + 벨 아이콘 깜빡임 (모든 페이지 공통)
+	  renderHeaderNotification(msg);
+	  markBellAsUnread();
+
+	  // 2) 신규 주문 리스트가 있는 페이지에서만 렌더링
+	  if (document.getElementById('newOrderList')) {
+	    renderNewOrderItem(msg);
+	  }
+	});
 
     // 7.2.2: 주문 상태 변경 구독 (헤더 알림 제거)
     stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
@@ -468,12 +480,15 @@ window.rejectOrder = function(oNo) {
 // ==== 10. 렌더링 헬퍼 =====================================
 function renderNewOrderItem(msg) {
   const ul = document.getElementById('newOrderList');
-    // placeholder 제거 (클래스명이 다르면 알맞게 조정)
-    const empty = ul.querySelector('li.text-center.text-muted');
-    if (empty) empty.remove();
+  if (!ul) return;
 
-    const o  = JSON.parse(msg.body);
-    const li = document.createElement('li');
+  // placeholder 제거
+  ul.querySelector('li.text-center.text-muted')?.remove();
+
+  const o = JSON.parse(msg.body);
+  const orderId = o.orderId;
+
+  const li = document.createElement('li');
   li.className = 'list-group-item d-flex align-items-start mb-3 p-3';
   li.innerHTML = `
     <div class="flex-grow-1 pe-3">
@@ -484,8 +499,8 @@ function renderNewOrderItem(msg) {
       </div>
     </div>
     <div class="d-flex flex-column justify-content-between" style="min-width: 5rem;">
-      <button class="btn btn-success btn-sm mb-2" onclick="acceptOrder(${o.oNo})">수락</button>
-      <button class="btn btn-outline-danger btn-sm" onclick="rejectOrder(${o.oNo})">거절</button>
+      <button class="btn btn-success btn-sm mb-2" onclick="acceptOrder(${orderId})">수락</button>
+      <button class="btn btn-outline-danger btn-sm" onclick="rejectOrder(${orderId})">거절</button>
     </div>
   `;
   ul.prepend(li);
@@ -503,14 +518,23 @@ function renderHeaderNotification(msg) {
   // “알림이 없습니다.” 제거
   list.querySelector('li.text-muted')?.remove();
 
-  // 새 알림 아이템 추가
+  // 알림 아이템 생성
   const item = document.createElement('li');
-  item.className         = 'notif-item';
-  item.dataset.orderNo   = data.oNo;
-  item.innerHTML         = `<a class="dropdown-item text-truncate" href="/shop/orderDetail?oNo=${data.oNo}">
-    새 주문 알림이 도착했습니다.
-  </a>`;
-  list.prepend(item);
+  item.className       = 'notif-item';
+  // ↓ JSON 필드명이 orderId 로 넘어오므로 oNo 대신 orderId 사용
+  const id             = data.orderId;
+  item.dataset.orderNo = id;
+
+  // 링크 구성
+  const a = document.createElement('a');
+  a.className = 'dropdown-item text-truncate';
+  a.href      = `/shop/orderDetail?oNo=${id}`;
+  a.textContent = '새 주문 알림이 도착했습니다.';
+
+  item.appendChild(a);
+
+  // ↓ prepend → append 로 바꿔서 새 알림이 아래로 쌓이도록
+  list.appendChild(item);
 }
 
 //헤더 알림에서 아이템 제거 함수
