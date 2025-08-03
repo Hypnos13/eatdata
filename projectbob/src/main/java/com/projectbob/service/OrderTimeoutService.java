@@ -25,8 +25,8 @@ public class OrderTimeoutService {
     @Scheduled(initialDelay = 180_000, fixedRate = 60_000)
     @Transactional
     public void autoRejectStaleOrders() {
-        // ▶ 20초 이전의 PENDING 주문만 거절 대상으로 삼음
-        Timestamp cutoff = new Timestamp(System.currentTimeMillis() - 60_000);
+        // ▶ 10분 이전의 PENDING 주문만 거절 대상으로 삼음
+        Timestamp cutoff = new Timestamp(System.currentTimeMillis() - 600_000);
 
         log.info("autoRejectStaleOrders triggered – cutoff={}", cutoff);
         

@@ -1328,6 +1328,12 @@ $("#rPicture").on("change", function () {
       $imgPreview.hide().attr('src', ''); 
       return;
   }
+	const reader = new FileReader();
+	 reader.onload = function (e) {
+	   $imgPreview.attr('src', e.target.result).show();
+	 };
+	 reader.readAsDataURL(file);
+	
 
 	
 	//검색버튼
@@ -2051,16 +2057,16 @@ function resetReviewForm(){
 
 
 // 없애면 메뉴 모달창 안뜸
-  const reader = new FileReader();
+  /*const reader = new FileReader();
   reader.onload = function (e) {
     $imgPreview.attr('src', e.target.result).show();
   };
-  reader.readAsDataURL(file);
+  reader.readAsDataURL(file);*/
 });
 
 
 // 리뷰 사진 미리보기
-$("#rPicture").on("change", function () { // ID를 rPicture로 변경
+/*$("#rPicture").on("change", function () { // ID를 rPicture로 변경
   const file = this.files[0];
   const $imgPreview = $('#imgPreview'); // jQuery 객체로 변경
 
@@ -2074,7 +2080,7 @@ $("#rPicture").on("change", function () { // ID를 rPicture로 변경
     $imgPreview.attr('src', e.target.result).show();
   };
   reader.readAsDataURL(file);
-});
+});*/
 
 
 // 결제 수단 및 버튼 클릭시
@@ -2237,7 +2243,7 @@ $(document).on("click", "#btnPayNow", function() {
                                 success: function(completeResponse) {
                                     if (completeResponse.success) {
                                         alert("결제가 성공적으로 완료되었습니다!");
-                                        window.location.href = "/end?orderId=" + encodeURIComponent(completeResponse.orderNo); // 결제 완료 페이지로 이동
+                                        window.location.href = "/"; // 메인 페이지로 이동
                                     } else {
                                         alert("결제 완료 처리 중 오류가 발생했습니다: " + completeResponse.message);
                                     }
@@ -2269,4 +2275,66 @@ $(document).on("click", "#btnPayNow", function() {
     });
 });
 
+// 웹소켓
+window.onload = function() {
+    // 로그인한 사용자 ID가 있는지 확인 (Thymeleaf 등을 통해 서버에서 주입된 값)
+    if (window.currentUserId && window.currentUserId.trim() !== '') {
+        console.log("[WebSocket] User logged in, connecting...");
+        connectWebSocket();
+    }
+};
 
+function connectWebSocket() {
+    const socket = new SockJS('/ws');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log('[WebSocket] Connected: ' + frame);
+
+        // 개인화된 주문 상태 업데이트 채널 구독
+        stompClient.subscribe('/user/queue/order-updates', function (message) {
+            console.log('[WebSocket] Received order update:', message.body);
+            const payload = JSON.parse(message.body);
+            showOrderNotification(payload);
+        });
+    }, function(error) {
+        console.error('[WebSocket] Connection error: ' + error);
+        // 연결 실패 시 5초 후 재시도
+        setTimeout(connectWebSocket, 5000);
+    });
+}
+
+function showOrderNotification(payload) {
+    console.log(">>> showOrderNotification 함수 실행됨. 받은 payload:", payload); // 이 줄 추가
+    let message = payload.message || '주문 상태가 변경되었습니다.';
+    let isAccepted = payload.status === 'ACCEPTED';
+
+    // Toastify.js를 사용하여 알림 표시 (라이브러리가 추가되어 있다고 가정)
+    // 만약 Toastify.js가 없다면 alert()으로 대체할 수 있습니다.
+    if (typeof Toastify === 'function') {
+        Toastify({
+            text: message,
+            duration: isAccepted ? -1 : 5000, // 수락 시에는 사용자가 닫을 때까지 유지
+            close: true,
+            gravity: "top", 
+            position: "right", 
+            backgroundColor: isAccepted ? "linear-gradient(to right, #00b09b, #96c93d)" : "linear-gradient(to right, #ff5f6d, #ffc371)",
+            stopOnFocus: true, 
+            onClick: isAccepted ? function(){
+                // 주문 완료 페이지로 이동
+                window.location.href = '/end?orderId=' + payload.oNo;
+            } : function(){}
+        }).showToast();
+    } else {
+        // Toastify 라이브러리가 없을 경우 alert으로 대체
+        alert(message);
+        if (isAccepted) {
+            if (confirm("주문 완료 페이지로 이동하시겠습니까?")) {
+                window.location.href = '/end?orderId=' + payload.oNo;
+            }
+        }
+    }
+}
+
+$(document).ready(function() {
+});
