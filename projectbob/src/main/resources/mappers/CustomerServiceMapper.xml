@@ -242,7 +242,7 @@
 	SELECT price
 	FROM menu_option
 	WHERE m_id = #{mId}
-	AND m_option = #{mOption}
+	AND content = #{content}
 </select>
 </mapper>	
 

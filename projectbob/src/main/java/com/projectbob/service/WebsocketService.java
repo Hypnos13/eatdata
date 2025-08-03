@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import com.projectbob.dto.NewOrder;
-import com.projectbob.mapper.ShopMapper;
+import com.projectbob.domain.NewOrder;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class WebsocketService {
 	
@@ -20,28 +22,23 @@ public class WebsocketService {
 		this.template = template;
 	}
 	
-	/** 
-     * shopId별로 구독자에게 주문 정보를 푸시합니다. 
-     * @param shopId : 가게 고유번호
-     * @param orderInfo : 전송할 주문 요약 DTO (orderId, shopName 등)
-     */
-    public void sendNewOrder(int shopId, Map<String, Object> orderInfo) {
-        template.convertAndSend("/topic/newOrder/" + shopId, orderInfo);
-    }
 	
-    /**
-     * 주문 상태 변경을 구독자(가게 뷰)에게 푸시
-     * @param oNo 변경된 주문 번호
-     * @param shopId 해당 주문의 shopId
-     * @param newStatus "REJECTED" 또는 "IN_PROGRESS" 등
-     */
-    public void sendOrderStatusChange(int orderNo, int shopId, String newStatus) {
+	// 주문정보 푸시
+	public void sendNewOrder(NewOrder order) {
+		log.info("[WebSocket] sendNewOrder: {}", order);
+		template.convertAndSend("/topic/newOrder/" + order.getShopId(), order);
+	}
+	
+    //주문 상태 변경 푸시
+    public void sendOrderStatusChange(int oNo, int shopId, String newStatus) {
         Map<String,Object> payload = Map.of(
-            "oNo",       orderNo,
-            "newStatus", newStatus
+          "oNo", oNo,
+          "newStatus", newStatus
         );
-        // ↓ 주문번호(oNo) 로 구독하는 클라이언트가 받을 수 있게 수정
-        template.convertAndSend("/topic/orderStatus/" + orderNo, payload);
+        // 헤더 알림
+        template.convertAndSend("/topic/orderStatus/shop/" + shopId, payload);
+        // 테이블 업데이트
+        template.convertAndSend("/topic/orderStatus/order/" + oNo, payload);
     }
     
 	/*

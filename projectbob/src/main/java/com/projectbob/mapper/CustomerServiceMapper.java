@@ -48,6 +48,6 @@ public interface CustomerServiceMapper {
 	List<Map<String, Object>> myReviewList(String id);
 	List<Map<String, Object>> myOrderList(String id);
 	List<Map<String, Object>> getMenuPrice(@Param("sId") String sId, @Param("name") String name);
-	int getMenuOptionPrice(@Param("mId") String mId, @Param("mOption") String mOption);
+	int getMenuOptionPrice(@Param("mId") int mId, @Param("content") String content);
 	
 }

@@ -208,13 +208,16 @@ public class CustomerServiceService {
 	               
 	               if (menuPriceList != null) {
 	            	   	Map<String, Object> menuInfo = menuPriceList.get(0);
-	            	    String mId = menuInfo.get("m_id").toString();       
+	            	    int mId = Integer.parseInt(menuInfo.get("m_id").toString());       
 	            	    int menuPrice = Integer.parseInt(menuInfo.get("price").toString());
 
 	            	    parsed.put("menuPrice", menuPrice);
+	            	    
+	            	    System.out.println("파싱된 메뉴명: " + menuName + ", 옵션: [" + option + "], sId: " + sId);
+	            	    System.out.println("선택된 m_id: " + mId);
 
 	            	    if (!option.isEmpty()) {
-	            	        int optionPrice = csMapper.getMenuOptionPrice(mId, option);
+	            	    	int optionPrice = csMapper.getMenuOptionPrice(mId, option);
 	            	        parsed.put("optionPrice", optionPrice);
 	            	    } else {
 	            	        parsed.put("optionPrice", 0);

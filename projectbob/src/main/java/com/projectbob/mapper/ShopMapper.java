@@ -121,6 +121,9 @@ public interface ShopMapper {
         @Param("newStatus")  String newStatus
     );
     
+    //주문 저장 (useGeneratedKeys로 oNo 설정)
+    int insertOrder(Orders order);
+    
 	/* === Menu === */
 	// 메뉴 관련 메서드
     void insertMenu(Menu menu);                  // 메뉴 등록
