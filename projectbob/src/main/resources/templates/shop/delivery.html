@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>배달 대행 호출</title>
+    <link href="https://cdn.jsdelivr.net-npm-bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_APPKEY&libraries=services"></script>
+    <style>
+        :root {
+            --theme-color: #43D091;
+            --light-gray: #f8f9fa;
+        }
+        body { background-color: var(--light-gray); }
+        .main-container { display: flex; height: 100vh; }
+        .order-list-panel {
+            width: 380px;
+            background-color: white;
+            border-right: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+        }
+        .order-list-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .order-list { overflow-y: auto; flex-grow: 1; }
+        .order-card {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .order-card:hover { background-color: #f1f3f5; }
+        .order-card.active {
+            background-color: #e6f9f2;
+            border-left: 4px solid var(--theme-color);
+        }
+        .order-card-title { font-weight: bold; display: flex; justify-content: space-between; }
+        .order-card-address { font-size: 0.9rem; color: #495057; }
+        .order-card-menu { font-size: 0.85rem; color: #868e96; margin-top: 0.5rem; }
+        .dispatch-detail-panel {
+            flex-grow: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        #map {
+            width: 100%;
+            height: 400px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .detail-header { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .info-box {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        .info-box h5 { font-size: 1rem; font-weight: bold; color: var(--theme-color); }
+        .dispatch-actions { margin-top: auto; text-align: center; }
+        .btn-dispatch {
+            background-color: var(--theme-color);
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 0.8rem 2.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="shopData" th:data-shop="${shopJson}" style="display: none;"></div>
+    <div id="waitingOrdersData" th:data-orders="${waitingOrdersJson}" style="display: none;"></div>
+
+    <div class="main-container">
+        <div class="order-list-panel">
+            <div class="order-list-header">
+                <i class="bi bi-list-task"></i> 배차 대기 <span class="badge bg-danger rounded-pill" th:text="${#lists.size(waitingOrders)}">3</span>
+            </div>
+            <div class="order-list">
+                <div th:each="order, iter : ${waitingOrders}" class="order-card" th:classappend="${iter.index == 0} ? 'active'" th:attr="data-order-id=${order.oNo}">
+                    <div class="order-card-title">
+                        <span>주문번호 <span th:text="${order.oNo}">12345</span></span>
+                        <span th:text="${order.payment}">선결제</span>
+                    </div>
+                    <div class="order-card-address" th:text="${order.OAddress}">서울 강남구 테헤란로 123</div>
+                    <div class="order-card-menu" th:text="${order.menus}">피자 1개 외 2건</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dispatch-detail-panel">
+            <div class="detail-header">
+                <span th:text="${shop.name}">우리 가게</span> - 배달 요청
+            </div>
+            
+            <div id="map"></div>
+            
+            <div class="info-grid">
+                <div class="info-box">
+                    <h5><i class="bi bi-shop"></i> 픽업지 (가게)</h5>
+                    <p th:text="${shop.address1 + ' ' + shop.address2}">서울 강남구 역삼동 1</p>
+                    <p class="mb-0" th:text="${shop.phone}">02-111-2222</p>
+                </div>
+                <div class="info-box">
+                    <h5><i class="bi bi-geo-alt-fill"></i> 도착지 (고객)</h5>
+                    <p th:text="${selectedOrder != null ? selectedOrder.OAddress : '선택된 주문이 없습니다.'}">서울 강남구 테헤란로 123</p>
+                    <p class="mb-0 text-danger">고객 연락처 정보 필요</p>
+                </div>
+            </div>
+
+            <div class="dispatch-actions">
+                <button class="btn btn-dispatch">
+                    <i class="bi bi-bicycle"></i> 지금 배차 요청하기
+                </button>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

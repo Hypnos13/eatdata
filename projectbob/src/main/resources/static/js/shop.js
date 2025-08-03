@@ -207,6 +207,61 @@ document.addEventListener('DOMContentLoaded', function() {
 		    });
 		}
 		
+	    // ## [배달 대행 호출] 페이지 전용 스크립트 ##
+	    
+	    const dispatchMapContainer = document.getElementById('map');
+	
+	    // 'map'이라는 id를 가진 요소가 있는 페이지에서만 이 코드를 실행합니다.
+	    if (dispatchMapContainer) {
+			// HTML의 data-* 속성에서 JSON 문자열을 읽어옵니다.
+	        const shopInfoEl = document.getElementById('shopData');
+	        const waitingOrdersEl = document.getElementById('waitingOrdersData');
+	
+	        // shopData와 waitingOrdersData 요소가 모두 있을 때만 아래 로직을 실행합니다.
+	        if (shopInfoEl && waitingOrdersEl) {
+	            // data-* 속성의 값을 JSON 객체로 파싱(변환)합니다.
+	            const shopInfo = JSON.parse(shopInfoEl.dataset.shop);
+	            const orderList = JSON.parse(waitingOrdersEl.dataset.orders);
+	            const shopFullAddress = shopInfo.address1 + ' ' + shopInfo.address2;
+				            
+	            const mapOption = { 
+	                center: new kakao.maps.LatLng(37.566826, 126.9786567), // 기본 중심 좌표
+	                level: 3 
+	            };
+	            const map = new kakao.maps.Map(dispatchMapContainer, mapOption);
+	            const geocoder = new kakao.maps.services.Geocoder();
+	
+	            // 마커를 표시하는 함수
+	            function displayMarkers(shopAddress, customerAddress) {
+	                // 픽업지 마커
+	                geocoder.addressSearch(shopAddress, function(result, status) {
+	                    if (status === kakao.maps.services.Status.OK) {
+	                        const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+	                        new kakao.maps.Marker({ map: map, position: coords, title: '픽업지' });
+	                        map.setCenter(coords);
+	                    }
+	                });
+	
+	                // 도착지 마커
+	                geocoder.addressSearch(customerAddress, function(result, status) {
+	                    if (status === kakao.maps.services.Status.OK) {
+	                        const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+	                        const markerImage = new kakao.maps.MarkerImage(
+	                            'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', 
+	                            new kakao.maps.Size(64, 69), 
+	                            { offset: new kakao.maps.Point(27, 69) }
+	                        );
+	                        new kakao.maps.Marker({ map: map, position: coords, title: '도착지', image: markerImage });
+	                    }
+	                });
+	            }
+	
+	            // 페이지 로드 시 첫 번째 주문 기준으로 마커 표시
+	            if (orderList.length > 0) {
+	                displayMarkers(shopFullAddress, orderList[0].oAddress);
+	            }
+	        }
+	    }
 });
 
 // ==== 4. 카카오맵 표시 =====================================

@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.*;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,9 @@ public class ShopController {
 	
 	@Autowired
     private SimpMessagingTemplate messagingTemplate;
+	
+	@Autowired
+    private ObjectMapper objectMapper;
 	
 	
 	// 식품영양성분DB API 검색
@@ -131,6 +135,51 @@ public class ShopController {
         model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
 		return "redirect:shopMain";
 	}
+	
+	// 배달페이지 임시
+	@GetMapping("/shop/delivery")
+	public String deliveryDispatchPage(
+            @SessionAttribute(name = "loginId", required = false) String loginId,
+            @SessionAttribute(name = "currentSId", required = false) Integer sId,
+            Model model) {
+
+        if (loginId == null || sId == null) {
+            return "redirect:/login";
+        }
+
+        Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+        if (currentShop == null) {
+            return "redirect:/shopMain";
+        }
+        
+        List<Orders> waitingOrders = shopService.findOrdersByStatusAndShop("ACCEPTED", sId);
+        Orders selectedOrder = waitingOrders.isEmpty() ? null : waitingOrders.get(0);
+
+        try {
+            // ✨ 2. Controller에서 Java 객체를 JSON 문자열로 미리 변환합니다.
+            String shopJson = objectMapper.writeValueAsString(currentShop);
+            String waitingOrdersJson = objectMapper.writeValueAsString(waitingOrders);
+
+            // ✨ 3. 변환된 JSON "문자열"을 모델에 담습니다.
+            model.addAttribute("shopJson", shopJson);
+            model.addAttribute("waitingOrdersJson", waitingOrdersJson);
+
+        } catch (Exception e) {
+            log.error("JSON 변환 오류", e);
+            // JSON 변환 실패 시 비어있는 데이터 전달
+            model.addAttribute("shopJson", "{}");
+            model.addAttribute("waitingOrdersJson", "[]");
+
+        }
+
+        // 기존 데이터는 그대로 전달합니다.
+        model.addAttribute("shop", currentShop);
+        model.addAttribute("waitingOrders", waitingOrders);
+        model.addAttribute("selectedOrder", selectedOrder);
+
+        return "shop/delivery"; 
+    }
+
 	
 	/* ----------------------- 메인 ----------------------- */
     @GetMapping("/shopMain")
