@@ -735,23 +735,7 @@ public class ShopController {
         Orders saved = shopService.placeOrder(req);
         return ResponseEntity.ok(Map.of("oNo", saved.getONo()));
     }
-	
-	/* ----------------------- 전역 타이틀 ----------------------- */
-    @ControllerAdvice
-    public static class GlobalModelAdvice {
-        @ModelAttribute
-        public void addGlobalAttributes(Model model, jakarta.servlet.http.HttpServletRequest request) {
-            String uri = request.getRequestURI();
-            String pageTitle = "";
-            if (uri.contains("shopBasic")) pageTitle = "기본설정";
-            else if (uri.contains("shopOpenTime")) pageTitle = "영업시간";
-            else if (uri.contains("shopStatus")) pageTitle = "영업상태";
-            else if (uri.contains("menu")) pageTitle = "메뉴관리";
-            else if (uri.contains("shopNotice")) pageTitle = "가게 공지";
-            else if (uri.contains("reviewManage")) pageTitle = "리뷰 관리";
 
-            model.addAttribute("pageTitle", pageTitle);
-        }
-    }
-		
+	
+	
 }

@@ -1,53 +1,78 @@
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/shop_layout}">
   <head>
     <title>🔔 신규 주문</title>
+    <style>
+      .order-summary { cursor: pointer; }
+      .order-detail { display: none; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px; }
+    </style>
   </head>
   <body>
-    <!-- 이 div가 반드시 필요합니다 -->
     <div layout:fragment="content">
       <div class="container py-3">
         <h4 class="mb-3">🔔 신규 주문</h4>
+
         <ul id="newOrderList" class="list-group" th:data-shop-id="${currentShop.sId}">
-		  <li th:each="o : ${orders}"
-		      class="list-group-item d-flex align-items-start mb-3 p-3">
-		
-		    <!-- 1) 왼쪽: 주문 내용 -->
-		    <div class="flex-grow-1 pe-3">
-		      <div class="mb-1">🛒 <span th:text="${o.menus}">치킨 x1, 콜라 x1</span></div>
-		      <div class="mb-1">💬 <span th:text="${o.request != null ? o.request : '요청사항 없음'}">초인종 금지</span></div>
-		      <div class="text-muted small"><i class="bi bi-clock"></i>
-		        <span th:text="${#dates.format(o.regDate,'HH:mm')}">11:07</span>
-		      </div>
-		    </div>
-		
-		    <!-- 2) 오른쪽: 버튼 그룹 -->
-			<div class="d-flex flex-column justify-content-between" style="min-width: 5rem;">
-			  <button
-			    type="button"
-			    class="btn btn-success btn-sm mb-2"
-			    th:onclick="|acceptOrder(${o.oNo})|">
-			    수락
-			  </button>
-			  <button
-			    type="button"
-			    class="btn btn-outline-danger btn-sm"
-			    th:onclick="|rejectOrder(${o.oNo})|">
-			    거절
-			  </button>
-			</div>
-		  </li>
-		
-		  <li th:if="${#lists.isEmpty(orders)}"
-		      class="list-group-item text-center text-muted">
-		    대기 중인 주문이 없습니다.
-		  </li>
-		</ul>
+          <li th:each="o : ${orders}" class="list-group-item mb-3 p-3">
+
+            <!-- 복사기록: 주문 개요 -->
+            <div class="order-summary d-flex justify-content-between align-items-start" th:onclick="|toggleDetail('${o.oNo}')|">
+              <div class="flex-grow-1 pe-3">
+                <div><strong>주문 번호:</strong> <span th:text="${o.oNo}"></span></div>
+                <div><strong>건물:</strong> <span th:text="${o.menus}"></span></div>
+                <div><strong>건조:</strong> <span th:text="${o.totalPrice} + ' 원'"></span></div>
+                <div><strong>주소:</strong> <span th:text="${o.oAddress}"></span></div>
+                <div class="small text-muted">
+                  <i class="bi bi-clock"></i>
+                  <span th:text="${#dates.format(o.regDate,'HH:mm')}"></span>
+                  &nbsp; | &nbsp;
+                  <span class="text-danger">
+                    남은시간: <span id="countdown-${o.oNo}" class="notif-timer" th:attr="data-expiry=${o.regDate.time + 180000}">--:--</span>
+                  </span>
+                </div>
+              </div>
+              <div>
+                <button class="btn btn-outline-info btn-sm">확인</button>
+              </div>
+            </div>
+
+            <!-- 상세정보 -->
+            <div class="order-detail" th:id="'detail-' + ${o.oNo}">
+              <hr>
+              <div><strong>수량:</strong> <span th:text="${o.quantity} + '개'"></span></div>
+              <div><strong>요청사항:</strong> <span th:text="${o.request ?: '요청사항 없음'}"></span></div>
+              <div class="mt-3">
+                <button type="button" class="btn btn-success btn-sm me-2" th:onclick="|acceptOrder(${o.oNo})|">수량</button>
+                <button type="button" class="btn btn-outline-danger btn-sm" th:onclick="|rejectOrder(${o.oNo})|">거절</button>
+              </div>
+            </div>
+          </li>
+
+          <li th:if="${#lists.isEmpty(orders)}" class="list-group-item text-center text-muted">
+            대기 중인 주문이 없습니다.
+          </li>
+        </ul>
       </div>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script th:src="@{/js/shop.js}"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        if (document.getElementById('newOrderList')) {
+          startOrderTimers();
+        }
+      });
+
+      function toggleDetail(orderId) {
+        const detail = document.getElementById('detail-' + orderId);
+        if (detail) {
+          detail.style.display = detail.style.display === 'none' || detail.style.display === '' ? 'block' : 'none';
+        }
+      }
+    </script>
   </body>
 </html>

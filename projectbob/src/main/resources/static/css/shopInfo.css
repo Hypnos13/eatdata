@@ -66,12 +66,6 @@ body {
 }
 
 /* ===== 사이드바 ===== */
-.dropdown .dropdown-menu {
-  min-width: 100%;
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .dropdown-toggle::after {
   display: none !important;
 }
@@ -176,6 +170,13 @@ body {
 }
 
 /* ===== 사이드바 메뉴 그룹 ===== */
+/* 사이드바 내 드롭다운만 full-width */
+.services-sidebar .dropdown .dropdown-menu {
+  min-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .sidebar-menu-group { margin-top: 18px; }
 .sidebar-group-btn {
   background: #fff;
@@ -548,17 +549,33 @@ body {
 /* 카드 간 간격 */
 .review-card + .review-card { margin-top: 42px; }
 
-/* 알림 아이콘 깜박임 키프레임 정의 */
-@keyframes bell-red-blink {
-  0%, 100% {
-    color: inherit;      /* 원래 색 */
-  }
-  50% {
-    color: #fe2961;      /* 깜박일 때 빨간색 */
-  }
+/* 벨 아이콘 깜빡임 */
+@keyframes bell-blink-red {
+  0%, 100% { color: inherit; }
+  50%      { color: #e74c3c; } /* 선명한 빨강(예: red 계열) */
+}
+#notifyIcon.blink {
+  animation: bell-blink-red 1s step-end infinite;
 }
 
-/* blink 클래스를 달면 깜박이도록 설정 */
-.blink {
-  animation: bell-red-blink 1s ease-in-out infinite;
+/* 헤더 알림 드롭다운 전용 오버라이드 */
+#notifyContainer > .dropdown-menu {
+  width: auto !important;
+  min-width: 400px !important;
+  max-width: 600px !important;
+}
+
+/* ========= 디지털 시계 스타일 ========= */
+/* 둥근 네모 (pill) 형태 */
+.timer-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  min-width: 3em;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI Mono', monospace;
+  font-size: 0.9em;
 }

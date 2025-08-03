@@ -22,11 +22,12 @@ public class OrderTimeoutService {
     @Autowired private ShopMapper shopMapper;
     @Autowired private WebsocketService websocketService;
 
+    // ① 애플리케이션 시작 후 3분 뒤 첫 실행, 그 뒤엔 매 1분마다 체크
     @Scheduled(initialDelay = 180_000, fixedRate = 60_000)
     @Transactional
     public void autoRejectStaleOrders() {
-        // ▶ 20초 이전의 PENDING 주문만 거절 대상으로 삼음
-        Timestamp cutoff = new Timestamp(System.currentTimeMillis() - 60_000);
+        // ▶ 3분(180,000ms) 이전의 PENDING 주문만 거절 대상으로 삼음
+        Timestamp cutoff = new Timestamp(System.currentTimeMillis() - 180_000);
 
         log.info("autoRejectStaleOrders triggered – cutoff={}", cutoff);
         

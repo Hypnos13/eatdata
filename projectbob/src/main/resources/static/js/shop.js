@@ -1,4 +1,50 @@
-// ==== 1. Shop / Menu 가입 폼 검증 ============================
+// ==== 0. 알림 깜빡임 제어 (맨 위) ========================
+function markBellAsUnread() {
+  const icon = document.getElementById('notifyIcon');
+  if (icon && !icon.classList.contains('blink')) {
+    icon.classList.add('blink');
+  }
+}
+function clearBellBlink() {
+  const icon = document.getElementById('notifyIcon');
+  if (icon && icon.classList.contains('blink')) {
+    icon.classList.remove('blink');
+  }
+}
+
+// ==== 0. 주문 상세 토글 ========================
+window.toggleDetail = function(orderId) {
+  const detailEl = document.getElementById('order-detail-' + orderId);
+  if (detailEl) {
+    detailEl.classList.toggle('d-none');
+  }
+};
+
+// ==== 1. 타이머 헬퍼 (반드시 전역에 선언) ============
+function formatMMSS(totalSeconds) {
+  const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const s = String(totalSeconds % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function startCountdown(oNo, prefix = 'countdown-') {
+  const el = document.getElementById(prefix + oNo);
+  if (!el) return;
+  let remain = Math.ceil((parseInt(el.dataset.expiry,10) - Date.now())/1000);
+  if (remain < 0) remain = 0;
+  el.textContent = formatMMSS(remain);
+  const iv = setInterval(() => {
+    remain--;
+    if (remain <= 0) {
+      el.textContent = '00:00';
+      clearInterval(iv);
+    } else {
+      el.textContent = formatMMSS(remain);
+    }
+  }, 1000);
+}
+
+// ==== 2. Shop / Menu 가입 폼 검증 ============================
 $(function() {
 	
 	$("#shopJoinForm").on("submit", shopJoinFormCheck);
@@ -68,144 +114,144 @@ function menuJoinFormCheck() {
 // ==== 2. 입력값 포맷팅 유틸 ================================
 document.addEventListener('DOMContentLoaded', function() {
     
-    // ===== 1. 입력 시 하이픈(-) 자동 생성 기능 =====
-    const sNumberInputForFormatting = document.getElementById('sNumber');
-    if (sNumberInputForFormatting) {
-        sNumberInputForFormatting.addEventListener('input', function(event) {
-            let value = event.target.value.replace(/[^0-9]/g, '');
-            if (value.length > 10) {
-                value = value.substring(0, 10);
-            }
+// ===== 1. 입력 시 하이픈(-) 자동 생성 기능 =====
+const sNumberInputForFormatting = document.getElementById('sNumber');
+if (sNumberInputForFormatting) {
+    sNumberInputForFormatting.addEventListener('input', function(event) {
+        let value = event.target.value.replace(/[^0-9]/g, '');
+        if (value.length > 10) {
+            value = value.substring(0, 10);
+        }
 
-            let formattedValue = '';
-            if (value.length < 4) {
-                formattedValue = value;
-            } else if (value.length < 6) {
-                formattedValue = value.substring(0, 3) + '-' + value.substring(3);
+        let formattedValue = '';
+        if (value.length < 4) {
+            formattedValue = value;
+        } else if (value.length < 6) {
+            formattedValue = value.substring(0, 3) + '-' + value.substring(3);
+        } else {
+            formattedValue = value.substring(0, 3) + '-' + value.substring(3, 5) + '-' + value.substring(5);
+        }
+        event.target.value = formattedValue;
+    });
+}
+
+// ===== 3. 폼 제출 시 하이픈(-) 제거 기능 (새로 추가된 부분) =====
+const shopJoinForm = document.getElementById('shopJoinForm');
+if (shopJoinForm) {
+    shopJoinForm.addEventListener('submit', function(event) {
+        event.preventDefault(); // 폼 자동 전송 중단
+
+        const sNumberInput = document.getElementById('sNumber');
+        // 사업자등록번호 값에서 하이픈 제거
+        sNumberInput.value = sNumberInput.value.replace(/-/g, '');
+
+        // 다른 전화번호 필드 등도 숫자만 보내고 싶다면 아래처럼 추가 가능
+        // const phoneInput = document.getElementById('phone');
+        // phoneInput.value = phoneInput.value.replace(/-/g, '');
+
+        this.submit(); // 정리된 값으로 폼 전송
+    });
+}
+	
+// 폰번호 포맷팅
+const phoneNumberInput = document.getElementById('phone');
+
+if (phoneNumberInput) { // 요소가 존재하는지 확인
+    phoneNumberInput.addEventListener('input', function(event) {
+        let value = event.target.value.replace(/[^0-9]/g, ''); // 숫자 이외의 문자 제거
+
+        if (value.length > 11) {
+            value = value.substring(0, 11); // 11자리 초과 시 잘라냄
+        }
+
+        let formattedValue = '';
+        if (value.length < 4) {
+            formattedValue = value;
+        } else if (value.length < 8) {
+            formattedValue = value.substring(0, 3) + '-' + value.substring(3);
+        } else {
+            formattedValue = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7);
+        }
+
+        event.target.value = formattedValue;
+    });
+}
+
+// ==== 3. 영양성분 검색 =====================================
+const btnSearch = document.getElementById('btnSearchNutrition');
+const menuNameInput = document.getElementById('name');
+const resultsList = document.getElementById('nutrition-results');
+const selectedInfoDiv = document.getElementById('selected-nutrition-info');
+
+if (btnSearch) {
+    // '영양성분 검색' 버튼 클릭 이벤트
+    btnSearch.addEventListener('click', async function() {
+        const foodName = menuNameInput.value;
+        if (!foodName) {
+            alert('메뉴 이름을 먼저 입력해주세요.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/nutrition-search?foodName=${encodeURIComponent(foodName)}`);
+            const resultStr = await response.text();
+            const result = JSON.parse(resultStr);
+            
+            resultsList.innerHTML = ''; // 이전 결과 초기화
+            
+            if (result.body && result.body.items && result.body.items.length > 0) {
+                resultsList.style.display = 'block';
+                result.body.items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item list-group-item-action';
+                    li.style.cursor = 'pointer';
+                    li.textContent = `${item.FOOD_NM_KR} (1회 제공량: ${item.SERVING_SIZE}, 열량: ${item.AMT_NUM1}kcal)`;
+                    
+										li.dataset.servingSize = item.SERVING_SIZE.replace(/[^0-9.]/g, '');
+                    li.dataset.calories = item.AMT_NUM1;
+                    li.dataset.carbs = item.AMT_NUM6;
+                    li.dataset.protein = item.AMT_NUM3;
+                    li.dataset.fat = item.AMT_NUM4;
+										li.dataset.sfa = item.AMT_NUM24;
+										li.dataset.sugar = item.AMT_NUM7;
+                    li.dataset.sodium = item.AMT_NUM13;
+                    
+                    resultsList.appendChild(li);
+                });
             } else {
-                formattedValue = value.substring(0, 3) + '-' + value.substring(3, 5) + '-' + value.substring(5);
+                resultsList.innerHTML = '<li class="list-group-item">검색 결과가 없습니다.</li>';
+                resultsList.style.display = 'block';
             }
-            event.target.value = formattedValue;
-        });
-    }
+        } catch (error) {
+            console.error('Error fetching nutrition data:', error);
+            alert('영양 정보를 불러오는 데 실패했습니다.');
+        }
+    });
+    
+    // 검색 결과 리스트에서 항목을 클릭했을 때의 동작
+    resultsList.addEventListener('click', function(e) {
+        // 클릭된 요소가 LI 태그일 때만 실행
+        if (e.target && e.target.nodeName === 'LI') {
+            const selectedItem = e.target;
+            const { servingSize, calories, carbs, protein, fat, sfa, sugar, sodium } = selectedItem.dataset;
 
-    // ===== 2. 폼 제출 시 하이픈(-) 제거 기능 (새로 추가된 부분) =====
-    const shopJoinForm = document.getElementById('shopJoinForm');
-    if (shopJoinForm) {
-        shopJoinForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // 폼 자동 전송 중단
-
-            const sNumberInput = document.getElementById('sNumber');
-            // 사업자등록번호 값에서 하이픈 제거
-            sNumberInput.value = sNumberInput.value.replace(/-/g, '');
-
-            // 다른 전화번호 필드 등도 숫자만 보내고 싶다면 아래처럼 추가 가능
-            // const phoneInput = document.getElementById('phone');
-            // phoneInput.value = phoneInput.value.replace(/-/g, '');
-
-            this.submit(); // 정리된 값으로 폼 전송
-        });
-    }
-		
-		// 폰번호 포맷팅
-		const phoneNumberInput = document.getElementById('phone');
-
-		    if (phoneNumberInput) { // 요소가 존재하는지 확인
-		        phoneNumberInput.addEventListener('input', function(event) {
-		            let value = event.target.value.replace(/[^0-9]/g, ''); // 숫자 이외의 문자 제거
-
-		            if (value.length > 11) {
-		                value = value.substring(0, 11); // 11자리 초과 시 잘라냄
-		            }
-
-		            let formattedValue = '';
-		            if (value.length < 4) {
-		                formattedValue = value;
-		            } else if (value.length < 8) {
-		                formattedValue = value.substring(0, 3) + '-' + value.substring(3);
-		            } else {
-		                formattedValue = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7);
-		            }
-
-		            event.target.value = formattedValue;
-		        });
-		    }
-				
-		// ==== 3. 영양성분 검색 =====================================
-		const btnSearch = document.getElementById('btnSearchNutrition');
-		const menuNameInput = document.getElementById('name');
-		const resultsList = document.getElementById('nutrition-results');
-		const selectedInfoDiv = document.getElementById('selected-nutrition-info');
-
-		if (btnSearch) {
-		    // '영양성분 검색' 버튼 클릭 이벤트
-		    btnSearch.addEventListener('click', async function() {
-		        const foodName = menuNameInput.value;
-		        if (!foodName) {
-		            alert('메뉴 이름을 먼저 입력해주세요.');
-		            return;
-		        }
-
-		        try {
-		            const response = await fetch(`/api/nutrition-search?foodName=${encodeURIComponent(foodName)}`);
-		            const resultStr = await response.text();
-		            const result = JSON.parse(resultStr);
-		            
-		            resultsList.innerHTML = ''; // 이전 결과 초기화
-		            
-		            if (result.body && result.body.items && result.body.items.length > 0) {
-		                resultsList.style.display = 'block';
-		                result.body.items.forEach(item => {
-		                    const li = document.createElement('li');
-		                    li.className = 'list-group-item list-group-item-action';
-		                    li.style.cursor = 'pointer';
-		                    li.textContent = `${item.FOOD_NM_KR} (1회 제공량: ${item.SERVING_SIZE}, 열량: ${item.AMT_NUM1}kcal)`;
-		                    
-												li.dataset.servingSize = item.SERVING_SIZE.replace(/[^0-9.]/g, '');
-		                    li.dataset.calories = item.AMT_NUM1;
-		                    li.dataset.carbs = item.AMT_NUM6;
-		                    li.dataset.protein = item.AMT_NUM3;
-		                    li.dataset.fat = item.AMT_NUM4;
-												li.dataset.sfa = item.AMT_NUM24;
-												li.dataset.sugar = item.AMT_NUM7;
-		                    li.dataset.sodium = item.AMT_NUM13;
-		                    
-		                    resultsList.appendChild(li);
-		                });
-		            } else {
-		                resultsList.innerHTML = '<li class="list-group-item">검색 결과가 없습니다.</li>';
-		                resultsList.style.display = 'block';
-		            }
-		        } catch (error) {
-		            console.error('Error fetching nutrition data:', error);
-		            alert('영양 정보를 불러오는 데 실패했습니다.');
-		        }
-		    });
-		    
-		    // 검색 결과 리스트에서 항목을 클릭했을 때의 동작
-		    resultsList.addEventListener('click', function(e) {
-		        // 클릭된 요소가 LI 태그일 때만 실행
-		        if (e.target && e.target.nodeName === 'LI') {
-		            const selectedItem = e.target;
-		            const { servingSize, calories, carbs, protein, fat, sfa, sugar, sodium } = selectedItem.dataset;
-
-		            // form 안에 있는 hidden input들을 찾아서 값을 채워줍니다.
-		            document.querySelector('input[name="servingSize"]').value = servingSize || 0;
-		            document.querySelector('input[name="calories"]').value = calories || 0;
-		            document.querySelector('input[name="carbs"]').value = carbs || 0;
-		            document.querySelector('input[name="protein"]').value = protein || 0;
-		            document.querySelector('input[name="fat"]').value = fat || 0;
-								document.querySelector('input[name="sfa"]').value = sfa || 0;
-								document.querySelector('input[name="sugar"]').value = sugar || 0;
-		            document.querySelector('input[name="sodium"]').value = sodium || 0;
-		            
-		            selectedInfoDiv.textContent = `✅ ${selectedItem.textContent} 의 영양성분이 선택되었습니다.`;
-		            selectedInfoDiv.style.display = 'block';
-		            
-		            resultsList.style.display = 'none';
-		        }
-		    });
-		}
+            // form 안에 있는 hidden input들을 찾아서 값을 채워줍니다.
+            document.querySelector('input[name="servingSize"]').value = servingSize || 0;
+            document.querySelector('input[name="calories"]').value = calories || 0;
+            document.querySelector('input[name="carbs"]').value = carbs || 0;
+            document.querySelector('input[name="protein"]').value = protein || 0;
+            document.querySelector('input[name="fat"]').value = fat || 0;
+						document.querySelector('input[name="sfa"]').value = sfa || 0;
+						document.querySelector('input[name="sugar"]').value = sugar || 0;
+            document.querySelector('input[name="sodium"]').value = sodium || 0;
+            
+            selectedInfoDiv.textContent = `✅ ${selectedItem.textContent} 의 영양성분이 선택되었습니다.`;
+            selectedInfoDiv.style.display = 'block';
+            
+            resultsList.style.display = 'none';
+        }
+    });
+	}
 		
 });
 
@@ -297,7 +343,7 @@ $(function() {
     });
 });
 
-// ==== 5. 가게 상태 ON/OFF 토글 =============================
+// ==== 4. 가게 상태 ON/OFF 토글 =============================
 $(function() {
     $('#shopStat').on('change', function() {
         const $checkbox = $(this);
@@ -316,7 +362,7 @@ $(function() {
     });
 });
 
-// ==== 6. 리뷰 답글 수정/삭제 모드 토글 =====================
+// ==== 5. 리뷰 답글 수정/삭제 모드 토글 =====================
 // # 리뷰 답글 “수정/삭제” 바로가기 토글 & AJAX 처리
 $(function () {
 $('.reply-box')
@@ -374,181 +420,197 @@ $('.reply-box')
   });
 });
 
-// ==== 7. WebSocket 초기화 & 이벤트 처리 =================
-// 페이지 로드 후 한 번만 실행됩니다.
+// ==== 6. WebSocket 초기화 & 이벤트 처리 =================
 document.addEventListener('DOMContentLoaded', () => {
-  // 7.0: shopId 조회 (헤더 알림 컨테이너에서)
+  // 7.0: shopId 가져오기
   const notifyContainer = document.getElementById('notifyContainer');
   if (!notifyContainer) return;
   const shopId = notifyContainer.dataset.shopId;
 
-  // 7.1: SockJS & STOMP 클라이언트 생성
+  // 7.1: SockJS + STOMP 클라이언트
   const socket      = new SockJS('/ws');
   const stompClient = Stomp.over(socket);
 
-  // 7.2: STOMP 연결 후 구독 시작
+  // 7.2: 연결 및 구독
   stompClient.connect({}, () => {
     console.log('[shop.js] STOMP connected, shopId=', shopId);
 
-	// 7.2.1: 신규 주문 알림 구독
-	stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
-	  console.log('[WS 新주문 콜백]', msg, typeof msg.body, msg.body);
-	  try {
-	    const o = JSON.parse(msg.body);
-	    console.log('[WS 新주문] 주문 객체:', o);
-	  } catch(e) {
-	    console.error('JSON parse error:', e, msg.body);
-	  }
+    // 7.2.1: 신규 주문 알림 구독
+    stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
+      // ① 헤더 알림 추가 + 벨 아이콘 깜빡임
+      renderHeaderNotification(msg);
+      markBellAsUnread();
 
-	  // 1) 헤더 알림 + 벨 아이콘 깜빡임 (모든 페이지 공통)
-	  renderHeaderNotification(msg);
-	  markBellAsUnread();
-
-	  // 2) 신규 주문 리스트가 있는 페이지에서만 렌더링
+      // ② 신규주문 리스트 페이지면, 리스트에도 추가 (타이머 포함)
 	  if (document.getElementById('newOrderList')) {
-	    renderNewOrderItem(msg);
-	  }
-	});
+	      // 기존 예약 타이머, 벨 깜빡임 재초기화
+	      // (1) 신규주문 리스트 타이머
+	      document.querySelectorAll('[id^="countdown-"]').forEach(el => {
+	        const oNo = el.id.replace('countdown-', '');
+	        startCountdown(oNo);
+	      });
+	    }
+    });
 
-    // 7.2.2: 주문 상태 변경 구독 (헤더 알림 제거)
+    // 7.2.2: 주문 상태 변경(헤더) → 해당 알림 지우기
     stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
-      console.log('[WS 상태변경_헤더]', msg.body);
       const { oNo } = JSON.parse(msg.body);
       removeHeaderNotification(oNo);
     });
 
-    // 7.2.3: 주문 상태 변경 구독 (테이블 업데이트)
+    // 7.2.3: 주문 상태 변경(테이블) → 상태 셀 업데이트
     document.querySelectorAll('tr[data-order-no]').forEach(row => {
       const oNo = row.dataset.orderNo;
       stompClient.subscribe(`/topic/orderStatus/order/${oNo}`, msg => {
-        console.log('[WS 상태변경_테이블]', msg.body);
         const { newStatus } = JSON.parse(msg.body);
         const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
         if (cell) cell.textContent = newStatus;
       });
     });
-
-    // 7.2.4: 드롭다운 열림 시 깜빡임 해제
-    document.getElementById('headerNotifyBtn')
-      ?.addEventListener('shown.bs.dropdown', clearBellBlink);
   });
 });
 
-// ==== 8. 알림 아이콘 깜박임 제어 ===========================
-//알림 아이콘 깜박임 시작
-function markBellAsUnread() {
-  const icon = document.getElementById('notifyIcon');
-  if (icon) icon.classList.add('blink');
-}
-
-//알림 아이콘 깜박임 종료
-function clearBellBlink() {
-  const icon = document.getElementById('notifyIcon');
-  if (icon) icon.classList.remove('blink');
-}
-
-// ==== 9. 주문 관리 함수 (수락 / 거절) =====================
+// ==== 7. 주문 관리 함수 (수락 / 거절) =====================
 // 주문 수락 함수 (기존)
-window.acceptOrder = function(oNo) {
+window.acceptOrder = oNo => {
   fetch(`/shop/orderManage/${oNo}/status`, {
     method: 'POST',
     headers: {'Content-Type':'application/x-www-form-urlencoded'},
     body: 'newStatus=ACCEPTED'
-  })
-  .then(res => {
-    if (!res.ok) throw new Error('상태 변경 실패');
+  }).then(r => {
+    if (!r.ok) throw new Error();
     document.querySelector(`button[onclick="acceptOrder(${oNo})"]`)?.closest('li').remove();
     location.href = '/shop/orderManage?status=IN_PROGRESS';
-  })
-  .catch(() => alert('주문 수락에 실패했습니다.'));
+  }).catch(() => alert('수락 실패'));
 };
 
 // 주문 거절 함수 (추가)
-window.rejectOrder = function(oNo) {
+window.rejectOrder = oNo => {
   fetch(`/shop/orderManage/${oNo}/status`, {
     method: 'POST',
     headers: {'Content-Type':'application/x-www-form-urlencoded'},
     body: 'newStatus=REJECTED'
-  })
-  .then(res => {
-    if (!res.ok) throw new Error('거절 실패');
+  }).then(r => {
+    if (!r.ok) throw new Error();
     document.querySelector(`button[onclick="rejectOrder(${oNo})"]`)?.closest('li').remove();
-  })
-  .catch(() => alert('주문 거절에 실패했습니다.'));
+  }).catch(() => alert('거절 실패'));
 };
 
-// ==== 10. 렌더링 헬퍼 =====================================
+// ==== 8. 렌더링 헬퍼 =====================================
+//신규주문 리스트에 항목 추가
 function renderNewOrderItem(msg) {
+  const o = JSON.parse(msg.body);
   const ul = document.getElementById('newOrderList');
-  if (!ul) return;
-
-  // placeholder 제거
   ul.querySelector('li.text-center.text-muted')?.remove();
 
-  const o = JSON.parse(msg.body);
-  const orderId = o.orderId;
+  // ① 만료 시각(ms)
+  const expiryMs = Date.now() + 3 * 60 * 1000;
 
+  // ② 자동거절 예약
+  setTimeout(() => {
+    if (document.querySelector(`.notif-item[data-order-no="${o.oNo}"]`)) {
+      rejectOrder(o.oNo);
+      clearBellBlink();
+    }
+  }, expiryMs - Date.now());
+
+  // ③ 한국시간 HH:mm 계산 (이걸 innerHTML 전에 미리 계산해야 합니다)
+  const utcString = o.regDate + 'Z';  
+  const dt = new Date(utcString);
+  const hhmm = dt.toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
+
+  // ④ li 생성
   const li = document.createElement('li');
-  li.className = 'list-group-item d-flex align-items-start mb-3 p-3';
+  li.className = 'list-group-item d-flex align-items-start mb-3 p-3 notif-item';
+  li.dataset.orderNo = o.oNo;
   li.innerHTML = `
     <div class="flex-grow-1 pe-3">
       <div class="mb-1">🛒 ${o.menus}</div>
       <div class="mb-1">💬 ${o.request || '요청사항 없음'}</div>
       <div class="text-muted small">
-        <i class="bi bi-clock"></i>${new Date(o.regDate).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+        <i class="bi bi-clock"></i> ${hhmm}
+      </div>
+      <div class="text-danger small mt-1">
+        남은시간:
+        <span id="countdown-${o.oNo}" data-expiry="${expiryMs}">--:--</span>
       </div>
     </div>
-    <div class="d-flex flex-column justify-content-between" style="min-width: 5rem;">
-      <button class="btn btn-success btn-sm mb-2" onclick="acceptOrder(${orderId})">수락</button>
-      <button class="btn btn-outline-danger btn-sm" onclick="rejectOrder(${orderId})">거절</button>
+    <div class="d-flex flex-column justify-content-between" style="min-width:5rem;">
+      <button class="btn btn-success btn-sm mb-2" onclick="acceptOrder(${o.oNo})">수락</button>
+      <button class="btn btn-outline-danger btn-sm" onclick="rejectOrder(${o.oNo})">거절</button>
     </div>
   `;
   ul.prepend(li);
+
+  // ⑤ 카운트다운 시작
+  startCountdown(o.oNo);
 }
 
+//10-b. 헤더 알림 렌더링 (타이머 포함)
 function renderHeaderNotification(msg) {
-  const data  = JSON.parse(msg.body);
+  const data = JSON.parse(msg.body);
   const badge = document.getElementById('header-notif-badge');
   const list  = document.getElementById('header-notif-list');
 
-  // 뱃지 증가
-  badge.textContent  = parseInt(badge.textContent || '0',10) + 1;
+  // badge 증가
+  badge.textContent = String((parseInt(badge.textContent,10)||0) + 1);
   badge.classList.remove('d-none');
 
-  // “알림이 없습니다.” 제거
+  // placeholder(“알림이 없습니다.”) 제거
   list.querySelector('li.text-muted')?.remove();
 
-  // 알림 아이템 생성
+  // 3분 뒤 만료 ms
+  const expiryMs = Date.now() + 3 * 60 * 1000;
+
+  // 새 알림 아이템
   const item = document.createElement('li');
-  item.className       = 'notif-item';
-  // ↓ JSON 필드명이 orderId 로 넘어오므로 oNo 대신 orderId 사용
-  const id             = data.orderId;
-  item.dataset.orderNo = id;
+  item.className       = 'notif-item d-flex justify-content-between align-items-center';
+  item.dataset.orderNo = data.oNo;
+  item.innerHTML = `
+    <a class="dropdown-item flex-grow-1 text-truncate"
+       href="/shop/orderDetail?oNo=${data.oNo}">
+      새 주문이 도착했습니다.
+    </a>
+    <span class="text-danger small ms-2">
+      <span id="hdr-countdown-${data.oNo}"
+            class="timer"
+            data-expiry="${expiryMs}">--:--</span>
+    </span>
+  `;
+  // “새로운 알림” 헤더(<h6>)를 찾아, 그 부모 <li> 바로 다음에 삽입
+  const headerH6 = list.querySelector('h6.dropdown-header');
+  const headerLi = headerH6 ? headerH6.closest('li') : null;
+  if (headerLi && headerLi.nextSibling) {
+    list.insertBefore(item, headerLi.nextSibling);
+  } else {
+    // 혹시 헤더를 못 찾으면 맨 뒤로
+    list.appendChild(item);
+  }
 
-  // 링크 구성
-  const a = document.createElement('a');
-  a.className = 'dropdown-item text-truncate';
-  a.href      = `/shop/orderDetail?oNo=${id}`;
-  a.textContent = '새 주문 알림이 도착했습니다.';
-
-  item.appendChild(a);
-
-  // ↓ prepend → append 로 바꿔서 새 알림이 아래로 쌓이도록
-  list.appendChild(item);
+  // 헤더 타이머 시작
+  startCountdown(data.oNo, 'hdr-countdown-');
 }
 
-//헤더 알림에서 아이템 제거 함수
+//10-c. 헤더 알림 제거
 function removeHeaderNotification(oNo) {
-  // 아이템 제거
-  document.querySelector(`#header-notif-list .notif-item[data-order-no="${oNo}"]`)?.remove();
-  // 뱃지 감소
+  // 1) 해당 알림 아이템 제거
+  document
+    .querySelector(`#header-notif-list .notif-item[data-order-no="${oNo}"]`)
+    ?.remove();
+
+  // 2) badge 카운트 차감
   const badge = document.getElementById('header-notif-badge');
-  const cnt   = Math.max(0, parseInt(badge.textContent||'0',10) - 1);
+  const cnt = Math.max(0, parseInt(badge.textContent||'0', 10) - 1);
   badge.textContent = cnt;
-  if (cnt === 0) badge.classList.add('d-none');
+
+  // 3) 남은 알림 없으면 badge 감추고 blink 종료
+  if (cnt === 0) {
+    badge.classList.add('d-none');
+    clearBellBlink();
+  }
 }
 
-  // ==== 11. 휴무/영업 버튼 ================
+  // ==== 9. 휴무/영업 버튼 ================
   // 휴무/영업 스위치
   const updateDayRow = ($chk) => {
     const $tr = $chk.closest("tr");
@@ -592,7 +654,7 @@ function removeHeaderNotification(oNo) {
       // disabled 절대 쓰지 않음
     });
 	
-// ==== 12. 주문 상세 페이지 픽업/배달 버튼 ================
+// ==== 10. 주문 상세 페이지 픽업/배달 버튼 ================
 // 픽업·배달 버튼 처리
 document.addEventListener('DOMContentLoaded', () => {
   const btnPickup  = document.getElementById('btnPickup');
@@ -629,4 +691,44 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(d => { if (d.success) cb(); });
   }
 });
+});
+
+// ==== 11. 주문내역 타이머 카운트다운 ================
+// data-expiry 속성(밀리초 UNIX 타임) → 남은시간 표시
+function startHeaderTimers() {
+  document.querySelectorAll('.notif-timer').forEach(el => {
+    const expiry = parseInt(el.dataset.expiry, 10);
+    function tick() {
+      const remainSec = Math.max(0, Math.ceil((expiry - Date.now()) / 1000));
+      el.textContent = formatMMSS(remainSec);   // ← formatMSS 가 아니라 formatMMSS
+      if (remainSec <= 0) clearInterval(iv);
+    }
+    tick();
+    const iv = setInterval(tick, 1000);
+  });
+}
+
+// 초기 페이지 로드 시 실행
+document.addEventListener('DOMContentLoaded', () => {
+  // …STOMP 연결 후…
+  startHeaderTimers();
+});
+
+// ==== 12. 페이지 로드 후 알림·타이머 재초기화 코드 추가 ================
+document.addEventListener('DOMContentLoaded', () => {
+  // (1) 벨 깜빡임
+  const badge = document.getElementById('header-notif-badge');
+  if (badge && +badge.textContent > 0) markBellAsUnread();
+
+  // (2) 헤더 알림 타이머
+  document.querySelectorAll('[id^="hdr-countdown-"]').forEach(el => {
+    const oNo = el.id.replace('hdr-countdown-', '');
+    startCountdown(oNo, 'hdr-countdown-');
+  });
+
+  // (3) 신규주문 리스트 타이머
+  document.querySelectorAll('[id^="countdown-"]').forEach(el => {
+    const oNo = el.id.replace('countdown-', '');
+    startCountdown(oNo);
+  });
 });
