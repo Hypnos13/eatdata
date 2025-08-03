@@ -164,6 +164,15 @@ public interface BobMapper {
 	// 특정 주문 번호에 대한 리뷰 개수 조회
 	public int countReviewByOrderNo(@Param("oNo") int oNo);
 	
+	// 특정 주문 번호와 사용자 ID에 대한 리뷰 개수 조회
+	public int countReviewByOrderNoAndUserId(@Param("userId") String userId, @Param("oNo") int oNo);
+
+	// 주문 번호로 주문 정보 조회
+	public Orders selectOrderByOrderNo(@Param("orderId") String orderId);
+
+	// 메뉴 이름으로 mId 조회
+	public Integer selectMenuIdByName(@Param("menuName") String menuName);
+	
 
 }
 

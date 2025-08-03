@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.projectbob.domain.LikeList;
@@ -411,7 +412,14 @@ public class BobService {
 			}
 		}
 		bobMapper.addReview(review);
-		shopMapper.updateShopRatingBySId(review.getSId());
+		// 평점 업데이트 로직을 별도 트랜잭션으로 분리
+		this.updateShopRating(review.getSId());
+	}
+
+	// 가게 평점 업데이트 (별도 트랜잭션)
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void updateShopRating(int sId) {
+		shopMapper.updateShopRatingBySId(sId);
 	}
 
 	//댓글 수정하는 메서드
@@ -485,6 +493,21 @@ public class BobService {
 			return new ArrayList<>();
 		}
 		return bobMapper.getReviewableOrders(userId, sId);
+	}
+	
+	// 사용자가 특정 주문에 대해 리뷰를 작성했는지 확인하는 메서드
+	public boolean hasUserReviewedForOrder(String userId, int oNo) {
+		return bobMapper.countReviewByOrderNoAndUserId(userId, oNo) > 0;
+	}
+
+	// 주문 번호로 주문 정보 가져오기
+	public Orders getOrderByOrderNo(String orderId) {
+		return bobMapper.selectOrderByOrderNo(orderId);
+	}
+
+	// 메뉴 이름으로 mId 가져오기
+	public Integer getMenuIdByName(String menuName) {
+		return bobMapper.selectMenuIdByName(menuName);
 	}
 	
 	
