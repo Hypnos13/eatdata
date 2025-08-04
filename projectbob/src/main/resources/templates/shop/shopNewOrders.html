@@ -1,54 +1,89 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/shop_layout}">
-  <div layout:fragment="content">
-    <div class="container py-3">
-      <h4>🔔 신규 주문</h4>
-      <ul id="newOrderList" class="list-group" th:data-shop-id="${currentShop.sId}">
-        <li th:each="o : ${orders}" class="list-group-item mb-3 p-3">
-          <div class="d-flex justify-content-between">
-            <div>
-              <div><strong>주문번호:</strong> <span th:text="${o.oNo}"/></div>
-              <!-- ... -->
-              <div class="small text-muted d-flex align-items-center">
-                <i class="bi bi-clock me-1"></i>
-                <span th:text="${#dates.format(o.regDate,'HH:mm')}"/>
-                <span class="ms-3 text-danger d-flex align-items-center">
-                  <i class="bi bi-hourglass-bottom me-1"></i>
-                  <span id="countdown-[[${o.oNo}]]"
-                        class="timer"
-                        th:attr="data-expiry=${o.regDate.time + 180000}">--:--</span>
+  <head>
+    <title>🔔 신규 주문</title>
+  </head>
+  <body>
+    <!-- layouts/shop_layout 에 <main layout:fragment="content"> 이 부분을 대체합니다 -->
+    <div layout:fragment="content">
+      <div class="container py-3">
+        <h4 class="mb-3">🔔 신규 주문</h4>
+        <ul id="newOrderList"
+            class="list-group"
+            th:data-shop-id="${currentShop.sId}">
+          
+          <li th:each="o : ${orders}"
+              class="list-group-item mb-3 p-3">
+            
+            <div class="d-flex justify-content-between align-items-center order-summary"
+     				th:onclick="|toggleDetail(${o.oNo})|">
+              
+              <div>
+                <strong>주문번호:</strong>
+                  <span th:text="${o.oNo}">123</span>
+                &nbsp;|&nbsp;
+                <i class="bi bi-clock"></i>
+                  <span th:text="${#dates.format(o.regDate,'HH:mm')}">12:34</span>
+                <span class="badge bg-secondary ms-2"
+                      th:text="${o.oAddress != null and !#strings.isEmpty(o.oAddress) 
+                                 ? '배달' : '픽업'}">
+                  배달
                 </span>
-              </div>
-              <div class="progress mt-1" style="height:6px;">
-                <div id="progress-countdown-[[${o.oNo}]]"
-                     class="progress-bar bg-danger progress-bar-striped"
-                     role="progressbar"
-                     style="width:100%"></div>
-              </div>
-            </div>
-            <button class="btn btn-outline-info btn-sm"
-                    th:onclick="|acceptOrder(${o.oNo})|">확인</button>
-          </div>
+                <div th:if="${o.oAddress}"
+                     th:text="${o.oAddress}">서울시 강남구…</div>
 
-            <!-- 상세정보 -->
-            <div class="order-detail" th:id="'detail-' + ${o.oNo}">
-              <hr>
-              <div><strong>수량:</strong> <span th:text="${o.quantity} + '개'"></span></div>
-              <div><strong>요청사항:</strong> <span th:text="${o.request ?: '요청사항 없음'}"></span></div>
+                <div class="mt-1">
+                  <strong>총액:</strong>
+                  <!-- 그냥 “숫자 + 원” 으로 결합 -->
+                  <span th:text="${o.totalPrice + '원'}">15,000원</span>
+                  &nbsp;·&nbsp;
+                  <strong>수량:</strong>
+                  <span th:text="${o.quantity + '개'}">2개</span>
+                </div>
+
+                <div>
+                  <strong>메뉴:</strong>
+                  <span th:utext="${o.menus}">치킨 *1, 콜라 *1</span>
+                </div>
+              </div>
+
+              <button class="btn btn-outline-info btn-sm"
+			          type="button"
+			          th:attr="aria-controls='detail-' + ${o.oNo}"
+			          aria-expanded="false">
+			    <i class="bi bi-chevron-down"></i> 상세
+			  </button>
+            </div>
+            
+            <div class="order-detail d-none" th:id="'detail-' + ${o.oNo}">
+              <h6>고객 정보</h6>
+              <div><strong>회원ID:</strong> <span th:text="${o.id}">user01</span></div>
+              <div th:if="${o.oAddress}">
+                <strong>주소:</strong> <span th:text="${o.oAddress}">서울시…</span>
+              </div>
+              <h6 class="mt-3">결제 정보</h6>
+              <div><strong>수단:</strong> <span th:text="${o.payment}">카카오페이</span></div>
+              <div><strong>결제 ID:</strong> <span th:text="${o.paymentUid}">abc123xyz</span></div>
+              <h6 class="mt-3">요청사항</h6>
+              <div th:text="${o.request ?: '없음'}">없음</div>
               <div class="mt-3">
-                <button type="button" class="btn btn-success btn-sm me-2" th:onclick="|acceptOrder(${o.oNo})|">수량</button>
-                <button type="button" class="btn btn-outline-danger btn-sm" th:onclick="|rejectOrder(${o.oNo})|">거절</button>
+                <button class="btn btn-success btn-sm me-2"
+                        th:onclick="|acceptOrder(${o.oNo})|">수락</button>
+                <button class="btn btn-outline-danger btn-sm"
+                        th:onclick="|rejectOrder(${o.oNo})|">거절</button>
               </div>
             </div>
           </li>
-
+          
           <li th:if="${#lists.isEmpty(orders)}"
-            class="list-group-item text-center text-muted">
-          대기 중인 주문이 없습니다.
-        </li>
-      </ul>
+              class="list-group-item text-center text-muted">
+            대기 중인 주문이 없습니다.
+          </li>
+        </ul>
+      </div>
     </div>
-  </div>
+  </body>
 </html>

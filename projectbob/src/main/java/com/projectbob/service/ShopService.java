@@ -2,6 +2,7 @@ package com.projectbob.service;
 
 import java.io.*;
 import java.util.*;
+import java.sql.Timestamp;
 
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class ShopService {
 	
 	@Autowired
 	private FileUploadService fileUploadService;
-
+	
     ShopService(WebsocketService websocketService) {
         this.websocketService = websocketService;
     }
@@ -391,11 +392,6 @@ public class ShopService {
         return shopMapper.selectOrdersByShopId(sId);
     }
     
-    // 상태별 & 가게별 주문 조회 
-    public List<Orders> findOrdersByStatusAndShop(String status, int sId) {
-        return shopMapper.selectOrdersByStatusAndShop(status, sId);
-    }
-
     // 단일 주문 상세 조회 
     public Orders findOrderByNo(int oNo) {
         return shopMapper.selectOrderByNo(oNo);
@@ -458,10 +454,10 @@ public class ShopService {
         // 6. 주문 엔티티 반환
         return order;
     }
-
-    //스케쥴러
-    public List<Orders> findPendingOrdersExpired(int minutes) {
-        return shopMapper.findExpiredPendingOrders(minutes);
+    
+    // 상태별 & 가게별 주문 조회 (OrderItem 없이 menus 문자열만)
+    public List<Orders> findOrdersByStatusAndShop(String status, int sId) {
+        return shopMapper.selectOrdersByStatusAndShop(status, sId);
     }
-
+    
 }
