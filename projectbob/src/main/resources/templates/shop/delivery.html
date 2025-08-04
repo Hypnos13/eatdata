@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/shop_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>배달 대행 호출</title>
+    <style>
+        :root {
+            --theme-color: #43D091;
+            --light-gray: #f8f9fa;
+        }
+        .main-container { display: flex; height: calc(100vh - 70px); }
+        .order-list-panel {
+            width: 380px;
+            background-color: white;
+            border-right: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .order-list-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 1.2rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .order-list { overflow-y: auto; flex-grow: 1; }
+        .order-card {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .order-card:hover { background-color: #f1f3f5; }
+        .order-card.active {
+            background-color: #e6f9f2;
+            border-left: 4px solid var(--theme-color);
+        }
+        .order-card-title { font-weight: bold; display: flex; justify-content: space-between; }
+        .order-card-address { font-size: 0.9rem; color: #495057; }
+        .order-card-menu { font-size: 0.85rem; color: #868e96; margin-top: 0.5rem; }
+        .dispatch-detail-panel {
+            flex-grow: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        #map {
+            width: 100%;
+            min-height: 400px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+        .detail-header { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .info-box {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        .info-box h5 { font-size: 1rem; font-weight: bold; color: var(--theme-color); }
+        .dispatch-actions { margin-top: auto; text-align: center; }
+        .btn-dispatch {
+            background-color: var(--theme-color);
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 0.8rem 2.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <th:block layout:fragment="content">
+    
+        <div id="shopData" th:data-shop="${shopJson}" style="display: none;"></div>
+        <div id="waitingOrdersData" th:data-orders="${waitingOrdersJson}" style="display: none;"></div>
+        
+        <div class="main-container">
+            <div class="order-list-panel">
+                <div class="order-list-header">
+                    <i class="bi bi-list-task"></i> 배차 대기 
+                    <span class="badge bg-danger rounded-pill" th:if="${waitingOrders != null}" th:text="${#lists.size(waitingOrders)}">0</span>
+                </div>
+                <div class="order-list">
+                    <div th:if="${#lists.isEmpty(waitingOrders)}" class="text-center p-5 text-muted">
+                        배차 대기 중인 주문이 없습니다.
+                    </div>
+                    <div th:each="order, iter : ${waitingOrders}" class="order-card" th:classappend="${iter.index == 0} ? 'active'" th:data-order-id="${order.oNo}">
+                        <div class="order-card-title">
+                            <span>주문번호 <span th:text="${order.oNo}"></span></span>
+                            <span th:text="${order.payment}"></span>
+                        </div>
+                        <div class="order-card-address" th:text="${order.OAddress}"></div>
+                        <div class="order-card-menu" th:text="${order.menus}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dispatch-detail-panel">
+                <div class="detail-header">
+                    <span th:if="${shop != null}" th:text="${shop.name}">가게 이름</span> - 배달 요청
+                </div>
+                
+                <div id="map"></div>
+                
+                <div class="info-grid">
+                    <div class="info-box">
+                        <h5><i class="bi bi-shop"></i> 픽업지 (가게)</h5>
+                        <p th:if="${shop != null}" th:text="${shop.address1 + ' ' + shop.address2}"></p>
+                        <p class="mb-0" th:if="${shop != null}" th:text="${shop.phone}"></p>
+                    </div>
+                    <div class="info-box">
+                        <h5><i class="bi bi-geo-alt-fill"></i> 도착지 (고객)</h5>
+                        <p id="customerAddress" th:text="${selectedOrder != null ? selectedOrder.OAddress : '주문을 선택해주세요.'}"></p>
+                        <p id="customerPhone" class="mb-0" th:text="${selectedOrder != null ? selectedOrder.clientPhone : '연락처 정보 필요'}"></p>
+                    </div>
+                </div>
+
+                <div class="dispatch-actions">
+                    <button class="btn btn-dispatch" data-bs-toggle="modal" data-bs-target="#dispatchModal">
+                        <i class="bi bi-bicycle"></i> 지금 배차 요청하기
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="dispatchModal" tabindex="-1" aria-labelledby="dispatchModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dispatchModalLabel">배달 정보 입력</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="deliveryAgencySelect" class="form-label">배달 대행사</label>
+                            <select class="form-select" id="deliveryAgencySelect">
+                                <option th:each="agency : ${deliveryAgencies}" th:value="${agency}" th:text="${agency}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pickupTimeSelect" class="form-label">조리 완료 (픽업 예상)</label>
+                            <div class="input-group">
+                                <select class="form-select" id="pickupTimeSelect">
+                                    <option value="5">5분 후</option>
+                                    <option value="10" selected>10분 후</option>
+                                    <option value="15">15분 후</option>
+                                    <option value="20">20분 후</option>
+                                    <option value="30">30분 후</option>
+                                </select>
+                                <span class="input-group-text" id="pickupTimeDisplay"></span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deliveryTimeSelect" class="form-label">배달 완료 예상</label>
+                             <div class="input-group">
+                                <select class="form-select" id="deliveryTimeSelect">
+                                    <option value="20">20분 후</option>
+                                    <option value="30" selected>30분 후</option>
+                                    <option value="40">40분 후</option>
+                                    <option value="50">50분 후</option>
+                                    <option value="60">60분 후</option>
+                                </select>
+                                <span class="input-group-text" id="deliveryTimeDisplay"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="button" class="btn btn-primary" id="btnConfirmDispatch">배차 요청</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </th:block>
+</body>
+</html>

@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
+=======
+>>>>>>> develop
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <!-- 부트스트랩, 아이콘 로드 -->
@@ -8,6 +11,7 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
 </head>
 <header th:fragment="shopHeader" class="header">
+<<<<<<< HEAD
   <div class="d-flex align-items-center">
     <a href="/shopMain" class="logo">Project BoB</a>
     <a href="/shopListMain" class="header-home-link ms-3 fw-semibold">서비스 홈</a>
@@ -90,5 +94,56 @@
       <a href="shopManage" class="btn-register">가게관리</a>
     </th:block>
   </nav>
+=======
+    <div class="d-flex align-items-center">
+        <a th:href="@{/shopMain}" class="logo">Project BoB</a>
+        <a th:href="@{/shopListMain}" class="header-home-link ms-3 fw-semibold">
+	        서비스 홈
+	    </a>
+        <span class="ms-3 fw-semibold page-title-text">
+            <span th:text="${pageTitle}">현재 페이지명</span>
+        </span>
+    </div>
+    
+    <nav class="d-flex align-items-center">
+	    <th:block th:if="${session.isLogin}">
+	    	<div id="notifyContainer"
+			     th:if="${currentShop != null}"
+			     th:attr="data-shop-id=${currentShop.sId}"
+			     class="position-relative me-3 dropdown">
+			  <a href="#" id="headerNotifyBtn" data-bs-toggle="dropdown" aria-expanded="false">
+			    <i id="notifyIcon" class="bi bi-bell-fill fs-4"></i>
+			  </a>
+			  <span id="header-notif-badge"
+			        th:text="${session.notifyCount}"
+			        class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1"
+			        th:classappend="${session.notifyCount == 0} ? 'd-none' : ''">
+			    0
+			  </span>
+		
+				<ul id="header-notif-list" class="dropdown-menu dropdown-menu-end p-2" style="min-width:300px; max-width:500px;" aria-labelledby="headerNotifyBtn">
+			    <li><h6 class="dropdown-header">새로운 알림</h6></li>
+			    <li class="text-muted mb-0">알림이 없습니다.</li>
+			  </ul>
+			</div>
+      
+	      <a class="me-2 fw-bold">[[${session.loginNickname}]] 님 어서오세요.</a>
+	      <a th:href="@{/logout}" class="btn-login">로그아웃</a>
+	      <a th:href="@{/myProfile}" class="btn-login">내정보수정</a>
+	    </th:block>
+	    
+	    <th:block th:unless="${session.isLogin}">
+	      <a th:href="@{/login(from='owner')}" class="btn-login">로그인</a>  
+	    </th:block>
+	    
+	    <th:block th:if="${session.loginDivision == 'master'}">
+	    	<a th:href="@{/faqList}" class="btn-register">FAQ관리</a>
+	    	<a th:href="@{/noticeList}" class="btn-register">공지사항관리</a>
+	    	<a th:href="@{/userList}" class="btn-register">사용자관리</a>
+	    	<a th:href="@{/shopManage}" class="btn-register">가게관리</a>
+	    </th:block>
+    </nav>
+    
+>>>>>>> develop
 </header>
 </html>

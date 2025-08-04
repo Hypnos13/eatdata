@@ -23,6 +23,7 @@ import com.projectbob.domain.*;
 import com.projectbob.mapper.ShopMapper;
 import com.projectbob.service.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.*;
 import lombok.extern.slf4j.Slf4j;
@@ -44,11 +45,19 @@ public class ShopController {
 	private FileUploadService fileUploadService;
 
 	@Autowired
+<<<<<<< HEAD
 	private SimpMessagingTemplate messagingTemplate;
 
 	@Autowired
 	private WebsocketService websocketService;
 
+=======
+    private SimpMessagingTemplate messagingTemplate;
+	
+	@Autowired
+    private ObjectMapper objectMapper;
+	
+>>>>>>> develop
 	// 식품영양성분DB API 검색
 	@GetMapping("/api/nutrition-search")
 	@ResponseBody
@@ -131,7 +140,51 @@ public class ShopController {
 		model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
 		return "redirect:shopMain";
 	}
+<<<<<<< HEAD
 
+=======
+	
+	@GetMapping("/shop/delivery")
+	public String deliveryDispatchPage(
+	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	        Model model) {
+
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    if (currentShop == null) {
+	        return "redirect:/shopMain";
+	    }
+	    
+	    List<Orders> waitingOrders = bobService.findOrdersByStatusAndShop("ACCEPTED", sId);
+	    Orders selectedOrder = waitingOrders.isEmpty() ? null : waitingOrders.get(0);
+	    List<String> deliveryAgencies = Arrays.asList("생각대로", "바로고", "부릉", "기타");
+
+	    try {
+	        String shopJson = objectMapper.writeValueAsString(currentShop);
+	        String waitingOrdersJson = objectMapper.writeValueAsString(waitingOrders);
+
+	        model.addAttribute("shopJson", shopJson);
+	        model.addAttribute("waitingOrdersJson", waitingOrdersJson);
+	    } catch (Exception e) {
+	        log.error("JSON 변환 오류", e);
+	        model.addAttribute("shopJson", "{}");
+	        model.addAttribute("waitingOrdersJson", "[]");
+	    }
+
+	    model.addAttribute("shop", currentShop);
+	    model.addAttribute("waitingOrders", waitingOrders);
+	    model.addAttribute("selectedOrder", selectedOrder);
+	    model.addAttribute("deliveryAgencies", deliveryAgencies);
+
+	    return "shop/delivery"; 
+	}
+
+	
+>>>>>>> develop
 	/* ----------------------- 메인 ----------------------- */
 	@GetMapping("/shopMain")
 	public String shopMain(@RequestParam(value = "s_id", required = false) Integer sId,

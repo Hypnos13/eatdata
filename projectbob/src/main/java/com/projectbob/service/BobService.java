@@ -45,6 +45,11 @@ public class BobService {
 	
 	@Autowired
 	private WebsocketService websocketService;
+	
+	// 주문 읽기
+    public List<Orders> findOrdersByStatusAndShop(String status, int sId) {
+        return bobMapper.findOrdersByStatusAndShop(status, sId);
+    }
 
 	public Menu getMenuCal(int mId) {
 		return bobMapper.getMenuCal(mId);

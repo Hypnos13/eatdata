@@ -50,7 +50,7 @@ public class LoginController {
 	private JavaMailSender javaMailSender;
 	@Value("${spring.mail.username}")
 	String NAVER_EMAIL;
-	final DefaultMessageService MESSAGE_SERVICE = NurigoApp.INSTANCE.initialize("NCSAPQWVSQ1DX1ZB", "RQSJXZYQH0YRPL75MUVMM999RLC5L7IP", "https://api.coolsms.co.kr");
+	final DefaultMessageService MESSAGE_SERVICE = NurigoApp.INSTANCE.initialize("NCSAPQWVSQ1DX1ZB", "RQSJXZYQH0YRPL75MUVMM999RLC5L7IP", "https://api.coolsms.co.kr");  //핸드폰 인증시 사용되는 서비스
 	
 	//로그인 폼
 	@GetMapping("/login")
@@ -66,7 +66,7 @@ public class LoginController {
 	public String login(Model model, @RequestParam("id") String id, @RequestParam("pass") String pass, HttpSession session,
 			HttpServletResponse response, @RequestParam(name = "redirectURL", required = false) String redirectURL )throws ServletException, IOException {
 		
-		int login = loginService.login(id, pass);
+		int login = loginService.login(id, pass);   // login : -2(관리자에게 사용금지 당함) / -1 (존재하지 않음) / 0 (아이디는 있으나 비밀번호 불일치) / 1 (아이디 비밀번호 일치)
 		
 		if(login == -1) {
 			response.setContentType("text/html; charset=utf-8");
@@ -108,17 +108,18 @@ public class LoginController {
 		session.setAttribute("loginDivision", member.getDivision());
 		session.removeAttribute("guestId");
 		
-		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+		// 생일 쿠폰 받기
+		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd"); 
 		LocalDate birthday = LocalDate.parse(member.getBirthday(), dateFormatter);
 		LocalDate today = LocalDate.now();
 		
-				if (redirectURL != null && !redirectURL.isEmpty()) {
+		if (redirectURL != null && !redirectURL.isEmpty()) {
 			return "redirect:" + redirectURL;
-		} else if (member.getDivision().equals("owner")) {
+		} else if (member.getDivision().equals("owner")) {  // 사장님 아이디로 로그인시
 			return "redirect:/shopMain";
-		} else { // This covers client and any other division not explicitly handled
-			if (member.getDivision().equals("client")) { // Keep client-specific logic
-				if((birthday.getMonth() == today.getMonth()) && (birthday.getDayOfMonth() == today.getDayOfMonth())) {
+		} else { 
+			if (member.getDivision().equals("client")) {  // 고객 로그인 시
+				if((birthday.getMonth() == today.getMonth()) && (birthday.getDayOfMonth() == today.getDayOfMonth())) {  // 생일 당일날 로그인 했으면 생일 쿠폰이 발급되게 함
 					if(loginService.checkbirthdayCoupon(id) == -1) {
 						System.out.println("생일 쿠폰 없음");
 						loginService.addBirthdayCoupon(id);
@@ -127,7 +128,7 @@ public class LoginController {
 					}
 				}
 			}
-			return "redirect:/main"; // Default redirect for clients and others
+			return "redirect:/main";
 		}
 	}
 	
@@ -135,7 +136,7 @@ public class LoginController {
 	@PostMapping("/joinMember")
 	public String joinMember(Model model, Member member) {
 		
-		if(member.getNickname().equals("")) {
+		if(member.getNickname().equals("")) {  // 닉네임을 쓰지 않을 때 이름과 동일하게 함
 			member.setNickname(member.getName());
 		}
 		
@@ -165,26 +166,26 @@ public class LoginController {
 			}else if(pass.equals("")){
 				out.println("	alert('입력한 정보가 잘못되었습니다.');");
 			}else {
-				if(receive.equals("email")) {
+				if(receive.equals("email")) { // 이메일로 받을 시
 					try {
-						MimeMessage m = javaMailSender.createMimeMessage();
-						MimeMessageHelper h = new MimeMessageHelper(m, "UTF-8");
-						h.setFrom(NAVER_EMAIL);
-						h.setTo(email);
-						h.setSubject("ProjectBOB 비밀번호 찾기 답변 메일입니다.");
-						h.setText(id + "의 비밀번호는 "+pass+" 입니다.");
-						javaMailSender.send(m);
+						MimeMessage m = javaMailSender.createMimeMessage();  // 메시지 보내는 객체
+						MimeMessageHelper h = new MimeMessageHelper(m, "UTF-8"); // 메일 작성시 설정
+						h.setFrom(NAVER_EMAIL);   // 발신자
+						h.setTo(email);  // 수신자
+						h.setSubject("ProjectBOB 비밀번호 찾기 답변 메일입니다.");  // 메일 제목
+						h.setText(id + "의 비밀번호는 "+pass+" 입니다."); // 메일 내용
+						javaMailSender.send(m);  // 메일 전송
 					} catch (MessagingException e) {
 						e.printStackTrace();
 					}
 					out.println("	alert('이메일이 보내졌습니다.');");
-				}else if(receive.equals("phone")) {
-					Message m = new Message();
-					m.setFrom("01042273840");
-					m.setTo(phone.replace("-", ""));
-					m.setText(id + "의 비밀번호는 "+pass+" 입니다.");
+				}else if(receive.equals("phone")) {  // 전화로 받을 시
+					Message m = new Message();  // 문자 메시지를 보낼 객체 생성
+					m.setFrom("01042273840"); // 발신자 
+					m.setTo(phone.replace("-", ""));  // 수신자
+					m.setText(id + "의 비밀번호는 "+pass+" 입니다.");  // 문자 내용
 					
-					SingleMessageSentResponse  res =  MESSAGE_SERVICE.sendOne(new SingleMessageSendingRequest(m));
+					SingleMessageSentResponse  res =  MESSAGE_SERVICE.sendOne(new SingleMessageSendingRequest(m));  // 단일 문자를 보내는 객체
 					out.println("	alert('문자가 전송되었습니다.');");
 				}	
 			}
@@ -203,14 +204,14 @@ public class LoginController {
 			}else {
 				try {
 					String ids="";
-					for(int i = 0 ; i < userIds.size(); i++) {
+					for(int i = 0 ; i < userIds.size(); i++) {    // 아이디가 여러개가 있을 수 있으므로 모두 가져온다.
 						if( i + 1 < userIds.size()) {
 							ids += userIds.get(i) + " , ";	
 						}else {
 							ids += userIds.get(i);					
 						}		
 					}
-					if(receive.equals("email")) {
+					if(receive.equals("email")) {   // 위와 같음
 						MimeMessage m = javaMailSender.createMimeMessage();
 						MimeMessageHelper h = new MimeMessageHelper(m, "UTF-8");
 						h.setFrom(NAVER_EMAIL);
@@ -261,7 +262,7 @@ public class LoginController {
 		
 		model.addAttribute("Member", loginService.getMember(id));
 		
-		if(id.substring(0, 2).equals("N_") || id.substring(0, 2).equals("K_")) {
+		if(id.substring(0, 2).equals("N_") || id.substring(0, 2).equals("K_")) {  // 네이버나 카카오로 가입하면 N_ 또는 K_가 붙는다.
 			return "members/updateNaverMemberships";
 		}
 		
@@ -272,7 +273,7 @@ public class LoginController {
 	
 	// 내 정보 수정
 	@PostMapping("/updateMember")
-	public String updateMember(Model model, Member member, HttpSession session, HttpServletResponse response) throws ServletException, IOException {
+	public String updateMember(Model model, Member member, @RequestParam("newPass") String newPass , HttpSession session, HttpServletResponse response) throws ServletException, IOException {
 		
 		int login = loginService.login(member.getId(), member.getPass());	
 		
@@ -284,6 +285,12 @@ public class LoginController {
 			out.println("	history.back();");
 			out.println("</script>");
 			return null;
+		}
+		
+		System.out.println("newPass = " + newPass);
+		
+		if(!(newPass == null || newPass.equals(""))) {
+			member.setPass(newPass);
 		}
 		
 		loginService.updateMember(member);
@@ -380,7 +387,7 @@ public class LoginController {
 			
 			Member member = new Member();
 			member.setId(id);
-			member.setPass("naver0000");
+			member.setPass("naver0000");  // 사용할 일 없음
 			member.setName(name);
 			member.setNickname(nickname);
 			member.setEmail(email);
@@ -456,15 +463,15 @@ public class LoginController {
 	@GetMapping("/kakao")
 	public String kakaoLogin(Model model, @RequestParam("code") String code, HttpSession session) {
 		
-		RestTemplate rt = new RestTemplate();
+		RestTemplate rt = new RestTemplate();   // HTTP 통신 객체
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		
 		 MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		 params.add("grant_type", "authorization_code");
-		 params.add("client_id", "a6ce69b235d3336723f4b86140c8a301");
-		 params.add("redirect_uri", "http://localhost:8080/kakao");
+		 params.add("client_id", "a6ce69b235d3336723f4b86140c8a301");  // 카카오 API
+		 params.add("redirect_uri", "http://localhost:8080/kakao");  // 카카오에 등록된 URI
 		 params.add("code", code);
 		
 		 HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(params, headers);
@@ -472,31 +479,28 @@ public class LoginController {
 		 
 		 String accessToken = (String) tokenResponse.getBody().get("access_token");
 		 
-		 HttpHeaders profileHeaders = new HttpHeaders();
+		 HttpHeaders profileHeaders = new HttpHeaders();		
 		 profileHeaders.setBearerAuth(accessToken);
 		 HttpEntity<?> profileRequest = new HttpEntity<>(profileHeaders);
 		 
 		 ResponseEntity<Map> profileResponse = rt.exchange("https://kapi.kakao.com/v2/user/me", HttpMethod.GET, profileRequest, Map.class);
 		 
 		 Map<String, Object> kakaoAccount = (Map<String, Object>) profileResponse.getBody().get("kakao_account");
-		 String email = (String) kakaoAccount.get("email");
+		 String email = (String) kakaoAccount.get("email"); 	// 사용자 이메일
 		 
 		 Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-		 String nickname = (String) profile.get("nickname");
+		 String nickname = (String) profile.get("nickname");	// 사용자 닉네임
 		 
-		 System.out.println("이메일: " + email);
-		 System.out.println("별명: " + nickname);
-		 
-		 String id  = "K_"+email.substring(0, email.indexOf("@"));
+		 String id  = "K_"+email.substring(0, email.indexOf("@"));		// 아이디는 K_ 가 붙고 기존 이메일 아이디로 사용
 			
 			// DB에 가입되어있는지 확인
 			int login = loginService.login(id, "");
 			
-			if(login == -1) {  // 없으면 추가 
+			if(login == -1) {  // DB에 가입되어 있지 않으면 추가 함 
 				
 				Member member = new Member();
 				member.setId(id);
-				member.setPass("Kakao0000");
+				member.setPass("Kakao0000");   // 사용할 일 없음
 				member.setName(nickname);
 				member.setNickname(nickname);
 				member.setEmail(email);
@@ -527,27 +531,23 @@ public class LoginController {
 	@GetMapping("/phoneCertify")
 	public String phoneCertifyPop(Model model, @RequestParam("phone") String phone, HttpSession session, HttpServletResponse response) throws ServletException, IOException{
 		
+		String code = (String) session.getAttribute("code") ; // 인증번호 코드
 		
-		String code = (String) session.getAttribute("code") ;
-		
-		if(code == null) {
+		if(code == null) {  // 인증번호 코드가 없다면 생성해서 보낸다
 			SecureRandom random = new SecureRandom();
 			StringBuilder sb = new StringBuilder();
 			
-			for(int i = 0 ; i < 6 ; i++) {	sb.append(random.nextInt(10)); }
+			for(int i = 0 ; i < 6 ; i++) {	sb.append(random.nextInt(10)); }  // 6자리의 인증코드 랜덤으로 생성
 			
 			code = sb.toString();
-			session.setAttribute("code", code);
+			session.setAttribute("code", code);		// 세션에 저장
 			
-		/*
-			Message m = new Message();
-			m.setFrom("01042273840");
-			m.setTo(phone.replace("-", ""));
-			m.setText("인증번호는 " +code+" 입니다.");
+			Message m = new Message();			// 핸드폰 메시지 객체 생성
+			m.setFrom("01042273840");			// 발신자
+			m.setTo(phone.replace("-", ""));	// 수신자
+			m.setText("인증번호는 " +code+" 입니다.");  // 문자 메시지 내용
 			
 			SingleMessageSentResponse res =  MESSAGE_SERVICE.sendOne(new SingleMessageSendingRequest(m));
-			
-		*/
 			
 			response.setContentType("text/html; charset=utf-8");
 			PrintWriter out = response.getWriter();
@@ -574,8 +574,8 @@ public class LoginController {
 		response.setContentType("text/html; charset=utf-8");
 		PrintWriter out = response.getWriter();
 		
-		if(code.equals(certifyNumber)) {
-			session.removeAttribute("code");
+		if(code.equals(certifyNumber)) {		// 인증번호와 입력한 번호 확인
+			session.removeAttribute("code");  // 일치할 시 인증이 완료되어 번호 제거함
 			
 			out.print("<script>");
 			out.print(" alert('인증이 완료되었습니다.');");

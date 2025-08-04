@@ -390,11 +390,14 @@
   ORDER BY reg_date DESC
 </select>
 
+<<<<<<< HEAD
 <!-- 상태별 & 가게별 주문 리스트 조회 -->
 <select id="selectOrdersByStatusAndShop" parameterType="map" resultType="com.projectbob.domain.Orders">
   SELECT * FROM orders WHERE status=#{status} AND s_id=#{sId} ORDER BY reg_date DESC
 </select>
 
+=======
+>>>>>>> develop
 <!-- 단일 주문 상세 조회 -->
 <select id="selectOrderByNo" parameterType="int" resultType="com.projectbob.domain.Orders">
   SELECT * FROM orders WHERE o_no = #{oNo}
