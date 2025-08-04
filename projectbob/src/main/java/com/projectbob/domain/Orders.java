@@ -27,5 +27,7 @@ public class Orders {
 	private int quantity;//수량
 	private String menus; //주문메뉴
 	private String paymentUid; // 포트원 결제 고유ID
+	
+	private String clientPhone; // 고객 연락처
 
 }

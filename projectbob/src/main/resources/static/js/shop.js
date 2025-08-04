@@ -224,8 +224,8 @@ $(function() {
 		                        }
 		                    });
 		                }
-		                
 		                $('#customerAddress').text(order.oaddress || '주소 정보 없음');
+										$('#customerPhone').text(order.clientPhone || '연락처 정보 없음');
 		            }
 
 		            if (orderList && orderList.length > 0) {

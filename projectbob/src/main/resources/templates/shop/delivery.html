@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/shop_layout}">
+
 <head>
     <meta charset="UTF-8">
     <title>배달 대행 호출</title>
@@ -80,6 +81,7 @@
         }
     </style>
 </head>
+
 <body>
     <th:block layout:fragment="content">
     
@@ -123,7 +125,7 @@
                     <div class="info-box">
                         <h5><i class="bi bi-geo-alt-fill"></i> 도착지 (고객)</h5>
                         <p id="customerAddress" th:text="${selectedOrder != null ? selectedOrder.OAddress : '주문을 선택해주세요.'}"></p>
-                        <p id="customerPhone" class="mb-0 text-danger">고객 연락처 정보 필요</p>
+                        <p id="customerPhone" class="mb-0" th:text="${selectedOrder != null ? selectedOrder.clientPhone : '연락처 정보 필요'}"></p>
                     </div>
                 </div>
 
