@@ -272,7 +272,7 @@ public class LoginController {
 	
 	// 내 정보 수정
 	@PostMapping("/updateMember")
-	public String updateMember(Model model, Member member, HttpSession session, HttpServletResponse response) throws ServletException, IOException {
+	public String updateMember(Model model, Member member, @RequestParam("newPass") String newPass , HttpSession session, HttpServletResponse response) throws ServletException, IOException {
 		
 		int login = loginService.login(member.getId(), member.getPass());	
 		
@@ -284,6 +284,10 @@ public class LoginController {
 			out.println("	history.back();");
 			out.println("</script>");
 			return null;
+		}
+		
+		if(newPass != null || !newPass.equals("")) {
+			member.setPass(newPass);
 		}
 		
 		loginService.updateMember(member);
