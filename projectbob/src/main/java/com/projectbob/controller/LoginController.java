@@ -50,7 +50,7 @@ public class LoginController {
 	private JavaMailSender javaMailSender;
 	@Value("${spring.mail.username}")
 	String NAVER_EMAIL;
-	final DefaultMessageService MESSAGE_SERVICE = NurigoApp.INSTANCE.initialize("NCSAPQWVSQ1DX1ZB", "RQSJXZYQH0YRPL75MUVMM999RLC5L7IP", "https://api.coolsms.co.kr");
+	final DefaultMessageService MESSAGE_SERVICE = NurigoApp.INSTANCE.initialize("NCSAPQWVSQ1DX1ZB", "RQSJXZYQH0YRPL75MUVMM999RLC5L7IP", "https://api.coolsms.co.kr");  //핸드폰 인증시 사용되는 서비스
 	
 	//로그인 폼
 	@GetMapping("/login")
@@ -66,7 +66,7 @@ public class LoginController {
 	public String login(Model model, @RequestParam("id") String id, @RequestParam("pass") String pass, HttpSession session,
 			HttpServletResponse response, @RequestParam(name = "redirectURL", required = false) String redirectURL )throws ServletException, IOException {
 		
-		int login = loginService.login(id, pass);
+		int login = loginService.login(id, pass);   // login : -2(관리자에게 사용금지 당함) / -1 (존재하지 않음) / 0 (아이디는 있으나 비밀번호 불일치) / 1 (아이디 비밀번호 일치)
 		
 		if(login == -1) {
 			response.setContentType("text/html; charset=utf-8");
@@ -108,16 +108,17 @@ public class LoginController {
 		session.setAttribute("loginDivision", member.getDivision());
 		session.removeAttribute("guestId");
 		
-		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+		// 생일 쿠폰 받기
+		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd"); 
 		LocalDate birthday = LocalDate.parse(member.getBirthday(), dateFormatter);
 		LocalDate today = LocalDate.now();
 		
-				if (redirectURL != null && !redirectURL.isEmpty()) {
+		if (redirectURL != null && !redirectURL.isEmpty()) {
 			return "redirect:" + redirectURL;
 		} else if (member.getDivision().equals("owner")) {
 			return "redirect:/shopMain";
-		} else { // This covers client and any other division not explicitly handled
-			if (member.getDivision().equals("client")) { // Keep client-specific logic
+		} else { 
+			if (member.getDivision().equals("client")) {
 				if((birthday.getMonth() == today.getMonth()) && (birthday.getDayOfMonth() == today.getDayOfMonth())) {
 					if(loginService.checkbirthdayCoupon(id) == -1) {
 						System.out.println("생일 쿠폰 없음");
@@ -127,7 +128,7 @@ public class LoginController {
 					}
 				}
 			}
-			return "redirect:/main"; // Default redirect for clients and others
+			return "redirect:/main";
 		}
 	}
 	
@@ -272,7 +273,7 @@ public class LoginController {
 	
 	// 내 정보 수정
 	@PostMapping("/updateMember")
-	public String updateMember(Model model, Member member, HttpSession session, HttpServletResponse response) throws ServletException, IOException {
+	public String updateMember(Model model, Member member, @RequestParam("newPass") String newPass , HttpSession session, HttpServletResponse response) throws ServletException, IOException {
 		
 		int login = loginService.login(member.getId(), member.getPass());	
 		
@@ -284,6 +285,10 @@ public class LoginController {
 			out.println("	history.back();");
 			out.println("</script>");
 			return null;
+		}
+		
+		if(newPass != null || !newPass.equals("")) {
+			member.setPass(newPass);
 		}
 		
 		loginService.updateMember(member);
