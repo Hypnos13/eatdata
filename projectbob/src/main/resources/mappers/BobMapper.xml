@@ -3,6 +3,29 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.BobMapper">
+<!-- 주문 읽기 -->
+	<resultMap id="ordersResultMap" type="com.projectbob.domain.Orders">
+        <id property="oNo" column="o_no" />
+        <result property="sId" column="s_id" />
+        <result property="id" column="id" />
+        <result property="totalPrice" column="total_price" />
+        <result property="payment" column="payment" />
+        <result property="OAddress" column="o_address" />
+        <result property="request" column="request" />
+        <result property="regDate" column="reg_date" />
+        <result property="modiDate" column="modi_date" />
+        <result property="status" column="status" />
+        <result property="quantity" column="quantity" />
+        <result property="menus" column="menus" />
+        <result property="paymentUid" column="payment_uid" />
+  </resultMap>
+
+  <select id="findOrdersByStatusAndShop" resultMap="ordersResultMap">
+      SELECT * FROM orders 
+      WHERE status = #{status} AND s_id = #{sId} 
+      ORDER BY reg_date DESC
+  </select>
+
 <!-- 메뉴 성분표  -->
 <select id="getMenuCal" resultType="com.projectbob.domain.Menu">
         SELECT m_id, calories, carbs, protein, fat, sfa, sugar, sodium, serving_size

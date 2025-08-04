@@ -1,16 +1,27 @@
 $(function(){
-	// 회원가입시 유효성 검사
+	
+	// 상시 적용(html이 실행될 때)
+	$("#userid").on("focusout",CheckId);
+	$("#password").on("focusout",CheckPass);
+	$("#name").on("focusout",CheckName);
+	$("#birthday").on("focusout",CheckBirthday);
+	$("#address1").on("focusout",CheckAddress);
+	$("#email").on("focusout",CheckEmail);
+	$("#phone").on("focusout",CheckPhone);
+	$("#btnAdress").on("click", findAddress);
+	
+	// 회원가입시 유효성 검사 (가입하기 버튼을 눌렀을 때)
 	$("#joinMemberForm").on("submit",async function(e){
 		
-		let phoneIsReadOnly = $("#phone").prop("readonly");
+		let phoneIsReadOnly = $("#phone").prop("readonly");  // 인증이 안료되면 휴대전화가 readonly 되기 때문에 지금 현재 상태를 알기 위해 가져온다.
 		
-		e.preventDefault();
+		e.preventDefault(); // 유효성 검사가 되기 전 submit이 되지 않게 막는다.
 		
-		let check = 0;
+		let check = 0; // 각각의 유효성 검사를 통과하면 +1 아니면 0
 		
-		check += await CheckId();	
-		
-		check += CheckPass();		
+		check += await CheckId();	// CheckId = 아이디를 입력했는지, 아이디가 5~20자 사이인지, 영문과 숫자만 사용했는지, 이미 존재하는 아이디 인지 확인해준다.
+									// 아이디 중복을 확인 할때 Ajax를 사용하기 때문에 조회후 이벤트를 진행하기 위해 async await를 사용했다. (비동기식 제어)
+		check += CheckPass(); 		
 
     	check += CheckName();		
 
@@ -22,28 +33,18 @@ $(function(){
 		
 		check += CheckPhone();
 		
-		if(phoneIsReadOnly){
+		if(phoneIsReadOnly){  // 휴대전화가 readonly일 경우 통과
 			check += 1;
 		}else{
 			alert("핸드폰 인증을 완료해주세요.");
 		}
 		
-		if(check != 8){
+		if(check != 8){   // 8개의 유효성 검사를 통과하지 못하면 submit이 되지 않는다.
 			return false;
 		}
 		
 		this.submit();
 	});
-	
-	// 상시 적용
-	$("#userid").on("focusout",CheckId);
-	$("#password").on("focusout",CheckPass);
-	$("#name").on("focusout",CheckName);
-	$("#birthday").on("focusout",CheckBirthday);
-	$("#address1").on("focusout",CheckAddress);
-	$("#email").on("focusout",CheckEmail);
-	$("#phone").on("focusout",CheckPhone);
-	$("#btnAdress").on("click", findAddress);
 	
 	
 	// 내정보 수정하기 유효성 검사
@@ -95,11 +96,11 @@ $(function(){
 			
 			check += CheckPass();
 			
-			if(check != 1){
+			if(check != 1){   // 비밀번호만 일치하면 삭제 가능
 				return false;
 			}
 			
-			if (!confirm("정말로 탈퇴 하시겠습니까? (복원이 불가능합니다.)")) {
+			if (!confirm("정말로 탈퇴 하시겠습니까? (복원이 불가능합니다.)")) {  // 마지막으로 탈퇴 할건지 확인
 			      return false;
 			} else {
 			    $("#userPass").val($("#password").val());
@@ -114,7 +115,7 @@ $(function(){
 	$(".emailRow").hide();
 	$(".phoneRow").hide();
 	
-	$("input[name='receive']").on("change",function(){
+	$("input[name='receive']").on("change",function(){  // 라디오 버튼이 바뀔때 마다 기존거 hide 하고 선택한 거 show 함
 		$(".inputForm").show();
 		
 		if($("#rEmail:checked").val()){
@@ -128,9 +129,9 @@ $(function(){
 	});
 	
 	
-	$("#searchIdPassForm").on("submit",function(){
+	$("#searchIdPassForm").on("submit",function(){ 
 		let check = 0;	
-		let phoneIsReadOnly = $("#phone").prop("readonly");
+		let phoneIsReadOnly = $("#phone").prop("readonly");  // 이메일로 찾기는 그냥 보내고 휴대폰은 인증 후 보냄
 		
 		if($("#search").val() == "false"){
 			check += 1;

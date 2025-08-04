@@ -25,6 +25,9 @@ public interface BobMapper {
 	
 	Menu getMenuCal(int mId);
 	
+	//주문 읽기
+	List<Orders> findOrdersByStatusAndShop(@Param("status") String status, @Param("sId") int sId);
+	
 	// 주문페이지에서 주문완료 페이지로 보내기
 	public int insertOrder(Orders order);
 	
