@@ -36,6 +36,7 @@ import com.projectbob.domain.Cart;
 import com.projectbob.domain.CartSummaryDto;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.OrderData;
+import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
 import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
@@ -329,6 +330,43 @@ public class MenuAjaxController {
 	public Map<String, Object> addReview(@ModelAttribute Review review,
 			@RequestParam(value="reviewUploadFile", required=false) MultipartFile rPicture){
 		
+		log.info("addReview 호출됨 - review 객체: {}", review);
+		log.info("addReview - review.oNo: {}", review.getONo());
+		
+		// 유효성 검사 추가
+		Map<String, Object> result = new HashMap<>();
+		if (review.getONo() == null || review.getONo() == 0) {
+		    result.put("success", false);
+		    result.put("message", "리뷰할 주문을 선택해주세요.");
+		    return result;
+		}
+
+		boolean hasReviewed = bobService.hasUserReviewedForOrder(review.getId(), review.getONo());
+		if (hasReviewed) {
+		    result.put("success", false);
+		    result.put("message", "이미 리뷰를 작성한 주문입니다.");
+		    return result;
+		}
+
+		// 주문 정보에서 메뉴 이름을 파싱하여 mId를 찾음
+		Orders order = bobService.getOrderByOrderNo(String.valueOf(review.getONo()));
+		if (order != null && order.getMenus() != null && !order.getMenus().isEmpty()) {
+		    String[] menuItems = order.getMenus().split(",");
+		    if (menuItems.length > 0) {
+		        String firstMenuItem = menuItems[0].split("\\*")[0].trim();
+		        Integer mId = bobService.getMenuIdByName(firstMenuItem);
+		        if (mId != null) {
+		            review.setMId(mId);
+		        }
+		    }
+		}
+
+		if (review.getMId() == 0) {
+		    result.put("success", false);
+		    result.put("message", "리뷰할 메뉴 정보를 찾을 수 없습니다.");
+		    return result;
+		}
+		
 		String uploadDir = "C:/projectbob/images/review/";
 		File dir = new File(uploadDir);
 		if (!dir.exists()) dir.mkdirs();		
@@ -346,7 +384,6 @@ public class MenuAjaxController {
 		review.setStatus("일반");
 		bobService.addReview(review);
 		
-		Map<String, Object> result = new HashMap<>();
 		result.put("reviewList", bobService.getReviewList(review.getSId()));
 		result.put("reviewReplyMap", bobService.getReviewReplyMap(review.getSId()));
 		String shopOwnerId = null;
@@ -355,8 +392,8 @@ public class MenuAjaxController {
 			shopOwnerId = shop.getId();
 		}
 		result.put("shopOwnerId", shopOwnerId);
+		result.put("success", true); // 성공 상태 추가
 				
-		//return bobService.getReviewList(review.getSId());
 		return result;
 	}
 	
@@ -366,6 +403,34 @@ public class MenuAjaxController {
 	public Map<String, Object> updateReview(@ModelAttribute Review review,
 			@RequestParam(value="reviewUploadFile", required=false) MultipartFile rPicture){
 		
+		// 리뷰 내용 유효성 검사 (추가)
+		if (review.getContent() == null || review.getContent().trim().isEmpty()) {
+		    Map<String, Object> errorResult = new HashMap<>();
+		    errorResult.put("success", false);
+		    errorResult.put("message", "리뷰 내용을 입력하세요.");
+		    return errorResult;
+		}
+
+		// 주문 정보에서 mId를 가져와 review 객체에 설정 (addReview와 동일한 로직)
+		Orders order = bobService.getOrderByOrderNo(String.valueOf(review.getONo()));
+		if (order != null && order.getMenus() != null && !order.getMenus().isEmpty()) {
+		    String[] menuItems = order.getMenus().split(",");
+		    if (menuItems.length > 0) {
+		        String firstMenuItem = menuItems[0].split("\\*")[0].trim();
+		        Integer mId = bobService.getMenuIdByName(firstMenuItem);
+		        if (mId != null) {
+		            review.setMId(mId);
+		        }
+		    }
+		}
+
+		if (review.getMId() == 0) {
+		    Map<String, Object> errorResult = new HashMap<>();
+		    errorResult.put("success", false);
+		    errorResult.put("message", "리뷰할 메뉴 정보를 찾을 수 없습니다.");
+		    return errorResult;
+		}
+
 		if(rPicture != null && !rPicture.isEmpty()) {
 			String uploadDir = "C:/projectbob/images/review/";
 			File dir = new File(uploadDir);
@@ -421,7 +486,12 @@ public class MenuAjaxController {
 	// 대댓글 쓰기 메서드	
 	@PostMapping("/reviewReplyWrite.ajax")
 	@ResponseBody
-	public Map<String, Object> addReviewReply(@RequestBody ReviewReply reviewreply){
+	public Map<String, Object> addReviewReply(@RequestParam("rNo") int rNo, @RequestParam("sId") int sId, @RequestParam("id") String id, @RequestParam("content") String content){
+		ReviewReply reviewreply = new ReviewReply(); 
+		reviewreply.setRNo(rNo);
+		reviewreply.setSId(sId);
+		reviewreply.setId(id);
+		reviewreply.setContent(content);
 		log.info("대댓글 등록 rNo: {}", reviewreply.getRNo());		
 		log.info("대댓글 등록 reviewreply: {}", reviewreply);
 		log.info("addReviewReply: reviewreply={}", reviewreply);
@@ -495,6 +565,17 @@ public class MenuAjaxController {
 		return result;
 	}
 	
+	
+	// 특정 가게에서 리뷰 가능한 주문 목록을 가져오는 메서드
+	@GetMapping("/ajax/reviewableOrders")
+	public ResponseEntity<List<Orders>> getReviewableOrders(@RequestParam("sId") int sId, HttpSession session){
+		String userId = (String) session.getAttribute("loginId");
+		if(userId == null || userId.trim().isEmpty()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+		List<Orders> reviewableOrders = bobService.getReviewableOrdersForShop(userId, sId);
+		return ResponseEntity.ok(reviewableOrders);
+	}
 	
 	
 	

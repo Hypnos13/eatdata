@@ -11,6 +11,12 @@
     </select>
 
 
+<!-- 회원이 특정 가게에서 주문한 내역이 있는지 확인 -->
+<select id="countOrdersByUserIdAndShopId" resultType="int">
+	select COUNT(*) FROM orders 
+	WHERE id = #{userId} AND s_id = #{sId} <!-- AND status = 'COMPLETED'  주문 완료처리하면 주석풀기-->
+</select>
+
 <!-- 주문 페이지에서 주문 완료 페이지로 보내기 -->
 <insert id="insertOrder" parameterType="com.projectbob.domain.Orders" useGeneratedKeys="true" keyProperty="oNo">
 	INSERT INTO orders (s_id, id, total_price, payment, payment_uid, o_address, request, status, quantity, menus, reg_date)
@@ -260,8 +266,8 @@
 
 <!-- 댓글 추가 맵핑 구문 -->
 <insert id="addReview" parameterType="Review">
-	INSERT INTO review(id, s_id, m_id, content, rating, r_picture, liked, status, reg_date, modi_date)
-	VALUES(#{id}, #{sId}, #{mId}, #{content}, #{rating}, #{rPicture}, #{liked}, #{status}, SYSDATE(), SYSDATE())
+	INSERT INTO review(id, s_id, m_id, content, rating, r_picture, liked, status, reg_date, modi_date, o_no)
+	VALUES(#{id}, #{sId}, #{mId}, #{content}, #{rating}, #{rPicture}, #{liked}, #{status}, SYSDATE(), SYSDATE(), #{oNo})
 </insert>
 
 <!-- 내가 찜한 가게 목록 -->
@@ -315,16 +321,53 @@
     <result property="modiDate" column="modi_date"/>
     <result property="status" column="status"/>
     <result property="menuName" column="menuName"/>
+    <result property="oNo" column="o_no"/>
+    <result property="menus" column="menus"/>
 </resultMap>
 
 <!-- 리뷰 -->
 <select id="getReviewList" parameterType="int" resultMap="reviewResultMap">
-	SELECT review.r_no, review.id, review.s_id, review.m_id, review.content, review.rating,
-		review.r_picture, review.liked, review.reg_date, review.modi_date, review.status, 
-	menu.name AS menuName FROM review
-	JOIN menu ON review.m_id = menu.m_id 
-	WHERE review.s_id = #{sId} ORDER BY review.r_no DESC
+	SELECT r.r_no, r.id, r.s_id, r.m_id, r.content, r.rating,
+		r.r_picture, r.liked, r.reg_date, r.modi_date, r.status, 
+		m.name AS menuName, o.o_no, o.menus
+	FROM review r
+	JOIN menu m ON r.m_id = m.m_id
+	LEFT JOIN orders o ON r.o_no = o.o_no
+	WHERE r.s_id = #{sId} ORDER BY r.r_no DESC
 </select>
+
+<!-- 회원이 특정 가게에서 리뷰 가능한 주문 목록 조회 -->
+<select id="getReviewableOrders" resultType="com.projectbob.domain.Orders">
+	SELECT o.o_no, o.s_id, o.id, o.total_price, o.payment, o.payment_uid, o.o_address,
+		o.request, o.status, o.quantity, o.menus, o.reg_date
+	FROM orders o
+	WHERE o.id = #{userId}
+		AND o.s_id = #{sId}
+		<!-- AND o.status = 'COMPLETED'   __완료된 주문만 -->
+		AND NOT EXISTS (SELECT 1 FROM review r WHERE r.o_no = o.o_no)
+			ORDER BY o.reg_date DESC
+</select>
+
+<!-- 특정 주문 번호에 대한 리뷰 개수 조회 -->
+<select id="countReviewByOrderNo" resultType="int">
+	SELECT COUNT(*) FROM review WHERE o_no = #{oNo}
+</select>
+
+<!-- 특정 주문 번호와 사용자 ID에 대한 리뷰 개수 조회 -->
+<select id="countReviewByOrderNoAndUserId" resultType="int">
+	SELECT COUNT(*) FROM review WHERE o_no = #{oNo} AND id = #{userId}
+</select>
+
+<!-- 주문 번호로 주문 정보 조회 -->
+<select id="selectOrderByOrderNo" resultType="com.projectbob.domain.Orders">
+	SELECT * FROM orders WHERE o_no = #{orderId}
+</select>
+
+<!-- 메뉴 이름으로 mId 조회 -->
+<select id="selectMenuIdByName" resultType="int">
+	SELECT m_id FROM menu WHERE name = #{menuName} LIMIT 1
+</select>
+
 
 <!-- 가게 상세 페이지에 필요한 xml -->
 <select id="getMenuListByShopId" resultType="com.projectbob.domain.Menu">

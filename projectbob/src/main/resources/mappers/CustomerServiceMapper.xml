@@ -224,6 +224,26 @@
 	AND r.id = #{id}
 </select>
 
+<select id="myOrderList" resultType="map">
+	SELECT o.o_no as no, o.s_id as sId, o.id as id, o.total_price as price, o.payment as payment, o.o_address as address, o.request as request , o.quantity as quantity, o.reg_date as regDate, o.menus as menu, s.name as shopName 
+	FROM orders o, shop s
+	WHERE o.s_id = s.s_id
+	AND o.id = #{id}
+</select>
+
+<select id="getMenuPrice" resultType="map">
+	SELECT price, m_id
+	FROM menu
+	WHERE s_id = #{sId}
+	AND name = #{name}
+</select>
+
+<select id="getMenuOptionPrice">
+	SELECT price
+	FROM menu_option
+	WHERE m_id = #{mId}
+	AND content = #{content}
+</select>
 </mapper>	
 
 

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.projectbob.domain.LikeList;
@@ -407,8 +408,21 @@ public class BobService {
 	// 댓글 등록하는 메서드
 	@Transactional
 	public void addReview(Review review) {
+		if(review.getONo() != null) {
+			int existingReviewCount = bobMapper.countReviewByOrderNo(review.getONo());
+			if(existingReviewCount > 0) {
+				throw new IllegalStateException("해당 주문에 대한 리뷰가 이미 존재합니다.");
+			}
+		}
 		bobMapper.addReview(review);
-		shopMapper.updateShopRatingBySId(review.getSId());
+		// 평점 업데이트 로직을 별도 트랜잭션으로 분리
+		this.updateShopRating(review.getSId());
+	}
+
+	// 가게 평점 업데이트 (별도 트랜잭션)
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void updateShopRating(int sId) {
+		shopMapper.updateShopRatingBySId(sId);
 	}
 
 	//댓글 수정하는 메서드
@@ -463,6 +477,41 @@ public class BobService {
 		bobMapper.deleteReviewReply(rrNo);
 	}
 
+	
+	// 회원이 특정 가게에서 주문한 내역이 있는지 확인하는 메서드
+	public boolean hasUserOrderedFromShop(String userId, int sId) {
+		log.info("hasUserOrderedFromShop 호출됨 - userId: {}, sId: {}", userId, sId);
+		if (userId == null || userId.trim().isEmpty()) {
+			log.info("hasUserOrderedFromShop: userId가 null 또는 비어있어 false 반환");
+			return false;
+		}
+		int orderCount = bobMapper.countOrdersByUserIdAndShopId(userId, sId);
+		log.info("bobMapper.countOrdersByUserIdAndShopId 결과 : {} (userId: {}, sId: {})", orderCount, userId, sId);
+		return orderCount > 0;
+	}
+	
+	// 회원이 특정 가게에서 아직 리뷰를 작성하지 않은 주문 목록을 가져오는 메서드
+	public List<com.projectbob.domain.Orders> getReviewableOrdersForShop(String userId, int sId){
+		if (userId == null || userId.trim().isEmpty()) {
+			return new ArrayList<>();
+		}
+		return bobMapper.getReviewableOrders(userId, sId);
+	}
+	
+	// 사용자가 특정 주문에 대해 리뷰를 작성했는지 확인하는 메서드
+	public boolean hasUserReviewedForOrder(String userId, int oNo) {
+		return bobMapper.countReviewByOrderNoAndUserId(userId, oNo) > 0;
+	}
+
+	// 주문 번호로 주문 정보 가져오기
+	public Orders getOrderByOrderNo(String orderId) {
+		return bobMapper.selectOrderByOrderNo(orderId);
+	}
+
+	// 메뉴 이름으로 mId 가져오기
+	public Integer getMenuIdByName(String menuName) {
+		return bobMapper.selectMenuIdByName(menuName);
+	}
 	
 	
 	// 결제정보 가져오기

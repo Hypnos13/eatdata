@@ -168,6 +168,13 @@ public class BobController {
 			  member = loginService.getMember(loginId);
 		  }
 		 model.addAttribute("member", member);
+		 
+		 // 회원이 해당 가게에서 주문한 내역이 있는지 확인
+		 boolean hasOrdered = false;
+		 if (loginId != null) {
+			 hasOrdered = bobService.hasUserOrderedFromShop(loginId, sId);
+		 }
+		 model.addAttribute("hasOrdered", hasOrdered);
 		  
 		 // 찜
 		 boolean liked = false;

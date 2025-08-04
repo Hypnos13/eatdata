@@ -126,21 +126,26 @@
 							</div>
 						</div>
 						
-						<!-- 댓글쓰기 -->
+												<!-- 댓글쓰기 -->
 						<div class="row my-3">
 						<div class="col border p-1 text-center">
-						<span id="reviewWrite" class="text-success" style="cursor: pointer;">
-							<i class="bi bi-file-earmark-text-fill" style="color: cornflowerblue;"></i>리뷰쓰기
-						</span>
+						<th:block th:if="${hasOrdered}">
+							<span id="reviewWrite" class="text-success" style="cursor: pointer;">
+								<i class="bi bi-file-earmark-text-fill" style="color: cornflowerblue;"></i>리뷰쓰기
+							</span>
+						</th:block>
+						<th:block th:unless="${hasOrdered}">
+							<p class="text-muted">리뷰는 구매 내역이 있는 고객만 작성할 수 있습니다.</p>
+						</th:block>
 						</div>
 						</div>
 						<!-- 댓글 헤더 영역 -->						
 			<div id="reviewFormOriginalContainer">
 						<!-- 댓글 쓰기 폼 -->
-					<div class="row my-3 d-none" id="reviewForm" th:if="${member != null}">
+					<div class="row my-3 d-none" id="reviewForm" th:if="${member != null and hasOrdered}">
 						<div class="col">
 							<form name="reviewWriteForm" id="reviewWriteForm" enctype="multipart/form-data">
-								<input type="hidden" name="sId" th:value="${shop.sId}">
+								<input type="hidden" name="sId" id="shopId" th:value="${shop.sId}">
 						  	<input type="hidden" name="id" th:value="${member?.id}">
 						  	<input type="hidden" id="loginId" th:value="${member != null ? member.id : ''}">
 						  	<input type="hidden" id="reviewFormMode" value="댓글쓰기">
@@ -151,14 +156,17 @@
 										<div class="row">
 											<div class="col text-center">
 											
-											<!-- 메뉴 선택 -->
+											<!-- 주문했던 메뉴 선택 (리뷰 가능한 주문) -->
 						<div class="mb-2">
-							<label class="form-label">메뉴 선택</label>
-							<select name="mId" class="form-select" required>
-								<option value="">메뉴를 선택하세요</option>
-								<option th:each="menu : ${menuList}" th:value="${menu.mId}" th:text="${menu.name}"></option>
-							</select>
+							<label class="form-label">리뷰할 주문 선택</label>
+								<select name="oNo" id="reviewOrdersSelect" class="form-select" required>
+									<option value="">주문을 선택하세요</option>
+									<th:block th:each="order : ${reviewableOrders}">
+										<option th:if="${!reviewedOrders[order.oNo]}" th:value="${order.oNo}" th:text="${order.orderName}"></option>
+									</th:block>
+								</select>
 						</div>
+						
 											<!-- 별점 영역 -->
 						<div class="mb-2">
 							<label class="form-label">별점</label>
@@ -203,7 +211,7 @@
 									<span class="fw-bold" th:text="${#strings.substring(review.id,0,2) + '**님'}">ad**님</span>
 									<span class="text-muted small ms-2" th:text="${#dates.format(review.regDate, 'yyyy-MM-dd')}">날짜</span>
 									<div class="ms-auto">
-									<button th:if="${member != null and review.id == member.id}" class="modifyReview btn btn-outline-success btn-sm" th:data-no="${review.rNo}">
+									<button th:if="${member != null and review.id == member.id}" class="modifyReview btn btn-outline-success btn-sm" th:data-no="${review.rNo}" th:data-ono="${review.oNo}" th:data-menus="${review.menus}">
 										<i class="bi bi-journal-text">수정</i>									
 									</button>
 									<button th:if="${member != null and review.id == member.id }" class="deleteReview btn btn-outline-dark btn-sm" th:data-no="${review.rNo}" th:data-sid="${review.sId}">
@@ -262,6 +270,7 @@
 									<form class="review-reply-form">
 										<input type="hidden" name="rNo" th:value="${review.rNo}">
 										<input type="hidden" name="sId" th:value="${shop.sId}">
+										<input type="hidden" name="id" th:value="${shop.id}">
 										<input type="hidden" name="rrNo" th:value="${reviewReplyMap[review.rNo].rrNo}" th:if="${reviewReplyMap[review.rNo] != null}">
 										<div class="mb-2">
 											<textarea name="content" class="form-control fs-5 py-3" rows="3" maxlength="250"
@@ -270,7 +279,7 @@
 										<div class="text-end">
 											<th:block th:if="${member != null and member.id == shop.id}">
 												<button class="btn btn-success px-4 me-1 review-reply-submit-btn" type="submit">등록</button>
-												<button type="button" class="btn btn-outline-primary px-4 me-1 modifyReviewReply">수정</button>
+												<button type="button" class="btn btn-outline-primary px-4 me-1 modifyReviewReply d-none">수정</button>
 												<button type="button" class="btn btn-outline-danger px-4 deleteReviewReply" th:attr="data-rrno=${reviewReplyMap[review.rNo].rrNo}" th:if="${reviewReplyMap[review.rNo] != null}" th:data-sid="${shop.sId}">삭제</button>
 											</th:block>
 										</div>

@@ -154,7 +154,24 @@ public interface BobMapper {
 	// 주문 번호에 해당하는 주문 레코드를 DB에서 가져오기
 	public Orders selectOrderId(@Param("orderId") int orderId);
 	public Orders selectOrderByPaymentUid(@Param("paymentUid") String paymentUid);
+	
+	// 회원이 특정 가게에서 주문한 내역이 있는지 확인
+	public int countOrdersByUserIdAndShopId(@Param("userId") String userId, @Param("sId") int sId);
 
+	// 회원이 특정 가게에서 리뷰 가능한 주문 목록 조회
+	public List<Orders> getReviewableOrders(@Param("userId") String userId, @Param("sId") int sId);
+	
+	// 특정 주문 번호에 대한 리뷰 개수 조회
+	public int countReviewByOrderNo(@Param("oNo") int oNo);
+	
+	// 특정 주문 번호와 사용자 ID에 대한 리뷰 개수 조회
+	public int countReviewByOrderNoAndUserId(@Param("userId") String userId, @Param("oNo") int oNo);
+
+	// 주문 번호로 주문 정보 조회
+	public Orders selectOrderByOrderNo(@Param("orderId") String orderId);
+
+	// 메뉴 이름으로 mId 조회
+	public Integer selectMenuIdByName(@Param("menuName") String menuName);
 	
 
 }

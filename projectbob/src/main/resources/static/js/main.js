@@ -1283,37 +1283,40 @@ $("#reviewWrite").click(() => $("#reviewForm").toggleClass("d-none"));
 $(document).on("submit", "#reviewWriteForm", function (e) {
   e.preventDefault();
 
-  if ($("#reviewContent").val().length < 5) {
-      alert("댓글은 5자 이상 입력하세요~");
-      return;
-  }
+  /*const reviewContent = $("#reviewContent").val().trim();
+  if (reviewContent.length === 0) {
+      alert("리뷰 내용을 입력하세요~!!!");
+      return false; // 제출을 막기 위해 false 반환
+  }*/
   if (!$('input[name="rating"]:checked').val()) {
       alert("별점을 선택하세요~!");
-      return;
+      return false;
   }
 
   const formData = new FormData(this);
+  formData.append("oNo", $("#reviewOrdersSelect").val()); // oNo 추가
 
-  $.ajax({
-    url: "reviewWrite.ajax",
-    data: formData,
-    type: "post",
-    processData: false, 
-    contentType: false, 
-    dataType: "json",
-    success: function (resData) {
-      // TODO: 리뷰 목록을 새로고침하는 로직 추가 (예: 리뷰 목록을 다시 AJAX로 불러오거나, 응답 데이터로 UI 업데이트)
-      // 현재는 단순히 alert만 띄우고 있습니다.
-      alert("댓글이 등록되었습니다.");
-      $("#reviewWriteForm")[0].reset(); 
-      $("#reviewForm").addClass("d-none"); 
-      // 예: fetchAndDisplayReviews(); // 리뷰 목록을 다시 불러오는 함수 호출
-    },
-    error: function (xhr, status, error) {
-      alert("댓글 등록 오류: " + (xhr.responseText || error));
-      console.error("댓글 등록 오류:", xhr.responseText);
-    }
-  });
+  // 유효성 검사를 통과했을 때만 AJAX 호출
+  if (reviewContent.length > 0 && $('input[name="rating"]:checked').val()) {
+      $.ajax({
+        url: "reviewWrite.ajax",
+        data: formData,
+        type: "post",
+        processData: false, 
+        contentType: false, 
+        dataType: "json",
+        success: function (resData) {
+          console.log('resData: ' ,resData);
+          recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId); // 리뷰 목록 새로고침
+          $("#reviewWriteForm")[0].reset(); 
+          $("#reviewForm").addClass("d-none"); 
+        },
+        error: function (xhr, status, error) {
+          alert("댓글 등록 오류: " + (xhr.responseText || error));
+          console.error("댓글 등록 오류:", xhr.responseText);
+        }
+      });
+  }
 });
 
 // 리뷰 사진 미리보기
@@ -1380,7 +1383,7 @@ $("#rPicture").on("change", function () {
 //찜하기~
 $(function(){
 	$('#btnLikeList').click(function(){
-		const loginId = $('#loginId').val();
+		const loginId = window.currentUserId;
 		if (!loginId){
 			alert('로그인 후 이용가능함');
 			return;
@@ -1433,19 +1436,63 @@ $("#reviewWrite").on("click", function(){
 		$("#imgPreview").hide().attr('src', '');
 		if(previewUrl){URL.revokeObjectURL(previewUrl); previewUrl = null;}
 		lastEditRno = null;
+		
+		// 주문 했던 목록 꺼내기
+		const sId = $("#shopId").val();
+		const userId = window.currentUserId;
+
+		if (userId && sId){
+			$.ajax({
+				url: "/ajax/reviewableOrders",
+				type: "GET",
+				data: {sId:sId},
+				success: function(response){
+					const $orderSelect = $("#reviewOrdersSelect");
+					$orderSelect.empty();
+					$orderSelect.append('<option value="">주문을 선택하세요</option>');
+					
+					if (response && response.length > 0){
+						response.forEach(order => {
+							const orderText = `${order.menus} (${new Date(order.regDate).toLocaleDateString()})`;
+							$orderSelect.append(`<option value="${order.ono}">${orderText}</option>`);
+						});
+					}
+						else{
+							$orderSelect.append('<option value="">리뷰 가능한 주문이 없습니다.</option>');
+						}
+					},
+					error: function(xhr, status, error){
+						console.error("리뷰 가능한 주문을 불러오는데 실패했습니다.:", error);
+						alert("리뷰 가능한 주문을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
+					}
+				})
+		}else{
+			console.warn("리뷰 가능한 주문을 불러오기 위한 사용자 ID  또는 가게 ID가 없습니다.");
+			$("#reviewOrderSelect").empty().append('<option value="">로그인 후 이용해주세요.</option>');
+		}	
+
+
+		
 	});
 	
+
+	
+	// 댓글쓰기 submit
 	$(document).on("submit", "#reviewWriteForm", function(e){
 		e.preventDefault();
-		/*if($("#reviewContent").val().length < 5){
-			alert("댓글은 5자 이상 입력하세요~");
+		
+		const reviewContent = $("#reviewContent").val().trim();
+		if (reviewContent.length === 0) {
+			alert("리뷰 내용을 입력하세요~");
 			return false;
-		}*/
+		}
+
 		if (!$('input[name="rating"]:checked').val()){
 			alert("별점을 선택하세요~!");
 			return false;
 		}
 		let formData = new FormData(this);
+		formData.append("oNo", $("#reviewOrdersSelect").val());
 		
 		let params = $(this).serialize();
 		console.log(params);
@@ -1460,12 +1507,31 @@ $("#reviewWrite").on("click", function(){
 			"success": function(resData){
 				console.log('resData: ' ,resData);
 				
-				recallReviewList(resData.reviewList, resData.reviewReplyMap);
+				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
 				resetReviewForm();
 				
+				// 리뷰 작성 성공 후, 주문 선택 목록을 다시 불러와 갱신합니다.
+				const sId = $("#shopId").val();
+				$.ajax({
+					url: "/ajax/reviewableOrders",
+					type: "GET",
+					data: {sId:sId},
+					success: function(orders){
+						const $orderSelect = $("#reviewOrdersSelect");
+						$orderSelect.empty();
+						$orderSelect.append('<option value="">주문을 선택하세요</option>');
+						if (orders && orders.length > 0){
+							orders.forEach(order => {
+								const orderText = `${order.menus} (${new Date(order.regDate).toLocaleDateString()})`;
+								$orderSelect.append(`<option value="${order.ono}">${orderText}</option>`);
+							});
+						} else {
+							$orderSelect.append('<option value="" disabled>리뷰를 작성할 주문이 없습니다.</option>');
+						}
+					}
+				});
+				
 				console.log('버튼 찾기:', $("#reviewFormMode"));
-
-								
 			},
 			"error": function(xhr, status){
 				console.log("error : " + status);
@@ -1502,46 +1568,61 @@ lastEditRno = null;
 $(document).on("click", ".modifyReview", function(){
 	resetReviewForm();
 	console.log("수정 버튼 클릭");
-	console.log($("#reviewForm").css("display"));
-	console.log($("#reviewForm").is(":visible"));
 	
-	console.log($(this).parents(".reviewRow"));
 	let $reviewRow = $(this).closest(".reviewRow");
 	if(!$reviewRow.length){
 		alert("리뷰 요소를 못찾음");
 		return;
 	}
-	let rno = $(this).attr("data-no");
+	let rno = $(this).data("no");
+	let ono = $(this).data("ono");
+	let menus = $(this).data("menus");
+	let sIdFromButton = $(this).data("sid"); // Get sId from the button
+	console.log("sId from modify button:", sIdFromButton); // Add this line
 	lastEditRno = rno;
-	console.log("폼을 해당리뷰 아래로 이동:", $reviewRow, "rno", rno);
 	
 	$reviewRow.after($("#reviewForm").removeClass("d-none"));
-	console.log("폼 실제 위치:", $("#reviewForm").parent()[0]);
 	
 	let $form = $("#reviewForm").find("form");
 	let reviewContent = $reviewRow.find(".review-content").text();
 	$form.find("#reviewContent").val($.trim(reviewContent));			
-	$form.attr("id", "reviewUpdateForm").attr("data-no", rno);		
+	$form.attr("id", "reviewUpdateForm").attr("data-no", rno);
+	$form.data("ono", ono); // Store ono in data attribute
+	$form.data("sid", $(this).data("sid")); // Store sid in data attribute		
 	$("#reviewForm input[type='submit']").val("댓글수정").text("댓글수정");
-		
+
+	// 주문 선택 드롭다운 비활성화 및 값 설정
+	const $orderSelect = $("#reviewOrdersSelect");
+	$orderSelect.empty();
+	$orderSelect.append(`<option value="${ono}">${menus}</option>`);
+	$orderSelect.prop("disabled", false); // Enable the dropdown
 });
 
 // 댓글 수정 폼 submit
 $(document).on("submit", "#reviewUpdateForm", function(e){
 	e.preventDefault();
 	
-	/*if($("#reviewContent").val().length <= 5){
-		alert("댓글은 5자 이상 입력해야 합니다.");
+	const reviewContent = $("#reviewContent").val().trim();
+	if (reviewContent.length === 0) {
+		alert("리뷰 내용을 입력하세요");
 		return false;
-	}*/
-	//$("#global-content > div").append($("#reviewForm"));
-	
+	}
+	if (!$('input[name="rating"]:checked').val()){
+		alert("별점을 선택하세요~!");
+		return false;
+	}
+
 	let form = this;
 	let formData = new FormData(form);
 	formData.append("rNo", $(form).attr("data-no"));
+	formData.append("oNo", $(form).data("ono"));
+	formData.append("sId", $(form).data("sid"));
 	
 	console.log("전송할 rNo (수정):", $(form).attr("data-no"));
 	console.log("전송할 FormData:", formData);
+	for (let [key, value] of formData.entries()) {
+	    console.log(`${key}: ${value}`);
+	}
 	
 	$.ajax({
 			"url": "reviewUpdate.ajax",
@@ -1553,13 +1634,11 @@ $(document).on("submit", "#reviewUpdateForm", function(e){
 			"success": function(resData){
 				console.log('resData: ' ,resData);
 				
-				recallReviewList(resData.reviewList, resData.reviewReplyMap);
+				// 서버에서 reviewList를 반환하면 성공으로 간주하고 처리
+				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
 				resetReviewForm();
-										
-				console.log("리뷰 다시 그림. 폼 숨기기");			
+				console.log("리뷰 다시 그림. 폼 숨기기");
 				console.log('버튼 찾기:', $("#reviewFormMode"));
-				
-		
 			},
 			"error": function(xhr, status){
 				console.log("error : " + status);
@@ -1602,7 +1681,7 @@ $(document).on("click", ".deleteReview", function(){
 				"success": function(resData, status, xhr){
 					console.log('resData: ' ,resData);
 					
-				recallReviewList(resData.reviewList, resData.reviewReplyMap);
+				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
 				resetReviewForm();
 
 				},
@@ -1651,7 +1730,7 @@ $(document).on('submit', '.review-reply-form', function(e){
 	console.log('main.js - sId from form:', sId); 
 
 	const content = $form.find('textarea[name="content"]').val();
-	const shopOwnerId = $("#shopOwnerId").val();
+	const shopOwnerId = $form.find('input[name="id"]').val();
 
 	console.log('ajax전송 전 rrNo:', rrNo, 'sId:' , sId, 'shopOwnerId:', shopOwnerId, '대댓글 content값:', content);
 	
@@ -1662,16 +1741,15 @@ $(document).on('submit', '.review-reply-form', function(e){
 	$.ajax({
 		url: '/reviewReplyWrite.ajax',
 		type: 'post',
-		data: JSON.stringify({
+		data: {
 			rNo: Number(rNo),
 			sId: Number(sId),
 			id: shopOwnerId,
 			content: content
-		}),
-		contentType: "application/json",
+		},
 		dataType: 'json',
 		success: function(resData){
-			recallReviewList(resData.reviewList, resData.reviewReplyMap);
+			recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
 			
 			$form.closest('.reviewReplyForm').addClass('d-none');
 			$form[0].reset();
@@ -1704,7 +1782,7 @@ $(document).on("click", ".modifyReviewReply", function(){
 		$replyForm.find('input[name="rrNo"]').val(rrNo);
 		$replyForm.find('input[name="sId"]').val(sId);
 		$replyForm.find('textarea[name="content"]').val(content);
-		$replyForm.attr('id', 'reviewReplyUpdateForm');
+		$replyForm.find('form').attr('id', 'reviewReplyUpdateForm');
 		$('.reviewReplyForm').addClass('d-none');
 		$replyForm.removeClass('d-none');	
 			
@@ -1719,7 +1797,7 @@ $(document).on("submit", "#reviewReplyUpdateForm", function(e){
 		const rrNo = $form.find('input[name="rrNo"]').val();	
 		const sId = $form.find('input[name="sId"]').val();
 		const content = $form.find('[name="content"]').val();
-		const shopOwnerId = $("#shopOwnerId").val();
+		const shopOwnerId = $form.find('input[name="id"]').val();
 
 		console.log('수정ajax전송 전 rrNo:', rrNo,'rNo', rNo, 'sId:' , sId, 'shopOwnerId:', shopOwnerId, '대댓글 content값:', content);
 		console.log('shopOwnerId:', $('#shopOwnerId').val());
@@ -1744,7 +1822,7 @@ $(document).on("submit", "#reviewReplyUpdateForm", function(e){
 				console.log("✔ reviewReplyWrite.ajax resData:", resData);				    
 				    console.log("   → reviewReplyMap keys:", Object.keys(resData.reviewReplyMap));
 				    console.log("   → reviewReplyMap[rNo]:", resData.reviewReplyMap[resData.reviewList[0].rNo]);
-				recallReviewList(resData.reviewList, resData.reviewReplyMap);
+				recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);
 				
 				const $replyForm = $form.closest('.reviewReplyForm');
 				$replyForm.addClass('d-none');
@@ -1776,7 +1854,7 @@ $(document).on("click", ".deleteReviewReply", function(){
 		dataType: "json",
 		success: function(resData){
 			delete resData.reviewReplyMap[rrNo];
-			recallReviewList(resData.reviewList, resData.reviewReplyMap);		
+			recallReviewList(resData.reviewList, resData.reviewReplyMap, resData.shopOwnerId);		
 		},
 		error: function(xhr, status){
 			alert("사장님 댓글 삭제 중 오류:" + status);
@@ -1786,11 +1864,10 @@ $(document).on("click", ".deleteReviewReply", function(){
 
 
 // 리뷰쓰기/수정/삭제 AJAX 성공 후~
-function recallReviewList(reviewArr, reviewreplyMap){
+function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId, loginId){
 	console.log("recallReviewList 호출!:", reviewArr, reviewreplyMap);
 	$("#reviewFormOriginalContainer").append($("#reviewForm").addClass("d-none"));
-	const loginId = $("#loginId").val();	
-	const shopOwnerId = $("#shopOwnerId").val();
+	loginId = window.currentUserId;
 //	const shopId = $("input[name='sId']").first().val();
 	const $list = $("#reviewList");
 	const $none = $("#noReview");	
@@ -1816,7 +1893,7 @@ function recallReviewList(reviewArr, reviewreplyMap){
 		let buttons = '';
 		if(isMine){
 			buttons += `
-				<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rno}" data-sid="${shopId}">
+				<button class="modifyReview btn btn-outline-success btn-sm" data-no="${r.rno}" data-sid="${shopId}" data-ono="${r.ono}" data-menus="${r.menus}">
 					<i class="bi bi-journal-text">수정</i>
 				</button>
 				<button class="deleteReview btn btn-outline-dark btn-sm" data-no="${r.rno}" data-sid="${shopId}">
@@ -1865,10 +1942,14 @@ function recallReviewList(reviewArr, reviewreplyMap){
 													<form>			
 													   <input type="hidden" name="rNo"  value="${r.rno}">
 													 <input type="hidden" name="sId"  value="${shopId}">
-													 <input type="hidden" name="rrNo" value="${reply.rrNo}">											
+													 <input type="hidden" name="rrNo" value="${reply.rrNo}">
+													 <input type="hidden" name="id" value="${shopOwnerId}">											
 														<textarea name="content" class="form-control fs-5 py-3 mb-2" rows="3" maxlength="250" placeholder="사장님 댓글 수정"></textarea>
 														<div class="text-end">
-															<button type="submit" class="btn btn-success px-4 me-1">수정완료</button>											
+																										<button type="submit" class="btn btn-success px-4 me-1">수정완료</button>											
+										</div>
+									</form>
+								</div>											
 														</div>
 													</form>
 												</div>
@@ -1881,7 +1962,7 @@ function recallReviewList(reviewArr, reviewreplyMap){
 					<span class="fw-bold text-primary">
 						<i class="bi bi-person-badge"></i>사장님
 					</span>
-					<span class="text-muted small ms-2">${childDate(reviewreplyMap[r.rno].regDate)}</span>
+					<span class="text-muted small ms-2">${new Date(reviewreplyMap[r.rno].regDate).toLocaleString()}</span>
 				</div>
 				<div class="ms-3 fs-5 py-2">${reviewreplyMap[r.rno].content}</div>
 			</div>
@@ -1897,7 +1978,8 @@ function recallReviewList(reviewArr, reviewreplyMap){
 			<div class="reviewReplyForm d-none p-3 rounded shadow-sm mt-2" style="background:#f8fafc;">
 					<form class="review-reply-form">
 						<input type="hidden" name="rNo" value="${r.rno}">
-						<input type="hidden" name="sId" value="${shopId}">						
+						<input type="hidden" name="sId" value="${shopId}">
+						<input type="hidden" name="id" value="${shopOwnerId}">						
 						<textarea name="content" class="form-control fs-5 py-3 mb-2" rows="3" maxlength="250" placeholder="사장님 댓글을 입력하세요" style="resize: none;"></textarea>
 						<div class="text-end mt-2">
 							<button type="submit" class="btn btn-success px-4 me-1">등록</button>

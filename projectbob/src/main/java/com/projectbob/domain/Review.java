@@ -6,17 +6,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data; 
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
+@Data 
 public class Review {
 	private int rNo;
 	private String id;
@@ -30,8 +22,10 @@ public class Review {
 	private Timestamp regDate;
 	private Timestamp modiDate;
 	private String status;
+	private Integer oNo;
 	
 	private String menuName;
+	private String menus;
 	
 	private List<ReviewReply> replies = new ArrayList<>();
 }
