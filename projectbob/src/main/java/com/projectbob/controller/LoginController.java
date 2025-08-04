@@ -62,6 +62,7 @@ public class LoginController {
 	}
 	
 	// 로그인
+	/*  웹소켓 spring Security의 AuthenticationSucessHandler로 로직 이동
 	@PostMapping("/login")
 	public String login(Model model, @RequestParam("id") String id, @RequestParam("pass") String pass, HttpSession session,
 			HttpServletResponse response, @RequestParam(name = "redirectURL", required = false) String redirectURL )throws ServletException, IOException {
@@ -130,6 +131,7 @@ public class LoginController {
 			return "redirect:/main"; // Default redirect for clients and others
 		}
 	}
+	*/
 	
 	// 회원가입
 	@PostMapping("/joinMember")

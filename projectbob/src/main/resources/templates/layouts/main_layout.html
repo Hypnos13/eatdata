@@ -14,12 +14,17 @@
 
 <!-- window.currentUserId 주입 코드 추가 -->
 <script th:inline="javascript">
-	// Thymeleaf를 사용하여 세션에서 로그인 ID를 가져와 window.currentUserId에 할당
-	// 값이 문자열이면 자동으로 따옴표로 묶이고, null이면 JavaScript의 null 키워드로 렌더링됩니다.
-	window.currentUserId = /*[[${session.loginId}]]*/null;
-
-	// 디버깅을 위해 콘솔에 출력
-	console.log("Current User ID (from main_layout):", window.currentUserId);
+    /*<![CDATA[*/
+    var principal = /*[[${#authentication?.principal}]]*/ null;
+    if (principal && typeof principal === 'object') {
+        window.currentUserId = principal.username;
+    } else if (principal && typeof principal === 'string') {
+        window.currentUserId = principal;
+    } else {
+        window.currentUserId = null;
+    }
+    console.log("main_layout.html: window.currentUserId is set to: " + window.currentUserId);
+    /*]]>*/
 </script>
 
 <!-- Toastify.js CSS -->

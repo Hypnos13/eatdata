@@ -404,7 +404,34 @@ public class ShopService {
     // 주문 상태 변경 
     @Transactional
     public void updateOrderStatus(int oNo, String newStatus) {
+        // 1. 주문 상태 DB 업데이트
         shopMapper.updateOrderStatus(oNo, newStatus);
+
+        // 2. 알림에 필요한 정보 조회
+        Orders order = findOrderByNo(oNo); // 서비스 내의 메서드 호출
+        if (order == null) {
+            log.error("주문 상태 변경 알림 실패: 주문 정보를 찾을 수 없습니다. (oNo: {})", oNo);
+            return;
+        }
+        String userId = shopMapper.getUserIdByOrderNo(oNo);
+        int shopId = order.getSId();
+
+        // 3. Payload 생성
+        Map<String, Object> payload = Map.of(
+            "oNo", oNo,
+            "newStatus", newStatus
+        );
+
+        // 4. 사장님 페이지로 상태 변경 전송 (테이블 업데이트 등)
+        websocketService.sendOrderStatusChange(oNo, shopId, newStatus);
+
+        // 5. 고객에게 상태 변경 알림 전송
+        if (userId != null && !userId.isEmpty()) {
+            websocketService.sendOrderStatusUpdateToUser(userId, payload);
+            log.info("고객에게 주문 상태 변경 알림 전송 완료. userId: {}, oNo: {}, status: {}", userId, oNo, newStatus);
+        } else {
+            log.error("고객 ID를 찾을 수 없어 주문 상태 변경 알림을 전송하지 못했습니다. (oNo: {})", oNo);
+        }
     }
     
     @Transactional

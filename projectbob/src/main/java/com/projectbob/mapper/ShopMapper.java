@@ -10,6 +10,9 @@ import com.projectbob.domain.*;
 @Mapper
 public interface ShopMapper {
 	
+	//웹소켓
+	public String getUserIdByOrderNo(@Param("oNo") int oNo);
+	
 	/* === Shop === */
 	//가게 등록
 	public void insertShop(Shop shop);

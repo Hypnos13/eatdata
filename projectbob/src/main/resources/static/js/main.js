@@ -2337,12 +2337,38 @@ function showOrderNotification(payload) {
 
 $(document).ready(function() {
     console.log("main.js: $(document).ready() 실행됨.");
-    // window.currentUserId는 main_layout.html에서 이미 설정됩니다.
-    // 사용자 ID가 있을 경우에만 웹소켓 연결 시도
-    if (window.currentUserId && window.currentUserId.trim() !== '') {
-        console.log("[WebSocket] User logged in, attempting to connect...");
-        connectWebSocket();
-    } else {
-        console.log("[WebSocket] No currentUserId found, WebSocket connection skipped.");
-    }
+    
+		var stomClient =null;
+		var userId = window.currentUserId;
+		
+		if (userId){
+			console.log("[WebSockey] User logged in, attempting to connect...");
+			connect();
+		} else {
+			console.log("[WebSocket] User not logged in, skipping connection.");
+		}
+		function connect(){
+			var socket = new SockJS('/ws');
+			stompClient = Stomp.over(socket);
+			stompClient.connect({}, function (frame){
+				console.log('[WebSocket] Connected: ' + frame);
+				
+				stompClient.subscribe('/user/queue/order-updates', function (message){
+					console.log('[WebSocket] Received message: ', message.body);
+					var payload = JSON.parse(message.body);
+					
+					if (payload.newStatus == 'ACCEPTED'){
+						alert('주문이 수락되었습니다!');
+						window.location.href = '/completed?oNo=' + payload.oNo;
+					}
+					else if(payload.newStatus == 'REJECTED'){
+						alert('주문이 거절되었습니다.');
+						window.location.href = '/main';
+					}
+				});
+			}, function(error){
+				console.error('[WebSocket] Connection error:', error);
+				setTimeout(connect, 5000);
+			});
+		}
 });

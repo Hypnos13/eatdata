@@ -6,12 +6,14 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.security.core.context.SecurityContext; // SecurityContext 임포트
+import org.springframework.stereotype.Component;
 import org.springframework.security.core.Authentication; // Authentication 임포트
 
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import java.security.Principal;
 
+@Component
 public class UserHandshakeInterceptor implements HandshakeInterceptor {
 
     @Override

@@ -75,7 +75,8 @@ $(function(){
 	
 	
 	
-	// 로그인 시
+	// 로그인 시 (기존 코드 - 주석 처리)
+	/*
 	$("#loginForm").on("submit",function(){
 		if($("#id").val().length <= 0){
 			alert("아이디를 입력해주세요.");
@@ -83,6 +84,20 @@ $(function(){
 		}
 		
 		if($("#pass").val().length <= 0){
+			alert("비밀번호를 입력해주세요.");
+			return false;
+		}
+	});
+	*/
+	
+	// 로그인 시 (수정된 코드 - Spring Security의 username/password 파라미터 사용)
+	$("#loginForm").on("submit",function(){
+		if($("input[name='username']").val().length <= 0){
+			alert("아이디를 입력해주세요.");
+			return false;
+		}
+		
+		if($("input[name='password']").val().length <= 0){
 			alert("비밀번호를 입력해주세요.");
 			return false;
 		}
