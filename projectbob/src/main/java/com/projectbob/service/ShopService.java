@@ -410,7 +410,7 @@ public class ShopService {
     @Transactional
     public Orders placeOrder(Map<String,Object> req) {
         // 1. 주문 정보 객체 생성 (모든 필드 세팅)
-        Orders order = new Orders();
+        Orders order = new Orders();    // ← 반드시 선언!
         order.setSId((Integer) req.get("sId"));
         order.setId((String) req.get("id"));
         order.setTotalPrice((Integer) req.get("totalPrice"));
@@ -425,7 +425,9 @@ public class ShopService {
 
         // 2. DB에 주문 insert
         shopMapper.insertOrder(order);
-        // order의 oNo, regDate 등 자동 세팅됨 (useGeneratedKeys="true"일 때)
+        Orders inserted = shopMapper.selectOrderByNo(order.getONo());
+        order.setRegDate(inserted.getRegDate());
+        order.setModiDate(inserted.getModiDate());
 
         // 3. 추가 정보 조회
         Shop shop = shopMapper.findBySId(order.getSId());
@@ -433,6 +435,8 @@ public class ShopService {
         String customerPhone = (String) req.get("phone");
 
         // 4. WebSocket용 NewOrder DTO 생성
+        long regDateMs = order.getRegDate().getTime();  // ← 반드시 order 변수 사용!
+
         NewOrder newOrder = new NewOrder(
             order.getONo(),           // orderId
             order.getSId(),           // shopId
@@ -444,7 +448,8 @@ public class ShopService {
             customerPhone,            // phone
             order.getRequest(),       // request
             order.getStatus(),        // status
-            order.getRegDate()        // regDate
+            order.getRegDate(),       // regDate
+            regDateMs                 // regDateMs ← 추가된 필드!
         );
 
         // 5. WebSocket 알림
@@ -452,6 +457,11 @@ public class ShopService {
 
         // 6. 주문 엔티티 반환
         return order;
+    }
+
+    //스케쥴러
+    public List<Orders> findPendingOrdersExpired(int minutes) {
+        return shopMapper.findExpiredPendingOrders(minutes);
     }
 
 }

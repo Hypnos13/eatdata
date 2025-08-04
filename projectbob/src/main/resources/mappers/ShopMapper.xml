@@ -439,4 +439,11 @@
      #{status}, #{quantity}, #{menus}, #{paymentUid})
 </insert>
 
+<!-- 스케쥴러 -->
+<select id="findExpiredPendingOrders" resultType="com.projectbob.domain.Orders">
+    SELECT * FROM orders
+    WHERE status = 'PENDING'
+      AND reg_date &lt; DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+</select>
+
 </mapper>	

@@ -21,27 +21,28 @@ window.toggleDetail = function(orderId) {
 };
 
 // ==== 1. 타이머 헬퍼 (반드시 전역에 선언) ============
-function formatMMSS(totalSeconds) {
-  const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-  const s = String(totalSeconds % 60).padStart(2, '0');
-  return `${m}:${s}`;
-}
-
 function startCountdown(oNo, prefix = 'countdown-') {
-  const el = document.getElementById(prefix + oNo);
-  if (!el) return;
-  let remain = Math.ceil((parseInt(el.dataset.expiry,10) - Date.now())/1000);
-  if (remain < 0) remain = 0;
-  el.textContent = formatMMSS(remain);
-  const iv = setInterval(() => {
-    remain--;
-    if (remain <= 0) {
-      el.textContent = '00:00';
-      clearInterval(iv);
-    } else {
-      el.textContent = formatMMSS(remain);
+  const textEl  = document.getElementById(prefix + oNo);
+  const barEl   = document.getElementById('progress-' + prefix + oNo.replace(prefix, ''));
+  if (!textEl) return;
+
+  const expiry = parseInt(textEl.dataset.expiry, 10);
+  if (isNaN(expiry)) {
+    textEl.textContent = '--:--';
+    return;
+  }
+
+  function update() {
+    const remainSec = Math.max(0, Math.floor((expiry - Date.now())/1000));
+    textEl.textContent = formatMMSS(remainSec);
+    if (barEl) {
+      barEl.style.width = (remainSec / 180 * 100) + '%';
     }
-  }, 1000);
+    if (remainSec <= 0) clearInterval(timer);
+  }
+
+  update();
+  const timer = setInterval(update, 1000);
 }
 
 // ==== 2. Shop / Menu 가입 폼 검증 ============================
@@ -445,10 +446,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	  if (document.getElementById('newOrderList')) {
 	      // 기존 예약 타이머, 벨 깜빡임 재초기화
 	      // (1) 신규주문 리스트 타이머
-	      document.querySelectorAll('[id^="countdown-"]').forEach(el => {
-	        const oNo = el.id.replace('countdown-', '');
-	        startCountdown(oNo);
-	      });
+		  document.querySelectorAll('[id^="countdown-"]').forEach(el => {
+		      const oNo = el.id.replace('countdown-', '');
+		      startCountdown(oNo);
+		    });
 	    }
     });
 
@@ -503,23 +504,8 @@ function renderNewOrderItem(msg) {
   const ul = document.getElementById('newOrderList');
   ul.querySelector('li.text-center.text-muted')?.remove();
 
-  // ① 만료 시각(ms)
-  const expiryMs = Date.now() + 3 * 60 * 1000;
-
-  // ② 자동거절 예약
-  setTimeout(() => {
-    if (document.querySelector(`.notif-item[data-order-no="${o.oNo}"]`)) {
-      rejectOrder(o.oNo);
-      clearBellBlink();
-    }
-  }, expiryMs - Date.now());
-
-  // ③ 한국시간 HH:mm 계산 (이걸 innerHTML 전에 미리 계산해야 합니다)
-  const utcString = o.regDate + 'Z';  
-  const dt = new Date(utcString);
-  const hhmm = dt.toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
-
-  // ④ li 생성
+  // ① 3분 타이머 (알림 도착 기준)
+  let remain = 180; // 3분 = 180초
   const li = document.createElement('li');
   li.className = 'list-group-item d-flex align-items-start mb-3 p-3 notif-item';
   li.dataset.orderNo = o.oNo;
@@ -528,11 +514,11 @@ function renderNewOrderItem(msg) {
       <div class="mb-1">🛒 ${o.menus}</div>
       <div class="mb-1">💬 ${o.request || '요청사항 없음'}</div>
       <div class="text-muted small">
-        <i class="bi bi-clock"></i> ${hhmm}
+        <i class="bi bi-clock"></i> ${new Date().toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' })}
       </div>
       <div class="text-danger small mt-1">
         남은시간:
-        <span id="countdown-${o.oNo}" data-expiry="${expiryMs}">--:--</span>
+        <span id="countdown-${o.oNo}">03:00</span>
       </div>
     </div>
     <div class="d-flex flex-column justify-content-between" style="min-width:5rem;">
@@ -542,8 +528,25 @@ function renderNewOrderItem(msg) {
   `;
   ul.prepend(li);
 
-  // ⑤ 카운트다운 시작
-  startCountdown(o.oNo);
+  // ② 카운트다운 직접 구현 (알림이 추가된 시점부터 3분)
+  const countdownEl = document.getElementById(`countdown-${o.oNo}`);
+  if (countdownEl) {
+    let remain = 180;
+    countdownEl.textContent = formatMMSS(remain);
+    const iv = setInterval(() => {
+      remain--;
+      countdownEl.textContent = formatMMSS(remain);
+      if (remain <= 0) {
+        countdownEl.textContent = '00:00';
+        clearInterval(iv);
+      }
+    }, 1000);
+  }
+
+  // ③ 3분 뒤 자동 거절
+  setTimeout(() => {
+    clearBellBlink(); //깜박이
+  }, 180 * 1000); // 3분
 }
 
 //10-b. 헤더 알림 렌더링 (타이머 포함)
@@ -551,43 +554,32 @@ function renderHeaderNotification(msg) {
   const data = JSON.parse(msg.body);
   const badge = document.getElementById('header-notif-badge');
   const list  = document.getElementById('header-notif-list');
-
-  // badge 증가
   badge.textContent = String((parseInt(badge.textContent,10)||0) + 1);
   badge.classList.remove('d-none');
-
-  // placeholder(“알림이 없습니다.”) 제거
   list.querySelector('li.text-muted')?.remove();
 
-  // 3분 뒤 만료 ms
-  const expiryMs = Date.now() + 3 * 60 * 1000;
-
-  // 새 알림 아이템
+  // 3분 카운트다운 UI
   const item = document.createElement('li');
   item.className       = 'notif-item d-flex justify-content-between align-items-center';
   item.dataset.orderNo = data.oNo;
   item.innerHTML = `
     <a class="dropdown-item flex-grow-1 text-truncate"
-       href="/shop/orderDetail?oNo=${data.oNo}">
+       href="/shop/orderManage?status=PENDING">
       새 주문이 도착했습니다.
     </a>
     <span class="text-danger small ms-2">
       <span id="hdr-countdown-${data.oNo}"
-            class="timer"
-            data-expiry="${expiryMs}">--:--</span>
+            class="timer">03:00</span>
     </span>
   `;
-  // “새로운 알림” 헤더(<h6>)를 찾아, 그 부모 <li> 바로 다음에 삽입
   const headerH6 = list.querySelector('h6.dropdown-header');
   const headerLi = headerH6 ? headerH6.closest('li') : null;
   if (headerLi && headerLi.nextSibling) {
     list.insertBefore(item, headerLi.nextSibling);
   } else {
-    // 혹시 헤더를 못 찾으면 맨 뒤로
     list.appendChild(item);
   }
-
-  // 헤더 타이머 시작
+  // 3분 타이머 시작!
   startCountdown(data.oNo, 'hdr-countdown-');
 }
 
@@ -693,42 +685,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 });
 
-// ==== 11. 주문내역 타이머 카운트다운 ================
-// data-expiry 속성(밀리초 UNIX 타임) → 남은시간 표시
-function startHeaderTimers() {
-  document.querySelectorAll('.notif-timer').forEach(el => {
-    const expiry = parseInt(el.dataset.expiry, 10);
-    function tick() {
-      const remainSec = Math.max(0, Math.ceil((expiry - Date.now()) / 1000));
-      el.textContent = formatMMSS(remainSec);   // ← formatMSS 가 아니라 formatMMSS
-      if (remainSec <= 0) clearInterval(iv);
-    }
-    tick();
-    const iv = setInterval(tick, 1000);
-  });
-}
-
-// 초기 페이지 로드 시 실행
-document.addEventListener('DOMContentLoaded', () => {
-  // …STOMP 연결 후…
-  startHeaderTimers();
-});
-
-// ==== 12. 페이지 로드 후 알림·타이머 재초기화 코드 추가 ================
+// ==== 11. 페이지 로드 후 알림·타이머 재초기화 코드 추가 ================
 document.addEventListener('DOMContentLoaded', () => {
   // (1) 벨 깜빡임
   const badge = document.getElementById('header-notif-badge');
   if (badge && +badge.textContent > 0) markBellAsUnread();
 
-  // (2) 헤더 알림 타이머
+  // (2) 헤더 알림 타이머 (여기서 실행!)
   document.querySelectorAll('[id^="hdr-countdown-"]').forEach(el => {
     const oNo = el.id.replace('hdr-countdown-', '');
     startCountdown(oNo, 'hdr-countdown-');
   });
 
-  // (3) 신규주문 리스트 타이머
+  // (3) 신규주문 리스트 타이머 (여기도!)
   document.querySelectorAll('[id^="countdown-"]').forEach(el => {
     const oNo = el.id.replace('countdown-', '');
     startCountdown(oNo);
   });
 });
+

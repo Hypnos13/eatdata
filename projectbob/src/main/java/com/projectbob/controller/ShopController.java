@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.projectbob.domain.*;
 import com.projectbob.service.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import jakarta.servlet.http.*;
 import lombok.extern.slf4j.Slf4j;
@@ -749,13 +750,31 @@ public class ShopController {
 	    return "shop/shopOrders";
 	}
 	
-	//주문정보 출력
+	//주문정보 출력 및 WebSocket 알림 추가
 	@PostMapping("/order")
-    public ResponseEntity<?> createOrder(@RequestBody Map<String,Object> req) {
-        Orders saved = shopService.placeOrder(req);
-        return ResponseEntity.ok(Map.of("oNo", saved.getONo()));
-    }
+	public ResponseEntity<?> createOrder(@RequestBody Map<String,Object> req) {
+	    // 1. 주문 DB 저장
+	    Orders saved = shopService.placeOrder(req);
 
+	    return ResponseEntity.ok(Map.of("oNo", saved.getONo()));
+	}
 	
+	// 1분마다 실행 하는 스케쥴러
+    @Scheduled(fixedRate = 60000)
+    public void autoRejectExpiredOrders() {
+        int minutes = 3; // 3분 경과 주문을 자동 거절
+        List<Orders> expiredOrders = shopService.findPendingOrdersExpired(minutes);
+        if (!expiredOrders.isEmpty()) {
+            log.info("자동 거절 주문 {}건 처리", expiredOrders.size());
+        }
+        for (Orders order : expiredOrders) {
+            shopService.updateOrderStatus(order.getONo(), "REJECTED");
+            // 관리자 페이지에 실시간 알림도 보낼 수 있음
+            messagingTemplate.convertAndSend(
+                "/topic/orderStatus/" + order.getONo(),
+                java.util.Map.of("oNo", order.getONo(), "newStatus", "REJECTED")
+            );
+        }
+    }
 	
 }
