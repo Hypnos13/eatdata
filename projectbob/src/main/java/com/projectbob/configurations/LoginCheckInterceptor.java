@@ -16,7 +16,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 
 		// 비회원도 접근 가능한 URL 목록
 		String[] guestAllowedUrls = {
-			"/", "/main", "/shopList", "/MenuDetail",
+			"/main", "/shopList", "/MenuDetail",
 			"/login", "/joinMember", "/searchIdPass", "/searchIdPassForm",
 			"/naverLogin", "/naverJoin", "/updateNaverMember", "/deleteNaverMember", "/kakao",
 			"/phoneCertify", "/certifyNumber",

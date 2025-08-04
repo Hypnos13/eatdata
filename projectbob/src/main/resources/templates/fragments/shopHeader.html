@@ -1,4 +1,3 @@
-<!-- templates/fragments/shopHeader.html -->
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <header th:fragment="shopHeader" class="header">
     <div class="d-flex align-items-center">
@@ -12,16 +11,14 @@
     </div>
     
     <nav class="d-flex align-items-center">
-	    <!-- 로그인 상태일 때 -->
 	    <th:block th:if="${session.isLogin}">
-	    	<!-- 알림 아이콘 + 뱃지 -->
-			<div id="notifyContainer"
+	    	<div id="notifyContainer"
+			     th:if="${currentShop != null}"
 			     th:attr="data-shop-id=${currentShop.sId}"
 			     class="position-relative me-3 dropdown">
 			  <a href="#" id="headerNotifyBtn" data-bs-toggle="dropdown" aria-expanded="false">
 			    <i id="notifyIcon" class="bi bi-bell-fill fs-4"></i>
 			  </a>
-			  <!-- badge ID -->
 			  <span id="header-notif-badge"
 			        th:text="${session.notifyCount}"
 			        class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1"
@@ -29,10 +26,8 @@
 			    0
 			  </span>
 		
-		        <!-- 드롭다운 메뉴 -->
 				<ul id="header-notif-list" class="dropdown-menu dropdown-menu-end p-2" style="min-width:300px; max-width:500px;" aria-labelledby="headerNotifyBtn">
 			    <li><h6 class="dropdown-header">새로운 알림</h6></li>
-			    <!-- 초기 “알림이 없습니다.” -->
 			    <li class="text-muted mb-0">알림이 없습니다.</li>
 			  </ul>
 			</div>
@@ -42,12 +37,10 @@
 	      <a th:href="@{/myProfile}" class="btn-login">내정보수정</a>
 	    </th:block>
 	    
-	    <!-- 비로그인 상태 -->
 	    <th:block th:unless="${session.isLogin}">
 	      <a th:href="@{/login(from='owner')}" class="btn-login">로그인</a>  
 	    </th:block>
 	    
-	    <!-- master 권한일 때만 보이는 관리 링크 -->
 	    <th:block th:if="${session.loginDivision == 'master'}">
 	    	<a th:href="@{/faqList}" class="btn-register">FAQ관리</a>
 	    	<a th:href="@{/noticeList}" class="btn-register">공지사항관리</a>
