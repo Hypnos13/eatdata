@@ -32,6 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ShopController {
 
+    private final WebsocketService websocketService;
+
 	@Autowired
 	private ShopService shopService;
 
@@ -45,19 +47,15 @@ public class ShopController {
 	private FileUploadService fileUploadService;
 
 	@Autowired
-<<<<<<< HEAD
-	private SimpMessagingTemplate messagingTemplate;
-
-	@Autowired
-	private WebsocketService websocketService;
-
-=======
     private SimpMessagingTemplate messagingTemplate;
 	
 	@Autowired
     private ObjectMapper objectMapper;
+
+    ShopController(WebsocketService websocketService) {
+        this.websocketService = websocketService;
+    }
 	
->>>>>>> develop
 	// 식품영양성분DB API 검색
 	@GetMapping("/api/nutrition-search")
 	@ResponseBody
@@ -140,9 +138,6 @@ public class ShopController {
 		model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
 		return "redirect:shopMain";
 	}
-<<<<<<< HEAD
-
-=======
 	
 	@GetMapping("/shop/delivery")
 	public String deliveryDispatchPage(
@@ -183,8 +178,6 @@ public class ShopController {
 	    return "shop/delivery"; 
 	}
 
-	
->>>>>>> develop
 	/* ----------------------- 메인 ----------------------- */
 	@GetMapping("/shopMain")
 	public String shopMain(@RequestParam(value = "s_id", required = false) Integer sId,
@@ -667,32 +660,45 @@ public class ShopController {
 		return "redirect:/shop/reviewManage?s_id=" + sId;
 	}
 
-	/* ----------------------- 상태별 주문 리스트 ----------------------- */
+	/* ----------------------- 상태별 주문 관리 ----------------------- */
 	@GetMapping("/shop/orderManage")
-	public String orderManage(@RequestParam(value = "status", defaultValue = "PENDING") String status,
-			@SessionAttribute(name = "currentSId", required = false) Integer sId,
-			@SessionAttribute(name = "loginId", required = false) String loginId, Model model) {
+	public String orderManage(
+	        @RequestParam(value = "status", defaultValue = "ALL") String status,
+	        @RequestParam(value = "oNo", required = false) Integer oNo,
+	        @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        Model model) {
 
-		if (loginId == null || sId == null) {
-			return "redirect:/login";
-		}
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    if (currentShop == null) {
+	        return "redirect:/shopMain";
+	    }
 
-		Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
-		if (currentShop == null) {
-			return "redirect:/shopMain";
-		}
+	    List<Orders> orders;
+	    if ("ALL".equals(status)) {
+	        // ALL이란, 거절(REJECTED)·완료(DELIVERED)만 빼고 다 보여주기
+	        orders = shopService.findOrdersByShopId(sId).stream()
+	            .filter(o -> !"REJECTED".equals(o.getStatus()) && !"DELIVERED".equals(o.getStatus()))
+	            .toList();
+	    } else {
+	        // 특정 상태로 필터링 (COOKING, IN_PROGRESS 등)
+	        orders = shopService.findOrdersByStatusAndShop(status, sId);
+	    }
 
-		// 1) PENDING 상태 주문 가져오기
-		List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
+	    model.addAttribute("orders", orders);
+	    model.addAttribute("status", status);
+	    model.addAttribute("currentShop", currentShop);
 
-		// 2) 모델에 담기
-		model.addAttribute("currentShop", currentShop);
-		model.addAttribute("orders", orders);
+	    if (oNo != null) {
+	        model.addAttribute("selectedOrder", shopService.findOrderByNo(oNo));
+	    }
 
-		// 3) shop/shopNewOrders.html 뷰 호출
-		return "shop/shopNewOrders";
+	    return "shop/shopOrderManage";
 	}
-
+	
 	/* ----------------------- 주문 상세 보기 ----------------------- */
 	@GetMapping("/shop/orderDetail")
 	public String orderDetail(@RequestParam("oNo") int oNo,
@@ -737,17 +743,19 @@ public class ShopController {
 	}
 
 	/* ----------------------- 기존 주문 내역 보기 ----------------------- */
-	@GetMapping("/orders")
-	public String viewOrders(@SessionAttribute(name = "currentSId", required = false) Integer sId,
-			@SessionAttribute(name = "loginId", required = false) String loginId, Model model) {
-
-		if (loginId == null || sId == null) {
-			return "redirect:/login";
-		}
-		List<Orders> orders = shopService.findOrdersByShopId(sId);
-		model.addAttribute("orders", orders);
-		model.addAttribute("currentShop", shopService.findByShopIdAndOwnerId(sId, loginId));
-		return "shop/shopOrders";
+	@GetMapping("/shop/orders")
+	public String viewOrders(
+	        @RequestParam("s_id") Integer sId,
+	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        Model model) {
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+	    List<Orders> orders = shopService.findOrdersByShopId(sId);
+	    model.addAttribute("orders", orders);
+	    model.addAttribute("currentShop",
+	           shopService.findByShopIdAndOwnerId(sId, loginId));
+	    return "shop/shopOrders";
 	}
 
 	// 주문정보 출력 및 WebSocket 알림 추가

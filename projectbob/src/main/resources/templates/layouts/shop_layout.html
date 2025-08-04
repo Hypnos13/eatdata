@@ -69,13 +69,13 @@
 		        <div style="font-size:13px;">신규 주문</div>
 		      </a>
 		    </div>
-		    <div class="col-4">
-		      <a href="/orders"
-		         class="card text-center py-3 border-0 bg-light">
-		        <i class="bi bi-receipt fs-3 text-primary"></i>
-		        <div style="font-size:13px;">주문 내역</div>
-		      </a>
-		    </div>
+			<div class="col-4">
+				<a href="/shop/orderManage?status=ALL"
+				   class="card text-center py-3 border-0 bg-light">
+				  <i class="bi bi-receipt fs-3 text-primary"></i>
+				  <div style="font-size:13px;">주문 관리</div>
+				</a>
+			</div>
 		    <div class="col-4">
 		      <a href="/delivery/assign"
 		         class="card text-center py-3 border-0 bg-light">
@@ -110,7 +110,12 @@
 			    가게 공지
 			  </a>
 			</li>
-			
+			<li>
+		      <a class="sidebar-sub-link"
+		         th:href="@{|/shop/orders?s_id=${currentShop.sId}|}">
+		        주문 내역
+		      </a>
+		    </li>
 	      </ul>
 	    </div>
 	  </div>
@@ -192,10 +197,6 @@
 	  <script th:src="@{/js/shop.js}"></script>
 	  <!-- 6) 그 외 스크립트 -->
 	  <script th:src="@{/js/menu.js}"></script>
-<<<<<<< HEAD
 	  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2b87d757b240dd70a51d682dd3cc37ed&libraries=services"></script>
-=======
-	  
->>>>>>> develop
 </body>
 </html>
