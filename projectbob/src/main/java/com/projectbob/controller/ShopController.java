@@ -133,7 +133,7 @@ public class ShopController {
         shopService.insertShop(shop);
 
         model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
-		return "redirect:shopMain";
+		return "redirect:/shopMain";
 	}
 	
 	/* ----------------------- 메인 ----------------------- */

@@ -387,51 +387,60 @@ document.addEventListener('DOMContentLoaded', () => {
   const stompClient = Stomp.over(socket);
 
   // 7.2: STOMP 연결 후 구독 시작
-  stompClient.connect({}, () => {
-    console.log('[shop.js] STOMP connected, shopId=', shopId);
+  stompClient.connect({},
+    // 연결 성공 콜백
+    () => {
+      console.log('[shop.js] STOMP connected, shopId=', shopId);
 
-	// 7.2.1: 신규 주문 알림 구독
-	stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
-	  console.log('[WS 新주문 콜백]', msg, typeof msg.body, msg.body);
-	  try {
-	    const o = JSON.parse(msg.body);
-	    console.log('[WS 新주문] 주문 객체:', o);
-	  } catch(e) {
-	    console.error('JSON parse error:', e, msg.body);
-	  }
+      // 7.2.1: 신규 주문 알림 구독
+      stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
+        console.log('[WS 新주문 콜백]', msg, typeof msg.body, msg.body);
+        try {
+          const o = JSON.parse(msg.body);
+          console.log('[WS 新주문] 주문 객체:', o);
+        } catch(e) {
+          console.error('JSON parse error:', e, msg.body);
+        }
 
-	  // 1) 헤더 알림 + 벨 아이콘 깜빡임 (모든 페이지 공통)
-	  renderHeaderNotification(msg);
-	  markBellAsUnread();
+        // 1) 헤더 알림 + 벨 아이콘 깜빡임 (모든 페이지 공통)
+        renderHeaderNotification(msg);
+        markBellAsUnread();
 
-	  // 2) 신규 주문 리스트가 있는 페이지에서만 렌더링
-	  if (document.getElementById('newOrderList')) {
-	    renderNewOrderItem(msg);
-	  }
-	});
-
-    // 7.2.2: 주문 상태 변경 구독 (헤더 알림 제거)
-    stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
-      console.log('[WS 상태변경_헤더]', msg.body);
-      const { oNo } = JSON.parse(msg.body);
-      removeHeaderNotification(oNo);
-    });
-
-    // 7.2.3: 주문 상태 변경 구독 (테이블 업데이트)
-    document.querySelectorAll('tr[data-order-no]').forEach(row => {
-      const oNo = row.dataset.orderNo;
-      stompClient.subscribe(`/topic/orderStatus/order/${oNo}`, msg => {
-        console.log('[WS 상태변경_테이블]', msg.body);
-        const { newStatus } = JSON.parse(msg.body);
-        const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
-        if (cell) cell.textContent = newStatus;
+        // 2) 신규 주문 리스트가 있는 페이지에서만 렌더링
+        if (document.getElementById('newOrderList')) {
+          renderNewOrderItem(msg);
+        }
       });
-    });
 
-    // 7.2.4: 드롭다운 열림 시 깜빡임 해제
-    document.getElementById('headerNotifyBtn')
-      ?.addEventListener('shown.bs.dropdown', clearBellBlink);
-  });
+      // 7.2.2: 주문 상태 변경 구독 (헤더 알림 제거)
+      stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
+        console.log('[WS 상태변경_헤더]', msg.body);
+        const { oNo } = JSON.parse(msg.body);
+        removeHeaderNotification(oNo);
+      });
+
+      // 7.2.3: 주문 상태 변경 구독 (테이블 업데이트)
+      document.querySelectorAll('tr[data-order-no]').forEach(row => {
+        const oNo = row.dataset.orderNo;
+        stompClient.subscribe(`/topic/orderStatus/order/${oNo}`, msg => {
+          console.log('[WS 상태변경_테이블]', msg.body);
+          const { newStatus } = JSON.parse(msg.body);
+          const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
+          if (cell) cell.textContent = newStatus;
+        });
+      });
+
+      // 7.2.4: 드롭다운 열림 시 깜빡임 해제
+      document.getElementById('headerNotifyBtn')
+        ?.addEventListener('shown.bs.dropdown', clearBellBlink);
+    },
+    // 연결 실패 콜백
+    (error) => {
+      console.error('[shop.js] STOMP 연결에 실패했습니다:', error);
+      // 사용자에게 연결 실패를 알리는 UI 로직을 추가할 수 있습니다.
+      // 예: alert('실시간 알림 서버에 연결하지 못했습니다. 페이지를 새로고침하거나 관리자에게 문의하세요.');
+    }
+  );
 });
 
 // ==== 8. 알림 아이콘 깜박임 제어 ===========================

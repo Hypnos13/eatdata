@@ -1,10 +1,11 @@
+console.log("main.js (top): window.currentUserId =", window.currentUserId);
 var selectedMenuId = null;
 var selectedMenuName = '';
 var selectedMenuPrice = 0;
 var selectedShopId = null;
 var currentQuantity = 1; // 'count' 대신 'currentQuantity'로 변수명 변경 (혼동 방지)
-window.currentUserId = null;  // 로그인 시 서버에서 주입 (예: Thymeleaf)
-window.currentGuestId = null; // 서버에서 발급받아 세션에 있으면 가져옴
+//window.currentUserId = null;  // 로그인 시 서버에서 주입 (예: Thymeleaf)
+//window.currentGuestId = null; // 서버에서 발급받아 세션에 있으면 가져옴
 var currentCartData = []; 
 var currentTotalPrice = 0;
 var currentTotalQuantity = 0;
@@ -2275,14 +2276,11 @@ $(document).on("click", "#btnPayNow", function() {
     });
 });
 
+
+//+++
 // 웹소켓
-window.onload = function() {
-    // 로그인한 사용자 ID가 있는지 확인 (Thymeleaf 등을 통해 서버에서 주입된 값)
-    if (window.currentUserId && window.currentUserId.trim() !== '') {
-        console.log("[WebSocket] User logged in, connecting...");
-        connectWebSocket();
-    }
-};
+//+++
+
 
 function connectWebSocket() {
     const socket = new SockJS('/ws');
@@ -2293,6 +2291,7 @@ function connectWebSocket() {
 
         // 개인화된 주문 상태 업데이트 채널 구독
         stompClient.subscribe('/user/queue/order-updates', function (message) {
+					console.log('--- STOMP SUBSCRIBE CALLBACK ENTERED ---');
             console.log('[WebSocket] Received order update:', message.body);
             const payload = JSON.parse(message.body);
             showOrderNotification(payload);
@@ -2337,4 +2336,13 @@ function showOrderNotification(payload) {
 }
 
 $(document).ready(function() {
+    console.log("main.js: $(document).ready() 실행됨.");
+    // window.currentUserId는 main_layout.html에서 이미 설정됩니다.
+    // 사용자 ID가 있을 경우에만 웹소켓 연결 시도
+    if (window.currentUserId && window.currentUserId.trim() !== '') {
+        console.log("[WebSocket] User logged in, attempting to connect...");
+        connectWebSocket();
+    } else {
+        console.log("[WebSocket] No currentUserId found, WebSocket connection skipped.");
+    }
 });
