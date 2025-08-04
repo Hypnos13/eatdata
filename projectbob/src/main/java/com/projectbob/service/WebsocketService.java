@@ -40,6 +40,12 @@ public class WebsocketService {
         // 테이블 업데이트
         template.convertAndSend("/topic/orderStatus/order/" + oNo, payload);
     }
+
+    // 사용자에게 주문 상태 변경 알림을 보내는 메소드
+    public void sendOrderStatusUpdateToUser(String userId, Map<String, Object> payload) {
+        log.info("[WebSocket] sendOrderStatusUpdateToUser: userId={}, payload={}", userId, payload);
+        template.convertAndSendToUser(userId, "/queue/order-updates", payload);
+    }
     
 	/*
 	 * public void sendNewOrder(int shopId, int orderId) { NewOrder msg = new

@@ -41,6 +41,10 @@ public class ShopController {
 	
 	@Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+	@Autowired
+	private WebsocketService websocketService;
+
 	
 	
 	// 식품영양성분DB API 검색
@@ -704,11 +708,27 @@ public class ShopController {
 	        @PathVariable int oNo,
 	        @RequestParam("newStatus") String newStatus) {
 
+		// 1. 주문 상태를 DB에 업데이트합니다.
 	    shopService.updateOrderStatus(oNo, newStatus);
+
+		// 2. 가게의 다른 관리자 페이지 UI를 실시간으로 업데이트하기 위해 메시지를 보냅니다.
 	    messagingTemplate.convertAndSend(
 	        "/topic/orderStatus/" + oNo,
 	        Map.of("oNo", oNo, "newStatus", newStatus)
 	    );
+
+		// 3. 주문 정보를 조회하여 사용자 ID를 얻습니다.
+		Orders order = shopService.findOrderByNo(oNo);
+		if (order != null && order.getId() != null) {
+			// 4. 해당 사용자에게 개인화된 알림을 보냅니다.
+			Map<String, Object> payload = Map.of(
+				"oNo", oNo,
+				"status", newStatus,
+				"message", "주문이 " + ("ACCEPTED".equals(newStatus) ? "수락" : "취소") + "되었습니다."
+			);
+			websocketService.sendOrderStatusUpdateToUser(order.getId(), payload);
+		}
+
 	    return ResponseEntity.ok(Map.of("success", true));
 	}
 
