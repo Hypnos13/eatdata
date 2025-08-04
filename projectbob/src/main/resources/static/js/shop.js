@@ -1,28 +1,32 @@
-// ==== 1. Shop / Menu 가입 폼 검증 ============================
-$(function() {
-	
-	$("#shopJoinForm").on("submit", shopJoinFormCheck);
-	$("#menuJoinForm").on("submit", menuJoinFormCheck);
+function findZipcode() {
+	new daum.Postcode({
+		oncomplete: function(data) {
+			let addr = data.roadAddress;
+			let extraAddr = '';
+			if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+				extraAddr += data.bname;
+			}
+			if(data.buildingName !== '' && data.apartment === 'Y'){
+			   extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+			}
+			if(extraAddr !== ''){
+				extraAddr = ' (' + extraAddr + ')';
+			}
+			addr += extraAddr;
+			$("#zipcode").val(data.zonecode);
+			$("#address1").val(addr);
+			$("#address2").focus();
+    	}
+	}).open();
+}
 
-	//우편번호찾기
-	//$("#btnZipcode").click(findZipcode);
-	const $btnZip = $("#btnZipcode");
-	  if ($btnZip.length && typeof findZipcode === 'function') {
-	    $btnZip.click(findZipcode);
-	  }
-});
-
-function shopJoinFormCheck(isShopJoinForm) {
-	if($("#sNumber").val().length != 10 ) {
+function shopJoinFormCheck() {
+	if($("#sNumber").val().replace(/-/g, '').length != 10 ) {
 		alert("사업자 등록번호는 10자리입니다.")
 		$("#sNumber").focus();
 		return false;
 	}
-	/*if(isShopJoinForm && $("#isSNumCheck").val() == 'false') {
-		alert("사업자번호 체크를 해주세요");
-		return false;
-	}*/
-	if($("#owner").val().length ==0 ) {
+	if($("#owner").val().length == 0 ) {
 		alert("대표자 명을 입력해주세요.")
 		return false;
 	}
@@ -32,236 +36,266 @@ function shopJoinFormCheck(isShopJoinForm) {
 		$("#phone").focus();
 		return false;
 	}
-	if($("#name").val().length ==0 ) {
+	if($("#name").val().length == 0 ) {
 		alert("가게 이름을 입력해주세요.")
 		return false;
 	}
-	if($("#zipcode").val().length ==0 ) {
+	if($("#zipcode").val().length == 0 ) {
 		alert("우편번호를 입력해주세요.")
 		return false;
 	}
-	if($("#address2").val().length ==0 ) {
+	if($("#address2").val().length == 0 ) {
 		alert("상세주소를 입력해주세요.")
 		return false;
 	}
+    return true; // 모든 검증 통과 시 true 반환
 }
 
 function menuJoinFormCheck() {
-	if($("#category").val().length ==0 ) {
+	if($("#category").val().length == 0 ) {
 		alert("카테고리를 입력해주세요.")
 		return false;
 	}
-	if($("#name").val().length ==0 ) {
+	if($("#name").val().length == 0 ) {
 		alert("메뉴 이름을 입력해주세요.")
 		return false;
 	}
-	if($("#price").val().length ==0 ) {
+	if($("#price").val().length == 0 ) {
 		alert("가격을 입력해주세요.")
 		return false;
 	}
-	if($("#mInfo").val().length ==0 ) {
+	if($("#mInfo").val().length == 0 ) {
 		alert("메뉴 설명을 입력해주세요.")
 		return false;
 	}
+    return true; // 모든 검증 통과 시 true 반환
 }
 
-// ==== 2. 입력값 포맷팅 유틸 ================================
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // ===== 1. 입력 시 하이픈(-) 자동 생성 기능 =====
-    const sNumberInputForFormatting = document.getElementById('sNumber');
-    if (sNumberInputForFormatting) {
-        sNumberInputForFormatting.addEventListener('input', function(event) {
-            let value = event.target.value.replace(/[^0-9]/g, '');
-            if (value.length > 10) {
-                value = value.substring(0, 10);
-            }
 
-            let formattedValue = '';
-            if (value.length < 4) {
-                formattedValue = value;
-            } else if (value.length < 6) {
-                formattedValue = value.substring(0, 3) + '-' + value.substring(3);
-            } else {
-                formattedValue = value.substring(0, 3) + '-' + value.substring(3, 5) + '-' + value.substring(5);
-            }
-            event.target.value = formattedValue;
-        });
-    }
+// ==== 2. jQuery Document Ready - 모든 이벤트 리스너 및 기능 실행 ====
+$(function() {
 
-    // ===== 2. 폼 제출 시 하이픈(-) 제거 기능 (새로 추가된 부분) =====
-    const shopJoinForm = document.getElementById('shopJoinForm');
-    if (shopJoinForm) {
-        shopJoinForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // 폼 자동 전송 중단
-
+    // ===== 2.1. 폼 검증 및 공통 이벤트 바인딩 =====
+    $("#shopJoinForm").on("submit", function(e) {
+        if (!shopJoinFormCheck()) {
+            e.preventDefault();
+        } else {
+            // 폼 제출 시 하이픈 제거
             const sNumberInput = document.getElementById('sNumber');
-            // 사업자등록번호 값에서 하이픈 제거
-            sNumberInput.value = sNumberInput.value.replace(/-/g, '');
+            if (sNumberInput) {
+                sNumberInput.value = sNumberInput.value.replace(/-/g, '');
+            }
+        }
+    });
 
-            // 다른 전화번호 필드 등도 숫자만 보내고 싶다면 아래처럼 추가 가능
-            // const phoneInput = document.getElementById('phone');
-            // phoneInput.value = phoneInput.value.replace(/-/g, '');
+    $("#menuJoinForm").on("submit", function(e) {
+        if (!menuJoinFormCheck()) e.preventDefault();
+    });
 
-            this.submit(); // 정리된 값으로 폼 전송
+    $("#btnZipcode").on("click", findZipcode);
+
+    // ===== 2.2. 입력값 포맷팅 유틸 =====
+    $('#sNumber').on('input', function(event) {
+        let value = this.value.replace(/[^0-9]/g, '');
+        if (value.length > 10) value = value.substring(0, 10);
+        
+        let formattedValue = '';
+        if (value.length < 4) formattedValue = value;
+        else if (value.length < 6) formattedValue = value.substring(0, 3) + '-' + value.substring(3);
+        else formattedValue = value.substring(0, 3) + '-' + value.substring(3, 5) + '-' + value.substring(5);
+        this.value = formattedValue;
+    });
+
+    $('#phone').on('input', function(event) {
+        let value = this.value.replace(/[^0-9]/g, '');
+        if (value.length > 11) value = value.substring(0, 11);
+
+        let formattedValue = '';
+        if (value.length < 4) formattedValue = value;
+        else if (value.length < 8) formattedValue = value.substring(0, 3) + '-' + value.substring(3);
+        else formattedValue = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7);
+        this.value = formattedValue;
+    });
+				
+    // ===== 2.3. 영양성분 검색 기능 =====
+    const $btnSearch = $('#btnSearchNutrition');
+    if ($btnSearch.length) {
+        const $menuNameInput = $('#name');
+        const $resultsList = $('#nutrition-results');
+        const $selectedInfoDiv = $('#selected-nutrition-info');
+
+        $btnSearch.on('click', async function() {
+            const foodName = $menuNameInput.val();
+            if (!foodName) {
+                alert('메뉴 이름을 먼저 입력해주세요.');
+                return;
+            }
+            try {
+                const response = await fetch(`/api/nutrition-search?foodName=${encodeURIComponent(foodName)}`);
+                const result = await response.json();
+                
+                $resultsList.empty(); 
+                
+                if (result.body && result.body.items && result.body.items.length > 0) {
+                    $resultsList.show();
+                    result.body.items.forEach(item => {
+                        const $li = $('<li></li>')
+                            .addClass('list-group-item list-group-item-action')
+                            .css('cursor', 'pointer')
+                            .text(`${item.FOOD_NM_KR} (1회 제공량: ${item.SERVING_SIZE}, 열량: ${item.AMT_NUM1}kcal)`)
+                            .data({
+                                servingSize: item.SERVING_SIZE.replace(/[^0-9.]/g, ''),
+                                calories: item.AMT_NUM1,
+                                carbs: item.AMT_NUM6,
+                                protein: item.AMT_NUM4,
+                                fat: item.AMT_NUM5,
+                                sugar: item.AMT_NUM7,
+                                sodium: item.AMT_NUM13
+                            });
+                        $resultsList.append($li);
+                    });
+                } else {
+                    $resultsList.html('<li class="list-group-item">검색 결과가 없습니다.</li>').show();
+                }
+            } catch (error) {
+                console.error('Error fetching nutrition data:', error);
+                alert('영양 정보를 불러오는 데 실패했습니다.');
+            }
+        });
+        
+        $resultsList.on('click', 'li', function() {
+            const $selectedItem = $(this);
+            const data = $selectedItem.data();
+
+            $('input[name="servingSize"]').val(data.servingSize || 0);
+            $('input[name="calories"]').val(data.calories || 0);
+            $('input[name="carbs"]').val(data.carbs || 0);
+            $('input[name="protein"]').val(data.protein || 0);
+            $('input[name="fat"]').val(data.fat || 0);
+            $('input[name="sugar"]').val(data.sugar || 0);
+            $('input[name="sodium"]').val(data.sodium || 0);
+            
+            $selectedInfoDiv.text(`✅ ${$selectedItem.text()} 의 영양성분이 선택되었습니다.`).show();
+            $resultsList.hide();
         });
     }
 		
-		// 폰번호 포맷팅
-		const phoneNumberInput = document.getElementById('phone');
+		// ## [배달 대행 호출] 페이지 전용 스크립트 (최종 완성본) ##
+		const $dispatchMapContainer = $('#map');
+		if ($dispatchMapContainer.length) {
+		    kakao.maps.load(function() {
+		        const $shopInfoEl = $('#shopData');
+		        const $waitingOrdersEl = $('#waitingOrdersData');
 
-		    if (phoneNumberInput) { // 요소가 존재하는지 확인
-		        phoneNumberInput.addEventListener('input', function(event) {
-		            let value = event.target.value.replace(/[^0-9]/g, ''); // 숫자 이외의 문자 제거
+		        if ($shopInfoEl.length && $waitingOrdersEl.length) {
+		            const shopInfo = $shopInfoEl.data('shop');
+		            const orderList = $waitingOrdersEl.data('orders');
+		            const shopFullAddress = shopInfo.address1 + ' ' + shopInfo.address2;
+		            let currentSelectedOrderId = orderList.length > 0 ? orderList[0].ono : null;
 
-		            if (value.length > 11) {
-		                value = value.substring(0, 11); // 11자리 초과 시 잘라냄
+		            const map = new kakao.maps.Map($dispatchMapContainer[0], {
+		                center: new kakao.maps.LatLng(37.480987, 126.952227),
+		                level: 3
+		            });
+		            const geocoder = new kakao.maps.services.Geocoder();
+		            let markers = [];
+
+		            function updateMapAndDetails(order) {
+		                if (!order) return;
+		                markers.forEach(marker => marker.setMap(null));
+		                markers = [];
+
+		                if (shopFullAddress) {
+		                    geocoder.addressSearch(shopFullAddress, function(result, status) {
+		                        if (status === kakao.maps.services.Status.OK && result.length > 0) {
+		                            const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+		                            markers.push(new kakao.maps.Marker({ map: map, position: coords, title: '픽업지' }));
+		                            map.setCenter(coords);
+		                        }
+		                    });
+		                }
+
+		                if (order.oaddress) {
+		                    geocoder.addressSearch(order.oaddress, function(result, status) {
+		                        if (status === kakao.maps.services.Status.OK && result.length > 0) {
+		                            const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+		                            const markerImage = new kakao.maps.MarkerImage('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', new kakao.maps.Size(64, 69), { offset: new kakao.maps.Point(27, 69) });
+		                            markers.push(new kakao.maps.Marker({ map: map, position: coords, title: '도착지', image: markerImage }));
+		                        }
+		                    });
+		                }
+		                
+		                $('#customerAddress').text(order.oaddress || '주소 정보 없음');
 		            }
 
-		            let formattedValue = '';
-		            if (value.length < 4) {
-		                formattedValue = value;
-		            } else if (value.length < 8) {
-		                formattedValue = value.substring(0, 3) + '-' + value.substring(3);
-		            } else {
-		                formattedValue = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7);
+		            if (orderList && orderList.length > 0) {
+		                updateMapAndDetails(orderList[0]);
+		            }
+		            
+		            $('.order-list').on('click', '.order-card', function() {
+		                const $clickedCard = $(this);
+		                currentSelectedOrderId = parseInt($clickedCard.data('orderId')); // 현재 선택된 주문 ID 업데이트
+		                const selectedOrder = orderList.find(order => order.ono === currentSelectedOrderId);
+		                if (!selectedOrder) return;
+
+		                $('.order-card').removeClass('active');
+		                $clickedCard.addClass('active');
+		                updateMapAndDetails(selectedOrder);
+		            });
+
+		            // --- 모달 관련 스크립트 ---
+		            const $pickupSelect = $('#pickupTimeSelect');
+		            const $deliverySelect = $('#deliveryTimeSelect');
+		            const $pickupDisplay = $('#pickupTimeDisplay');
+		            const $deliveryDisplay = $('#deliveryTimeDisplay');
+
+		            function formatTime(date) {
+		                const hours = String(date.getHours()).padStart(2, '0');
+		                const minutes = String(date.getMinutes()).padStart(2, '0');
+		                return `${hours}:${minutes}`;
 		            }
 
-		            event.target.value = formattedValue;
-		        });
-		    }
-				
-		// ==== 3. 영양성분 검색 =====================================
-		const btnSearch = document.getElementById('btnSearchNutrition');
-		const menuNameInput = document.getElementById('name');
-		const resultsList = document.getElementById('nutrition-results');
-		const selectedInfoDiv = document.getElementById('selected-nutrition-info');
+		            function updateDisplayTimes() {
+		                const now = new Date();
+		                const pickupMinutes = parseInt($pickupSelect.val());
+		                const deliveryMinutes = parseInt($deliverySelect.val());
 
-		if (btnSearch) {
-		    // '영양성분 검색' 버튼 클릭 이벤트
-		    btnSearch.addEventListener('click', async function() {
-		        const foodName = menuNameInput.value;
-		        if (!foodName) {
-		            alert('메뉴 이름을 먼저 입력해주세요.');
-		            return;
-		        }
+		                const pickupTime = new Date(now.getTime() + pickupMinutes * 60000);
+		                const deliveryTime = new Date(now.getTime() + deliveryMinutes * 60000);
 
-		        try {
-		            const response = await fetch(`/api/nutrition-search?foodName=${encodeURIComponent(foodName)}`);
-		            const resultStr = await response.text();
-		            const result = JSON.parse(resultStr);
-		            
-		            resultsList.innerHTML = ''; // 이전 결과 초기화
-		            
-		            if (result.body && result.body.items && result.body.items.length > 0) {
-		                resultsList.style.display = 'block';
-		                result.body.items.forEach(item => {
-		                    const li = document.createElement('li');
-		                    li.className = 'list-group-item list-group-item-action';
-		                    li.style.cursor = 'pointer';
-		                    li.textContent = `${item.FOOD_NM_KR} (1회 제공량: ${item.SERVING_SIZE}, 열량: ${item.AMT_NUM1}kcal)`;
-		                    
-												li.dataset.servingSize = item.SERVING_SIZE.replace(/[^0-9.]/g, '');
-		                    li.dataset.calories = item.AMT_NUM1;
-		                    li.dataset.carbs = item.AMT_NUM6;
-		                    li.dataset.protein = item.AMT_NUM3;
-		                    li.dataset.fat = item.AMT_NUM4;
-												li.dataset.sfa = item.AMT_NUM24;
-												li.dataset.sugar = item.AMT_NUM7;
-		                    li.dataset.sodium = item.AMT_NUM13;
-		                    
-		                    resultsList.appendChild(li);
-		                });
-		            } else {
-		                resultsList.innerHTML = '<li class="list-group-item">검색 결과가 없습니다.</li>';
-		                resultsList.style.display = 'block';
+		                $pickupDisplay.text(`(${formatTime(pickupTime)})`);
+		                $deliveryDisplay.text(`(${formatTime(deliveryTime)})`);
 		            }
-		        } catch (error) {
-		            console.error('Error fetching nutrition data:', error);
-		            alert('영양 정보를 불러오는 데 실패했습니다.');
-		        }
-		    });
-		    
-		    // 검색 결과 리스트에서 항목을 클릭했을 때의 동작
-		    resultsList.addEventListener('click', function(e) {
-		        // 클릭된 요소가 LI 태그일 때만 실행
-		        if (e.target && e.target.nodeName === 'LI') {
-		            const selectedItem = e.target;
-		            const { servingSize, calories, carbs, protein, fat, sfa, sugar, sodium } = selectedItem.dataset;
+		            
+		            $pickupSelect.on('change', updateDisplayTimes);
+		            $deliverySelect.on('change', updateDisplayTimes);
+		            
+		            $('#dispatchModal').on('show.bs.modal', function () {
+		                updateDisplayTimes();
+		            });
 
-		            // form 안에 있는 hidden input들을 찾아서 값을 채워줍니다.
-		            document.querySelector('input[name="servingSize"]').value = servingSize || 0;
-		            document.querySelector('input[name="calories"]').value = calories || 0;
-		            document.querySelector('input[name="carbs"]').value = carbs || 0;
-		            document.querySelector('input[name="protein"]').value = protein || 0;
-		            document.querySelector('input[name="fat"]').value = fat || 0;
-								document.querySelector('input[name="sfa"]').value = sfa || 0;
-								document.querySelector('input[name="sugar"]').value = sugar || 0;
-		            document.querySelector('input[name="sodium"]').value = sodium || 0;
-		            
-		            selectedInfoDiv.textContent = `✅ ${selectedItem.textContent} 의 영양성분이 선택되었습니다.`;
-		            selectedInfoDiv.style.display = 'block';
-		            
-		            resultsList.style.display = 'none';
+		            $('#btnConfirmDispatch').on('click', function() {
+		                const dispatchData = {
+		                    orderId: currentSelectedOrderId,
+		                    agency: $('#deliveryAgencySelect').val(),
+		                    pickupAfterMinutes: parseInt($pickupSelect.val()),
+		                    deliveryAfterMinutes: parseInt($deliverySelect.val())
+		                };
+
+		                // (나중에 이 부분에 웹소켓 전송 코드가 들어갑니다)
+		                console.log("배차 요청 데이터:", dispatchData);
+		                alert(`주문번호 ${dispatchData.orderId}에 대한 배차를 요청했습니다.`);
+
+		                const modal = bootstrap.Modal.getInstance(document.getElementById('dispatchModal'));
+		                modal.hide();
+		                
+		                // (나중에) 성공적으로 요청이 가면, 좌측 목록에서 해당 주문을 제거하는 로직 추가
+		                // $(`.order-card[data-order-id="${dispatchData.orderId}"]`).remove();
+		            });
 		        }
 		    });
 		}
 		
-	    // ## [배달 대행 호출] 페이지 전용 스크립트 ##
-	    
-	    const dispatchMapContainer = document.getElementById('map');
-	
-	    // 'map'이라는 id를 가진 요소가 있는 페이지에서만 이 코드를 실행합니다.
-	    if (dispatchMapContainer) {
-			// HTML의 data-* 속성에서 JSON 문자열을 읽어옵니다.
-	        const shopInfoEl = document.getElementById('shopData');
-	        const waitingOrdersEl = document.getElementById('waitingOrdersData');
-	
-	        // shopData와 waitingOrdersData 요소가 모두 있을 때만 아래 로직을 실행합니다.
-	        if (shopInfoEl && waitingOrdersEl) {
-	            // data-* 속성의 값을 JSON 객체로 파싱(변환)합니다.
-	            const shopInfo = JSON.parse(shopInfoEl.dataset.shop);
-	            const orderList = JSON.parse(waitingOrdersEl.dataset.orders);
-	            const shopFullAddress = shopInfo.address1 + ' ' + shopInfo.address2;
-				            
-	            const mapOption = { 
-	                center: new kakao.maps.LatLng(37.566826, 126.9786567), // 기본 중심 좌표
-	                level: 3 
-	            };
-	            const map = new kakao.maps.Map(dispatchMapContainer, mapOption);
-	            const geocoder = new kakao.maps.services.Geocoder();
-	
-	            // 마커를 표시하는 함수
-	            function displayMarkers(shopAddress, customerAddress) {
-	                // 픽업지 마커
-	                geocoder.addressSearch(shopAddress, function(result, status) {
-	                    if (status === kakao.maps.services.Status.OK) {
-	                        const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-	                        new kakao.maps.Marker({ map: map, position: coords, title: '픽업지' });
-	                        map.setCenter(coords);
-	                    }
-	                });
-	
-	                // 도착지 마커
-	                geocoder.addressSearch(customerAddress, function(result, status) {
-	                    if (status === kakao.maps.services.Status.OK) {
-	                        const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-	                        const markerImage = new kakao.maps.MarkerImage(
-	                            'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', 
-	                            new kakao.maps.Size(64, 69), 
-	                            { offset: new kakao.maps.Point(27, 69) }
-	                        );
-	                        new kakao.maps.Marker({ map: map, position: coords, title: '도착지', image: markerImage });
-	                    }
-	                });
-	            }
-	
-	            // 페이지 로드 시 첫 번째 주문 기준으로 마커 표시
-	            if (orderList.length > 0) {
-	                displayMarkers(shopFullAddress, orderList[0].oAddress);
-	            }
-	        }
-	    }
 });
 
 // ==== 4. 카카오맵 표시 =====================================

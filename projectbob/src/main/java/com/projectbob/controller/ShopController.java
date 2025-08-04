@@ -46,7 +46,6 @@ public class ShopController {
 	@Autowired
     private ObjectMapper objectMapper;
 	
-	
 	// 식품영양성분DB API 검색
 	@GetMapping("/api/nutrition-search")
 	@ResponseBody
@@ -136,49 +135,44 @@ public class ShopController {
 		return "redirect:shopMain";
 	}
 	
-	// 배달페이지 임시
 	@GetMapping("/shop/delivery")
 	public String deliveryDispatchPage(
-            @SessionAttribute(name = "loginId", required = false) String loginId,
-            @SessionAttribute(name = "currentSId", required = false) Integer sId,
-            Model model) {
+	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	        Model model) {
 
-        if (loginId == null || sId == null) {
-            return "redirect:/login";
-        }
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
 
-        Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
-        if (currentShop == null) {
-            return "redirect:/shopMain";
-        }
-        
-        List<Orders> waitingOrders = shopService.findOrdersByStatusAndShop("ACCEPTED", sId);
-        Orders selectedOrder = waitingOrders.isEmpty() ? null : waitingOrders.get(0);
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    if (currentShop == null) {
+	        return "redirect:/shopMain";
+	    }
+	    
+	    List<Orders> waitingOrders = bobService.findOrdersByStatusAndShop("ACCEPTED", sId);
+	    Orders selectedOrder = waitingOrders.isEmpty() ? null : waitingOrders.get(0);
+	    List<String> deliveryAgencies = Arrays.asList("생각대로", "바로고", "부릉", "기타");
 
-        try {
-            // ✨ 2. Controller에서 Java 객체를 JSON 문자열로 미리 변환합니다.
-            String shopJson = objectMapper.writeValueAsString(currentShop);
-            String waitingOrdersJson = objectMapper.writeValueAsString(waitingOrders);
+	    try {
+	        String shopJson = objectMapper.writeValueAsString(currentShop);
+	        String waitingOrdersJson = objectMapper.writeValueAsString(waitingOrders);
 
-            // ✨ 3. 변환된 JSON "문자열"을 모델에 담습니다.
-            model.addAttribute("shopJson", shopJson);
-            model.addAttribute("waitingOrdersJson", waitingOrdersJson);
+	        model.addAttribute("shopJson", shopJson);
+	        model.addAttribute("waitingOrdersJson", waitingOrdersJson);
+	    } catch (Exception e) {
+	        log.error("JSON 변환 오류", e);
+	        model.addAttribute("shopJson", "{}");
+	        model.addAttribute("waitingOrdersJson", "[]");
+	    }
 
-        } catch (Exception e) {
-            log.error("JSON 변환 오류", e);
-            // JSON 변환 실패 시 비어있는 데이터 전달
-            model.addAttribute("shopJson", "{}");
-            model.addAttribute("waitingOrdersJson", "[]");
+	    model.addAttribute("shop", currentShop);
+	    model.addAttribute("waitingOrders", waitingOrders);
+	    model.addAttribute("selectedOrder", selectedOrder);
+	    model.addAttribute("deliveryAgencies", deliveryAgencies);
 
-        }
-
-        // 기존 데이터는 그대로 전달합니다.
-        model.addAttribute("shop", currentShop);
-        model.addAttribute("waitingOrders", waitingOrders);
-        model.addAttribute("selectedOrder", selectedOrder);
-
-        return "shop/delivery"; 
-    }
+	    return "shop/delivery"; 
+	}
 
 	
 	/* ----------------------- 메인 ----------------------- */
