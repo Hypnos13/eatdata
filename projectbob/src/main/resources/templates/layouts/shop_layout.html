@@ -57,22 +57,29 @@
 			</div>
 
         <!-- 아이콘 메뉴 리스트 -->
-        <div class="sidebar-icon-list mb-3 mt-2">
+		<div class="sidebar-icon-list mb-3 mt-2">
 		  <div class="row g-2">
+		    <!-- 1. 신규주문(PENDING) -->
 		    <div class="col-4">
-		      <a href="/shop/orderManage?status=PENDING"
+		      <a th:href="@{/shop/orderManage(status='PENDING')}"
+		         th:classappend="${status=='PENDING'} ? ' border-primary' : ''"
 		         class="card text-center py-3 border-0 bg-light">
 		        <i class="bi bi-bell fs-3 text-warning"></i>
 		        <div style="font-size:13px;">신규 주문</div>
 		      </a>
 		    </div>
+
+		    <!-- 2. 주문관리(ACCEPTED 기본) -->
 			<div class="col-4">
-				<a href="/shop/orderManage?status=ALL"
-				   class="card text-center py-3 border-0 bg-light">
-				  <i class="bi bi-receipt fs-3 text-primary"></i>
-				  <div style="font-size:13px;">주문 관리</div>
-				</a>
+			  <a th:href="@{/shop/orderManage(status='ALL')}"
+			     class="card text-center py-3 border-0 bg-light"
+			     th:classappend="${status=='ALL'} ? ' bg-primary text-white'">
+			    <i class="bi bi-receipt fs-3"></i>
+			    <div style="font-size:13px;">주문 관리</div>
+			  </a>
 			</div>
+
+		    <!-- 3. 배차관리(외부 링크) -->
 		    <div class="col-4">
 		      <a href="/delivery/assign"
 		         class="card text-center py-3 border-0 bg-light">

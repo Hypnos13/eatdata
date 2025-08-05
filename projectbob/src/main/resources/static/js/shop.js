@@ -1,3 +1,26 @@
+// ==== 주문관리 배달시작/완료 버튼 ====
+let stompClient;       // 전역으로 빼서 나중에도 접근 가능하게
+window.changeStatus = function(oNo, newStatus) {
+  // stompClient 가 아직 연결되기 전일 수도 있으니
+  if (!stompClient) return;
+
+  stompClient.send(
+    '/app/order/changeStatus',
+    {}, 
+    JSON.stringify({ oNo: oNo, newStatus: newStatus })
+  );
+};
+
+// 그 다음에 DOMContentLoaded 안에서 stompClient 연결
+document.addEventListener('DOMContentLoaded', () => {
+  const socket = new SockJS('/ws');
+  stompClient = Stomp.over(socket);
+
+  stompClient.connect({}, () => {
+    // (주문 상세 갱신, 리스트 갱신 구독 로직)
+  });
+});
+
 // ==== 알림 렌더링 헬퍼 함수 ====
 // 기존 리스트를 완전히 지우는 함수
 function clearHeaderList() {
@@ -20,7 +43,7 @@ function renderPendingOrders(orderIds) {
       li.dataset.orderNo = oNo;
       li.innerHTML = `
         <a class="dropdown-item text-truncate"
-           href="/shop/orderManage?status=NEW&oNo=${oNo}">
+           href="/shop/orderManage?status=PENDING&oNo=${oNo}">
           신규 주문 #${oNo} 알림이 도착했습니다.
         </a>`;
       ul.appendChild(li);
@@ -612,9 +635,8 @@ window.acceptOrder = function(oNo) {
   })
   .then(data => {
     if (data.success) {
-      // 성공 시 UI 처리
-      document.querySelector(`button[onclick="acceptOrder(${oNo})"]`)?.closest('li').remove();
-      location.href = '/shop/orderManage?status=IN_PROGRESS';
+      // 바로 새 화면으로 이동
+      location.href = '/shop/orderManage?status=ACCEPTED';
     } else {
       throw new Error('상태 변경 실패');
     }
@@ -634,14 +656,15 @@ window.rejectOrder = function(oNo) {
     return res.json();
   })
   .then(data => {
-    if (data.success) {
-      document.querySelector(`button[onclick="rejectOrder(${oNo})"]`)?.closest('li').remove();
-    } else {
-      throw new Error('거절 실패');
-    }
-  })
-  .catch(() => alert('주문 거절에 실패했습니다.'));
-};
+      if (data.success) {
+        // 개별 remove 없이 전체 화면 갱신
+        location.href = '/shop/orderManage?status=PENDING';
+      } else {
+        throw new Error('거절 실패');
+      }
+    })
+    .catch(() => alert('주문 거절에 실패했습니다.'));
+  };
 
 // ==== 11. 렌더링 헬퍼 =====================================
 function renderNewOrderItem(msg) {
@@ -805,7 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('[data-order-no]');
     const oNo       = container ? container.dataset.orderNo : 0;
 
-    fetch(`/shop/orderManage/${oNo}/status`, {
+    fetch(`/shop/order/${oNo}/status`, {
       method:  'POST',
       headers: { 'Content-Type':'application/x-www-form-urlencoded' },
       body:    'newStatus=' + newStatus
@@ -847,8 +870,16 @@ function selectNewOrder(el) {
   `;
 }
 
-// 최초 진입 시 첫 주문 자동 표시
+// newOrders 전용 요소(#newOrderList)가 있을 때만 실행
+if (document.getElementById('newOrderList')) {
+  // 1) 클릭 이벤트 바인딩
+  document.querySelectorAll('.order-list .order-card')
+    .forEach(card => {
+      card.addEventListener('click', () => selectNewOrder(card));
+    });
+  // 2) 최초 진입 시 첫 주문 자동 표시
 document.addEventListener('DOMContentLoaded', function() {
   const firstCard = document.querySelector('.order-card');
   if (firstCard) selectNewOrder(firstCard);
 });
+};

@@ -7,178 +7,222 @@
   <meta charset="UTF-8">
   <title>주문 관리</title>
   <style>
-    .main-container { display: flex; height: calc(100vh - 70px); }
-    .order-list-panel {
-      width: 360px; background: #fff; border-right:1px solid #dee2e6;
-      display:flex;flex-direction:column;
-    }
-    .order-list-header {
-      padding:1rem; font-weight:bold; border-bottom:1px solid #dee2e6;
-    }
-    .order-list { overflow-y:auto; flex-grow:1; }
-    .order-card {
-      padding:.75rem 1rem; border-bottom:1px solid #e9ecef;
-      cursor:pointer; transition:background .2s;
-      text-decoration:none; color:inherit; display:block;
-    }
-    .order-card:hover { background:#f8f9fa; }
-    .order-card.active { background:#e6f9f2; border-left:4px solid #43D091; }
-    .order-card-title { font-weight:bold; display:flex; justify-content:space-between; }
-    .order-card-detail { font-size:.9rem; color:#495057; margin-top:.25rem; }
-    .order-detail-panel {
-      flex-grow:1; padding:2rem; background:#fafafa; overflow-y:auto;
-    }
-    /* 타임라인 스타일 */
-    .status-steps { display:flex; counter-reset:step; margin:2rem 0; list-style:none; padding:0; }
-    .status-steps li {
-      position:relative; flex:1; text-align:center;
-    }
-    .status-steps li:before {
-      counter-increment:step;
-      content:counter(step);
-      width:2rem; height:2rem; line-height:2rem;
-      border:2px solid #ccc; border-radius:50%;
-      background:#fff; display:block; margin:0 auto; z-index:1;
-    }
-    .status-steps li:after {
-      content:''; position:absolute;
-      width:100%; height:2px; background:#ccc;
-      top:1rem; left:-50%; z-index:0;
-    }
-    .status-steps li:first-child:after { display:none; }
-    .status-steps li.completed:before,
-    .status-steps li.completed:after {
-      background:#43D091; border-color:#43D091;
-    }
-    .status-steps li span { display:block; margin-top:.5rem; font-size:.9rem; }
-    .btn-group { margin-top:1.5rem; }
-  </style>
+      .main-container { display: flex; height: calc(100vh - 70px); }
+      .order-list-panel {
+        width: 360px;
+        background: #fff;
+        border-right:1px solid #dee2e6;
+        display: flex;
+        flex-direction: column;
+      }
+      .order-list-header {
+        padding:1rem;
+        font-weight:bold;
+        border-bottom:1px solid #dee2e6;
+      }
+      .order-list { overflow-y:auto; flex-grow:1; }
+      .order-card {
+        padding:.75rem 1rem;
+        border-bottom:1px solid #e9ecef;
+        cursor:pointer;
+        transition:background .2s;
+        text-decoration:none;
+        color:inherit;
+        display:block;
+      }
+      .order-card:hover { background:#f8f9fa; }
+      .order-card.active {
+        background:#e6f9f2;
+        border-left:4px solid #43D091;
+      }
+      .order-card-title {
+        font-weight:bold;
+        display:flex;
+        justify-content:space-between;
+      }
+      .order-card-detail {
+        font-size:.9rem;
+        color:#495057;
+        margin-top:.25rem;
+      }
+      .order-detail-panel {
+        flex-grow:1;
+        padding:2rem;
+        background:#fafafa;
+        overflow-y:auto;
+      }
+      /* 타임라인 */
+      .status-steps {
+        display:flex;
+        counter-reset:step;
+        margin:2rem 0;
+        list-style:none;
+        padding:0;
+      }
+      .status-steps li {
+        position:relative;
+        flex:1;
+        text-align:center;
+      }
+      .status-steps li:before {
+        counter-increment:step;
+        content:counter(step);
+        width:2rem; height:2rem; line-height:2rem;
+        border:2px solid #ccc;
+        border-radius:50%;
+        background:#fff;
+        display:block;
+        margin:0 auto;
+        z-index:1;
+      }
+      .status-steps li:after {
+        content:'';
+        position:absolute;
+        width:100%; height:2px;
+        background:#ccc;
+        top:1rem; left:-50%;
+        z-index:0;
+      }
+      .status-steps li:first-child:after { display:none; }
+      .status-steps li.completed:before,
+      .status-steps li.completed:after {
+        background:#43D091;
+        border-color:#43D091;
+      }
+      .status-steps li span {
+        display:block;
+        margin-top:.5rem;
+        font-size:.9rem;
+      }
+      .btn-group { margin-top:1.5rem; }
+    </style>
 </head>
 <body>
-<th:block layout:fragment="content">
-  <div class="main-container">
-    
-    <!-- 좌측 주문 리스트 -->
-    <div class="order-list-panel">
-      <div class="order-list-header">
-        <i class="bi bi-receipt"></i>
-        주문 관리
-        <span class="badge bg-secondary ms-2" th:text="${status}">ALL</span>
-      </div>
-      <div class="order-list">
-        <div th:if="${#lists.isEmpty(orders)}"
-             class="text-center text-muted p-4">
-          조회된 주문이 없습니다.
-        </div>
-        <a th:each="o,iter : ${orders}"
-           th:href="@{|/shop/orderManage?status=${status}&oNo=${o.oNo}|}"
-           class="order-card"
-           th:classappend="${(selectedOrder != null and selectedOrder.oNo == o.oNo) 
-                             or (selectedOrder == null and iter.index == 0)} ? ' active' : ''">
-          
-          <div class="order-card-title">
-            <span>주문 #<span th:text="${o.oNo}">123</span></span>
-            <span th:text="${o.payment}">KAKAO</span>
-          </div>
-          <div class="order-card-detail">
-            <div th:text="${#dates.format(o.regDate,'yyyy-MM-dd HH:mm')}">2025-08-04 09:17</div>
-            <div th:text="${o.oAddress}">서울 …</div>
-          </div>
-        </a>
-      </div>
-    </div>
-    
-    <!-- 우측 상세 패널 -->
-    <div class="order-detail-panel">
-      <th:block th:if="${selectedOrder != null}">
-        <h4>주문번호 <span th:text="${selectedOrder.oNo}">123</span> 상세</h4>
-        
-        <!-- 1) 타임라인 -->
-        <ul class="status-steps">
-		  <li th:classappend="${selectedOrder.status == 'COOKING' 
-		                       or selectedOrder.status == 'IN_PROGRESS' 
-		                       or selectedOrder.status == 'DELIVERED'} ? 'completed'">
-		    <span>조리 중</span>
-		  </li>
-		  <li th:classappend="${selectedOrder.status == 'IN_PROGRESS' 
-		                       or selectedOrder.status == 'DELIVERED'} ? 'completed'">
-		    <span>배달 중</span>
-		  </li>
-		  <li th:classappend="${selectedOrder.status == 'DELIVERED'} ? 'completed'">
-		    <span>완료</span>
-		  </li>
-		</ul>
-        
-        <!-- 2) 주문 기본정보 -->
-        <p><strong>주문일시:</strong>
-          <span th:text="${#dates.format(selectedOrder.regDate,'yyyy-MM-dd HH:mm')}">2025-08-04 09:17</span>
-        </p>
-        <p><strong>배달/픽업:</strong>
-          <span th:text="${selectedOrder.oAddress != null ? '배달' : '픽업'}">배달</span>
-        </p>
-        <p th:if="${selectedOrder.oAddress}">
-          <strong>주소:</strong>
-          <span th:text="${selectedOrder.oAddress}">충남 …</span>
-        </p>
-        <p><strong>총액/수량:</strong>
-          <span th:text="${selectedOrder.totalPrice + '원'}">10,000원</span>
-          /
-          <span th:text="${selectedOrder.quantity + '개'}">1개</span>
-        </p>
-        <p><strong>메뉴:</strong>
-          <span th:utext="${selectedOrder.menus}">순대국밥 *1</span>
-        </p>
-        <p><strong>요청사항:</strong>
-          <span th:text="${selectedOrder.request ?: '없음'}">ads</span>
-        </p>
-        
-        <!-- 3) 상태 변경 버튼 -->
-        <div class="btn-group">
-		  <button class="btn btn-warning me-2"
-		          th:onclick="|changeStatus(${selectedOrder.oNo}, 'IN_PROGRESS')|">
-		    배달 요청
-		  </button>
-		  <button class="btn btn-success me-2"
-		          th:onclick="|changeStatus(${selectedOrder.oNo}, 'DELIVERED')|">
-		    배달 완료
-		  </button>
-		</div>
-      </th:block>
-      
-      <th:block th:if="${selectedOrder == null}">
-        <div class="text-center text-muted p-5">
-          왼쪽에서 주문을 선택하세요.
-        </div>
-      </th:block>
-    </div>
-  </div>
-</th:block>
+	<th:block layout:fragment="content">
+	  <div class="main-container">
+	    
+	    <!-- 좌측 주문 리스트 -->
+	    <div class="order-list-panel">
+	      <div class="order-list-header">
+	        <i class="bi bi-receipt"></i>
+	        주문 관리
+	        <span class="badge bg-secondary ms-2" th:text="${status}">ALL</span>
+	      </div>
+	      <div class="order-list">
+	        <div th:if="${#lists.isEmpty(orders)}"
+	             class="text-center text-muted p-4">
+	          조회된 주문이 없습니다.
+	        </div>
+	        <a th:each="o,iter : ${orders}"
+	           th:href="@{|/shop/orderManage?status=${status}&oNo=${o.oNo}|}"
+	           class="order-card"
+	           th:classappend="(selectedOrder?.oNo == o.oNo) or (selectedOrder==null and iter.index==0) ? ' active'">
+	          <div class="order-card-title">
+	            <span>주문 #<span th:text="${o.oNo}"></span></span>
+	            <span th:text="${o.payment}"></span>
+	          </div>
+	          <div class="order-card-detail">
+	            <div th:text="${#dates.format(o.regDate,'yyyy-MM-dd HH:mm')}"></div>
+	            <div th:text="${o.oAddress}"></div>
+	          </div>
+	        </a>
+	      </div>
+	    </div>
+	    
+	    <!-- 우측 상세 패널 -->
+	    <div class="order-detail-panel">
 
-<!-- CSRF 헤더, WebSocket 구독 스크립트 (Thymeleaf inlining) -->
-<script th:inline="javascript">
-/*<![CDATA[*/
-  function changeStatus(oNo, newStatus) {
-    fetch(/*[[@{/shop/orderManage/}]]*/ + oNo + '/status?newStatus=' + newStatus, {
-      method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': '[[${_csrf.token}]]'
-      }
-    }).then(r=>r.json()).then(json=>{
-      if(json.success) location.reload();
-      else alert('상태 변경 실패');
-    });
-  }
-  
-  // WebSocket → /topic/orderStatus/{oNo}
-  var sock = new SockJS('[[${#request.contextPath}]]/ws');
-  var stomp = Stomp.over(sock);
-  stomp.connect({}, function() {
-	  stomp.subscribe('/topic/orderStatus/' + /*[[${selectedOrder.oNo}]]*/ 0, function(msg) {
-      var p = JSON.parse(msg.body);
-      if(p.newStatus) location.reload();
-    });
-  });
-/*]]>*/
-</script>
+	      <th:block th:if="${selectedOrder!=null}">
+	        <h4>주문번호 <span th:text="${selectedOrder.oNo}"></span></h4>
+
+	        <!-- 타임라인 -->
+	        <ul class="status-steps">
+	          <li th:classappend="${selectedOrder.status=='ACCEPTED' 
+	                              or selectedOrder.status=='DELIVERING' 
+	                              or selectedOrder.status=='COMPLETED'} ? 'completed'">
+	            <span>조리 중</span>
+	          </li>
+	          <li th:classappend="${selectedOrder.status=='DELIVERING' 
+	                              or selectedOrder.status=='COMPLETED'} ? 'completed'">
+	            <span>배달 중</span>
+	          </li>
+	          <li th:classappend="${selectedOrder.status=='COMPLETED'} ? 'completed'">
+	            <span>완료</span>
+	          </li>
+	        </ul>
+
+	        <!-- 주문 정보 -->
+	        <p><strong>주문일시:</strong>
+	          <span th:text="${#dates.format(selectedOrder.regDate,'yyyy-MM-dd HH:mm')}"></span>
+	        </p>
+	        <p><strong>배달/픽업:</strong>
+	          <span th:text="${selectedOrder.oAddress!=null?'배달':'픽업'}"></span>
+	        </p>
+	        <p th:if="${selectedOrder.oAddress}">
+	          <strong>주소:</strong>
+	          <span th:text="${selectedOrder.oAddress}"></span>
+	        </p>
+	        <p><strong>총액/수량:</strong>
+	          <span th:text="${selectedOrder.totalPrice + '원'}"></span> /
+	          <span th:text="${selectedOrder.quantity + '개'}"></span>
+	        </p>
+	        <p><strong>메뉴:</strong>
+	          <span th:utext="${selectedOrder.menus}"></span>
+	        </p>
+	        <p><strong>요청사항:</strong>
+	          <span th:text="${selectedOrder.request ?: '없음'}"></span>
+	        </p>
+
+			<!-- 상태 변경 버튼 -->
+			<div class="btn-group">
+			  <button th:if="${selectedOrder.status=='ACCEPTED'}"
+			          class="btn btn-warning me-2"
+			          type="button"
+			          th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus=DELIVERING)}'|">
+			    🚚 배달 시작
+			  </button>
+
+			  <button th:if="${selectedOrder.status=='DELIVERING'}"
+			          class="btn btn-success me-2"
+			          type="button"
+			          th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus=COMPLETED)}'|">
+			    ✅ 배달 완료
+			  </button>
+			</div>
+	      </th:block>
+
+	      <th:block th:if="${selectedOrder==null}">
+	        <div class="text-center text-muted p-5">
+	          왼쪽에서 주문을 선택하세요.
+	        </div>
+	      </th:block>
+	    </div>
+
+	  </div>
+	</th:block>
+
+	<!-- WebSocket/STOMP 스크립트 -->
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+	  window.selectedOrderNo = /*[[${selectedOrder!=null?selectedOrder.oNo:0}]]*/ 0;
+	  window.shopId         = /*[[${currentShop.sId}]]*/ 0;
+
+	  const socket      = new SockJS('[[${#request.contextPath}]]/ws');
+	  const stompClient = Stomp.over(socket);
+
+	  stompClient.connect({}, () => {
+	    if (window.selectedOrderNo > 0) {
+	      stompClient.subscribe(
+	        '/topic/orderStatus/' + window.selectedOrderNo,
+	        msg => { if (JSON.parse(msg.body).newStatus) location.reload(); }
+	      );
+	    }
+	    stompClient.subscribe(
+	      '/topic/orderStatus/shop/' + window.shopId,
+	      _ => location.reload()
+	    );
+	  });
+	/*]]>*/
+	</script>
 </body>
 </html>

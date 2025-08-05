@@ -686,53 +686,89 @@ public class ShopController {
 	}
 
 	/* ----------------------- 주문 관리 ----------------------- */
+	// ────────── 주문 관리 ──────────
 	@GetMapping("/shop/orderManage")
 	public String orderManage(
-	    @RequestParam(value = "status", defaultValue = "ALL") String status,
-	    @RequestParam(value = "oNo", required = false) Integer oNo,
-	    @SessionAttribute(name = "currentSId", required = false) Integer sId,
-	    @SessionAttribute(name = "loginId", required = false) String loginId,
-	    Model model) {
+	        @RequestParam(value="oNo", required=false) Integer oNo,
+	        @SessionAttribute(name="currentSId", required=false) Integer sId,
+	        @SessionAttribute(name="loginId", required=false) String loginId,
+	        Model model) {
 
-	    // 로그인/세션 체크
+	    // 1) 로그인/세션 체크
 	    if (loginId == null || sId == null) {
 	        return "redirect:/login";
 	    }
-
 	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
 	    if (currentShop == null) {
 	        return "redirect:/shopMain";
 	    }
 
-	    if ("PENDING".equals(status)) {
-	        List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
-	        model.addAttribute("orders", orders);
+	    // 2) 대기 주문 조회
+	    List<Orders> pending = shopService.findOrdersByStatusAndShop("PENDING", sId);
+
+	    // 3) oNo 가 null 이거나, oNo 가 대기 주문 리스트에 속해 있으면 신규주문 화면
+	    boolean isPendingSelected = (oNo != null)
+	        && pending.stream().anyMatch(o -> o.getONo() == oNo);
+	    if (oNo == null || isPendingSelected) {
+	        model.addAttribute("orders", pending);
+	        Orders sel = (oNo != null) 
+	            ? shopService.findOrderByNo(oNo) 
+	            : (pending.isEmpty() ? null : pending.get(0));
+	        model.addAttribute("selectedOrder", sel);
 	        model.addAttribute("currentShop", currentShop);
-	        if (!orders.isEmpty()) {
-	            model.addAttribute("selectedOrder", orders.get(0));
-	        }
-	        return "shop/shopNewOrders";  
+	        return "shop/shopNewOrders";
 	    }
 
-	 // ②  주문관리 코드
-	    List<Orders> orders;
-	    if ("ALL".equals(status)) {
-	        orders = shopService.findOrdersByShopId(sId).stream()
-	            .filter(o -> !"REJECTED".equals(o.getStatus()) && !"DELIVERED".equals(o.getStatus()))
-	            .toList();
-	    } else {
-	        orders = shopService.findOrdersByStatusAndShop(status, sId);
-	    }
+	    // 4) ACCEPTED + DELIVERING 만 뽑아서 주문관리 화면
+	    List<Orders> orders = shopService.findOrdersByShopId(sId).stream()
+	        .filter(o -> {
+	            String st = o.getStatus();
+	            return !"PENDING".equals(st)
+	                && !"REJECTED".equals(st)
+	                && !"COMPLETED".equals(st);
+	        })
+	        .toList();
 
 	    model.addAttribute("orders", orders);
-	    model.addAttribute("status", status);
 	    model.addAttribute("currentShop", currentShop);
-	    if (oNo != null) {
-	        model.addAttribute("selectedOrder", shopService.findOrderByNo(oNo));
-	    }
+
+	    Orders sel = orders.stream()
+	        .filter(o -> o.getONo() == oNo)
+	        .findFirst()
+	        .orElse(orders.isEmpty() ? null : orders.get(0));
+	    model.addAttribute("selectedOrder", sel);
+
 	    return "shop/shopOrderManage";
 	}
+
+
+	// ----------------------- 주문 상태 변경 및 리다이렉트 -----------------------
+	@GetMapping("/shop/orderManage/{oNo}/status")
+	public String changeOrderStatusAndRedirect(
+	        @PathVariable("oNo") int oNo,             // <-- 변수명 명시
+	        @RequestParam("newStatus") String newStatus,
+	        @SessionAttribute("currentSId") Integer shopId,
+	        @SessionAttribute("loginId") String loginId,
+	        RedirectAttributes ra) {
+
+	    // 1) DB 상태 업데이트
+	    shopService.updateOrderStatus(oNo, newStatus);
+
+	    // 2) WebSocket 브로드캐스트 (운영자 화면 + 고객 화면)
+	    Map<String, Object> payload = Map.of("oNo", oNo, "newStatus", newStatus);
+	    messagingTemplate.convertAndSend("/topic/orderStatus/" + oNo, payload);
+	    messagingTemplate.convertAndSend("/topic/orderStatus/shop/" + shopId, payload);
+
+	    // 3) 같은 주문 번호로 주문관리 페이지로 되돌아가기
+	    // 바뀐 상태를 status 파라미터로 넘겨 줘야,
+	    // 버튼 눌렀을 때 해당 탭(DELIVERING 또는 COMPLETED 등)이 유지됩니다.
+	    return "redirect:/shop/orderManage?status=" 
+	          + newStatus 
+	          + "&oNo=" 
+	          + oNo;
+	}
 	
+	/* ----------------------- 헤더 알림용 PENDING 리스트 API (변경 없음) ----------------------- */
 	@GetMapping("/api/shop/{sId}/pendingOrders")
 	@ResponseBody
 	public List<Map<String, Object>> getPendingOrders(@PathVariable Integer sId) {
@@ -772,25 +808,33 @@ public class ShopController {
 	@PostMapping("/shop/orderManage/{oNo}/status")
 	@ResponseBody
 	@Transactional
-	public ResponseEntity<Map<String, Object>> changeOrderStatus(@PathVariable int oNo,
-				@RequestParam("newStatus") String newStatus) {
+	public ResponseEntity<Map<String,Object>> changeOrderStatus(
+	    @PathVariable("oNo") int oNo,
+	    @RequestParam("newStatus") String newStatus,
+	    @SessionAttribute(name="currentSId") Integer shopId
+	) {
 
-		// 1. 주문 상태를 DB에 업데이트합니다.
-		shopService.updateOrderStatus(oNo, newStatus);
+		// 1) DB 업데이트
+		  shopService.updateOrderStatus(oNo, newStatus);
 
-		// 2. 가게의 다른 관리자 페이지 UI를 실시간으로 업데이트하기 위해 메시지를 보냅니다.
-		messagingTemplate.convertAndSend("/topic/orderStatus/" + oNo, Map.of("oNo", oNo, "newStatus", newStatus));
+		  // 2) 상세 갱신용
+		  messagingTemplate.convertAndSend("/topic/orderStatus/" + oNo,
+		      Map.of("oNo", oNo, "newStatus", newStatus));
 
-		// 3. 주문 정보를 조회하여 사용자 ID를 얻습니다.
-		Orders order = shopService.findOrderByNo(oNo);
-		if (order != null && order.getId() != null) {
-			// 4. 해당 사용자에게 개인화된 알림을 보냅니다.
-			Map<String, Object> payload = Map.of("oNo", oNo, "status", newStatus, "message",
-					"주문이 " + ("ACCEPTED".equals(newStatus) ? "수락" : "취소") + "되었습니다.");
-			websocketService.sendOrderStatusUpdateToUser(order.getId(), payload);
-		}
+		  // 3) ★가게 전체 갱신용
+		  messagingTemplate.convertAndSend("/topic/orderStatus/shop/" + shopId,
+		      Map.of("oNo", oNo, "newStatus", newStatus));
 
-		return ResponseEntity.ok(Map.of("success", true));
+		// 4) 사용자 개인화 알림(기존)
+		  Orders order = shopService.findOrderByNo(oNo);
+		  if (order != null && order.getId() != null) {
+		    websocketService.sendOrderStatusUpdateToUser(
+		      order.getId(),
+		      Map.of("oNo",oNo,"status",newStatus,"message",
+					"주문이 " + ("ACCEPTED".equals(newStatus) ? "수락" : "취소") + "되었습니다.")
+		      );
+		  }
+		  return ResponseEntity.ok(Map.of("success", true));
 	}
 
 	/* ----------------------- 기존 주문 내역 보기 ----------------------- */
