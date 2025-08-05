@@ -97,46 +97,50 @@ public class ShopController {
 
 	// 입점 신청
 	@PostMapping("/insertShop")
-	public String insertShop(@RequestParam("id") String id, @RequestParam("sNumber") String sNumber,
-			@RequestParam("owner") String owner, @RequestParam("phone") String phone, @RequestParam("name") String name,
-			@RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1,
-			@RequestParam("address2") String address2, @RequestParam("sPicture") MultipartFile sPictureFile,
-			@RequestParam("sLicense") MultipartFile sLicenseFile, Model model) {
+	public String insertShop( @RequestParam("id") String id,
+	        @RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 
+	        @RequestParam("phone") String phone, @RequestParam("name") String name, 
+	        @RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1, 
+	        @RequestParam("address2") String address2, @RequestParam("sPicture") MultipartFile sPictureFile, 
+	        @RequestParam("sLicense") MultipartFile sLicenseFile, Model model ) { 
 
-		String sLicenseUrl = null;
-		String sPictureUrl = null;
+	    String sLicenseUrl = null;
+	    String sPictureUrl = null;
 
-		try {
-			sLicenseUrl = fileUploadService.uploadFile(sLicenseFile, "business-licenses/");
-			System.out.println("사업자등록증 업로드 성공. URL: " + sLicenseUrl);
-			if (sPictureFile != null && !sPictureFile.isEmpty()) {
-				sPictureUrl = fileUploadService.uploadFile(sPictureFile, "shop/");
-				System.out.println("가게 사진 업로드 성공. URL: " + sPictureUrl);
-			}
-		} catch (IllegalArgumentException e) {
-			model.addAttribute("errorMessage", e.getMessage()); // 파일이 비어있는 경우
-			return "/shop/shopJoinForm";
-		} catch (IOException e) {
-			e.printStackTrace();
-			model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-			return "/shop/shopJoinForm";
-		}
+	    try {
+	        // 1. 사업자 등록증 파일이 비어있지 않을 때만 업로드
+	        if (sLicenseFile != null && !sLicenseFile.isEmpty()) {
+	            sLicenseUrl = fileUploadService.uploadFile(sLicenseFile, "business-licenses/");
+	            log.info("사업자등록증 업로드 성공. URL: {}", sLicenseUrl);
+	        }
+	        
+	        // 2. 가게 사진 파일이 비어있지 않을 때만 업로드
+	        if (sPictureFile != null && !sPictureFile.isEmpty()) {
+	            sPictureUrl = fileUploadService.uploadFile(sPictureFile, "shop/");
+	            log.info("가게 사진 업로드 성공. URL: {}", sPictureUrl);
+	        }
 
-		Shop shop = new Shop();
-		shop.setId(id);
-		shop.setSNumber(sNumber);
-		shop.setOwner(owner);
-		shop.setPhone(phone);
-		shop.setName(name);
-		shop.setZipcode(zipcode);
-		shop.setAddress1(address1);
-		shop.setAddress2(address2);
-		shop.setSPictureUrl(sPictureUrl);
-		shop.setSLicenseUrl(sLicenseUrl);
-		shopService.insertShop(shop);
+	    } catch (IOException e) {
+	        log.error("파일 업로드 중 IOException 발생", e);
+	        model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 다시 시도해주세요.");
+	        return "/shop/shopJoinForm";
+	    }
+	    
+	    Shop shop = new Shop();
+	    shop.setId(id);
+	    shop.setSNumber(sNumber);
+	    shop.setOwner(owner);
+	    shop.setPhone(phone);
+	    shop.setName(name);
+	    shop.setZipcode(zipcode);
+	    shop.setAddress1(address1);
+	    shop.setAddress2(address2);
+	    shop.setSPictureUrl(sPictureUrl);
+	    shop.setSLicenseUrl(sLicenseUrl);
+	    shopService.insertShop(shop);
 
-		model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
-		return "redirect:shopMain";
+	    model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
+	    return "redirect:shopMain";
 	}
 	
 	//배달 대행 요청

@@ -21,13 +21,14 @@ function findZipcode() {
 }
 
 function shopJoinFormCheck() {
-	if($("#sNumber").val().replace(/-/g, '').length != 10 ) {
-		alert("사업자 등록번호는 10자리입니다.")
+	
+	if ($("#sNumber").val().replace(/-/g, '').length !== 10) {
+		alert("사업자 등록번호는 10자리입니다.");
 		$("#sNumber").focus();
 		return false;
 	}
-	if($("#owner").val().length == 0 ) {
-		alert("대표자 명을 입력해주세요.")
+	if ($("#owner").val().length == 0) {
+		alert("대표자 명을 입력해주세요.");
 		return false;
 	}
 	const rawPhoneNumber = $("#phone").val();
@@ -36,36 +37,36 @@ function shopJoinFormCheck() {
 		$("#phone").focus();
 		return false;
 	}
-	if($("#name").val().length == 0 ) {
-		alert("가게 이름을 입력해주세요.")
+	if ($("#name").val().length == 0) {
+		alert("가게 이름을 입력해주세요.");
 		return false;
 	}
-	if($("#zipcode").val().length == 0 ) {
-		alert("우편번호를 입력해주세요.")
+	if ($("#zipcode").val().length == 0) {
+		alert("우편번호를 입력해주세요.");
 		return false;
 	}
-	if($("#address2").val().length == 0 ) {
-		alert("상세주소를 입력해주세요.")
+	if ($("#address2").val().length == 0) {
+		alert("상세주소를 입력해주세요.");
 		return false;
 	}
     return true; // 모든 검증 통과 시 true 반환
 }
 
 function menuJoinFormCheck() {
-	if($("#category").val().length == 0 ) {
-		alert("카테고리를 입력해주세요.")
+	if ($("#category").val().length == 0) {
+		alert("카테고리를 입력해주세요.");
 		return false;
 	}
-	if($("#name").val().length == 0 ) {
-		alert("메뉴 이름을 입력해주세요.")
+	if ($("#name").val().length == 0) {
+		alert("메뉴 이름을 입력해주세요.");
 		return false;
 	}
-	if($("#price").val().length == 0 ) {
-		alert("가격을 입력해주세요.")
+	if ($("#price").val().length == 0) {
+		alert("가격을 입력해주세요.");
 		return false;
 	}
-	if($("#mInfo").val().length == 0 ) {
-		alert("메뉴 설명을 입력해주세요.")
+	if ($("#mInfo").val().length == 0) {
+		alert("메뉴 설명을 입력해주세요.");
 		return false;
 	}
     return true; // 모든 검증 통과 시 true 반환
@@ -76,17 +77,13 @@ function menuJoinFormCheck() {
 $(function() {
 
     // ===== 2.1. 폼 검증 및 공통 이벤트 바인딩 =====
-    $("#shopJoinForm").on("submit", function(e) {
-        if (!shopJoinFormCheck()) {
-            e.preventDefault();
-        } else {
-            // 폼 제출 시 하이픈 제거
-            const sNumberInput = document.getElementById('sNumber');
-            if (sNumberInput) {
-                sNumberInput.value = sNumberInput.value.replace(/-/g, '');
-            }
-        }
-    });
+		$("#shopJoinForm").on("submit", function(event) {
+			if (!shopJoinFormCheck()) {
+				event.preventDefault();
+				return;
+			}
+			$('#sNumber').val($('#sNumber').val().replace(/-/g, ''));
+		});
 
     $("#menuJoinForm").on("submit", function(e) {
         if (!menuJoinFormCheck()) e.preventDefault();
