@@ -666,7 +666,34 @@ public class ShopController {
 		return "redirect:/shop/reviewManage?s_id=" + sId;
 	}
 
-	/* ----------------------- 상태별 주문 관리 ----------------------- */
+	/* ----------------------- 신규주문 ----------------------- */
+	@GetMapping("/shop/newOrders")
+	public String newOrders(
+	    @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	    @SessionAttribute(name = "loginId", required = false) String loginId,
+	    Model model) {
+
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    if (currentShop == null) {
+	        return "redirect:/shopMain";
+	    }
+	    List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
+
+	    model.addAttribute("orders", orders);
+	    model.addAttribute("currentShop", currentShop);
+
+	    if (!orders.isEmpty()) {
+	        model.addAttribute("selectedOrder", orders.get(0));
+	    }
+
+	    return "shop/shopNewOrders"; // 신규주문 전용 템플릿
+	}
+
+	
+	/* ----------------------- 주문 관리 ----------------------- */
 	@GetMapping("/shop/orderManage")
 	public String orderManage(
 	        @RequestParam(value = "status", defaultValue = "ALL") String status,
@@ -683,25 +710,33 @@ public class ShopController {
 	        return "redirect:/shopMain";
 	    }
 
+	    // ① PENDING일 땐 신규주문 화면으로 강제 분기!
+	    if ("PENDING".equals(status)) {
+	        List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
+	        model.addAttribute("orders", orders);
+	        model.addAttribute("currentShop", currentShop);
+	        if (!orders.isEmpty()) {
+	            model.addAttribute("selectedOrder", orders.get(0));
+	        }
+	        return "shop/shopNewOrders";
+	    }
+
+	 // ②  주문관리 코드
 	    List<Orders> orders;
 	    if ("ALL".equals(status)) {
-	        // ALL이란, 거절(REJECTED)·완료(DELIVERED)만 빼고 다 보여주기
 	        orders = shopService.findOrdersByShopId(sId).stream()
 	            .filter(o -> !"REJECTED".equals(o.getStatus()) && !"DELIVERED".equals(o.getStatus()))
 	            .toList();
 	    } else {
-	        // 특정 상태로 필터링 (COOKING, IN_PROGRESS 등)
 	        orders = shopService.findOrdersByStatusAndShop(status, sId);
 	    }
 
 	    model.addAttribute("orders", orders);
 	    model.addAttribute("status", status);
 	    model.addAttribute("currentShop", currentShop);
-
 	    if (oNo != null) {
 	        model.addAttribute("selectedOrder", shopService.findOrderByNo(oNo));
 	    }
-
 	    return "shop/shopOrderManage";
 	}
 	
@@ -728,7 +763,7 @@ public class ShopController {
 	@ResponseBody
 	@Transactional
 	public ResponseEntity<Map<String, Object>> changeOrderStatus(@PathVariable int oNo,
-			@RequestParam("newStatus") String newStatus) {
+				@RequestParam("newStatus") String newStatus) {
 
 		// 1. 주문 상태를 DB에 업데이트합니다.
 		shopService.updateOrderStatus(oNo, newStatus);

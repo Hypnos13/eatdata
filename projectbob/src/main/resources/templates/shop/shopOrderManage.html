@@ -95,25 +95,19 @@
         
         <!-- 1) 타임라인 -->
         <ul class="status-steps">
-          <li th:classappend="${selectedOrder.status == 'ACCEPTED'
-                               or selectedOrder.status == 'COOKING'
-                               or selectedOrder.status == 'IN_PROGRESS'
-                               or selectedOrder.status == 'DELIVERED'} ? 'completed'">
-            <span>수락됨</span>
-          </li>
-          <li th:classappend="${selectedOrder.status == 'COOKING'
-                               or selectedOrder.status == 'IN_PROGRESS'
-                               or selectedOrder.status == 'DELIVERED'} ? 'completed'">
-            <span>조리 중</span>
-          </li>
-          <li th:classappend="${selectedOrder.status == 'IN_PROGRESS'
-                               or selectedOrder.status == 'DELIVERED'} ? 'completed'">
-            <span>배달 중</span>
-          </li>
-          <li th:classappend="${selectedOrder.status == 'DELIVERED'} ? 'completed'">
-            <span>완료</span>
-          </li>
-        </ul>
+		  <li th:classappend="${selectedOrder.status == 'COOKING' 
+		                       or selectedOrder.status == 'IN_PROGRESS' 
+		                       or selectedOrder.status == 'DELIVERED'} ? 'completed'">
+		    <span>조리 중</span>
+		  </li>
+		  <li th:classappend="${selectedOrder.status == 'IN_PROGRESS' 
+		                       or selectedOrder.status == 'DELIVERED'} ? 'completed'">
+		    <span>배달 중</span>
+		  </li>
+		  <li th:classappend="${selectedOrder.status == 'DELIVERED'} ? 'completed'">
+		    <span>완료</span>
+		  </li>
+		</ul>
         
         <!-- 2) 주문 기본정보 -->
         <p><strong>주문일시:</strong>
@@ -140,25 +134,15 @@
         
         <!-- 3) 상태 변경 버튼 -->
         <div class="btn-group">
-          <!-- ACCEPTED → COOKING -->
-          <button th:if="${selectedOrder.status == 'ACCEPTED'}"
-                  class="btn btn-primary me-2"
-                  th:onclick="|changeStatus(${selectedOrder.oNo}, 'COOKING')|">
-            조리 시작
-          </button>
-          <!-- COOKING → IN_PROGRESS -->
-          <button th:if="${selectedOrder.status == 'COOKING'}"
-                  class="btn btn-warning me-2"
-                  th:onclick="|changeStatus(${selectedOrder.oNo}, 'IN_PROGRESS')|">
-            배달 요청
-          </button>
-          <!-- IN_PROGRESS → DELIVERED -->
-          <button th:if="${selectedOrder.status == 'IN_PROGRESS'}"
-                  class="btn btn-success me-2"
-                  th:onclick="|changeStatus(${selectedOrder.oNo}, 'DELIVERED')|">
-            배달 완료
-          </button>
-        </div>
+		  <button class="btn btn-warning me-2"
+		          th:onclick="|changeStatus(${selectedOrder.oNo}, 'IN_PROGRESS')|">
+		    배달 요청
+		  </button>
+		  <button class="btn btn-success me-2"
+		          th:onclick="|changeStatus(${selectedOrder.oNo}, 'DELIVERED')|">
+		    배달 완료
+		  </button>
+		</div>
       </th:block>
       
       <th:block th:if="${selectedOrder == null}">
