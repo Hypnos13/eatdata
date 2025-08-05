@@ -562,11 +562,11 @@ function clearBellBlink() {
 // ==== 9. 주문 관리 함수 (수락 / 거절) =====================
 // 주문 수락 함수 (기존)
 window.acceptOrder = function(oNo) {
-  fetch(`/shop/orderManage/${oNo}/status`, {
-    method: 'POST',
-    headers: {'Content-Type':'application/x-www-form-urlencoded'},
-    body: 'newStatus=ACCEPTED'
-  })
+	fetch(`/shop/orderManage/${oNo}/status`, {
+	  method: 'POST',
+	  headers: {'Content-Type':'application/x-www-form-urlencoded'},
+	  body: 'newStatus=ACCEPTED' // 또는 REJECTED
+	})
   .then(res => {
     if (!res.ok) throw new Error('상태 변경 실패');
     document.querySelector(`button[onclick="acceptOrder(${oNo})"]`)?.closest('li').remove();
@@ -577,9 +577,9 @@ window.acceptOrder = function(oNo) {
 
 // 주문 거절 함수 (추가)
 window.rejectOrder = function(oNo) {
-  fetch(`/shop/orderManage/${oNo}/status`, {
-    method: 'POST',
-    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+	fetch(`/shop/orderManage/${oNo}/status`, {
+	  method: 'POST',
+	  headers: {'Content-Type':'application/x-www-form-urlencoded'},
     body: 'newStatus=REJECTED'
   })
   .then(res => {

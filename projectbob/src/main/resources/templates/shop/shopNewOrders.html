@@ -142,15 +142,15 @@
 		      <span th:text="${selectedOrder.request ?: '없음'}">없음</span>
 		    </p>
 		    <div class="mt-4">
-		      <button type="button" class="btn btn-success me-2"
-		              th:onclick="|acceptOrder(${selectedOrder.oNo})|">
-		        수락
-		      </button>
-		      <button type="button" class="btn btn-outline-danger"
-		              th:onclick="|rejectOrder(${selectedOrder.oNo})|">
-		        거절
-		      </button>
-		    </div>
+			  <button type="button" class="btn btn-success me-2"
+			          th:onclick="|acceptOrder(${selectedOrder.oNo})|">
+			    수락
+			  </button>
+			  <button type="button" class="btn btn-outline-danger"
+			          th:onclick="|rejectOrder(${selectedOrder.oNo})|">
+			    거절
+			  </button>
+			</div>
 		  </th:block>
 		  <th:block th:if="${selectedOrder == null}">
 		    <div class="text-center text-muted my-auto">
