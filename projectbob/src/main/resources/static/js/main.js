@@ -2359,7 +2359,7 @@ $(document).ready(function() {
 					
 					if (payload.newStatus == 'ACCEPTED'){
 						alert('주문이 수락되었습니다!');
-						window.location.href = '/completed?oNo=' + payload.oNo;
+						                        window.location.href = '/end?orderId=' + payload.oNo;
 					}
 					else if(payload.newStatus == 'REJECTED'){
 						alert('주문이 거절되었습니다.');

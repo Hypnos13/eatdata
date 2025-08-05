@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 <meta charset="UTF-8">
 <title>구조</title>
@@ -15,15 +16,8 @@
 <!-- window.currentUserId 주입 코드 추가 -->
 <script th:inline="javascript">
     /*<![CDATA[*/
-    var principal = /*[[${#authentication?.principal}]]*/ null;
-    if (principal && typeof principal === 'object') {
-        window.currentUserId = principal.username;
-    } else if (principal && typeof principal === 'string') {
-        window.currentUserId = principal;
-    } else {
-        window.currentUserId = null;
-    }
-    console.log("main_layout.html: window.currentUserId is set to: " + window.currentUserId);
+   window.currentUserId = /*[[${#authentication.name}]]*/ null;
+    console.log("main_layout.html: window.currentUserId : " + window.currentUserId);
     /*]]>*/
 </script>
 

@@ -37,6 +37,7 @@ dependencies {
 	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
 	
 	//--- 웹소켓---
