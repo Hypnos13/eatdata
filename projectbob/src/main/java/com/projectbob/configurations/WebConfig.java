@@ -29,7 +29,7 @@ public class WebConfig implements WebMvcConfigurer{
 		registry.addInterceptor(new OwnerCheckInterceptor())
 				.order(2)
 				.addPathPatterns("/shop*", "/menu*", "/api/nutrition-search")
-				.excludePathPatterns("/shopMain");
+				.excludePathPatterns("/shopMain", "/shopList");
 	}
 	
 	//리뷰 사진 추가

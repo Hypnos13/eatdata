@@ -135,6 +135,7 @@ public class ShopController {
 		return "redirect:shopMain";
 	}
 	
+	//배달 대행 요청
 	@GetMapping("/shop/delivery")
 	public String deliveryDispatchPage(
 	        @SessionAttribute(name = "loginId", required = false) String loginId,
@@ -172,6 +173,11 @@ public class ShopController {
 	    model.addAttribute("deliveryAgencies", deliveryAgencies);
 
 	    return "shop/delivery"; 
+	}
+	//라이더 페이지
+	@GetMapping("/rider/request")
+	public String riderRequestPage() {
+	    return "rider/rider_request";
 	}
 
 	

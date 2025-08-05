@@ -274,24 +274,47 @@ $(function() {
 		                updateDisplayTimes();
 		            });
 
-		            $('#btnConfirmDispatch').on('click', function() {
-		                const dispatchData = {
-		                    orderId: currentSelectedOrderId,
-		                    agency: $('#deliveryAgencySelect').val(),
-		                    pickupAfterMinutes: parseInt($pickupSelect.val()),
-		                    deliveryAfterMinutes: parseInt($deliverySelect.val())
-		                };
+								$('#btnConfirmDispatch').on('click', function() {
+								    // 1. 현재 선택된 주문 정보 가져오기
+								    const selectedOrder = orderList.find(order => order.ono === currentSelectedOrderId);
+								    if (!selectedOrder) {
+								        alert("오류: 선택된 주문이 없습니다.");
+								        return;
+								    }
 
-		                // (나중에 이 부분에 웹소켓 전송 코드가 들어갑니다)
-		                console.log("배차 요청 데이터:", dispatchData);
-		                alert(`주문번호 ${dispatchData.orderId}에 대한 배차를 요청했습니다.`);
+								    // 2. 모달에서 선택된 배달 정보 가져오기
+								    const agency = $('#deliveryAgencySelect').val();
+								    const pickupAfterMinutes = parseInt($('#pickupTimeSelect').val());
+								    const deliveryAfterMinutes = parseInt($('#deliveryTimeSelect').val());
+								    
+								    const now = new Date();
+								    const pickupTime = new Date(now.getTime() + pickupAfterMinutes * 60000);
+								    const deliveryTime = new Date(now.getTime() + deliveryAfterMinutes * 60000);
+								    const formatTime = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 
-		                const modal = bootstrap.Modal.getInstance(document.getElementById('dispatchModal'));
-		                modal.hide();
-		                
-		                // (나중에) 성공적으로 요청이 가면, 좌측 목록에서 해당 주문을 제거하는 로직 추가
-		                // $(`.order-card[data-order-id="${dispatchData.orderId}"]`).remove();
-		            });
+								    // 3. URL 파라미터로 넘길 데이터 정리
+								    const params = new URLSearchParams({
+								        orderId: selectedOrder.ono,
+								        shopName: shopInfo.name,
+								        shopAddress: shopInfo.address1 + ' ' + shopInfo.address2,
+								        shopPhone: shopInfo.phone,
+								        customerAddress: selectedOrder.oaddress,
+								        customerPhone: selectedOrder.clientPhone || '정보 없음',
+								        pickupTime: `${pickupAfterMinutes}분 후 (${formatTime(pickupTime)})`,
+								        deliveryTime: `${deliveryAfterMinutes}분 후 (${formatTime(deliveryTime)})`
+								    });
+
+								    // 4. 새 탭에서 라이더 페이지 열기
+								    const riderUrl = `/rider/request?${params.toString()}`;
+								    window.open(riderUrl, '_blank');
+
+								    // 모달 닫기
+								    const modal = bootstrap.Modal.getInstance(document.getElementById('dispatchModal'));
+								    modal.hide();
+								    
+								    // (나중에) 좌측 목록에서 해당 주문을 제거하는 로직
+								    $(`.order-card[data-order-id="${selectedOrder.ono}"]`).fadeOut();
+								});
 		        }
 		    });
 		}
