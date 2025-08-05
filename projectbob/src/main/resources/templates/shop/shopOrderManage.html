@@ -173,7 +173,7 @@
   var sock = new SockJS('[[${#request.contextPath}]]/ws');
   var stomp = Stomp.over(sock);
   stomp.connect({}, function() {
-    stomp.subscribe('/topic/orderStatus/' + /*[[${selectedOrder.oNo}]]*/, function(msg){
+	  stomp.subscribe('/topic/orderStatus/' + /*[[${selectedOrder.oNo}]]*/ 0, function(msg) {
       var p = JSON.parse(msg.body);
       if(p.newStatus) location.reload();
     });

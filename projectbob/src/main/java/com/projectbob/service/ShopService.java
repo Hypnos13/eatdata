@@ -7,8 +7,11 @@ import java.sql.Timestamp;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.util.StringUtils;
+import org.springframework.ui.Model;
 
 import com.projectbob.domain.*;
 import com.projectbob.mapper.*;
@@ -403,6 +406,7 @@ public class ShopService {
         shopMapper.updateOrderStatus(oNo, newStatus);
     }
     
+    //신규주문 insert
     @Transactional
     public Orders placeOrder(Map<String,Object> req) {
         // 1. 주문 정보 객체 생성 (모든 필드 세팅)
@@ -455,9 +459,20 @@ public class ShopService {
         return order;
     }
     
-    // 상태별 & 가게별 주문 조회 (OrderItem 없이 menus 문자열만)
+    // 상태별 & 가게별 주문 조회
     public List<Orders> findOrdersByStatusAndShop(String status, int sId) {
         return shopMapper.selectOrdersByStatusAndShop(status, sId);
     }
     
+    
+    // 상태별 & 오너별 "신규 주문" 알림 목록
+    public List<Orders> findNewOrdersByOwner(String loginId) {
+        return shopMapper.findOrdersByOwnerAndStatus(loginId, "NEW");
+    }
+
+    //헤더알림 주문으로 이동
+    public List<Orders> findNewOrdersByOwnerId(String ownerId) {
+        return shopMapper.findNewOrdersByOwnerId(ownerId);
+    }
+
 }
