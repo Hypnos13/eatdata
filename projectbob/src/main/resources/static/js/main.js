@@ -2227,8 +2227,8 @@ $(document).on("click", "#btnPayNow", function() {
                                 type: "POST",
                                 contentType: "application/json",
                                 data: JSON.stringify({
-																	merchant_uid: response.orderId,
-                                    paymentId: payment.paymentId, // PortOne SDK가 반환한 paymentId 사용
+																	merchantUid: payment.merchant_uid,
+                                    impUid: payment.imp_uid, // PortOne SDK가 반환한 paymentId 사용
                                     //orderId: response.orderId, // 백엔드에서 미리 생성한 orderId 사용
                                     paymentMethod: selectedMethod, // 선택된 결제 수단 추가
 

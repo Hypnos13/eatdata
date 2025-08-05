@@ -22,33 +22,53 @@ function connectWebSocket() {
 }
 
 function showOrderNotification(payload) {
-    console.log(">>> showOrderNotification 함수 실행됨. 받은 payload:", payload); // 이 줄 추가
-    let message = payload.message || '주문 상태가 변경되었습니다.';
-    let isAccepted = payload.status === 'ACCEPTED';
+    console.log(">>> showOrderNotification 함수 실행됨. 받은 payload:", payload);
 
-    // Toastify.js를 사용하여 알림 표시 (라이브러리가 추가되어 있다고 가정)
-    // 만약 Toastify.js가 없다면 alert()으로 대체할 수 있습니다.
-    if (typeof Toastify === 'function') {
-        Toastify({
-            text: message,
-            duration: isAccepted ? -1 : 5000, // 수락 시에는 사용자가 닫을 때까지 유지
-            close: true,
-            gravity: "top", 
-            position: "right", 
-            backgroundColor: isAccepted ? "linear-gradient(to right, #00b09b, #96c93d)" : "linear-gradient(to right, #ff5f6d, #ffc371)",
-            stopOnFocus: true, 
-            onClick: isAccepted ? function(){
-                // 주문 완료 페이지로 이동
-                window.location.href = '/end?orderId=' + payload.oNo;
-            } : function(){}
-        }).showToast();
+    let notificationMessage = '';
+    let onClickAction = function() {}; // 기본 클릭 동작 없음
+    let toastOptions = {
+        duration: 5000, // 기본 5초
+        close: true,
+        gravity: "top",
+        position: "right",
+        stopOnFocus: true,
+    };
+
+    // 상태에 따라 메시지, 색상, 동작 정의
+    if (payload.status === 'ACCEPTED') {
+        notificationMessage = `✅ 주문 #${payload.oNo}이(가) 수락되었습니다! 곧 준비가 시작됩니다.`;
+        toastOptions.backgroundColor = "linear-gradient(to right, #00b09b, #96c93d)";
+        toastOptions.duration = -1; // 사용자가 닫을 때까지 유지
+        onClickAction = function() {
+            // 사용자가 알림을 클릭하면 completed.html로 이동
+            window.location.href = '/end?orderId=' + payload.oNo;
+        };
+    } else if (payload.status === 'REJECTED') {
+        notificationMessage = `❌ 주문 #${payload.oNo}이(가) 가게 사정으로 취소되었습니다. 결제 금액은 자동으로 환불됩니다.`;
+        toastOptions.backgroundColor = "linear-gradient(to right, #ff5f6d, #ffc371)";
+        // 거절 알림은 특별한 클릭 동작이 필요 없음
+        onClickAction = function() { alert(notificationMessage); };
     } else {
-        // Toastify 라이브러리가 없을 경우 alert으로 대체
-        alert(message);
-        if (isAccepted) {
-            if (confirm("주문 완료 페이지로 이동하시겠습니까?")) {
-                window.location.href = '/end?orderId=' + payload.oNo;
+        // DELIVERING 등 다른 상태는 나중에 구현될 것이므로, 지금은 기본 알림만 처리
+        notificationMessage = `🔔 주문 #${payload.oNo} 상태 업데이트: ${payload.status}`;
+        toastOptions.backgroundColor = "#4e54c8";
+    }
+
+    // Toastify 라이브러리 사용 또는 alert/confirm으로 대체
+    if (typeof Toastify === 'function') {
+        toastOptions.text = notificationMessage;
+        toastOptions.onClick = onClickAction;
+        Toastify(toastOptions).showToast();
+    } else {
+        // Toastify 없을 때의 대체 동작
+        if (payload.status === 'REJECTED') {
+            alert(notificationMessage);
+        } else if (payload.status === 'ACCEPTED') {
+            if (confirm(notificationMessage + "\n\n주문 내역을 확인하시겠습니까?")) {
+                 window.location.href = '/end?oNo=' + payload.oNo;
             }
+        } else {
+            alert(notificationMessage);
         }
     }
 }

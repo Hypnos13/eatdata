@@ -332,9 +332,16 @@ public class BobController {
         String userId = (String) session.getAttribute("loginId");
         String guestId = (String) session.getAttribute("guestId");
         log.info("completePayment - userId: {}, guestId: {}", userId, guestId);
+
+        // PortOne SDK 응답에서 imp_uid 추출
+        String impUid = (String) req.get("imp_uid"); // imp_uid 필드 직접 사용
+        String merchantUid = (String) req.get("merchant_uid"); // merchant_uid 필드 직접 사용
+
+        log.info("completePayment: imp_uid: {}, merchant_uid: {}", impUid, merchantUid);
+
     	boolean verified = portoneService.verifyPayment(
-    			(String) req.get("paymentId"),
-    			(String) req.get("orderId")
+    			impUid,
+    			merchantUid // verifyPayment는 imp_uid만 사용하지만, 일단 전달
     			);
                 if (!verified) {
                 	return Map.of("success", false, "message", "결제 검증 실패");
@@ -361,7 +368,7 @@ public class BobController {
         // 2) PortOne 환불 API 호출
         boolean refunded = portoneService.cancelPayment(
             order.getPaymentUid(),
-            String.valueOf(order.getONo()),
+            null, // merchant_uid는 사용하지 않음 (imp_uid로 충분)
             "가게 거절로 인한 자동 환불",
             null
         );

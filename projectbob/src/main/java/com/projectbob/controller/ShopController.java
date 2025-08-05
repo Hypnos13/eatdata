@@ -784,8 +784,8 @@ public class ShopController {
 					log.info("주문 거절: 결제 환불 시작. paymentUid: {}, totalPrice: {}", paymentUid, totalPrice);
 					boolean refunded = portoneService.cancelPayment(
 					    paymentUid,
-					    String.valueOf(order.getONo()), // merchant_uid
-					    "가게 거절로 인한 자동 환불", // reason
+					    null, // merchant_uid는 사용하지 않음 (imp_uid로 충분)
+					    "가게 사정으로 인한 주문 거절", // reason
 					    null // 전액 환불
 					);
 					if (!refunded) {

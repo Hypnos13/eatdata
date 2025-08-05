@@ -3,23 +3,32 @@ package com.projectbob.service;
 import com.projectbob.domain.Orders;
 import com.projectbob.mapper.BobMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value; // application.properties에서 값 주입
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate; // HTTP 요청을 위한 RestTemplate
-import org.springframework.util.LinkedMultiValueMap; // 추가
-import org.springframework.util.MultiValueMap; // 추가
+import org.springframework.web.client.RestTemplate;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper; // ObjectMapper 추가
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import com.fasterxml.jackson.databind.JsonNode;
+
+// Lombok 대신 직접 Logger import
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class PortoneServiceImpl implements PortoneService {
+
+    // Lombok 대신 직접 Logger 객체 생성
+    private static final Logger log = LoggerFactory.getLogger(PortoneServiceImpl.class);
 
     @Autowired
     private BobMapper bobMapper;
@@ -27,46 +36,35 @@ public class PortoneServiceImpl implements PortoneService {
     @Autowired
     private BobService bobService;
 
-    // RestTemplate을 사용하여 외부 API 호출
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper; // ObjectMapper 필드 추가
 
-    // PortOne API 키와 시크릿 (application.properties 또는 환경 변수에서 주입)
     @Value("${portone.api.key}")
     private String portoneApiKey;
 
     @Value("${portone.api.secret}")
     private String portoneApiSecret;
 
-    // 생성자에서 RestTemplate 초기화
     public PortoneServiceImpl() {
         this.restTemplate = new RestTemplate();
+        this.objectMapper = new ObjectMapper(); // ObjectMapper 초기화
     }
 
-    // Access Token 발급 메서드 (PortOne API 문서 참고)
     private String getAccessToken() throws Exception {
-        String tokenUrl = "https://api.iamport.kr/users/getToken"; // PortOne 토큰 발급 URL
-
-        // 1) form-urlencoded 바디 준비
+        log.info("PortoneService: Access Token 요청 - API Key: {}, API Secret: {}", portoneApiKey, portoneApiSecret); // 디버깅용 로그
+        String tokenUrl = "https://api.iamport.kr/users/getToken";
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-        form.add("imp_key",    portoneApiKey);
+        form.add("imp_key", portoneApiKey);
         form.add("imp_secret", portoneApiSecret);
 
-        // 2) 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(form, headers);
-
-        // 3) POST (RestTemplate#postForEntity 로도 가능)
-        ResponseEntity<Map> resp = restTemplate.exchange(
-            tokenUrl,
-            HttpMethod.POST,
-            request,
-            Map.class
-        );
+        ResponseEntity<Map> resp = restTemplate.exchange(tokenUrl, HttpMethod.POST, request, Map.class);
 
         if (!resp.getStatusCode().is2xxSuccessful() || resp.getBody() == null) {
-            throw new RuntimeException("PortOne Access Token 발급 실패: " + resp.getStatusCode() + " - " + resp.getBody());
+            throw new RuntimeException("PortOne Access Token 발급 실패: " + resp.getStatusCode());
         }
 
         Map<String,Object> resBody = resp.getBody();
@@ -75,53 +73,113 @@ public class PortoneServiceImpl implements PortoneService {
         return (String) data.get("access_token");
     }
 
-    // 실제 PortOne API 연동 로직이 들어갈 부분
     @Override
     public Map<String, Object> preparePayment(int amount, String orderName, String customerId, String address1, String address2, String phone, String orderRequest) {
-        // ... (기존 preparePayment 로직은 동일) ...
         Map<String, Object> paymentData = new HashMap<>();
-        paymentData.put("storeId", "store-d5e7696b-604a-4b03-a1f7-2637ff538712"); // 실제 상점 ID
-        paymentData.put("channelKey", "channel-key-3a2e28ac-f305-4e9e-add2-1b55f1c6e70c"); // 실제 채널 키
+        paymentData.put("storeId", "store-d5e7696b-604a-4b03-a1f7-2637ff538712");
+        paymentData.put("channelKey", "channel-key-3a2e28ac-f305-4e9e-add2-1b55f1c6e70c");
         paymentData.put("paymentId", "PAY_" + UUID.randomUUID().toString().replace("-", ""));
         paymentData.put("orderName", orderName);
         paymentData.put("totalAmount", amount);
         paymentData.put("currency", "KRW");
-        paymentData.put("payMethod", "EASY_PAY"); // 카카오페이
+        paymentData.put("payMethod", "EASY_PAY");
         paymentData.put("customData", Map.of("customerId", customerId));
-
-        System.out.println("PortoneService: 결제 준비 요청 - " + paymentData);
+        log.info("PortoneService: 결제 준비 요청 - " + paymentData);
         return paymentData;
     }
 
     @Override
     public boolean verifyPayment(String paymentId, String orderId) {
-        System.out.println("PortoneService: 결제 검증 요청 - paymentId: " + paymentId + ", orderId: " + orderId);
-        // TODO: 실제 PortOne API 연동 시 이 부분을 제거하고 실제 검증 로직을 구현해야 합니다.
-        return true; // 테스트를 위해 임시로 항상 true 반환
+        log.info("PortoneService: 결제 검증 요청 - paymentId: " + paymentId + ", orderId: " + orderId);
+        try {
+            String token = getAccessToken();
+            String url = "https://api.iamport.kr/payments/" + paymentId; // imp_uid로 결제 정보 조회
+            log.info("PortoneService: 결제 정보 조회 URL: {}", url); // 디버깅용 로그
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<JsonNode> resp = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
+            JsonNode bodyNode = resp.getBody();
+
+            if (bodyNode == null || !bodyNode.has("response")) {
+                log.error("PortOne 결제 정보 조회 실패: 응답 body가 유효하지 않습니다.");
+                return false;
+            }
+
+            JsonNode responseNode = bodyNode.path("response");
+            String status = responseNode.path("status").asText();
+            String impUid = responseNode.path("imp_uid").asText();
+            int amount = responseNode.path("amount").asInt();
+
+            // 결제 상태가 'paid' (결제 완료)이고, imp_uid가 일치하는지 확인
+            if ("paid".equals(status) && paymentId.equals(impUid)) {
+                log.info("PortOne 결제 검증 성공. imp_uid: {}, status: {}", impUid, status);
+                return true;
+            } else {
+                log.error("PortOne 결제 검증 실패. imp_uid: {}, status: {}", impUid, status);
+                return false;
+            }
+
+        } catch (Exception e) {
+            log.error("PortOne 결제 검증 중 예외 발생. paymentId: {}", paymentId, e);
+            return false;
+        }
     }
 
     @Override
     public boolean cancelPayment(String impUid, String merchantUid, String reason, Integer amount) {
+        log.info("PortoneService.cancelPayment 호출됨. impUid: {}, merchantUid: {}, reason: {}, amount: {}", impUid, merchantUid, reason, amount);
         try {
             String token = getAccessToken();
-            String url   = "https://api.iamport.kr/payments/cancel";
+            String url = "https://api.iamport.kr/payments/cancel";
 
-            Map<String,Object> body = new HashMap<>();
-            body.put("imp_uid", impUid);
-            body.put("merchant_uid", merchantUid);
+            Map<String, Object> body = new HashMap<>();
             body.put("cancel_reason", reason);
-            if (amount != null) body.put("amount", amount);
+
+            if (impUid != null && !impUid.isBlank()) {
+                body.put("imp_uid", impUid);
+            } else {
+                log.error("PortOne 결제 취소 실패: 필수 파라미터인 imp_uid가 없습니다.");
+                return false;
+            }
+            
+            if (amount != null) {
+                body.put("amount", amount);
+            }
+
+            String jsonBody = objectMapper.writeValueAsString(body);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(token);
-            HttpEntity<Map<String,Object>> req = new HttpEntity<>(body, headers);
+            HttpEntity<String> req = new HttpEntity<>(jsonBody, headers);
 
-            ResponseEntity<JsonNode> resp = restTemplate.postForEntity(url, req, JsonNode.class);
-            JsonNode res = resp.getBody().path("response");
-            return res.has("cancel_date");
+            log.info("PortOne 환불 요청 Body (JSON): {}", jsonBody);
+
+            ResponseEntity<JsonNode> resp = restTemplate.exchange(url, HttpMethod.POST, req, JsonNode.class);
+            JsonNode bodyNode = resp.getBody();
+
+            if (bodyNode == null) {
+                log.error("PortOne API 응답 body가 null입니다.");
+                return false;
+            }
+
+            JsonNode responseNode = bodyNode.path("response");
+
+            if (!responseNode.isMissingNode() && responseNode.has("cancel_date")) {
+                log.info("PortOne 결제 취소 성공. imp_uid: {}", impUid);
+                return true;
+            }
+            
+            int code = bodyNode.path("code").asInt();
+            String message = bodyNode.path("message").asText();
+            log.error("PortOne 결제 취소 실패. imp_uid: {}, Code: {}, Message: {}", impUid, code, message);
+            return false;
+
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("PortOne 결제 취소 중 예외 발생. imp_uid: {}", impUid, e);
             return false;
         }
     }

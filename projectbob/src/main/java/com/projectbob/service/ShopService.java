@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 
 import com.projectbob.domain.*;
 import com.projectbob.mapper.*;
+import com.projectbob.service.PortoneService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,6 +24,9 @@ public class ShopService {
 	
 	@Autowired
 	private ShopMapper shopMapper;
+
+	@Autowired
+	private PortoneService portoneService;
 	
 	@Autowired
 	private FileUploadService fileUploadService;
@@ -427,6 +431,33 @@ public class ShopService {
             log.info("고객에게 주문 상태 변경 알림 전송 완료. userId: {}, oNo: {}, status: {}", userId, oNo, newStatus);
         } else {
             log.error("고객 ID를 찾을 수 없어 주문 상태 변경 알림을 전송하지 못했습니다. (oNo: {})", oNo);
+        }
+    }
+
+    // 주문 거절 및 환불 처리
+    @Transactional
+    public boolean rejectOrderAndCancelPayment(int oNo, String reason) {
+        // 1. 주문 정보 조회
+        Orders order = findOrderByNo(oNo);
+        if (order == null) {
+            log.error("주문 거절 실패: 주문 정보를 찾을 수 없습니다. (oNo: {})", oNo);
+            return false;
+        }
+
+        // 디버깅: paymentUid 값 확인
+        log.info("rejectOrderAndProcessRefund: 주문번호 {}의 paymentUid: {}", oNo, order.getPaymentUid());
+
+        // 2. 포트원 결제 취소 요청
+        boolean isCancelled = portoneService.cancelPayment(order.getPaymentUid(), String.valueOf(oNo), reason, order.getTotalPrice());
+
+        // 3. 결제 취소 성공 시 주문 상태 변경
+        if (isCancelled) {
+            updateOrderStatus(oNo, "REJECTED");
+            log.info("주문이 성공적으로 거절되고 환불 처리되었습니다. (oNo: {})", oNo);
+            return true;
+        } else {
+            log.error("포트원 결제 취소에 실패했습니다. (oNo: {}, paymentUid: {})", oNo, order.getPaymentUid());
+            return false;
         }
     }
     
