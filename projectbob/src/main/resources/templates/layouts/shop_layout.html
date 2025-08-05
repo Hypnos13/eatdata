@@ -20,14 +20,11 @@
 	    <div class="d-flex flex-row">
 	      <!-- 사이드바 -->
 	      <aside class="services-sidebar me-4">
-	        <!-- 사이드바: 가게 드롭다운 -->
-			<div th:if="${shopListMain == null or #lists.isEmpty(shopListMain)}">
-			  <button class="sidebar-menu-btn d-flex justify-content-between align-items-center">
-			    아직 가게가 없습니다.
-			  </button>
-			</div>
-			
-			<div th:if="${shopListMain != null and !#lists.isEmpty(shopListMain)}" class="dropdown">
+			  <div th:if="${shopListMain == null or #lists.isEmpty(shopListMain)}">
+			    <button class="sidebar-menu-btn w-100">아직 가게가 없습니다.</button>
+			  </div>
+			  <div th:if="${shopListMain != null and !#lists.isEmpty(shopListMain)}">
+		  		<div class="dropdown">
 			  <button class="sidebar-menu-btn d-flex justify-content-between align-items-center dropdown-toggle w-100"
 			        type="button" id="shopDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
 			  <span>

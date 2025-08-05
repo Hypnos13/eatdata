@@ -116,43 +116,48 @@
         </div>
       </div>
 
-      <!-- 우측: 선택된 주문 상세 -->
-      <div class="order-detail-panel">
-        <th:block th:if="${selectedOrder != null}">
-          <h4>주문 #<span th:text="${selectedOrder.oNo}">123</span> 상세</h4>
-          <p><strong>주문일시:</strong>
-            <span th:text="${#dates.format(selectedOrder.regDate,'yyyy-MM-dd HH:mm')}">
-              2025-08-05 09:00
-            </span>
-          </p>
-          <p><strong>총액·수량:</strong>
-            <span th:text="${selectedOrder.totalPrice + '원'}">10,000원</span>
-            &nbsp;·&nbsp;
-            <span th:text="${selectedOrder.quantity + '개'}">2개</span>
-          </p>
-          <p><strong>배달/픽업:</strong>
-            <span th:text="${selectedOrder.oAddress != null ? '배달' : '픽업'}">배달</span>
-          </p>
-          <p th:if="${selectedOrder.oAddress}">
-            <strong>주소:</strong>
-            <span th:text="${selectedOrder.oAddress}">서울 강남구 …</span>
-          </p>
-          
-          <h6>결제 정보</h6>
-          <p><strong>수단:</strong> <span th:text="${selectedOrder.payment}">카카오페이</span></p>
-          <p><strong>결제ID:</strong> <span th:text="${selectedOrder.paymentUid}">abc123xyz</span></p>
-          
-          <h6>메뉴 & 요청사항</h6>
-          <p><span th:utext="${selectedOrder.menus}">치킨 *1, 콜라 *1</span></p>
-          <p><strong>요청사항:</strong>
-            <span th:text="${selectedOrder.request ?: '없음'}">없음</span>
-          </p>
-        </th:block>
-        <th:block th:if="${selectedOrder == null}"
-                  class="text-center text-muted my-auto">
-          왼쪽 주문을 클릭하면 상세가 표시됩니다.
-        </th:block>
-      </div>
+      <!-- 우측: 선택된 주문 상세 (신규 주문에 특화된 UI) -->
+		<div class="order-detail-panel">
+		  <th:block th:if="${selectedOrder != null}">
+		    <h4>신규 주문 #<span th:text="${selectedOrder.oNo}">123</span></h4>
+		    <p><strong>주문일시:</strong>
+		      <span th:text="${#dates.format(selectedOrder.regDate,'yyyy-MM-dd HH:mm')}">
+		        2025-08-05 09:00
+		      </span>
+		    </p>
+		    <p><strong>총액:</strong>
+		      <span th:text="${selectedOrder.totalPrice + '원'}">10,000원</span>
+		    </p>
+		    <p><strong>배달/픽업:</strong>
+		      <span th:text="${selectedOrder.oAddress != null ? '배달' : '픽업'}">배달</span>
+		    </p>
+		    <p th:if="${selectedOrder.oAddress}">
+		      <strong>주소:</strong>
+		      <span th:text="${selectedOrder.oAddress}">서울 강남구 …</span>
+		    </p>
+		    <p><strong>메뉴:</strong>
+		      <span th:utext="${selectedOrder.menus}">치킨 *1, 콜라 *1</span>
+		    </p>
+		    <p><strong>요청사항:</strong>
+		      <span th:text="${selectedOrder.request ?: '없음'}">없음</span>
+		    </p>
+		    <div class="mt-4">
+		      <button type="button" class="btn btn-success me-2"
+		              th:onclick="|acceptOrder(${selectedOrder.oNo})|">
+		        수락
+		      </button>
+		      <button type="button" class="btn btn-outline-danger"
+		              th:onclick="|rejectOrder(${selectedOrder.oNo})|">
+		        거절
+		      </button>
+		    </div>
+		  </th:block>
+		  <th:block th:if="${selectedOrder == null}">
+		    <div class="text-center text-muted my-auto">
+		      왼쪽 주문을 클릭하면 상세가 표시됩니다.
+		    </div>
+		  </th:block>
+		</div>
 
     </div>
   </th:block>
