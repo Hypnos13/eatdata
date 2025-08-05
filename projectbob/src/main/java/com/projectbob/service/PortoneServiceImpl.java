@@ -16,6 +16,7 @@ import org.springframework.util.MultiValueMap; // 추가
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
 public class PortoneServiceImpl implements PortoneService {
@@ -97,5 +98,31 @@ public class PortoneServiceImpl implements PortoneService {
         System.out.println("PortoneService: 결제 검증 요청 - paymentId: " + paymentId + ", orderId: " + orderId);
         // TODO: 실제 PortOne API 연동 시 이 부분을 제거하고 실제 검증 로직을 구현해야 합니다.
         return true; // 테스트를 위해 임시로 항상 true 반환
+    }
+
+    @Override
+    public boolean cancelPayment(String impUid, String merchantUid, String reason, Integer amount) {
+        try {
+            String token = getAccessToken();
+            String url   = "https://api.iamport.kr/payments/cancel";
+
+            Map<String,Object> body = new HashMap<>();
+            body.put("imp_uid", impUid);
+            body.put("merchant_uid", merchantUid);
+            body.put("cancel_reason", reason);
+            if (amount != null) body.put("amount", amount);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+            HttpEntity<Map<String,Object>> req = new HttpEntity<>(body, headers);
+
+            ResponseEntity<JsonNode> resp = restTemplate.postForEntity(url, req, JsonNode.class);
+            JsonNode res = resp.getBody().path("response");
+            return res.has("cancel_date");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.projectbob.controller;
 
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.security.Principal;
@@ -274,7 +275,14 @@ public class BobController {
 			}
 		
     @Autowired
-	private PortoneService portoneService; // PortoneService 의존성 주입
+	private PortoneServiceImpl portoneService; // PortoneService 의존성 주입
+
+    @Autowired
+    BobController(LoginController loginController, WebsocketService websocketService, PortoneServiceImpl portoneService) {
+        this.loginController = loginController;
+        this.websocketService = websocketService;
+        this.portoneService = portoneService;
+    }
 
     @PostMapping("/preparePayment")
     @ResponseBody
@@ -341,6 +349,90 @@ public class BobController {
 
             return Map.of("success", true, "orderNo", newOrderNo);
         }
+
+    @PostMapping("/shop/orders/{orderId}/reject")
+    public ResponseEntity<?> rejectOrder(@PathVariable Long orderId) {
+        // 1) DB에서 주문 정보 조회
+        Orders order = bobService.findOrderByONo(orderId);
+        if (order == null || !"PENDING".equals(order.getStatus())) {
+            return ResponseEntity.badRequest().body("이미 결제되지 않았거나 처리된 주문입니다.");
+        }
+
+        // 2) PortOne 환불 API 호출
+        boolean refunded = portoneService.cancelPayment(
+            order.getPaymentUid(),
+            String.valueOf(order.getONo()),
+            "가게 거절로 인한 자동 환불",
+            null
+        );
+
+        if (!refunded) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body("환불에 실패했습니다.");
+        }
+
+        // 3) 주문 상태 DB 업데이트
+        bobService.updateOrderStatus(orderId, "REJECTED");
+
+        // 4) 고객에게 알림 (WebSocket 푸시)
+        Map<String,Object> payload = Map.of(
+            "orderId", orderId,
+            "status", "REJECTED"
+        );
+        websocketService.sendOrderStatusUpdateToUser(
+            order.getId(),
+            payload
+        );
+
+        return ResponseEntity.ok("주문이 거절되고 환불 처리되었습니다.");
     }
+
+    @PostMapping("/shop/orders/{orderId}/deliver")
+    public ResponseEntity<?> deliverOrder(@PathVariable Long orderId) {
+        // 1) DB에서 주문 정보 조회
+        Orders order = bobService.findOrderByONo(orderId);
+        if (order == null || !("ACCEPTED".equals(order.getStatus()) || "DELIVERING".equals(order.getStatus()))) {
+            return ResponseEntity.badRequest().body("수락되지 않았거나 이미 배달 중인 주문이 아닙니다.");
+        }
+
+        // 2) 주문 상태 DB 업데이트
+        bobService.updateOrderStatus(orderId, "DELIVERING");
+
+        // 3) 고객에게 알림 (WebSocket 푸시)
+        Map<String,Object> payload = Map.of(
+            "orderId", orderId,
+            "status", "DELIVERING"
+        );
+        websocketService.sendOrderStatusUpdateToUser(
+            order.getId(),
+            payload
+        );
+
+        return ResponseEntity.ok("주문이 배달 중으로 변경되었습니다.");
+    }
+
+    @PostMapping("/shop/orders/{orderId}/complete")
+    public ResponseEntity<?> completeOrder(@PathVariable Long orderId) {
+        // 1) DB에서 주문 정보 조회
+        Orders order = bobService.findOrderByONo(orderId);
+        if (order == null || !"DELIVERING".equals(order.getStatus())) {
+            return ResponseEntity.badRequest().body("배달 중인 주문이 아닙니다.");
+        }
+
+        // 2) 주문 상태 DB 업데이트
+        bobService.updateOrderStatus(orderId, "COMPLETED");
+
+        // 3) 고객에게 알림 (WebSocket 푸시)
+        Map<String,Object> payload = Map.of(
+            "orderId", orderId,
+            "status", "COMPLETED"
+        );
+        websocketService.sendOrderStatusUpdateToUser(
+            order.getId(),
+            payload
+        );
+
+        return ResponseEntity.ok("주문이 완료되었습니다.");
+    }
+}
 
 

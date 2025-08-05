@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ShopController {
 
     private final WebsocketService websocketService;
+    private final PortoneService portoneService; 
 
 	@Autowired
 	private ShopService shopService;
@@ -52,8 +53,9 @@ public class ShopController {
 	@Autowired
     private ObjectMapper objectMapper;
 
-    ShopController(WebsocketService websocketService) {
+    ShopController(WebsocketService websocketService, PortoneService portoneService) {
         this.websocketService = websocketService;
+        this.portoneService = portoneService;
     }
 	
 	// 식품영양성분DB API 검색
@@ -695,50 +697,50 @@ public class ShopController {
 	
 	/* ----------------------- 주문 관리 ----------------------- */
 	@GetMapping("/shop/orderManage")
-	public String orderManage(
-	        @RequestParam(value = "status", defaultValue = "ALL") String status,
-	        @RequestParam(value = "oNo", required = false) Integer oNo,
-	        @SessionAttribute(name = "currentSId", required = false) Integer sId,
-	        @SessionAttribute(name = "loginId", required = false) String loginId,
-	        Model model) {
+	   public String orderManage(
+	           @RequestParam(value = "status", defaultValue = "ALL") String status,
+	           @RequestParam(value = "oNo", required = false) Integer oNo,
+	           @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	           @SessionAttribute(name = "loginId", required = false) String loginId,
+	           Model model) {
 
-	    if (loginId == null || sId == null) {
-	        return "redirect:/login";
-	    }
-	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
-	    if (currentShop == null) {
-	        return "redirect:/shopMain";
-	    }
+	       if (loginId == null || sId == null) {
+	           return "redirect:/login";
+	       }
+	       Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	       if (currentShop == null) {
+	           return "redirect:/shopMain";
+	       }
 
-	    // ① PENDING일 땐 신규주문 화면으로 강제 분기!
-	    if ("PENDING".equals(status)) {
-	        List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
-	        model.addAttribute("orders", orders);
-	        model.addAttribute("currentShop", currentShop);
-	        if (!orders.isEmpty()) {
-	            model.addAttribute("selectedOrder", orders.get(0));
-	        }
-	        return "shop/shopNewOrders";
-	    }
+	       // ① PENDING일 땐 신규주문 화면으로 강제 분기!
+	       if ("PENDING".equals(status)) {
+	           List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
+	           model.addAttribute("orders", orders);
+	           model.addAttribute("currentShop", currentShop);
+	           if (!orders.isEmpty()) {
+	               model.addAttribute("selectedOrder", orders.get(0));
+	           }
+	           return "shop/shopNewOrders";
+	       }
 
-	 // ②  주문관리 코드
-	    List<Orders> orders;
-	    if ("ALL".equals(status)) {
-	        orders = shopService.findOrdersByShopId(sId).stream()
-	            .filter(o -> !"REJECTED".equals(o.getStatus()) && !"DELIVERED".equals(o.getStatus()))
-	            .toList();
-	    } else {
-	        orders = shopService.findOrdersByStatusAndShop(status, sId);
-	    }
+	    // ②  주문관리 코드
+	       List<Orders> orders;
+	       if ("ALL".equals(status)) {
+	           orders = shopService.findOrdersByShopId(sId).stream()
+	               .filter(o -> !"REJECTED".equals(o.getStatus()) && !"DELIVERED".equals(o.getStatus()))
+	               .toList();
+	       } else {
+	           orders = shopService.findOrdersByStatusAndShop(status, sId);
+	       }
 
-	    model.addAttribute("orders", orders);
-	    model.addAttribute("status", status);
-	    model.addAttribute("currentShop", currentShop);
-	    if (oNo != null) {
-	        model.addAttribute("selectedOrder", shopService.findOrderByNo(oNo));
-	    }
-	    return "shop/shopOrderManage";
-	}
+	       model.addAttribute("orders", orders);
+	       model.addAttribute("status", status);
+	       model.addAttribute("currentShop", currentShop);
+	       if (oNo != null) {
+	           model.addAttribute("selectedOrder", shopService.findOrderByNo(oNo));
+	       }
+	       return "shop/shopOrderManage";
+	   }
 	
 	/* ----------------------- 주문 상세 보기 ----------------------- */
 	@GetMapping("/shop/orderDetail")
@@ -763,7 +765,7 @@ public class ShopController {
 	@ResponseBody
 	@Transactional
 	public ResponseEntity<Map<String, Object>> changeOrderStatus(@PathVariable int oNo,
-				@RequestParam("newStatus") String newStatus) {
+			@RequestParam("newStatus") String newStatus) {
 
 		// 1. 주문 상태를 DB에 업데이트합니다.
 		shopService.updateOrderStatus(oNo, newStatus);
@@ -773,11 +775,36 @@ public class ShopController {
 
 		// 3. 주문 정보를 조회하여 사용자 ID를 얻습니다.
 		Orders order = shopService.findOrderByNo(oNo);
-		if (order != null && order.getId() != null) {
-			// 4. 해당 사용자에게 개인화된 알림을 보냅니다.
-			Map<String, Object> payload = Map.of("oNo", oNo, "status", newStatus, "message",
-					"주문이 " + ("ACCEPTED".equals(newStatus) ? "수락" : "취소") + "되었습니다.");
-			websocketService.sendOrderStatusUpdateToUser(order.getId(), payload);
+		if (order != null) {
+			if ("REJECTED".equals(newStatus)) {
+				// 주문 거절 시 결제 환불 처리
+				String paymentUid = order.getPaymentUid();
+				int totalPrice = order.getTotalPrice();
+				if (paymentUid != null && totalPrice > 0) {
+					log.info("주문 거절: 결제 환불 시작. paymentUid: {}, totalPrice: {}", paymentUid, totalPrice);
+					boolean refunded = portoneService.cancelPayment(
+					    paymentUid,
+					    String.valueOf(order.getONo()), // merchant_uid
+					    "가게 거절로 인한 자동 환불", // reason
+					    null // 전액 환불
+					);
+					if (!refunded) {
+						log.error("결제 환불 실패: {}", "PortoneService.cancelPayment 반환값 false");
+						// 환불 실패 시 적절한 에러 처리 (예: 사용자에게 알림, 관리자에게 보고)
+						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "주문 거절은 되었으나 결제 환불에 실패했습니다."));
+					}
+					log.info("결제 환불 성공");
+				} else {
+					log.warn("주문 거절: paymentUid 또는 totalPrice가 없어 환불을 진행할 수 없습니다. oNo: {}", oNo);
+				}
+			}
+
+			if (order.getId() != null) {
+				// 4. 해당 사용자에게 개인화된 알림을 보냅니다.
+				Map<String, Object> payload = Map.of("oNo", oNo, "status", newStatus, "message",
+						"주문이 " + ("ACCEPTED".equals(newStatus) ? "수락" : "취소(환불)") + "되었습니다.");
+				websocketService.sendOrderStatusUpdateToUser(order.getId(), payload);
+			}
 		}
 
 		return ResponseEntity.ok(Map.of("success", true));
