@@ -122,10 +122,6 @@ public class ShopController {
 			return "/shop/shopJoinForm";
 		}
 
-<<<<<<< HEAD
-        model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
-		return "redirect:/shopMain";
-=======
 		Shop shop = new Shop();
 		shop.setId(id);
 		shop.setSNumber(sNumber);
@@ -141,7 +137,6 @@ public class ShopController {
 
 		model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
 		return "redirect:shopMain";
->>>>>>> develop
 	}
 	
 	//배달 대행 요청
@@ -671,7 +666,34 @@ public class ShopController {
 		return "redirect:/shop/reviewManage?s_id=" + sId;
 	}
 
-	/* ----------------------- 상태별 주문 관리 ----------------------- */
+	/* ----------------------- 신규주문 ----------------------- */
+	@GetMapping("/shop/newOrders")
+	public String newOrders(
+	    @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	    @SessionAttribute(name = "loginId", required = false) String loginId,
+	    Model model) {
+
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    if (currentShop == null) {
+	        return "redirect:/shopMain";
+	    }
+	    List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
+
+	    model.addAttribute("orders", orders);
+	    model.addAttribute("currentShop", currentShop);
+
+	    if (!orders.isEmpty()) {
+	        model.addAttribute("selectedOrder", orders.get(0));
+	    }
+
+	    return "shop/shopNewOrders"; // 신규주문 전용 템플릿
+	}
+
+	
+	/* ----------------------- 주문 관리 ----------------------- */
 	@GetMapping("/shop/orderManage")
 	public String orderManage(
 	        @RequestParam(value = "status", defaultValue = "ALL") String status,

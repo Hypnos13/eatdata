@@ -1,40 +1,3 @@
-<<<<<<< HEAD
-// ==== 0. 벨 아이콘 깜빡임 제어 ========================
-function markBellAsUnread() {
-  const icon = document.getElementById('notifyIcon');
-  if (icon && !icon.classList.contains('blink')) {
-    icon.classList.add('blink');
-  }
-}
-function clearBellBlink() {
-  const icon = document.getElementById('notifyIcon');
-  if (icon && icon.classList.contains('blink')) {
-    icon.classList.remove('blink');
-  }
-}
-
-// ==== 1. 주문 상세 토글 & 아이콘 변경 ================
-function toggleDetail(oNo) {
-  const detail = document.getElementById(`detail-${oNo}`);
-  const btn    = document.querySelector(`button[aria-controls="detail-${oNo}"]`);
-  if (!detail || !btn) return;
-  const icon      = btn.querySelector('i');
-  const isOpening = detail.classList.toggle('d-none') === false;
-  btn.setAttribute('aria-expanded', isOpening);
-  icon.classList.toggle('bi-chevron-down', !isOpening);
-  icon.classList.toggle('bi-chevron-up',   isOpening);
-}
-
-// ==== 2. 벨 깜빡임 재시작 ============================
-document.addEventListener('DOMContentLoaded', () => {
-  const badge = document.getElementById('header-notif-badge');
-  if (badge && +badge.textContent > 0) {
-    markBellAsUnread();
-  }
-});
-
-// ==== 3. WebSocket 초기화 & 이벤트 처리 ==============
-=======
 function findZipcode() {
 	new daum.Postcode({
 		oncomplete: function(data) {
@@ -525,160 +488,224 @@ $('.reply-box')
 
 // ==== 7. WebSocket 초기화 & 이벤트 처리 =================
 // 페이지 로드 후 한 번만 실행됩니다.
->>>>>>> develop
 document.addEventListener('DOMContentLoaded', () => {
+  // 7.0: shopId 조회 (헤더 알림 컨테이너에서)
   const notifyContainer = document.getElementById('notifyContainer');
   if (!notifyContainer) return;
   const shopId = notifyContainer.dataset.shopId;
 
+  // 7.1: SockJS & STOMP 클라이언트 생성
   const socket      = new SockJS('/ws');
   const stompClient = Stomp.over(socket);
 
+  // 7.2: STOMP 연결 후 구독 시작
   stompClient.connect({}, () => {
-    // ─── 3.1 신규 주문 알림 구독 ─────────────────────────
-    stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
-      renderHeaderNotification(msg);
-      markBellAsUnread();
-    });
+    console.log('[shop.js] STOMP connected, shopId=', shopId);
 
-    // ─── 3.2 주문 상태 변경(헤더) ────────────────────────
+	// 7.2.1: 신규 주문 알림 구독
+	stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
+	  console.log('[WS 新주문 콜백]', msg, typeof msg.body, msg.body);
+	  try {
+	    const o = JSON.parse(msg.body);
+	    console.log('[WS 新주문] 주문 객체:', o);
+	  } catch(e) {
+	    console.error('JSON parse error:', e, msg.body);
+	  }
+
+	  // 1) 헤더 알림 + 벨 아이콘 깜빡임 (모든 페이지 공통)
+	  renderHeaderNotification(msg);
+	  markBellAsUnread();
+
+	  // 2) 신규 주문 리스트가 있는 페이지에서만 렌더링
+	  if (document.getElementById('newOrderList')) {
+	    renderNewOrderItem(msg);
+	  }
+	});
+
+    // 7.2.2: 주문 상태 변경 구독 (헤더 알림 제거)
     stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
+      console.log('[WS 상태변경_헤더]', msg.body);
       const { oNo } = JSON.parse(msg.body);
       removeHeaderNotification(oNo);
     });
 
-    // ─── 3.3 주문 상태 변경(테이블) ──────────────────────
+    // 7.2.3: 주문 상태 변경 구독 (테이블 업데이트)
     document.querySelectorAll('tr[data-order-no]').forEach(row => {
       const oNo = row.dataset.orderNo;
       stompClient.subscribe(`/topic/orderStatus/order/${oNo}`, msg => {
+        console.log('[WS 상태변경_테이블]', msg.body);
         const { newStatus } = JSON.parse(msg.body);
         const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
         if (cell) cell.textContent = newStatus;
       });
     });
+
+    // 7.2.4: 드롭다운 열림 시 깜빡임 해제
+    document.getElementById('headerNotifyBtn')
+      ?.addEventListener('shown.bs.dropdown', clearBellBlink);
   });
 });
 
-// ==== 4. 헤더 알림 추가/제거 헬퍼 ======================
-function renderHeaderNotification(msg) {
-  const data  = JSON.parse(msg.body);
-  const badge = document.getElementById('header-notif-badge');
-  const list  = document.getElementById('header-notif-list');
-  if (!badge || !list) return;
-
-  // 배지 업데이트
-  badge.textContent = String((parseInt(badge.textContent,10)||0) + 1);
-  badge.classList.remove('d-none');
-  list.querySelector('li.text-muted')?.remove();
-
-  // 새 알림 아이템 생성
-  const item = document.createElement('li');
-  item.className       = 'notif-item d-flex justify-content-between align-items-center';
-  item.dataset.orderNo = data.oNo;
-  item.innerHTML = `
-    <a class="dropdown-item flex-grow-1 text-truncate"
-       href="/shop/orderManage?status=PENDING">
-      새 주문이 도착했습니다.
-    </a>
-  `;
-  list.prepend(item);
+// ==== 8. 알림 아이콘 깜박임 제어 ===========================
+//알림 아이콘 깜박임 시작
+function markBellAsUnread() {
+  const icon = document.getElementById('notifyIcon');
+  if (icon) icon.classList.add('blink');
 }
 
-function removeHeaderNotification(oNo) {
-  document
-    .querySelector(`#header-notif-list .notif-item[data-order-no="${oNo}"]`)
-    ?.remove();
-
-  const badge = document.getElementById('header-notif-badge');
-  if (!badge) return;
-  const cnt = Math.max(0, parseInt(badge.textContent||'0', 10) - 1);
-  badge.textContent = cnt;
-
-  if (cnt === 0) {
-    badge.classList.add('d-none');
-    clearBellBlink();
-  }
+//알림 아이콘 깜박임 종료
+function clearBellBlink() {
+  const icon = document.getElementById('notifyIcon');
+  if (icon) icon.classList.remove('blink');
 }
 
-// ==== 5. 주문 관리 함수 (수락 / 거절) ================
-window.acceptOrder = oNo => {
+// ==== 9. 주문 관리 함수 (수락 / 거절) =====================
+// 주문 수락 함수 (기존)
+window.acceptOrder = function(oNo) {
   fetch(`/shop/orderManage/${oNo}/status`, {
     method: 'POST',
     headers: {'Content-Type':'application/x-www-form-urlencoded'},
     body: 'newStatus=ACCEPTED'
-  }).then(r => {
-    if (!r.ok) throw new Error();
-    document.querySelector(`li[data-order-no="${oNo}"]`)?.remove();
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('상태 변경 실패');
+    document.querySelector(`button[onclick="acceptOrder(${oNo})"]`)?.closest('li').remove();
     location.href = '/shop/orderManage?status=IN_PROGRESS';
-  }).catch(() => alert('수락 실패'));
+  })
+  .catch(() => alert('주문 수락에 실패했습니다.'));
 };
 
-window.rejectOrder = oNo => {
+// 주문 거절 함수 (추가)
+window.rejectOrder = function(oNo) {
   fetch(`/shop/orderManage/${oNo}/status`, {
     method: 'POST',
     headers: {'Content-Type':'application/x-www-form-urlencoded'},
     body: 'newStatus=REJECTED'
   })
-  .then(r => {
-    if (!r.ok) throw new Error();
-    document.querySelector(`li[data-order-no="${oNo}"]`)?.remove();
-    location.href = '/shop/orderManage?status=PENDING';
+  .then(res => {
+    if (!res.ok) throw new Error('거절 실패');
+    document.querySelector(`button[onclick="rejectOrder(${oNo})"]`)?.closest('li').remove();
   })
-  .catch(() => alert('거절 실패'));
+  .catch(() => alert('주문 거절에 실패했습니다.'));
 };
 
-// ==== 6. 신규주문 리스트에 항목 추가 (타이머 제거) ======
+// ==== 10. 렌더링 헬퍼 =====================================
 function renderNewOrderItem(msg) {
-  const o = JSON.parse(msg.body);
   const ul = document.getElementById('newOrderList');
+  if (!ul) return;
+
+  // placeholder 제거
   ul.querySelector('li.text-center.text-muted')?.remove();
 
+  const o = JSON.parse(msg.body);
+  const orderId = o.orderId;
+
   const li = document.createElement('li');
-  li.className       = 'list-group-item d-flex align-items-start mb-3 p-3 notif-item';
-  li.dataset.orderNo = o.oNo;
+  li.className = 'list-group-item d-flex align-items-start mb-3 p-3';
   li.innerHTML = `
     <div class="flex-grow-1 pe-3">
       <div class="mb-1">🛒 ${o.menus}</div>
       <div class="mb-1">💬 ${o.request || '요청사항 없음'}</div>
       <div class="text-muted small">
-        <i class="bi bi-clock"></i> ${new Date().toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' })}
+        <i class="bi bi-clock"></i>${new Date(o.regDate).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
       </div>
     </div>
-    <div class="d-flex flex-column justify-content-between" style="min-width:5rem;">
-      <button class="btn btn-success btn-sm mb-2" onclick="acceptOrder(${o.oNo})">수락</button>
-      <button class="btn btn-outline-danger btn-sm" onclick="rejectOrder(${o.oNo})">거절</button>
+    <div class="d-flex flex-column justify-content-between" style="min-width: 5rem;">
+      <button class="btn btn-success btn-sm mb-2" onclick="acceptOrder(${orderId})">수락</button>
+      <button class="btn btn-outline-danger btn-sm" onclick="rejectOrder(${orderId})">거절</button>
     </div>
   `;
   ul.prepend(li);
 }
 
-// ==== 7. 휴무/영업 버튼 ================================
-const updateDayRow = ($chk) => {
-  const $tr = $chk.closest("tr");
-  const idx = $chk.attr("id")
-    ? $chk.attr("id").replace("isOpen", "")
-    : $chk.attr("name").match(/\[(\d+)\]/)[1];
-  const $label = $("#openLabel" + idx);
-  const on = $chk.is(":checked");
+function renderHeaderNotification(msg) {
+  const data  = JSON.parse(msg.body);
+  const badge = document.getElementById('header-notif-badge');
+  const list  = document.getElementById('header-notif-list');
 
-  $tr.find("select").toggleClass("disabled-look", !on);
-  $tr.find(".allDay-check").prop("disabled", !on);
+  // 뱃지 증가
+  badge.textContent  = parseInt(badge.textContent || '0',10) + 1;
+  badge.classList.remove('d-none');
 
-  $label
-    .text(on ? "영업일" : "휴무일")
-    .toggleClass("bg-success", on)
-    .toggleClass("bg-secondary", !on);
-};
+  // “알림이 없습니다.” 제거
+  list.querySelector('li.text-muted')?.remove();
 
-$(".switch input[type='checkbox'][name^='isOpen']")
-  .each(function () { updateDayRow($(this)); })
-  .on("change",   function () { updateDayRow($(this)); });
+  // 알림 아이템 생성
+  const item = document.createElement('li');
+  item.className       = 'notif-item';
+  // ↓ JSON 필드명이 orderId 로 넘어오므로 oNo 대신 orderId 사용
+  const id             = data.orderId;
+  item.dataset.orderNo = id;
 
-$("#openTimeForm").on("submit", function () {
-  $(this).find("select:disabled").prop("disabled", false);
-});
+  // 링크 구성
+  const a = document.createElement('a');
+  a.className = 'dropdown-item text-truncate';
+  a.href      = `/shop/orderDetail?oNo=${id}`;
+  a.textContent = '새 주문 알림이 도착했습니다.';
 
-// ==== 8. 주문 상세 페이지 픽업/배달 버튼 ===============
+  item.appendChild(a);
+
+  // ↓ prepend → append 로 바꿔서 새 알림이 아래로 쌓이도록
+  list.appendChild(item);
+}
+
+//헤더 알림에서 아이템 제거 함수
+function removeHeaderNotification(oNo) {
+  // 아이템 제거
+  document.querySelector(`#header-notif-list .notif-item[data-order-no="${oNo}"]`)?.remove();
+  // 뱃지 감소
+  const badge = document.getElementById('header-notif-badge');
+  const cnt   = Math.max(0, parseInt(badge.textContent||'0',10) - 1);
+  badge.textContent = cnt;
+  if (cnt === 0) badge.classList.add('d-none');
+}
+
+  // ==== 11. 휴무/영업 버튼 ================
+  // 휴무/영업 스위치
+  const updateDayRow = ($chk) => {
+    const $tr = $chk.closest("tr");
+    const idx = $chk.attr("id")
+      ? $chk.attr("id").replace("isOpen", "")
+      : $chk.attr("name").match(/\[(\d+)\]/)[1];
+    const $label = $("#openLabel" + idx);
+    const on = $chk.is(":checked");
+
+    // 값 전송은 그대로, UI만 막기
+    $tr.find("select").toggleClass("disabled-look", !on);
+    $tr.find(".allDay-check").prop("disabled", !on);
+
+    $label
+      .text(on ? "영업일" : "휴무일")
+      .toggleClass("bg-success", on)
+      .toggleClass("bg-secondary", !on);
+  };
+
+  $(".switch input[type='checkbox'][name^='isOpen']")
+    .each(function () { updateDayRow($(this)); })
+    .on("change", function () { updateDayRow($(this)); });
+
+  // 혹시라도 다른 스크립트가 disabled 걸면 제출 전에 해제
+  $("#openTimeForm").on("submit", function () {
+    $(this).find("select:disabled").prop("disabled", false);
+  });
+
+  // ----- 영업시간 관리 (휴무/전체휴무 토글 등) -----
+  $(function () {
+
+    // 전체휴무 체크박스
+    $(".allDay-check").on("change", function () {
+      const $tr = $(this).closest("tr");
+      if (this.checked) {
+        $tr.find("select[name^='openHour']").val("00");
+        $tr.find("select[name^='openMin']").val("00");
+        $tr.find("select[name^='closeHour']").val("23");
+        $tr.find("select[name^='closeMin']").val("59");
+      }
+      // disabled 절대 쓰지 않음
+    });
+	
+// ==== 12. 주문 상세 페이지 픽업/배달 버튼 ================
+// 픽업·배달 버튼 처리
 document.addEventListener('DOMContentLoaded', () => {
   const btnPickup  = document.getElementById('btnPickup');
   const btnDeliver = document.getElementById('btnDeliver');
@@ -701,14 +728,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateStatus(newStatus, cb) {
+    // Thymeleaf 가 주입한 order.oNo 가 필요하므로 data-* 에 담아두면 좋습니다.
     const container = document.querySelector('[data-order-no]');
     const oNo       = container ? container.dataset.orderNo : 0;
+
     fetch(`/shop/orderManage/${oNo}/status`, {
       method:  'POST',
-      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      headers: { 'Content-Type':'application/x-www-form-urlencoded' },
       body:    'newStatus=' + newStatus
     })
     .then(r => r.json())
     .then(d => { if (d.success) cb(); });
   }
+});
 });
