@@ -11,15 +11,15 @@
   
   <th:block th:if="${session.loginDivision == 'owner' || from == 'owner'}">
   <div class="col-5 logo-area">
-    <a href="shopMain"><img src="images/Logo.png" width="180px" height="45px" /></a>
+    <a th:href="@{/shopMain}"><img th:src="@{/images/Logo.png}" width="180px" height="45px" /></a>
   </div>
   </th:block>
   
   <th:block th:if="${session.loginDivision == 'master'}">
   <div class="col-5 logo-area">	
-    <a href="main"><img src="images/Client.png" width="180px" height="45px"/></a>
-    <a href="shopMain">
-      <img src="images/Owner.png" width="180px" height="45px" />
+    <a th:href="@{/main}"><img th:src="@{/images/Client.png}" width="180px" height="45px"/></a>
+    <a th:href="@{/shopMain}">
+      <img th:src="@{/images/Owner.png}" width="180px" height="45px" />
     </a>
   </div>
   </th:block>
@@ -27,22 +27,22 @@
   <div class="col-7 text-end fs-6">
     <th:block th:if="${session.isLogin}">
       <a class="me-2">[[${session.loginNickname}]] 님 어서오세요.</a>
-      <a href="logout" class="topbar-href">로그아웃</a>
-      <a href="myProfile" class="topbar-href">내정보수정</a>
+      <a th:href="@{/logout}" class="topbar-href">로그아웃</a>
+      <a th:href="@{/myProfile}" class="topbar-href">내정보수정</a>
     </th:block>
     <th:block th:unless="${session.isLogin}">
-      <a href="login" class="topbar-href">로그인</a>  
+      <a th:href="@{/login}" class="topbar-href">로그인</a>  
     </th:block>
     <th:block th:if="${session.loginDivision == 'client'}">
-    	<a href="likePage" class="topbar-href">찜목록</a>
-    	<a href="myPage" class="topbar-href">마이페이지</a>
+    	<a th:href="@{/likePage}" class="topbar-href">찜목록</a>
+    	<a th:href="@{/myPage}" class="topbar-href">마이페이지</a>
     </th:block>
     <th:block th:if="${session.loginDivision == 'master'}">
-    	<a href="faqList" class="topbar-href">FAQ관리</a>
-    	<a href="noticeList" class="topbar-href">공지사항관리</a>
-    	<a href="userList" class="topbar-href">사용자관리</a>
-    	<a href="shopManage" class="topbar-href">가게관리</a>
-    	<a href="couponManage" class="topbar-href">쿠폰관리</a>
+    	<a th:href="@{/faqList}" class="topbar-href">FAQ관리</a>
+    	<a th:href="@{/noticeList}" class="topbar-href">공지사항관리</a>
+    	<a th:href="@{/userList}" class="topbar-href">사용자관리</a>
+    	<a th:href="@{/shopManage}" class="topbar-href">가게관리</a>
+    	<a th:href="@{/couponManage}" class="topbar-href">쿠폰관리</a>
     </th:block>
   </div>
 </div>

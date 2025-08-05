@@ -25,8 +25,11 @@ public class WebsocketService {
 	
 	// 주문정보 푸시
 	public void sendNewOrder(NewOrder order) {
-		log.info("[WebSocket] sendNewOrder: {}", order);
-		template.convertAndSend("/topic/newOrder/" + order.getShopId(), order);
+		if (order.getRegDate() != null) {
+	        order.setRegDateMs(order.getRegDate().getTime());
+	    }
+	    log.info("[WebSocket] sendNewOrder: {}", order);
+	    template.convertAndSend("/topic/newOrder/" + order.getShopId(), order);
 	}
 	
     //주문 상태 변경 푸시

@@ -19,6 +19,7 @@ public class WebConfig implements WebMvcConfigurer{
 		registry.addViewController("/login/naver/callback").setViewName("members/naverCallback");
 		registry.addViewController("/addAddressForm").setViewName("members/addAddressForm");
 	}
+<<<<<<< HEAD
 
 	/*
 	 * @Override public void addInterceptors(InterceptorRegistry registry) {
@@ -26,6 +27,21 @@ public class WebConfig implements WebMvcConfigurer{
 	 * .order(1).addPathPatterns("/shop*", "/menu*")
 	 * .excludePathPatterns("/shopMain"); }
 	 */
+=======
+	
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(new LoginCheckInterceptor())
+				.order(1).addPathPatterns("/shop*", "/menu*")
+				.excludePathPatterns("/shopMain");
+		
+		registry.addInterceptor(new OwnerCheckInterceptor())
+				.order(2)
+				.addPathPatterns("/shop*", "/menu*", "/api/nutrition-search")
+				.excludePathPatterns("/shopMain", "/shopList");
+	}
+	
+>>>>>>> develop
 	//리뷰 사진 추가
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {

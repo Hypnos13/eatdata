@@ -151,4 +151,9 @@ public interface ShopMapper {
     @Select("SELECT COUNT(*) FROM menu WHERE s_id = #{sId}")
     int countMenusByShopId(@Param("sId") int sId);
 
+
+    
+    // 3분 경과된 PENDING 주문 조회
+    List<Orders> selectPendingOrdersExpired(@Param("cutoff") Timestamp cutoff);
+
 }

@@ -31,8 +31,8 @@
        <result property="modiDate" column="modi_date"/>
        <result property="status" column="status"/>
    </resultMap>
-
-	 <!-- ===== Menu ===== -->
+   
+   <!-- ===== Menu ===== -->
    <insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
       INSERT INTO menu(
       s_id, category, name, price, m_info, m_picture_url, 
@@ -398,7 +398,7 @@
 
 <!-- 상태별 & 가게별 주문 리스트 조회 -->
 <select id="selectOrdersByStatusAndShop" parameterType="map" resultType="com.projectbob.domain.Orders">
-  SELECT * FROM orders WHERE status = #{status} AND s_id = #{sId} ORDER BY reg_date DESC
+  SELECT * FROM orders WHERE status=#{status} AND s_id=#{sId} ORDER BY reg_date DESC
 </select>
 
 <!-- 단일 주문 상세 조회 -->
@@ -444,5 +444,15 @@
      SYSDATE(), SYSDATE(),
      #{status}, #{quantity}, #{menus}, #{paymentUid})
 </insert>
+
+<!-- 스케쥴러 -->
+<select id="selectPendingOrdersExpired"
+        parameterType="java.sql.Timestamp"
+        resultType="com.projectbob.domain.Orders">
+  SELECT *
+    FROM orders
+   WHERE status = 'PENDING'
+     AND reg_date &lt; #{cutoff}
+</select>
 
 </mapper>	

@@ -20,14 +20,11 @@
 	    <div class="d-flex flex-row">
 	      <!-- 사이드바 -->
 	      <aside class="services-sidebar me-4">
-	        <!-- 사이드바: 가게 드롭다운 -->
-			<div th:if="${shopListMain == null or #lists.isEmpty(shopListMain)}">
-			  <button class="sidebar-menu-btn d-flex justify-content-between align-items-center">
-			    아직 가게가 없습니다.
-			  </button>
-			</div>
-			
-			<div th:if="${shopListMain != null and !#lists.isEmpty(shopListMain)}" class="dropdown">
+			  <div th:if="${shopListMain == null or #lists.isEmpty(shopListMain)}">
+			    <button class="sidebar-menu-btn w-100">아직 가게가 없습니다.</button>
+			  </div>
+			  <div th:if="${shopListMain != null and !#lists.isEmpty(shopListMain)}">
+		  		<div class="dropdown">
 			  <button class="sidebar-menu-btn d-flex justify-content-between align-items-center dropdown-toggle w-100"
 			        type="button" id="shopDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
 			  <span>
@@ -69,13 +66,13 @@
 		        <div style="font-size:13px;">신규 주문</div>
 		      </a>
 		    </div>
-		    <div class="col-4">
-		      <a href="/orders"
-		         class="card text-center py-3 border-0 bg-light">
-		        <i class="bi bi-receipt fs-3 text-primary"></i>
-		        <div style="font-size:13px;">주문 내역</div>
-		      </a>
-		    </div>
+			<div class="col-4">
+				<a href="/shop/orderManage?status=ALL"
+				   class="card text-center py-3 border-0 bg-light">
+				  <i class="bi bi-receipt fs-3 text-primary"></i>
+				  <div style="font-size:13px;">주문 관리</div>
+				</a>
+			</div>
 		    <div class="col-4">
 		      <a href="/delivery/assign"
 		         class="card text-center py-3 border-0 bg-light">
@@ -110,6 +107,12 @@
 			    가게 공지
 			  </a>
 			</li>
+			<li>
+		      <a class="sidebar-sub-link"
+		         th:href="@{|/shop/orders?s_id=${currentShop.sId}|}">
+		        주문 내역
+		      </a>
+		    </li>
 	      </ul>
 	    </div>
 	  </div>
@@ -119,6 +122,12 @@
 	  		<i class="bi bi-clock-history me-2"></i> 영업시간 관리
 	  	</a>
 	  </div>
+	  
+	  <div class="mb-2" th:if="${currentShop != null}">
+  <a th:href="@{|/shop/delivery?s_id=${currentShop.sId}|}" class="btn w-100 text-start sidebar-group-btn fw-bold">
+    <i class="bi bi-truck me-2"></i> 배달 관리
+  </a>
+</div>
 	  
 	  <div class="mb-2" th:if="${currentShop != null}">
 	  	<a th:href="@{|/shop/menuList?s_id=${currentShop.sId}|}" class="btn w-100 text-start sidebar-group-btn fw-bold">
@@ -155,22 +164,6 @@
 		  </div>
 		</div>		 -->
 		
-		<!-- 배달 관리 -->
-     	<div class="mb-2">
-        <button class="btn w-100 text-start sidebar-group-btn fw-bold"
-                data-bs-toggle="collapse" data-bs-target="#collapseDelivery" aria-expanded="false">
-          <i class="bi bi-truck me-2"></i> 배달 관리
-          <i class="bi bi-chevron-down float-end"></i>
-        </button>
-        <div class="collapse" id="collapseDelivery">
-          <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
-            <li><a href="/delivery/new" class="sidebar-sub-link"><i class="bi bi-bell me-1"></i> 신규 배달</a></li>
-            <li><a href="/delivery/assign" class="sidebar-sub-link"><i class="bi bi-people me-1"></i> 배차 관리</a></li>
-            <li><a href="/delivery/map" class="sidebar-sub-link"><i class="bi bi-geo-alt me-1"></i> 라이더 위치</a></li>
-            <li><a href="/delivery/history" class="sidebar-sub-link"><i class="bi bi-clock-history me-1"></i> 배달 내역</a></li>
-          </ul>
-        </div>
-        </div>
 		</div>
 	  	</aside>
        
@@ -195,9 +188,12 @@
 	  <!-- 3) SockJS & STOMP -->
 	  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
 	  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-	  <!-- 4) shop.js (WebSocket + 알림 로직) -->
+	  <!-- 4) 카카오맵 -->
+	  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2b87d757b240dd70a51d682dd3cc37ed&libraries=services"></script>
+	  <!-- 5) shop.js (WebSocket + 알림 로직) -->
 	  <script th:src="@{/js/shop.js}"></script>
-	  <!-- 5) 그 외 스크립트 -->
+	  <!-- 6) 그 외 스크립트 -->
 	  <script th:src="@{/js/menu.js}"></script>
+	  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2b87d757b240dd70a51d682dd3cc37ed&libraries=services"></script>
 </body>
 </html>

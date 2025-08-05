@@ -45,6 +45,11 @@ public class BobService {
 	
 	@Autowired
 	private WebsocketService websocketService;
+	
+	// 주문 읽기
+    public List<Orders> findOrdersByStatusAndShop(String status, int sId) {
+        return bobMapper.findOrdersByStatusAndShop(status, sId);
+    }
 
 	public Menu getMenuCal(int mId) {
 		return bobMapper.getMenuCal(mId);
@@ -626,20 +631,23 @@ public class BobService {
 		 int newOrderNo = order.getONo();
 		 
 	 	// 2) NewOrder DTO 생성
-	    Shop shop = shopMapper.findBySId(order.getSId());
-	    String shopName = shop.getName();
-	    NewOrder dto = new NewOrder(
-	        /* orderId    */ newOrderNo,
-	        /* shopId     */ order.getSId(),
-	        /* shopName   */  shopName,
-	        /* menus      */ order.getMenus(),
-	        /* totalPrice */ order.getTotalPrice(),
-	        /* payment    */ order.getPayment(),
-	        /* address    */ order.getOAddress(),
-	        /* phone      */ (String) req.get("phone"),
-	        /* request    */ order.getRequest(),
-	        /* status     */ order.getStatus(),
-	        /* regDate    */ order.getRegDate()
+		 Shop shop = shopMapper.findBySId(order.getSId());
+		 String shopName = shop.getName();
+		 long regDateMs = order.getRegDate() != null ? order.getRegDate().getTime() : System.currentTimeMillis();
+
+		 NewOrder dto = new NewOrder(
+			newOrderNo,                 // orderId
+		    order.getSId(),             // shopId
+		    shopName,                   // shopName
+		    order.getMenus(),           // menus
+		    order.getTotalPrice(),      // totalPrice
+		    order.getPayment(),         // payment
+		    order.getOAddress(),        // address
+		    (String) req.get("phone"),  // phone
+		    order.getRequest(),         // request
+		    order.getStatus(),          // status
+		    order.getRegDate(),         // regDate
+		    regDateMs                   // regDateMs
 	    );
 
 	    // ★ 3) WebSocket 알림 전송 ★
