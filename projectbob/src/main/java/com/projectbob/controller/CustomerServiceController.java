@@ -374,7 +374,7 @@ public class CustomerServiceController {
 		coupon.setRegDate(startDay);
 		coupon.setDelDate(endDay);
 		List<Member> ml = loginService.clientList();
-		if(coupon.getId().equals("전체")) {
+		if(coupon.getId().equals("전체")) {			// 쿠폰이 전체 일 때 모든 고객들에게 쿠폰을 줌
 			for (Member m : ml) {
 				coupon.setId(m.getId());
 			    csService.createCoupon(coupon);
