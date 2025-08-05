@@ -1,3 +1,39 @@
+// ==== 알림 렌더링 헬퍼 함수 ====
+// 기존 리스트를 완전히 지우는 함수
+function clearHeaderList() {
+  document.getElementById('header-notif-list').innerHTML = '';
+}
+
+// 주문 ID 배열을 받아서 헤더 알림(뱃지 + 리스트)을 그려주는 함수
+function renderPendingOrders(orderIds) {
+  const badge = document.getElementById('header-notif-badge');
+  const ul    = document.getElementById('header-notif-list');
+
+  badge.textContent = orderIds.length;
+  if (orderIds.length > 0) {
+    badge.classList.remove('d-none');
+    clearHeaderList();
+    ul.innerHTML = '<li><h6 class="dropdown-header">새로운 알림</h6></li>';
+    orderIds.forEach(oNo => {
+      const li = document.createElement('li');
+      li.className = 'notif-item';
+      li.dataset.orderNo = oNo;
+      li.innerHTML = `
+        <a class="dropdown-item text-truncate"
+           href="/shop/orderManage?status=NEW&oNo=${oNo}">
+          신규 주문 #${oNo} 알림이 도착했습니다.
+        </a>`;
+      ul.appendChild(li);
+    });
+    markBellAsUnread();
+  } else {
+    badge.classList.add('d-none');
+    clearBellBlink();
+    clearHeaderList();
+    ul.innerHTML = '<li class="text-muted mb-0">알림이 없습니다.</li>';
+  }
+}
+
 function findZipcode() {
 	new daum.Postcode({
 		oncomplete: function(data) {
@@ -409,40 +445,11 @@ $(function() {
     });
 });
 
-// ==== 5. 헤더 알림 =============================
+// ==== 5. 헤더 알림 (새로고침·이동 시 sessionStorage 만으로 복구) ====
 document.addEventListener('DOMContentLoaded', function() {
-    const notifyContainer = document.getElementById('notifyContainer');
-    const shopId = notifyContainer?.dataset.shopId;
-    if (!shopId) return;
-
-    // === 0. 새로고침시 헤더 알림목록/뱃지/깜박임 fetch로 동기화 ===
-    fetch(`/api/shop/${shopId}/pendingOrders`)
-      .then(res => res.json())
-      .then(list => {
-        const badge = document.getElementById('header-notif-badge');
-        const ul = document.getElementById('header-notif-list');
-        if (!badge || !ul) return;
-
-        ul.innerHTML = '<li><h6 class="dropdown-header">새로운 알림</h6></li>';
-        if (Array.isArray(list) && list.length > 0) {
-          badge.textContent = list.length;
-          badge.classList.remove('d-none');
-          markBellAsUnread();
-
-          list.forEach(o => {
-            const li = document.createElement('li');
-            li.className = 'notif-item';
-            li.dataset.orderNo = o.oNo;
-            li.innerHTML = `<a class="dropdown-item" href="/shopNewOrders?sOrderNo=${o.oNo}">
-              신규 주문 #${o.oNo} 알림이 도착했습니다.</a>`;
-            ul.appendChild(li);
-          });
-        } else {
-          badge.classList.add('d-none');
-          clearBellBlink();
-          ul.innerHTML += `<li class="text-muted mb-0">알림이 없습니다.</li>`;
-        }
-      });
+  // sessionStorage에 남아 있는 주문 ID 배열을 읽어서 바로 렌더
+  const stored = JSON.parse(sessionStorage.getItem('pendingOrders') || '[]');
+  renderPendingOrders(stored);
 });
 
 // ==== 6. 가게 상태 ON/OFF 토글 =============================
@@ -694,19 +701,35 @@ function renderHeaderNotification(msg) {
 
   // ↓ prepend → append 로 바꿔서 새 알림이 아래로 쌓이도록
   list.appendChild(item);
+  
+  // ▶ sessionStorage에도 추가
+  const pending = JSON.parse(sessionStorage.getItem('pendingOrders') || '[]');
+  pending.push(data.orderId);
+  sessionStorage.setItem(
+    'pendingOrders',
+    JSON.stringify(Array.from(new Set(pending)))
+  );
 }
 
 //헤더 알림에서 아이템 제거 함수
 function removeHeaderNotification(oNo) {
-  // 아이템 제거
-  document.querySelector(`#header-notif-list .notif-item[data-order-no="${oNo}"]`)?.remove();
-  // 뱃지 감소
+  // (1) 화면에서 아이템 제거
+  document.querySelector(
+    `#header-notif-list .notif-item[data-order-no="${oNo}"]`
+  )?.remove();
+
+// (2) sessionStorage에서도 제거
+const pending = JSON.parse(sessionStorage.getItem('pendingOrders') || '[]');
+const filtered = pending.filter(id => id !== oNo);
+sessionStorage.setItem('pendingOrders', JSON.stringify(filtered));
+
+  // (3) 뱃지 숫자 업데이트
   const badge = document.getElementById('header-notif-badge');
-  const cnt   = Math.max(0, parseInt(badge.textContent||'0',10) - 1);
+  const cnt   = filtered.length;
   badge.textContent = cnt;
   if (cnt === 0) {
     badge.classList.add('d-none');
-    clearBellBlink();   // 여기서 깜빡임 해제
+    clearBellBlink();
   }
 }
 
