@@ -44,10 +44,10 @@ public class SecurityConfig {
 					"/phoneCertify", "/certifyNumber", // 휴대폰 인증
 					"/ajax/menu/options", "/addCart", "/getCart", "/updateQuantity", "/deleteCart", "/removeAll", // AJAX 요청 (장바구니 등)
 					"/ws/**", "/user/**", "/topic/**", "/app/**", // 웹소켓 엔드포인트
-					"/css/**", "/js/**", "/images/**", "/bootstrap/**", "/error", "/favicon.ico" // 정적 리소스 및 에러 페이지
+					"/css/**", "/js/**", "/images/**", "/bootstrap/**", "/error", "/favicon.ico", "/shopMain" // 정적 리소스 및 에러 페이지
 				).permitAll()
 				// 사장님만 접근 가능한 경로 (예시)
-				.requestMatchers("/shopMain", "/shopMenu", "/shopInfo", "/shopReview", "/shopOrder", "/shopSales", "/shopNotice", "/shopQna", "/shopSetting", "/shopUpdate", "/shopRegister", "/shopRegisterForm", "/shopUpdateForm", "/shopMenuForm", "/shopNoticeForm", "/shopQnaForm", "/shopReviewForm", "/shopOrderForm", "/shopSalesForm", "/shopSettingForm").hasRole("OWNER") // "OWNER" 역할만 허용
+				.requestMatchers("/shopMenu", "/shopInfo", "/shopReview", "/shopOrder", "/shopSales", "/shopNotice", "/shopQna", "/shopSetting", "/shopUpdate", "/shopRegister", "/shopRegisterForm", "/shopUpdateForm", "/shopMenuForm", "/shopNoticeForm", "/shopQnaForm", "/shopReviewForm", "/shopOrderForm", "/shopSalesForm", "/shopSettingForm").hasRole("OWNER") // "OWNER" 역할만 허용
 				// 그 외 모든 요청은 인증된 사용자만 허용
 				.anyRequest().authenticated()
 				)
