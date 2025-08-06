@@ -22,10 +22,6 @@ public class NewOrder {
 	private String request;
 	private String status;
 	
-	
-
-
-
 	public static NewOrder from(Orders o, String menuName) {
 		return new NewOrder(
 				o.getONo(),
@@ -39,5 +35,5 @@ public class NewOrder {
 				o.getStatus()
 				);
 	}
-
+	
 }

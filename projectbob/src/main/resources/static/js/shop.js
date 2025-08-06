@@ -329,48 +329,65 @@ $(function() {
 		            $('#dispatchModal').on('show.bs.modal', function () {
 		                updateDisplayTimes();
 		            });
+								
+								$('#btnConfirmDispatch').on('click', async function() {
+								    const selectedOrder = orderList.find(order => order.ono === currentSelectedOrderId);
+								    if (!selectedOrder) {
+								        alert("오류: 선택된 주문을 없습니다.");
+								        return;
+								    }
 
-					$('#btnConfirmDispatch').on('click', function() {
-					    // 1. 현재 선택된 주문 정보 가져오기
-					    const selectedOrder = orderList.find(order => order.ono === currentSelectedOrderId);
-					    if (!selectedOrder) {
-					        alert("오류: 선택된 주문이 없습니다.");
-					        return;
-					    }
-	
-					    // 2. 모달에서 선택된 배달 정보 가져오기
-					    const agency = $('#deliveryAgencySelect').val();
-					    const pickupAfterMinutes = parseInt($('#pickupTimeSelect').val());
-					    const deliveryAfterMinutes = parseInt($('#deliveryTimeSelect').val());
-					    
-					    const now = new Date();
-					    const pickupTime = new Date(now.getTime() + pickupAfterMinutes * 60000);
-					    const deliveryTime = new Date(now.getTime() + deliveryAfterMinutes * 60000);
-					    const formatTime = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-	
-					    // 3. URL 파라미터로 넘길 데이터 정리
-					    const params = new URLSearchParams({
-					        orderId: selectedOrder.ono,
-					        shopName: shopInfo.name,
-					        shopAddress: shopInfo.address1 + ' ' + shopInfo.address2,
-					        shopPhone: shopInfo.phone,
-					        customerAddress: selectedOrder.oaddress,
-					        customerPhone: selectedOrder.clientPhone || '정보 없음',
-					        pickupTime: `${pickupAfterMinutes}분 후 (${formatTime(pickupTime)})`,
-					        deliveryTime: `${deliveryAfterMinutes}분 후 (${formatTime(deliveryTime)})`
-					    });
-	
-					    // 4. 새 탭에서 라이더 페이지 열기
-					    const riderUrl = `/rider/request?${params.toString()}`;
-					    window.open(riderUrl, '_blank');
-	
-					    // 모달 닫기
-					    const modal = bootstrap.Modal.getInstance(document.getElementById('dispatchModal'));
-					    modal.hide();
-					    
-					    // (나중에) 좌측 목록에서 해당 주문을 제거하는 로직
-					    $(`.order-card[data-order-id="${selectedOrder.ono}"]`).fadeOut();
-					});
+								    // 1. 모달에서 선택된 배달 정보 가져오기
+								    const agency = $('#deliveryAgencySelect').val();
+								    const pickupAfterMinutes = parseInt($('#pickupTimeSelect').val());
+								    const deliveryAfterMinutes = parseInt($('#deliveryTimeSelect').val());
+								    
+								    const now = new Date();
+								    const formatTime = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+								    const pickupTime = new Date(now.getTime() + pickupAfterMinutes * 60000);
+								    const deliveryTime = new Date(now.getTime() + deliveryAfterMinutes * 60000);
+								    
+								    const pickupTimeStr = `${pickupAfterMinutes}분 후 (${formatTime(pickupTime)})`;
+								    const deliveryTimeStr = `${deliveryAfterMinutes}분 후 (${formatTime(deliveryTime)})`;
+
+								    // 2. 서버에 보낼 데이터 (Request Body)
+								    const dispatchDataForServer = {
+								        agency: agency,
+								        pickupTime: pickupTimeStr,
+								        deliveryTime: deliveryTimeStr
+								    };
+
+								    try {
+								        // ✨✨✨ 3. 서버에 배차 요청을 보내는 HTTP POST 요청 (fetch) ✨✨✨
+								        const response = await fetch(`/shop/orders/${selectedOrder.ono}/dispatch`, {
+								            method: 'POST',
+								            headers: { 'Content-Type': 'application/json' },
+								            body: JSON.stringify(dispatchDataForServer)
+								        });
+
+								        if (!response.ok) {
+								            throw new Error('서버에 배차 요청을 보내는 데 실패했습니다.');
+								        }
+
+								        const result = await response.json();
+
+								        if (result.success) {
+								            alert(`주문번호 ${selectedOrder.ono}에 대한 배차를 요청했습니다.`);
+														// 모달 닫기 및 UI 업데이트
+								            const modal = bootstrap.Modal.getInstance(document.getElementById('dispatchModal'));
+								            modal.hide();
+								            $(`.order-card[data-order-id="${selectedOrder.ono}"]`).fadeOut();
+
+								        } else {
+								            alert(`배차 요청 실패: ${result.message || '알 수 없는 오류'}`);
+								        }
+
+								    } catch (error) {
+								        console.error("배차 요청 실패:", error);
+								        alert("배차 요청 중 오류가 발생했습니다.");
+								    }
+								});
+					
 		        }
 		    });
 		}
@@ -585,12 +602,38 @@ document.addEventListener('DOMContentLoaded', () => {
 	  }
 	});
 
-    // 8.2.2: 주문 상태 변경 구독 (헤더 알림 제거)
-    stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
-      console.log('[WS 상태변경_헤더]', msg.body);
-      const { oNo } = JSON.parse(msg.body);
-      removeHeaderNotification(oNo);
-    });
+	// 8.2.2: 가게 채널의 모든 주문 상태 변경 구독 (최종 수정본)
+	stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
+	    console.log('[WS] 가게 채널 상태 변경 수신:', msg.body);
+	    const payload = JSON.parse(msg.body);
+
+	    // --- 1. 헤더 알림 실시간 업데이트 ---
+	    // 서버가 보내준 최신 PENDING 주문 개수로 뱃지를 직접 업데이트합니다.
+	    const badge = document.getElementById('header-notif-badge');
+	    if (badge) {
+	        const newCount = payload.newPendingCount;
+	        badge.textContent = newCount;
+	        if (newCount > 0) {
+	            badge.classList.remove('d-none');
+	        } else {
+	            badge.classList.add('d-none');
+	            clearBellBlink(); // 깜빡임도 제거
+	        }
+	    }
+	    // 헤더 드롭다운 목록에서 해당 주문을 찾아 제거합니다.
+	    const notifItem = document.querySelector(`#header-notif-list .notif-item[data-order-no="${payload.oNo}"]`);
+	    if (notifItem) {
+	        notifItem.remove();
+	    }
+	    // --- 2. 주문 관리 페이지 실시간 업데이트 ---
+	    // 현재 페이지가 주문 관리 페이지일 때만 아래 로직을 실행합니다.
+	    if (window.location.pathname.includes('/shop/orderManage')) {
+	        if (payload.newStatus === 'DISPATCHED') {
+	            alert('라이더 배차가 완료되었습니다!');
+	            location.reload();
+	        }
+	    }
+	});
 
     // 8.2.3: 주문 상태 변경 구독 (테이블 업데이트)
     document.querySelectorAll('tr[data-order-no]').forEach(row => {

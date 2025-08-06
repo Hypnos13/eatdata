@@ -439,7 +439,7 @@
 		s.s_number AS sNumber, s.category AS category, s.s_pictureURL AS sPicture,
 		COALESCE(ROUND(( SELECT AVG(r.rating) FROM review r WHERE r.s_id = s.s_id
 		), 1), 0.0) AS rating,
-		s.heart AS heart, s.min_price AS minPrice, s.reg_date AS regDate, s.modi_date AS modiDate
+		s.heart AS heart, s.min_price AS minPrice,s.status AS status, s.reg_date AS regDate, s.modi_date AS modiDate
 			FROM shop s
 		where 1=1
 		<if test="category != null and category != '전체보기'">
@@ -452,13 +452,17 @@
 </select>
 
 <!-- 주문번호로 주문 정보 조회 -->
-    <select id="selectOrderByONo" resultType="com.projectbob.domain.Orders">
-        SELECT
-            o_no AS oNo, s_id AS sId, id, total_price AS totalPrice, payment, o_address AS oAddress, request,
-            reg_date AS regDate, modi_date AS modiDate, status, quantity, menus, payment_uid AS paymentUid, client_phone AS clientPhone
-        FROM orders
-        WHERE o_no = #{oNo}
-    </select>
+    <select id="selectOrderByONo" parameterType="long" resultMap="ordersResultMap">
+  SELECT 
+      o.*, 
+      c.phone AS client_phone
+  FROM 
+      orders o
+  LEFT JOIN 
+      client c ON o.id = c.id
+  WHERE 
+      o.o_no = #{oNo}
+</select>
 
 <!-- 주문 상태 업데이트 -->
     <update id="updateOrderStatus">

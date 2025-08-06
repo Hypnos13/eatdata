@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{layouts/main_layout}">
+
 <head>
-<title>메인2 페이지</title>
+	<title>메인2 페이지</title>
 </head>
+
 <body>
 	<div layout:fragment="content">
 
@@ -17,14 +18,11 @@
 
 			<div class="d-flex justify-content-center mt-2">
 
-				<button id="currentLocationSearchBtn"
-					class="btn text-white me-2 d-flex align-items-center"
+				<button id="currentLocationSearchBtn" class="btn text-white me-2 d-flex align-items-center"
 					style="background-color: #43d091" title="현재 위치로 주소 검색">
-					<img src="https://img.icons8.com/ios-filled/24/000000/marker.png"
-						alt="위치" class="me-1" />
+					<img src="https://img.icons8.com/ios-filled/24/000000/marker.png" alt="위치" class="me-1" />
 				</button>
-				<input id="location-input" type="text"
-					class="form-control w-25 me-2" th:value="${userAddress}"
+				<input id="location-input" type="text" class="form-control w-25 me-2" th:value="${userAddress}"
 					placeholder="배달주소입력" />
 				<button id="addressInputSearchBtn" class="btn text-dark fw-semibold"
 					style="background-color: #43d091">검색</button>
@@ -32,38 +30,32 @@
 		</div>
 
 		<!-- 주소 검색 시작 부분  -->
-		<div
-			class="address-popup-wrapper 
+		<div class="address-popup-wrapper 
     [[${session.loginId} != null ? '' : 'd-none']]">
 			<div class="address-section">
 				<h4 class="mb-3">배달 주소 입력</h4>
 
 				<!-- 주소 검색창 -->
 				<div class="input-group mb-3">
-					<input type="text" id="searchAddressInput" class="form-control"
-						placeholder="주소를 검색하세요">
-					<button type="button" id="open-postcode-search"
-						class="btn btn-primary">검색</button>
+					<input type="text" id="searchAddressInput" class="form-control" placeholder="주소를 검색하세요">
+					<button type="button" id="open-postcode-search" class="btn btn-primary">검색</button>
 				</div>
 
 				<!-- 검색된 주소 -->
-				<div id="searchedAddressResult"
-					class="mb-3 p-2 border rounded d-none">
+				<div id="searchedAddressResult" class="mb-3 p-2 border rounded d-none">
 					<p class="mb-0" id="searchedPostcode">우편번호:</p>
 					<p class="mb-0" id="searchedAddress">기본 주소:</p>
-					<input type="text" id="searchedDetailAddress"
-						class="form-control mt-2" placeholder="상세 주소를 입력하세요">
-					<button type="button" id="selectSearchedAddressBtn"
-						class="btn btn-success btn-sm mt-2 w-100">이 주소 선택</button>
+					<input type="text" id="searchedDetailAddress" class="form-control mt-2" placeholder="상세 주소를 입력하세요">
+					<button type="button" id="selectSearchedAddressBtn" class="btn btn-success btn-sm mt-2 w-100">이 주소
+						선택</button>
 				</div>
 
 				<!-- 주소 탭 -->
-				<ul class="nav nav-tabs mt-4" id="addressTabs" role="tablist"
-					th:if="${session.loginId != null}">
+				<ul class="nav nav-tabs mt-4" id="addressTabs" role="tablist" th:if="${session.loginId != null}">
 					<li class="nav-item" role="presentation">
 						<button class="nav-link active" id="home-tab" data-bs-toggle="tab"
-							data-bs-target="#home-addresses" type="button" role="tab"
-							aria-controls="home-addresses" aria-selected="true">집</button>
+							data-bs-target="#home-addresses" type="button" role="tab" aria-controls="home-addresses"
+							aria-selected="true">집</button>
 					</li>
 					<li class="nav-item" role="presentation">
 						<button class="nav-link" id="company-tab" data-bs-toggle="tab"
@@ -71,37 +63,33 @@
 							aria-controls="company-addresses" aria-selected="false">회사</button>
 					</li>
 					<li class="nav-item" role="presentation">
-						<button class="nav-link" id="etc-tab" data-bs-toggle="tab"
-							data-bs-target="#etc-addresses" type="button" role="tab"
-							aria-controls="etc-addresses" aria-selected="false">그 외</button>
+						<button class="nav-link" id="etc-tab" data-bs-toggle="tab" data-bs-target="#etc-addresses"
+							type="button" role="tab" aria-controls="etc-addresses" aria-selected="false">그 외</button>
 					</li>
 				</ul>
 
-				<div class="tab-content border border-top-0 p-3"
-					id="addressTabContent" th:if="${session.loginId != null}">
+				<div class="tab-content border border-top-0 p-3" id="addressTabContent"
+					th:if="${session.loginId != null}">
 
 					<!-- 집 주소 -->
-					<div class="tab-pane fade show active" id="home-addresses"
-						role="tabpanel" aria-labelledby="home-tab">
+					<div class="tab-pane fade show active" id="home-addresses" role="tabpanel"
+						aria-labelledby="home-tab">
 						<p class="text-muted">주소를 불러오는 중입니다...</p>
 					</div>
 
 					<!-- 회사 주소 -->
-					<div class="tab-pane fade" id="company-addresses" role="tabpanel"
-						aria-labelledby="company-tab">
+					<div class="tab-pane fade" id="company-addresses" role="tabpanel" aria-labelledby="company-tab">
 						<p class="text-muted">주소를 불러오는 중입니다...</p>
 					</div>
 
 					<!-- 기타 주소 -->
-					<div class="tab-pane fade" id="etc-addresses" role="tabpanel"
-						aria-labelledby="etc-tab">
+					<div class="tab-pane fade" id="etc-addresses" role="tabpanel" aria-labelledby="etc-tab">
 						<p class="text-muted">주소를 불러오는 중입니다...</p>
 					</div>
 
 				</div>
 
-				<button type="button" id="closeAddressSectionBtn"
-					class="btn btn-secondary mt-3 w-100">닫기</button>
+				<button type="button" id="closeAddressSectionBtn" class="btn btn-secondary mt-3 w-100">닫기</button>
 			</div>
 			<div></div>
 		</div>
@@ -119,11 +107,9 @@
 
 			<div id="searchBox" class="mb-3 d-none">
 				<div class="input-group input-group-sm" style="width: 300px;">
-					<input type="text" class="form-control"
-						placeholder="가게명 또는 메뉴를 검색하세요">
+					<input type="text" class="form-control" placeholder="가게명 또는 메뉴를 검색하세요">
 
-					<button class="btn text-white" id="searchSubmitBtn"
-						style="background-color: #43d091;">검색</button>
+					<button class="btn text-white" id="searchSubmitBtn" style="background-color: #43d091;">검색</button>
 				</div>
 			</div>
 
@@ -131,117 +117,131 @@
 
 			<nav class="navbar px-0">
 				<div class="d-flex align-items-center overflow-auto w-100">
-					
-					
+
+
 
 					<!-- 🔍 돋보기 버튼 -->
-					<button class="btn btn-outline-secondary me-3 flex-shrink-0"
-						id="searchMenuBtn">
+					<button class="btn btn-outline-secondary me-3 flex-shrink-0" id="searchMenuBtn">
 						<i class="bi bi-search"></i>
 					</button>
 
 					<!-- 카테고리 목록 -->
 					<ul class="nav flex-nowrap">
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '전체보기' ? ' active'"
-							th:href="@{/shopList(category='전체보기')}">전체보기</a></li>
+								th:classappend="${selectedCategory} == '전체보기' ? ' active'"
+								th:href="@{/shopList(category='전체보기')}">전체보기</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '1인분 주문' ? ' active'"
-							th:href="@{/shopList(category='1인분 주문')}">1인분 주문</a></li>
+								th:classappend="${selectedCategory} == '1인분 주문' ? ' active'"
+								th:href="@{/shopList(category='1인분 주문')}">1인분 주문</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '프랜차이즈' ? ' active'"
-							th:href="@{/shopList(category='프랜차이즈')}">프랜차이즈</a></li>
+								th:classappend="${selectedCategory} == '프랜차이즈' ? ' active'"
+								th:href="@{/shopList(category='프랜차이즈')}">프랜차이즈</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '치킨' ? ' active'"
-							th:href="@{/shopList(category='치킨')}">치킨</a></li>
+								th:classappend="${selectedCategory} == '치킨' ? ' active'"
+								th:href="@{/shopList(category='치킨')}">치킨</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '피자/양식' ? ' active'"
-							th:href="@{/shopList(category='피자/양식')}">피자/양식</a></li>
+								th:classappend="${selectedCategory} == '피자/양식' ? ' active'"
+								th:href="@{/shopList(category='피자/양식')}">피자/양식</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '중국집' ? ' active'"
-							th:href="@{/shopList(category='중국집')}">중국집</a></li>
+								th:classappend="${selectedCategory} == '중국집' ? ' active'"
+								th:href="@{/shopList(category='중국집')}">중국집</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '한식' ? ' active'"
-							th:href="@{/shopList(category='한식')}">한식</a></li>
+								th:classappend="${selectedCategory} == '한식' ? ' active'"
+								th:href="@{/shopList(category='한식')}">한식</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '일식/돈까스' ? ' active'"
-							th:href="@{/shopList(category='일식/돈까스')}">일식/돈까스</a></li>
+								th:classappend="${selectedCategory} == '일식/돈까스' ? ' active'"
+								th:href="@{/shopList(category='일식/돈까스')}">일식/돈까스</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '족발/보쌈' ? ' active'"
-							th:href="@{/shopList(category='족발/보쌈')}">족발/보쌈</a></li>
+								th:classappend="${selectedCategory} == '족발/보쌈' ? ' active'"
+								th:href="@{/shopList(category='족발/보쌈')}">족발/보쌈</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '야식' ? ' active'"
-							th:href="@{/shopList(category='야식')}">야식</a></li>
+								th:classappend="${selectedCategory} == '야식' ? ' active'"
+								th:href="@{/shopList(category='야식')}">야식</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '분식' ? ' active'"
-							th:href="@{/shopList(category='분식')}">분식</a></li>
+								th:classappend="${selectedCategory} == '분식' ? ' active'"
+								th:href="@{/shopList(category='분식')}">분식</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '카페/디저트' ? ' active'"
-							th:href="@{/shopList(category='카페/디저트')}">카페/디저트</a></li>
+								th:classappend="${selectedCategory} == '카페/디저트' ? ' active'"
+								th:href="@{/shopList(category='카페/디저트')}">카페/디저트</a></li>
 						<li class="nav-item"><a class="nav-link"
-							th:classappend="${selectedCategory} == '편의점/마트' ? ' active'"
-							th:href="@{/shopList(category='편의점/마트')}">편의점/마트</a></li>
+								th:classappend="${selectedCategory} == '편의점/마트' ? ' active'"
+								th:href="@{/shopList(category='편의점/마트')}">편의점/마트</a></li>
 					</ul>
 
 				</div>
 			</nav>
-				
-	<div class="ms-auto me-3 dropdown mb-2">
-  <button class="btn btn-sm btn-outline-primary dropdown-toggle py-1" type="button" id="distanceSortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-    거리순 정렬
-  </button>
-  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="distanceSortDropdown">
-    <li><a class="dropdown-item sort-distance-option" href="#" data-sort="asc">거리 가까운 순 ↑</a></li>
-    <li><a class="dropdown-item sort-distance-option" href="#" data-sort="desc">거리 먼 순 ↓</a></li>
-  </ul>
-</div>
-				
+
+			<div class="ms-auto me-3 dropdown mb-2">
+				<button class="btn btn-sm btn-outline-primary dropdown-toggle py-1" type="button"
+					id="distanceSortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+					거리순 정렬
+				</button>
+				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="distanceSortDropdown">
+					<li><a class="dropdown-item sort-distance-option" href="#" data-sort="asc">거리 가까운 순 ↑</a></li>
+					<li><a class="dropdown-item sort-distance-option" href="#" data-sort="desc">거리 먼 순 ↓</a></li>
+				</ul>
+			</div>
+
 
 			<div id="searchBox" class="d-none w-100 px-3 my-2">
-				<input type="text" id="location-input" class="form-control"
-					placeholder="주소 또는 상호명을 입력하세요">
+				<input type="text" id="location-input" class="form-control" placeholder="주소 또는 상호명을 입력하세요">
 			</div>
 
 
 			<th:block th:if="${not #lists.isEmpty(sList)}">
 				<div class="row g-4">
-					<div class="col-12 col-md-6 col-lg-4"
-						th:each="shop, status: ${sList}" th:attr="data-lat=${shop.latitude}, data-lng=${shop.longitude}">
-						<a th:href="@{/MenuDetail(sId=${shop.sId})}"
-							class="text-decoration-none text-dark">
-							<div class="card h-100 shadow-sm rounded-4 border-0">
-								<div class="row g-0">
-									<div class="col-4">
-										<!-- 업로드된 이미지가 있으면 그 경로를, 없으면 기본 플레이스홀더를 보여줌 -->
-										<img
-											th:src="${shop.sPictureUrl} != null
-									             ? @{${shop.sPictureUrl}}
-									             : @{/images/default-shop.png}"
-											class="img-fluid rounded-start h-100 object-fit-cover"
-											th:alt="${shop.name} + ' 이미지'" />
-									</div>
 
-									<div class="col-8" th:attr="data-address=${shop.address1}">
-										<div class="card-body">
-											<h5 class="card-title fw-bold mb-1">[[${shop.name}]]</h5>
-											<p class="card-text text-muted small mb-1">[[${shop.address1}]],
-												[[${shop.address2}]]</p>
+					<div class="col-12 col-md-6 col-lg-4" th:each="shop, status: ${sList}"
+						th:attr="data-lat=${shop.latitude}, data-lng=${shop.longitude}">
 
-											<!-- 거리 표시 -->
-											<p class="card-text text-muted small mb-1 distance-info">거리
-												계산 중...</p>
+							<div class="card h-100 shadow-sm rounded-4 border-0 position-relative">
 
-											<p class="card-text text-success fw-semibold mb-0">
-												평점 ★[[${shop.rating}]] <i
-													class="bi bi-heart-fill text-danger ms-1"
-													th:if="${likeShopList != null and likeShopList.contains(shop.sId)}"></i>
-											</p>
+								<div th:if="${shop.status == 'N'}"
+								            class="position-absolute top-0 start-0 w-100 h-100 rounded-4"
+								            style="z-index: 20; background-color: rgba(0, 0, 0, 0.4); pointer-events: auto;">
+								           <div class="d-flex justify-content-center align-items-center h-100 text-white fw-bold fs-5">
+								               영업 준비 중
+								           </div>
+								       </div>
+
+							
+									   <a th:href="${shop.status == 'N'} ? '#' : @{/MenuDetail(sId=${shop.sId})}"
+									      th:onclick="${shop.status == 'N'} ? 'return false;' : null"
+									      class="text-decoration-none text-dark"
+									      th:style="${shop.status == 'N'} ? 'pointer-events: none; cursor: default;' : ''">
+										
+										<div class="row g-0">
+											<div class="col-4">
+												<!-- 업로드된 이미지가 있으면 그 경로를, 없으면 기본 플레이스홀더를 보여줌 -->
+												<img th:src="${shop.sPictureUrl != null} ? @{${shop.sPictureUrl}} : @{/images/default-shop.png}"
+												     class="img-fluid rounded-start h-100 object-fit-cover"
+												     th:alt="${shop.name} + ' 이미지'" />
+											</div>
+
+											<div class="col-8" th:attr="data-address=${shop.address1}">
+												<div class="card-body">
+													<h5 class="card-title fw-bold mb-1">[[${shop.name}]]</h5>
+													<p class="card-text text-muted small mb-1">[[${shop.address1}]],
+														[[${shop.address2}]]</p>
+
+													<!-- 거리 표시 -->
+													<p class="card-text text-muted small mb-1 distance-info">거리
+														계산 중...</p>
+
+													<p class="card-text text-success fw-semibold mb-0">
+														평점 ★[[${shop.rating}]] <i
+															class="bi bi-heart-fill text-danger ms-1"
+															th:if="${likeShopList != null and likeShopList.contains(shop.sId)}"></i>
+													</p>
+												</div>
+											</div>
 										</div>
-									</div>
+										
+									</a>
+							
 
-								</div>
 							</div>
-						</a>
+							
 					</div>
 				</div>
 			</th:block>
@@ -256,4 +256,5 @@
 		</div>
 	</div>
 </body>
+
 </html>
