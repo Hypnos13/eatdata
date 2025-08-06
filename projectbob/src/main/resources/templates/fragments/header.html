@@ -4,6 +4,7 @@
 <div th:fragment="header" class="top-bar row">
 
   <th:block th:if="${(session.loginDivision == 'client' || session.loginDivision == null && from != 'owner' )}">
+<<<<<<< HEAD
   <div class="col-5 logo-area d-flex align-items-center" style="z-index: 100;">
     <a th:href="@{/main}"><img th:src="@{/images/Logo.png}" width="180px" height="45px" /></a>
     
@@ -29,21 +30,50 @@
         <li class="text-muted mb-0">알림이 없습니다.</li>
       </ul>
     </div>
+=======
+  <div class="col-5 logo-area">
+  	<div class="row">
+  		<div class="col-4">
+  			<a th:href="@{/main}"><img th:src="@{/images/nlogo.png}"/></a>
+  		</div>
+  		<div class="col-1">
+			<div id="notifyContainer"
+			         th:if="${session.isLogin != null && session.loginDivision == 'client'}"
+			         th:attr="data-client-id=${session.loginId}"
+			         class="position-relative ms-3 dropdown">
+			      <a href="#" id="headerNotifyBtn" data-bs-toggle="dropdown" aria-expanded="false">
+			        <i id="notifyIcon" class="bi bi-bell-fill fs-4 text-warning"></i>
+			      </a>
+			      <span id="header-notif-badge"
+			            th:text="${session.notifyCount}"
+			            class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1"
+			            th:classappend="${session.notifyCount == 0} ? 'd-none' : ''">
+			        0
+			      </span>
+			      <ul id="header-notif-list"
+			          class="dropdown-menu dropdown-menu-start p-2"
+			          style="min-width:300px; max-width:500px;"
+			          aria-labelledby="headerNotifyBtn">
+			        <li><h6 class="dropdown-header">새로운 알림</h6></li>
+			        <li class="text-muted mb-0">알림이 없습니다.</li>
+			      </ul>
+			</div>
+		</div>
+  	</div>
+>>>>>>> develop
   </div>
   </th:block>
   
+  
   <th:block th:if="${session.loginDivision == 'owner' || from == 'owner'}">
   <div class="col-5 logo-area">
-    <a th:href="@{/shopMain}"><img th:src="@{/images/Logo.png}" width="180px" height="45px" /></a>
+    <a th:href="@{/shopMain}"><img th:src="@{/images/nlogo.png}"/></a>
   </div>
   </th:block>
   
   <th:block th:if="${session.loginDivision == 'master'}">
   <div class="col-5 logo-area">	
-    <a th:href="@{/main}"><img th:src="@{/images/Client.png}" width="180px" height="45px"/></a>
-    <a th:href="@{/shopMain}">
-      <img th:src="@{/images/Owner.png}" width="180px" height="45px" />
-    </a>
+    <a th:href="@{/main}"><img th:src="@{/images/nlogo.png}"/></a>
   </div>
   </th:block>
   
@@ -71,6 +101,10 @@
     	<a th:href="@{/couponManage}" class="topbar-href">쿠폰관리</a>
     </th:block>
   </div>
+<<<<<<< HEAD
 </div>
 
 
+=======
+</div>
+>>>>>>> develop
