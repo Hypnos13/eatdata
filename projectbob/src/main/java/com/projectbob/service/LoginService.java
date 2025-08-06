@@ -15,8 +15,6 @@ public class LoginService {
 	@Autowired
 	LoginMapper loginMapper;
 	
-	// PasswordEncoder - Security 추가할때 할것
-	
 	
 	public void joinMember(Member member) {
 		loginMapper.joinMember(member);
@@ -25,7 +23,7 @@ public class LoginService {
 	public int login(String id, String pass) {	
 		int result = -1;  // 아이디가 존재하지 않음
 		Member member = loginMapper.getMember(id);
-		
+
 		if(member == null) { return result; }
 		
 		if(pass.equals(member.getPass())) {
