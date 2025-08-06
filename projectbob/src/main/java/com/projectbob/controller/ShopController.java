@@ -189,7 +189,50 @@ public class ShopController {
 	public String riderRequestPage() {
 	    return "rider/rider_request";
 	}
+	
+	// 배차요청
+	// ShopController.java
 
+	@PostMapping("/shop/orders/{orderId}/dispatch")
+	@ResponseBody
+	public ResponseEntity<?> dispatchOrder(
+	        @PathVariable("orderId") int orderId,
+	        @RequestBody Map<String, String> payload,
+	        @SessionAttribute("loginId") String loginId,
+	        @SessionAttribute("currentSId") Integer sId) {
+
+	    log.info(">>>>>>>>>>>>> ✅✅✅ 최종 수정된 dispatchOrder 메서드 실행됨! ✅✅✅ <<<<<<<<<<<<<");
+
+	    // findByOwnerId(loginId) 호출은 완전히 삭제되어야 합니다.
+	    
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    Orders order = bobService.findOrderByONo((long)orderId);
+
+	    if (currentShop == null || order == null || order.getSId() != currentShop.getSId()) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("success", false, "message", "권한이 없습니다."));
+	    }
+
+	    String pickupTimeStr = payload.get("pickupTime");
+	    String deliveryTimeStr = payload.get("deliveryTime");
+	    
+	    DispatchInfo dispatchInfo = new DispatchInfo(
+	        order.getONo(),
+	        currentShop.getSId(),
+	        currentShop.getName(),
+	        currentShop.getAddress1() + " " + currentShop.getAddress2(),
+	        currentShop.getPhone(),
+	        order.getOAddress(),
+	        order.getClientPhone(),
+	        pickupTimeStr,
+	        deliveryTimeStr,
+	        "DISPATCH_REQUEST"
+	    );
+
+	    websocketService.sendDispatchToRiders(dispatchInfo);
+	    
+	    return ResponseEntity.ok(Map.of("success", true, "message", "배차를 요청했습니다."));
+	}
+	
 	/* ----------------------- 메인 ----------------------- */
 	@GetMapping("/shopMain")
 	public String shopMain(
@@ -724,7 +767,10 @@ public class ShopController {
 
 	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
 	    List<Orders> orders;
-	    if ("ALL".equalsIgnoreCase(status)) {
+	    if ("ACCEPTED".equalsIgnoreCase(status)) {
+	        // "조리 중" 탭에서는 ACCEPTED와 DISPATCHED 상태를 모두 조회
+	        orders = shopService.findOrdersByMultipleStatusesAndShop(List.of("ACCEPTED", "DISPATCHED"), sId);
+	    } else if ("ALL".equalsIgnoreCase(status)) {
 	        orders = shopService.findOrdersByShopId(sId);
 	    } else {
 	        orders = shopService.findOrdersByStatusAndShop(status, sId);

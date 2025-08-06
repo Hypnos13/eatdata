@@ -148,19 +148,19 @@
 
 	        <!-- 타임라인 -->
 	        <ul class="status-steps">
-	          <li th:classappend="${selectedOrder.status=='ACCEPTED' 
-	                              or selectedOrder.status=='DELIVERING' 
-	                              or selectedOrder.status=='COMPLETED'} ? 'completed'">
-	            <span>조리 중</span>
-	          </li>
-	          <li th:classappend="${selectedOrder.status=='DELIVERING' 
-	                              or selectedOrder.status=='COMPLETED'} ? 'completed'">
-	            <span>배달 중</span>
-	          </li>
-	          <li th:classappend="${selectedOrder.status=='COMPLETED'} ? 'completed'">
-	            <span>완료</span>
-	          </li>
-	        </ul>
+	        	<li th:classappend="${#lists.contains({'ACCEPTED', 'DISPATCHED', 'DELIVERING', 'COMPLETED'}, selectedOrder.status)} ? 'completed'">
+    				<span>조리 중</span>
+					  </li>
+					  <li th:classappend="${#lists.contains({'DISPATCHED', 'DELIVERING', 'COMPLETED'}, selectedOrder.status)} ? 'completed'">
+					    <span>배차 완료</span>
+					  </li>
+					  <li th:classappend="${#lists.contains({'DELIVERING', 'COMPLETED'}, selectedOrder.status)} ? 'completed'">
+					    <span>배달 중</span>
+					  </li>
+					  <li th:classappend="${selectedOrder.status=='COMPLETED'} ? 'completed'">
+					    <span>완료</span>
+					  </li>
+					</ul>
 
 	        <!-- 주문 정보 -->
 	        <p><strong>주문일시:</strong>
@@ -186,12 +186,12 @@
 
 			<!-- 상태 변경 버튼 -->
 			<div class="btn-group">
-			  <button th:if="${selectedOrder.status=='ACCEPTED'}"
-			          class="btn btn-warning me-2"
-			          type="button"
-			          th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus=DELIVERING)}'|">
-			    🚚 배달 시작
-			  </button>
+					  <button th:if="${selectedOrder.status=='ACCEPTED' or selectedOrder.status=='DISPATCHED'}"
+					          class="btn btn-warning me-2" type="button"
+					          th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus='DELIVERING')}'|">
+					    🚚 배달 시작
+					  </button>
+				  </div>
 
 			  <button th:if="${selectedOrder.status=='DELIVERING'}"
 			          class="btn btn-success me-2"
@@ -211,28 +211,5 @@
 
 	  </div>
 	</th:block>
-
-	<!-- WebSocket/STOMP 스크립트 -->
-	<script th:inline="javascript">
-  /*<![CDATA[*/
-    const shopId         = /*[[${currentShop.sId}]]*/ 0;
-    let selectedOrderNo  = /*[[${selectedOrder!=null?selectedOrder.oNo:0}]]*/ 0;
-
-    const sock = new SockJS('[[${#request.contextPath}]]/ws');
-    const client = Stomp.over(sock);
-
-    client.connect({}, () => {
-      if (selectedOrderNo > 0) {
-        client.subscribe('/topic/orderStatus/' + selectedOrderNo, () => location.reload());
-      }
-      client.subscribe('/topic/orderStatus/shop/' + shopId, () => location.reload());
-    });
-
-    function changeStatus(oNo, newStatus) {
-      // 간단하게 GET 리다이렉트 방식으로 처리
-      window.location.href = `/shop/orderManage/${oNo}/status?newStatus=${newStatus}&status=${status}&oNo=${oNo}`;
-    }
-  /*]]>*/
-  </script>
 </body>
 </html>

@@ -195,6 +195,11 @@ public class ShopService {
 		String relativePath = webPath.substring("/images/".length());
 		return fileUploadService.getUploadBaseDir() + File.separator + relativePath.replace("/", File.separator);
 	}
+	
+	// 여러 상태값으로 주문 목록 조회
+	public List<Orders> findOrdersByMultipleStatusesAndShop(List<String> statuses, int sId) {
+	    return shopMapper.selectOrdersByMultipleStatusesAndShop(statuses, sId);
+	}
 
 	/* ---------- Shop ---------- */
 	//가게 등록
@@ -404,39 +409,38 @@ public class ShopService {
         return shopMapper.selectOrderByNo(oNo);
     }
 
-    // 주문 상태 변경 
+    // 주문 상태 변경
     @Transactional
     public void updateOrderStatus(int oNo, String newStatus) {
-        // 1. 주문 상태 DB 업데이트
+        // 1. 주문 상태를 DB에서 먼저 업데이트합니다.
         shopMapper.updateOrderStatus(oNo, newStatus);
 
-        // 2. 알림에 필요한 정보 조회
-        Orders order = findOrderByNo(oNo); // 서비스 내의 메서드 호출
+        // 2. 알림 전송에 필요한 추가 정보를 조회합니다 (가게ID, 고객ID 등).
+        Orders order = findOrderByNo(oNo);
         if (order == null) {
-            log.error("주문 상태 변경 알림 실패: 주문 정보를 찾을 수 없습니다. (oNo: {})", oNo);
+            log.error("주문 정보를 찾을 수 없습니다. (oNo: {})", oNo);
             return;
         }
         String userId = shopMapper.getUserIdByOrderNo(oNo);
         int shopId = order.getSId();
 
-        // 3. Payload 생성
-        Map<String, Object> payload = Map.of(
-            "oNo", oNo,
-            "newStatus", newStatus
-        );
+        // 3. (핵심) 상태 변경 후, 최신 PENDING 주문 개수를 다시 DB에서 조회합니다.
+        // 이 개수는 점주 페이지의 헤더 알림 뱃지를 실시간으로 정확하게 업데이트하는 데 사용됩니다.
+        int newPendingCount = shopMapper.countOrdersByStatusAndShop("PENDING", shopId);
 
-        // 4. 사장님 페이지로 상태 변경 전송 (테이블 업데이트 등)
-        websocketService.sendOrderStatusChange(oNo, shopId, newStatus);
+        // 4. WebsocketService를 통해 점주에게 변경 사실과 '최신 알림 개수'를 함께 전송합니다.
+        websocketService.sendOrderStatusChange(oNo, shopId, newStatus, newPendingCount);
 
-        // 5. 고객에게 상태 변경 알림 전송
+        // 5. 주문한 고객에게만 보내는 1:1 알림을 전송합니다.
         if (userId != null && !userId.isEmpty()) {
+            Map<String, Object> payload = Map.of("oNo", oNo, "newStatus", newStatus);
             websocketService.sendOrderStatusUpdateToUser(userId, payload);
             log.info("고객에게 주문 상태 변경 알림 전송 완료. userId: {}, oNo: {}, status: {}", userId, oNo, newStatus);
         } else {
             log.error("고객 ID를 찾을 수 없어 주문 상태 변경 알림을 전송하지 못했습니다. (oNo: {})", oNo);
         }
     }
-
+    
     // 주문 거절 및 환불 처리
     @Transactional
     public boolean rejectOrderAndCancelPayment(int oNo, String reason) {
