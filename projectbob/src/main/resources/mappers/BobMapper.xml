@@ -407,7 +407,7 @@
 		s.s_number AS sNumber, s.category AS category, s.s_pictureURL AS sPicture,
 		COALESCE(ROUND(( SELECT AVG(r.rating) FROM review r WHERE r.s_id = s.s_id
 		), 1), 0.0) AS rating,
-		s.heart AS heart, s.min_price AS minPrice, s.reg_date AS regDate, s.modi_date AS modiDate
+		s.heart AS heart, s.min_price AS minPrice,s.status AS status, s.reg_date AS regDate, s.modi_date AS modiDate
 			FROM shop s
 		where 1=1
 		<if test="category != null and category != '전체보기'">

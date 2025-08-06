@@ -65,14 +65,23 @@
 								<!-- 메뉴 카드  -->
 								<th:block th:if="${not #lists.isEmpty(menuList)}">
 									<div class="col-md-6 mb-4" th:each="menu, status: ${menuList}">
-										<div class="card text-center p-3 menu-card"
+										<div class="card text-center p-3 menu-card position-relative"
 											th:attr="
                                             data-id=${menu.mId},
                                             data-name=${menu.name},
                                             data-price=${menu.price},
                                             data-shop-id=${menu.sId},
                                             data-image=${menu.mPictureUrl},
-                                            data-info=${menu.mInfo}">
+                                            data-info=${menu.mInfo}"
+											th:style="${menu.status != '판매중'} ? 'pointer-events: none;' : ''">
+											
+											<!-- 품절 오버레이 -->
+											      <div th:if="${menu.status != '판매중'}"
+											           class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 
+											                  d-flex justify-content-center align-items-center text-white fw-bold fs-4 rounded"
+											           style="z-index: 10;">
+											        품절
+											      </div>
 
 											<div
 												class="d-flex justify-content-between align-items-center mb-2">
@@ -299,7 +308,29 @@
 
 						<!-- 정보 탭 -->
 						<div class="tab-pane fade" id="info">
-							  <p><strong>영업시간:</strong></p>
+							<p>
+							  <strong>가게 정보:</strong><br />
+							  <span th:text="${shop.sInfo}">가게에 대한 간단한 설명</span>
+							</p>
+							<hr />
+
+							<!-- 정보 -->
+							<p>
+							  <strong>정보:</strong><br />
+							  <span th:text="${shop.info}">가게의 기타 정보</span>
+							</p>
+							<hr />
+
+							<!-- 이벤트 -->
+							<p>
+							  <strong>이벤트:</strong><br />
+							  <span th:text="${shop.notice}">진행 중인 이벤트</span>
+							</p>
+							<hr />
+							
+							
+							
+							  <p><strong>영업시간:</strong>
 							  <ul class="list-unstyled ms-3">
 							    <!-- shop.sId에 맞는 openTextMap 리스트를 순회 -->
 							    <li th:each="line : ${openLines}"
@@ -307,7 +338,9 @@
 							      <!-- 출력 예: 월요일 : 10:30 ~ 20:30 -->
 							    </li>
 							  </ul>
-							
+							</p>
+							  <hr />
+							  
 							<p>
 								<strong>위치:</strong> 
 								<span id="storeAddress">[[${shop.address1}]] - [[${shop.address2}]]</span><br /> 
@@ -315,6 +348,7 @@
 
 								[[${shop.phone}]]
 							</p>
+							<hr />
 
 							<div class="mt-3">
 								<h6>📍 위치 지도</h6>
