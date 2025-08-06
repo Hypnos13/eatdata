@@ -565,16 +565,32 @@ body {
   max-width: 600px !important;
 }
 
-/* ========= 주문 타이머 ========= */
-.order-timer .progress {
-  background: #f8d7da;
-}
-.order-timer .progress-bar {
-  font-size: 0.95rem;
-  transition: width 1s linear;
-}
-.countdown-label {
-  color: #fff;
-  text-shadow: 0 0 2px #900;
+#header-notif-list {
+  padding: 0.5rem 0;
 }
 
+#header-notif-list .dropdown-item {
+  background-color: #fff !important;
+  color: #333 !important;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #eee;
+  white-space: normal;
+}
+
+#header-notif-list .dropdown-item:hover,
+#header-notif-list .dropdown-item:focus {
+  background-color: #f1f3f5 !important;
+  color: #000 !important;
+}
+
+#header-notif-list .dropdown-header {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+}
+
+#header-notif-list .text-muted {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}

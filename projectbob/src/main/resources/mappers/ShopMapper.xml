@@ -445,14 +445,25 @@
      #{status}, #{quantity}, #{menus}, #{paymentUid})
 </insert>
 
-<!-- 스케쥴러 -->
-<select id="selectPendingOrdersExpired"
-        parameterType="java.sql.Timestamp"
+<!-- 상태별 & 오너별 "신규 주문" 알림 목록 -->
+<select id="findOrdersByOwnerAndStatus"
+        parameterType="map"
         resultType="com.projectbob.domain.Orders">
   SELECT *
     FROM orders
-   WHERE status = 'PENDING'
-     AND reg_date &lt; #{cutoff}
+   WHERE id = #{ownerId}
+     AND status = #{status}
+   ORDER BY reg_date DESC
+</select>
+
+<!-- 헤더알림 주문으로 이동 -->
+<select id="findNewOrdersByOwnerId" parameterType="string" resultType="com.projectbob.domain.Orders">
+  SELECT *
+  FROM orders o
+  JOIN shop s ON o.s_id = s.s_id
+  WHERE s.owner = #{ownerId}
+    AND o.status = 'NEW'
+  ORDER BY o.reg_date DESC
 </select>
 
 </mapper>	

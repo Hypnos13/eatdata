@@ -151,9 +151,10 @@ public interface ShopMapper {
     @Select("SELECT COUNT(*) FROM menu WHERE s_id = #{sId}")
     int countMenusByShopId(@Param("sId") int sId);
 
+    //상태별 & 오너별 "신규 주문" 알림 목록
+    List<Orders> findOrdersByOwnerAndStatus(@Param("ownerId") String ownerId, @Param("status") String status);
 
-    
-    // 3분 경과된 PENDING 주문 조회
-    List<Orders> selectPendingOrdersExpired(@Param("cutoff") Timestamp cutoff);
+    //헤더알림 주문으로 이동
+    List<Orders> findNewOrdersByOwnerId(String ownerId);
 
 }

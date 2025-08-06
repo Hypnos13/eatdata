@@ -75,7 +75,7 @@
   </style>
 </head>
 
-<body>
+<body data-shop-id="[[${currentShop.sId}]]">
   <th:block layout:fragment="content">
     <div class="main-container">
 
@@ -91,11 +91,18 @@
                class="text-center text-muted p-4">
             대기 중인 주문이 없습니다.
           </div>
-          <div th:each="o,iter : ${orders}"
-               class="order-card"
-               th:classappend="${iter.index == 0} ? ' active' : ''"
-               th:data-order-no="${o.oNo}"
-               th:onclick="|selectNewOrder(${o.oNo})|">
+          <div class="order-card"
+			     th:each="o : ${orders}"
+			     th:classappend="${selectedOrder != null and o.oNo == selectedOrder.oNo} ? 'active' : ''"
+			     th:data-order-no="${o.oNo}"
+			     th:data-ono="${o.oNo}"
+			     th:data-regdate="${#dates.format(o.regDate, 'yyyy-MM-dd HH:mm')}"
+			     th:data-totalprice="${o.totalPrice}"
+			     th:data-quantity="${o.quantity}"
+			     th:data-oaddress="${o.oAddress}"
+			     th:data-menus="${o.menus}"
+			     th:data-request="${o.request}"
+			     th:onclick="selectNewOrder(this)">
             
             <div class="order-card-title">
               <span>주문 #<span th:text="${o.oNo}">123</span></span>

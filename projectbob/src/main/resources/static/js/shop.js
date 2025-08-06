@@ -1,3 +1,62 @@
+// ==== 주문관리 배달시작/완료 버튼 ====
+let stompClient;       // 전역으로 빼서 나중에도 접근 가능하게
+window.changeStatus = function(oNo, newStatus) {
+  // stompClient 가 아직 연결되기 전일 수도 있으니
+  if (!stompClient) return;
+
+  stompClient.send(
+    '/app/order/changeStatus',
+    {}, 
+    JSON.stringify({ oNo: oNo, newStatus: newStatus })
+  );
+};
+
+// 그 다음에 DOMContentLoaded 안에서 stompClient 연결
+document.addEventListener('DOMContentLoaded', () => {
+  const socket = new SockJS('/ws');
+  stompClient = Stomp.over(socket);
+
+  stompClient.connect({}, () => {
+    // (주문 상세 갱신, 리스트 갱신 구독 로직)
+  });
+});
+
+// ==== 알림 렌더링 헬퍼 함수 ====
+// 기존 리스트를 완전히 지우는 함수
+function clearHeaderList() {
+  document.getElementById('header-notif-list').innerHTML = '';
+}
+
+// 주문 ID 배열을 받아서 헤더 알림(뱃지 + 리스트)을 그려주는 함수
+function renderPendingOrders(orderIds) {
+  const badge = document.getElementById('header-notif-badge');
+  const ul    = document.getElementById('header-notif-list');
+
+  badge.textContent = orderIds.length;
+  if (orderIds.length > 0) {
+    badge.classList.remove('d-none');
+    clearHeaderList();
+    ul.innerHTML = '<li><h6 class="dropdown-header">새로운 알림</h6></li>';
+    orderIds.forEach(oNo => {
+      const li = document.createElement('li');
+      li.className = 'notif-item';
+      li.dataset.orderNo = oNo;
+      li.innerHTML = `
+        <a class="dropdown-item text-truncate"
+           href="/shop/newOrders?sOrderNo=${oNo}">
+          신규 주문이 도착했습니다.
+        </a>`;
+      ul.appendChild(li);
+    });
+    markBellAsUnread();
+  } else {
+    badge.classList.add('d-none');
+    clearBellBlink();
+    clearHeaderList();
+    ul.innerHTML = '<li class="text-muted mb-0">알림이 없습니다.</li>';
+  }
+}
+
 function findZipcode() {
 	new daum.Postcode({
 		oncomplete: function(data) {
@@ -274,47 +333,47 @@ $(function() {
 		                updateDisplayTimes();
 		            });
 
-								$('#btnConfirmDispatch').on('click', function() {
-								    // 1. 현재 선택된 주문 정보 가져오기
-								    const selectedOrder = orderList.find(order => order.ono === currentSelectedOrderId);
-								    if (!selectedOrder) {
-								        alert("오류: 선택된 주문이 없습니다.");
-								        return;
-								    }
-
-								    // 2. 모달에서 선택된 배달 정보 가져오기
-								    const agency = $('#deliveryAgencySelect').val();
-								    const pickupAfterMinutes = parseInt($('#pickupTimeSelect').val());
-								    const deliveryAfterMinutes = parseInt($('#deliveryTimeSelect').val());
-								    
-								    const now = new Date();
-								    const pickupTime = new Date(now.getTime() + pickupAfterMinutes * 60000);
-								    const deliveryTime = new Date(now.getTime() + deliveryAfterMinutes * 60000);
-								    const formatTime = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-
-								    // 3. URL 파라미터로 넘길 데이터 정리
-								    const params = new URLSearchParams({
-								        orderId: selectedOrder.ono,
-								        shopName: shopInfo.name,
-								        shopAddress: shopInfo.address1 + ' ' + shopInfo.address2,
-								        shopPhone: shopInfo.phone,
-								        customerAddress: selectedOrder.oaddress,
-								        customerPhone: selectedOrder.clientPhone || '정보 없음',
-								        pickupTime: `${pickupAfterMinutes}분 후 (${formatTime(pickupTime)})`,
-								        deliveryTime: `${deliveryAfterMinutes}분 후 (${formatTime(deliveryTime)})`
-								    });
-
-								    // 4. 새 탭에서 라이더 페이지 열기
-								    const riderUrl = `/rider/request?${params.toString()}`;
-								    window.open(riderUrl, '_blank');
-
-								    // 모달 닫기
-								    const modal = bootstrap.Modal.getInstance(document.getElementById('dispatchModal'));
-								    modal.hide();
-								    
-								    // (나중에) 좌측 목록에서 해당 주문을 제거하는 로직
-								    $(`.order-card[data-order-id="${selectedOrder.ono}"]`).fadeOut();
-								});
+					$('#btnConfirmDispatch').on('click', function() {
+					    // 1. 현재 선택된 주문 정보 가져오기
+					    const selectedOrder = orderList.find(order => order.ono === currentSelectedOrderId);
+					    if (!selectedOrder) {
+					        alert("오류: 선택된 주문이 없습니다.");
+					        return;
+					    }
+	
+					    // 2. 모달에서 선택된 배달 정보 가져오기
+					    const agency = $('#deliveryAgencySelect').val();
+					    const pickupAfterMinutes = parseInt($('#pickupTimeSelect').val());
+					    const deliveryAfterMinutes = parseInt($('#deliveryTimeSelect').val());
+					    
+					    const now = new Date();
+					    const pickupTime = new Date(now.getTime() + pickupAfterMinutes * 60000);
+					    const deliveryTime = new Date(now.getTime() + deliveryAfterMinutes * 60000);
+					    const formatTime = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+	
+					    // 3. URL 파라미터로 넘길 데이터 정리
+					    const params = new URLSearchParams({
+					        orderId: selectedOrder.ono,
+					        shopName: shopInfo.name,
+					        shopAddress: shopInfo.address1 + ' ' + shopInfo.address2,
+					        shopPhone: shopInfo.phone,
+					        customerAddress: selectedOrder.oaddress,
+					        customerPhone: selectedOrder.clientPhone || '정보 없음',
+					        pickupTime: `${pickupAfterMinutes}분 후 (${formatTime(pickupTime)})`,
+					        deliveryTime: `${deliveryAfterMinutes}분 후 (${formatTime(deliveryTime)})`
+					    });
+	
+					    // 4. 새 탭에서 라이더 페이지 열기
+					    const riderUrl = `/rider/request?${params.toString()}`;
+					    window.open(riderUrl, '_blank');
+	
+					    // 모달 닫기
+					    const modal = bootstrap.Modal.getInstance(document.getElementById('dispatchModal'));
+					    modal.hide();
+					    
+					    // (나중에) 좌측 목록에서 해당 주문을 제거하는 로직
+					    $(`.order-card[data-order-id="${selectedOrder.ono}"]`).fadeOut();
+					});
 		        }
 		    });
 		}
@@ -409,7 +468,14 @@ $(function() {
     });
 });
 
-// ==== 5. 가게 상태 ON/OFF 토글 =============================
+// ==== 5. 헤더 알림 (새로고침·이동 시 sessionStorage 만으로 복구) ====
+document.addEventListener('DOMContentLoaded', function() {
+  // sessionStorage에 남아 있는 주문 ID 배열을 읽어서 바로 렌더
+  const stored = JSON.parse(sessionStorage.getItem('pendingOrders') || '[]');
+  renderPendingOrders(stored);
+});
+
+// ==== 6. 가게 상태 ON/OFF 토글 =============================
 $(function() {
     $('#shopStat').on('change', function() {
         const $checkbox = $(this);
@@ -428,7 +494,7 @@ $(function() {
     });
 });
 
-// ==== 6. 리뷰 답글 수정/삭제 모드 토글 =====================
+// ==== 7. 리뷰 답글 수정/삭제 모드 토글 =====================
 // # 리뷰 답글 “수정/삭제” 바로가기 토글 & AJAX 처리
 $(function () {
 $('.reply-box')
@@ -486,7 +552,7 @@ $('.reply-box')
   });
 });
 
-// ==== 7. WebSocket 초기화 & 이벤트 처리 =================
+// ==== 8. WebSocket 초기화 & 이벤트 처리 =================
 // 페이지 로드 후 한 번만 실행됩니다.
 document.addEventListener('DOMContentLoaded', () => {
   // 7.0: shopId 조회 (헤더 알림 컨테이너에서)
@@ -494,15 +560,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!notifyContainer) return;
   const shopId = notifyContainer.dataset.shopId;
 
-  // 7.1: SockJS & STOMP 클라이언트 생성
+  // 8.1: SockJS & STOMP 클라이언트 생성
   const socket      = new SockJS('/ws');
   const stompClient = Stomp.over(socket);
 
-  // 7.2: STOMP 연결 후 구독 시작
+  // 8.2: STOMP 연결 후 구독 시작
   stompClient.connect({}, () => {
     console.log('[shop.js] STOMP connected, shopId=', shopId);
 
-	// 7.2.1: 신규 주문 알림 구독
+	// 8.2.1: 신규 주문 알림 구독
 	stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
 	  console.log('[WS 新주문 콜백]', msg, typeof msg.body, msg.body);
 	  try {
@@ -522,14 +588,14 @@ document.addEventListener('DOMContentLoaded', () => {
 	  }
 	});
 
-    // 7.2.2: 주문 상태 변경 구독 (헤더 알림 제거)
+    // 8.2.2: 주문 상태 변경 구독 (헤더 알림 제거)
     stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
       console.log('[WS 상태변경_헤더]', msg.body);
       const { oNo } = JSON.parse(msg.body);
       removeHeaderNotification(oNo);
     });
 
-    // 7.2.3: 주문 상태 변경 구독 (테이블 업데이트)
+    // 8.2.3: 주문 상태 변경 구독 (테이블 업데이트)
     document.querySelectorAll('tr[data-order-no]').forEach(row => {
       const oNo = row.dataset.orderNo;
       stompClient.subscribe(`/topic/orderStatus/order/${oNo}`, msg => {
@@ -539,14 +605,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cell) cell.textContent = newStatus;
       });
     });
-
-    // 7.2.4: 드롭다운 열림 시 깜빡임 해제
-    document.getElementById('headerNotifyBtn')
-      ?.addEventListener('shown.bs.dropdown', clearBellBlink);
   });
 });
 
-// ==== 8. 알림 아이콘 깜박임 제어 ===========================
+// ==== 9. 알림 아이콘 깜박임 제어 ===========================
 //알림 아이콘 깜박임 시작
 function markBellAsUnread() {
   const icon = document.getElementById('notifyIcon');
@@ -559,6 +621,7 @@ function clearBellBlink() {
   if (icon) icon.classList.remove('blink');
 }
 
+<<<<<<< HEAD
 // ==== 9. 주문 관리 함수 (수락 / 거절) =====================
 // 주문 수락 함수
 window.acceptOrder = function(oNo) {
@@ -567,6 +630,27 @@ window.acceptOrder = function(oNo) {
   fetch(`/shop/orderManage/${oNo}/status?newStatus=ACCEPTED`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
+=======
+// ==== 10. 주문 관리 함수 (수락 / 거절) =====================
+// 주문 수락 함수 (기존)
+window.acceptOrder = function(oNo) {
+  fetch(`/shop/orderManage/${oNo}/status`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: 'newStatus=ACCEPTED'
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('상태 변경 실패');
+    return res.json();
+  })
+  .then(data => {
+    if (data.success) {
+      // 바로 새 화면으로 이동
+      location.href = '/shop/orderManage?status=ACCEPTED';
+    } else {
+      throw new Error('상태 변경 실패');
+    }
+>>>>>>> develop
   })
   .then(response => response.json())
   .then(data => {
@@ -586,6 +670,7 @@ window.acceptOrder = function(oNo) {
 
 // 주문 거절 함수 (환불 처리)
 window.rejectOrder = function(oNo) {
+<<<<<<< HEAD
   if (!confirm(`주문 #${oNo}을(를) 거절하고 환불 처리하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
 
   fetch(`/shop/orderManage/${oNo}/status?newStatus=REJECTED`, {
@@ -606,8 +691,29 @@ window.rejectOrder = function(oNo) {
     alert('요청 중 오류가 발생했습니다.');
   });
 };
+=======
+  fetch(`/shop/orderManage/${oNo}/status`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: 'newStatus=REJECTED'
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('거절 실패');
+    return res.json();
+  })
+  .then(data => {
+      if (data.success) {
+        // 개별 remove 없이 전체 화면 갱신
+        location.href = '/shop/orderManage?status=PENDING';
+      } else {
+        throw new Error('거절 실패');
+      }
+    })
+    .catch(() => alert('주문 거절에 실패했습니다.'));
+  };
+>>>>>>> develop
 
-// ==== 10. 렌더링 헬퍼 =====================================
+// ==== 11. 렌더링 헬퍼 =====================================
 function renderNewOrderItem(msg) {
   const ul = document.getElementById('newOrderList');
   if (!ul) return;
@@ -658,27 +764,46 @@ function renderHeaderNotification(msg) {
   // 링크 구성
   const a = document.createElement('a');
   a.className = 'dropdown-item text-truncate';
-  a.href      = `/shop/orderDetail?oNo=${id}`;
-  a.textContent = '새 주문 알림이 도착했습니다.';
+  a.href = `/shop/newOrders?sOrderNo=${id}`;
+  a.textContent = `신규 주문이 도착했습니다.`;
 
   item.appendChild(a);
 
   // ↓ prepend → append 로 바꿔서 새 알림이 아래로 쌓이도록
   list.appendChild(item);
+  
+  // ▶ sessionStorage에도 추가
+  const pending = JSON.parse(sessionStorage.getItem('pendingOrders') || '[]');
+  pending.push(data.orderId);
+  sessionStorage.setItem(
+    'pendingOrders',
+    JSON.stringify(Array.from(new Set(pending)))
+  );
 }
 
 //헤더 알림에서 아이템 제거 함수
 function removeHeaderNotification(oNo) {
-  // 아이템 제거
-  document.querySelector(`#header-notif-list .notif-item[data-order-no="${oNo}"]`)?.remove();
-  // 뱃지 감소
+  // (1) 화면에서 아이템 제거
+  document.querySelector(
+    `#header-notif-list .notif-item[data-order-no="${oNo}"]`
+  )?.remove();
+
+// (2) sessionStorage에서도 제거
+const pending = JSON.parse(sessionStorage.getItem('pendingOrders') || '[]');
+const filtered = pending.filter(id => id !== oNo);
+sessionStorage.setItem('pendingOrders', JSON.stringify(filtered));
+
+  // (3) 뱃지 숫자 업데이트
   const badge = document.getElementById('header-notif-badge');
-  const cnt   = Math.max(0, parseInt(badge.textContent||'0',10) - 1);
+  const cnt   = filtered.length;
   badge.textContent = cnt;
-  if (cnt === 0) badge.classList.add('d-none');
+  if (cnt === 0) {
+    badge.classList.add('d-none');
+    clearBellBlink();
+  }
 }
 
-  // ==== 11. 휴무/영업 버튼 ================
+  // ==== 12. 휴무/영업 버튼 ================
   // 휴무/영업 스위치
   const updateDayRow = ($chk) => {
     const $tr = $chk.closest("tr");
@@ -721,8 +846,8 @@ function removeHeaderNotification(oNo) {
       }
       // disabled 절대 쓰지 않음
     });
-	
-// ==== 12. 주문 상세 페이지 픽업/배달 버튼 ================
+});
+// ==== 13. 주문 상세 페이지 픽업/배달 버튼 ================
 // 픽업·배달 버튼 처리
 document.addEventListener('DOMContentLoaded', () => {
   const btnPickup  = document.getElementById('btnPickup');
@@ -750,7 +875,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('[data-order-no]');
     const oNo       = container ? container.dataset.orderNo : 0;
 
-    fetch(`/shop/orderManage/${oNo}/status`, {
+    fetch(`/shop/order/${oNo}/status`, {
       method:  'POST',
       headers: { 'Content-Type':'application/x-www-form-urlencoded' },
       body:    'newStatus=' + newStatus
@@ -759,4 +884,54 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(d => { if (d.success) cb(); });
   }
 });
-});
+
+// ==== 14. 신규주문(#newOrderList) 전용: 클릭 & 최초 자동 표시 =====
+if (document.getElementById('newOrderList')) {
+
+  // 1) selectNewOrder 정의 (이전과 똑같습니다)
+  function selectNewOrder(el) {
+    // a) active 토글
+    document.querySelectorAll('.order-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+
+    // b) data-* 값 꺼내기
+    const oNo        = el.dataset.orderNo;
+    const regDate    = el.dataset.regdate;
+    const totalPrice = el.dataset.totalprice;
+    const oAddress   = el.dataset.oaddress;
+    const menus      = el.dataset.menus;
+    const request    = el.dataset.request;
+
+    // c) 상세 패널 갱신
+    const panel = document.querySelector('.order-detail-panel');
+    if (!panel) return;
+    panel.innerHTML = `
+      <h4>신규 주문 #${oNo}</h4>
+      <p><strong>주문일시:</strong> ${regDate}</p>
+      <p><strong>총액:</strong> ${totalPrice}원</p>
+      <p><strong>배달/픽업:</strong> ${oAddress ? '배달' : '픽업'}</p>
+      ${oAddress ? `<p><strong>주소:</strong> ${oAddress}</p>` : ''}
+      <p><strong>메뉴:</strong> ${menus || ''}</p>
+      <p><strong>요청사항:</strong> ${request || '없음'}</p>
+      <div class="mt-4">
+        <button type="button" class="btn btn-success me-2" onclick="acceptOrder(${oNo})">수락</button>
+        <button type="button" class="btn btn-outline-danger" onclick="rejectOrder(${oNo})">거절</button>
+      </div>
+    `;
+  }
+
+  // 2) DOMContentLoaded 에 실행: 
+  //    - 모든 .order-card 에 클릭 바인딩
+  //    - 첫 카드를 자동으로 보여주기
+  document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.order-list .order-card');
+    cards.forEach(card => {
+      card.addEventListener('click', () => selectNewOrder(card));
+    });
+    if (cards.length) {
+      selectNewOrder(cards[0]);
+    }
+  });
+
+}
+
