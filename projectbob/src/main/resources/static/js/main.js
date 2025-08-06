@@ -849,9 +849,7 @@ $(document).ready(function() {
         });
     }
 
-    // --- (이전에 작성했던 다른 JavaScript 코드들은 여기에 유지) ---
-    // 돋보기 버튼, 검색 제출 등 기존 기능들은 이 아래에 그대로 붙여넣으시면 됩니다.
-    // 카카오맵 API 관련 함수 (handleCurrentLocationSearch, triggerKakaoPostcodeSearch)는 삭제되었습니다.
+
 });
 
 // 모든 DOMContentLoaded 관련 스크립트를 하나의 jQuery $(document).ready() 블록으로 통합
@@ -1080,7 +1078,9 @@ document.addEventListener('click', function(e) {
     }
 });
 
+/*
 //위치버튼 클릭스 주소 
+
 function handleCurrentLocationSearch() {
     console.log("handleCurrentLocationSearch 함수 시작");
     if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
@@ -1152,6 +1152,94 @@ function handleCurrentLocationSearch() {
     });
 		console.log("이벤트 리스너 등록 완료");
 }
+*/
+
+function handleCurrentLocationSearch() {
+    console.log("handleCurrentLocationSearch 함수 시작");
+
+    if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
+        console.error("카카오 지도 API 또는 서비스 라이브러리가 로드되지 않았습니다.");
+        return;
+    }
+
+    const locationInputField = document.getElementById('location-input');
+    const currentLocationSearchBtn = document.getElementById('currentLocationSearchBtn');
+    const categoryCards = document.querySelectorAll('.category-card');
+
+    if (!locationInputField || !currentLocationSearchBtn || categoryCards.length === 0) {
+        console.warn("HTML 요소 누락 - 기능 초기화 실패");
+        return;
+    }
+
+    // 공통 위치 검색 및 페이지 이동 함수
+    function searchWithCurrentLocation(categoryTitle) {
+        if (!navigator.geolocation) {
+            alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const geocoder = new kakao.maps.services.Geocoder();
+                const coord = new kakao.maps.LatLng(lat, lon);
+
+                geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+                    if (status === kakao.maps.services.Status.OK && result.length > 0) {
+                        const address = result[0].address.address_name;
+                        locationInputField.value = address;
+
+                        const category = encodeURIComponent(categoryTitle || '전체보기');
+                        const url = `/shopList?category=${category}&address=${encodeURIComponent(address)}`;
+                        window.location.href = url;
+                    } else {
+                        alert('위치 → 주소 변환 실패');
+                        console.error("주소 변환 실패:", status, result);
+                    }
+                });
+            },
+            (error) => {
+                let errorMessage = '위치 정보를 가져오는 데 실패했습니다.';
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = '위치 정보 권한이 거부되었습니다.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = '위치 정보를 사용할 수 없습니다.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = '위치 요청 시간이 초과되었습니다.';
+                        break;
+                    default:
+                        errorMessage = `알 수 없는 오류: ${error.message}`;
+                }
+                alert(errorMessage);
+                console.error("위치 정보 오류:", error);
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
+    }
+
+    // 위치찾기 버튼 클릭
+    currentLocationSearchBtn.addEventListener('click', () => {
+        console.log("현재 위치 찾기 버튼 클릭");
+        searchWithCurrentLocation("전체보기");
+    });
+
+    // 카테고리 카드 클릭
+    categoryCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            e.preventDefault(); // 기존 링크 동작 방지
+            const categoryTitle = card.querySelector('.category-title')?.innerText || '전체보기';
+            console.log(`카테고리 클릭됨: ${categoryTitle}`);
+            searchWithCurrentLocation(categoryTitle);
+        });
+    });
+
+    console.log("이벤트 리스너 등록 완료");
+}
+
 
 // ==============================
 // 검색으로 주소 찾기

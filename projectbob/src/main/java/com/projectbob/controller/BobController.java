@@ -116,6 +116,9 @@ public class BobController {
 		  for (Shop shop : shopList) {
 		      log.info("Shop in sList: sId={}, name={}", shop.getSId(), shop.getName());
 		  }
+		  for (Shop shop : shopList) {
+			    log.info("Shop 상태: sId={}, status={}", shop.getSId(), shop.getStatus());
+			}
 	  model.addAttribute("sList",bobService.shopList(category,keyword));
 	  model.addAttribute("selectedCategory", category);
 	  model.addAttribute("userAddress", address);
