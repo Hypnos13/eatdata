@@ -51,6 +51,17 @@ public class BobService {
         return bobMapper.findOrdersByStatusAndShop(status, sId);
     }
 
+    // 주문 번호(oNo)로 주문 정보를 조회하는 메서드
+    public Orders findOrderByONo(Long oNo) {
+        return bobMapper.selectOrderByONo(oNo);
+    }
+
+    // 주문 상태를 업데이트하는 메서드
+    @Transactional
+    public void updateOrderStatus(Long oNo, String newStatus) {
+        bobMapper.updateOrderStatus(oNo, newStatus);
+    }
+
 	public Menu getMenuCal(int mId) {
 		return bobMapper.getMenuCal(mId);
 	}
@@ -631,20 +642,23 @@ public class BobService {
 		 int newOrderNo = order.getONo();
 		 
 	 	// 2) NewOrder DTO 생성
-	    Shop shop = shopMapper.findBySId(order.getSId());
-	    String shopName = shop.getName();
-	    NewOrder dto = new NewOrder(
-	        /* orderId    */ newOrderNo,
-	        /* shopId     */ order.getSId(),
-	        /* shopName   */  shopName,
-	        /* menus      */ order.getMenus(),
-	        /* totalPrice */ order.getTotalPrice(),
-	        /* payment    */ order.getPayment(),
-	        /* address    */ order.getOAddress(),
-	        /* phone      */ (String) req.get("phone"),
-	        /* request    */ order.getRequest(),
-	        /* status     */ order.getStatus(),
-	        /* regDate    */ order.getRegDate()
+		 Shop shop = shopMapper.findBySId(order.getSId());
+		 String shopName = shop.getName();
+		 long regDateMs = order.getRegDate() != null ? order.getRegDate().getTime() : System.currentTimeMillis();
+
+		 NewOrder dto = new NewOrder(
+			newOrderNo,                 // orderId
+		    order.getSId(),             // shopId
+		    shopName,                   // shopName
+		    order.getMenus(),           // menus
+		    order.getTotalPrice(),      // totalPrice
+		    order.getPayment(),         // payment
+		    order.getOAddress(),        // address
+		    (String) req.get("phone"),  // phone
+		    order.getRequest(),         // request
+		    order.getStatus(),          // status
+		    order.getRegDate(),         // regDate
+		    regDateMs                   // regDateMs
 	    );
 
 	    // ★ 3) WebSocket 알림 전송 ★

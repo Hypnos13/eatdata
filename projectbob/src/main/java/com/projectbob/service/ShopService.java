@@ -2,15 +2,20 @@ package com.projectbob.service;
 
 import java.io.*;
 import java.util.*;
+import java.sql.Timestamp;
 
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.util.StringUtils;
+import org.springframework.ui.Model;
 
 import com.projectbob.domain.*;
 import com.projectbob.mapper.*;
+import com.projectbob.service.PortoneService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,10 +27,13 @@ public class ShopService {
 	
 	@Autowired
 	private ShopMapper shopMapper;
+
+	@Autowired
+	private PortoneService portoneService;
 	
 	@Autowired
 	private FileUploadService fileUploadService;
-
+	
     ShopService(WebsocketService websocketService) {
         this.websocketService = websocketService;
     }
@@ -186,6 +194,11 @@ public class ShopService {
 		}
 		String relativePath = webPath.substring("/images/".length());
 		return fileUploadService.getUploadBaseDir() + File.separator + relativePath.replace("/", File.separator);
+	}
+	
+	// 여러 상태값으로 주문 목록 조회
+	public List<Orders> findOrdersByMultipleStatusesAndShop(List<String> statuses, int sId) {
+	    return shopMapper.selectOrdersByMultipleStatusesAndShop(statuses, sId);
 	}
 
 	/* ---------- Shop ---------- */
@@ -391,26 +404,75 @@ public class ShopService {
         return shopMapper.selectOrdersByShopId(sId);
     }
     
-    // 상태별 & 가게별 주문 조회 
-    public List<Orders> findOrdersByStatusAndShop(String status, int sId) {
-        return shopMapper.selectOrdersByStatusAndShop(status, sId);
-    }
-
     // 단일 주문 상세 조회 
     public Orders findOrderByNo(int oNo) {
         return shopMapper.selectOrderByNo(oNo);
     }
 
-    // 주문 상태 변경 
+    // 주문 상태 변경
     @Transactional
     public void updateOrderStatus(int oNo, String newStatus) {
+        // 1. 주문 상태를 DB에서 먼저 업데이트합니다.
         shopMapper.updateOrderStatus(oNo, newStatus);
+
+        // 2. 알림 전송에 필요한 추가 정보를 조회합니다 (가게ID, 고객ID 등).
+        Orders order = findOrderByNo(oNo);
+        if (order == null) {
+            log.error("주문 정보를 찾을 수 없습니다. (oNo: {})", oNo);
+            return;
+        }
+        String userId = shopMapper.getUserIdByOrderNo(oNo);
+        int shopId = order.getSId();
+
+        // 3. (핵심) 상태 변경 후, 최신 PENDING 주문 개수를 다시 DB에서 조회합니다.
+        // 이 개수는 점주 페이지의 헤더 알림 뱃지를 실시간으로 정확하게 업데이트하는 데 사용됩니다.
+        int newPendingCount = shopMapper.countOrdersByStatusAndShop("PENDING", shopId);
+
+        // 4. WebsocketService를 통해 점주에게 변경 사실과 '최신 알림 개수'를 함께 전송합니다.
+        websocketService.sendOrderStatusChange(oNo, shopId, newStatus, newPendingCount);
+
+        // 5. 주문한 고객에게만 보내는 1:1 알림을 전송합니다.
+        if (userId != null && !userId.isEmpty()) {
+            Map<String, Object> payload = Map.of("oNo", oNo, "newStatus", newStatus);
+            websocketService.sendOrderStatusUpdateToUser(userId, payload);
+            log.info("고객에게 주문 상태 변경 알림 전송 완료. userId: {}, oNo: {}, status: {}", userId, oNo, newStatus);
+        } else {
+            log.error("고객 ID를 찾을 수 없어 주문 상태 변경 알림을 전송하지 못했습니다. (oNo: {})", oNo);
+        }
     }
     
+    // 주문 거절 및 환불 처리
+    @Transactional
+    public boolean rejectOrderAndCancelPayment(int oNo, String reason) {
+        // 1. 주문 정보 조회
+        Orders order = findOrderByNo(oNo);
+        if (order == null) {
+            log.error("주문 거절 실패: 주문 정보를 찾을 수 없습니다. (oNo: {})", oNo);
+            return false;
+        }
+
+        // 디버깅: paymentUid 값 확인
+        log.info("rejectOrderAndProcessRefund: 주문번호 {}의 paymentUid: {}", oNo, order.getPaymentUid());
+
+        // 2. 포트원 결제 취소 요청
+        boolean isCancelled = portoneService.cancelPayment(order.getPaymentUid(), String.valueOf(oNo), reason, order.getTotalPrice());
+
+        // 3. 결제 취소 성공 시 주문 상태 변경
+        if (isCancelled) {
+            updateOrderStatus(oNo, "REJECTED");
+            log.info("주문이 성공적으로 거절되고 환불 처리되었습니다. (oNo: {})", oNo);
+            return true;
+        } else {
+            log.error("포트원 결제 취소에 실패했습니다. (oNo: {}, paymentUid: {})", oNo, order.getPaymentUid());
+            return false;
+        }
+    }
+    
+    //신규주문 insert
     @Transactional
     public Orders placeOrder(Map<String,Object> req) {
         // 1. 주문 정보 객체 생성 (모든 필드 세팅)
-        Orders order = new Orders();
+        Orders order = new Orders();    // ← 반드시 선언!
         order.setSId((Integer) req.get("sId"));
         order.setId((String) req.get("id"));
         order.setTotalPrice((Integer) req.get("totalPrice"));
@@ -425,7 +487,9 @@ public class ShopService {
 
         // 2. DB에 주문 insert
         shopMapper.insertOrder(order);
-        // order의 oNo, regDate 등 자동 세팅됨 (useGeneratedKeys="true"일 때)
+        Orders inserted = shopMapper.selectOrderByNo(order.getONo());
+        order.setRegDate(inserted.getRegDate());
+        order.setModiDate(inserted.getModiDate());
 
         // 3. 추가 정보 조회
         Shop shop = shopMapper.findBySId(order.getSId());
@@ -433,6 +497,8 @@ public class ShopService {
         String customerPhone = (String) req.get("phone");
 
         // 4. WebSocket용 NewOrder DTO 생성
+        long regDateMs = order.getRegDate().getTime();  // ← 반드시 order 변수 사용!
+
         NewOrder newOrder = new NewOrder(
             order.getONo(),           // orderId
             order.getSId(),           // shopId
@@ -444,7 +510,8 @@ public class ShopService {
             customerPhone,            // phone
             order.getRequest(),       // request
             order.getStatus(),        // status
-            order.getRegDate()        // regDate
+            order.getRegDate(),       // regDate
+            regDateMs                 // regDateMs ← 추가된 필드!
         );
 
         // 5. WebSocket 알림
@@ -452,6 +519,22 @@ public class ShopService {
 
         // 6. 주문 엔티티 반환
         return order;
+    }
+    
+    // 상태별 & 가게별 주문 조회
+    public List<Orders> findOrdersByStatusAndShop(String status, int sId) {
+        return shopMapper.selectOrdersByStatusAndShop(status, sId);
+    }
+    
+    
+    // 상태별 & 오너별 "신규 주문" 알림 목록
+    public List<Orders> findNewOrdersByOwner(String loginId) {
+        return shopMapper.findOrdersByOwnerAndStatus(loginId, "NEW");
+    }
+
+    //헤더알림 주문으로 이동
+    public List<Orders> findNewOrdersByOwnerId(String ownerId) {
+        return shopMapper.findNewOrdersByOwnerId(ownerId);
     }
 
 }

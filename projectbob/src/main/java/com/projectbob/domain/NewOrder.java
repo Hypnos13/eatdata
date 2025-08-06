@@ -27,4 +27,5 @@ public class NewOrder {
     private String request;      // 요청사항
     private String status;       // 주문 상태 (대기: PENDING,수락: ACCEPTED, 거절: REJECTED)
     private Timestamp regDate;   // 주문 생성 일시
+    private long regDateMs; //현지시간입력용
 }

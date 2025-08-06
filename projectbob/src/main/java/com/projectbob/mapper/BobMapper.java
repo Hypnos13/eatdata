@@ -23,6 +23,12 @@ import com.projectbob.domain.Shop;
 @Mapper
 public interface BobMapper {
 	
+	// 주문번호로 주문 정보 조회 
+	public Orders selectOrderByONo(@Param("oNo") Long oNo);
+	
+	// 주문 상태 업데이트
+	public void updateOrderStatus(@Param("oNo") Long oNo, @Param("newStatus") String newStatus);
+	
 	Menu getMenuCal(int mId);
 	
 	//주문 읽기

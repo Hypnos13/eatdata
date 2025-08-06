@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{main_layout}">
+<head>
+    <title>주문 현황</title>
+</head>
+<body>
+<div layout:fragment="content" class="py-4">
+    <div class="row justify-content-center">
+        <!-- 가운데: 주문 상세 -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #43D091; color: #fff;">
+                    <h5 class="m-0">주문 상세</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">주문 번호</label>
+                        <p class="form-control-plaintext fw-bold" th:text="${selectedOrder.id}"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">주문 일시</label>
+                        <p class="form-control-plaintext" th:text="${#temporals.format(selectedOrder.createdAt, 'yyyy-MM-dd HH:mm')}"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">배달 주소</label>
+                        <p class="form-control-plaintext" th:text="${selectedOrder.address}"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">총 금액</label>
+                        <p class="form-control-plaintext text-primary fw-semibold" th:text="${selectedOrder.total} + '원'"></p>
+                    </div>
+                    <hr>
+                    <h6>주문 항목</h6>
+                    <ul class="list-group mb-3">
+                        <li th:each="item : ${selectedOrder.items}" class="list-group-item d-flex justify-content-between">
+                            <span th:text="${item.name} + ' × ' + ${item.quantity}"></span>
+                            <span th:text="${item.price} + '원'"></span>
+                        </li>
+                    </ul>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-light text-white"
+                                th:attr="style='background-color: #43D091'"
+                                th:if="${selectedOrder.status == '접수'}"
+                                th:onclick="|location.href='@{/orders/ready/{id}(id=${selectedOrder.id})}'|">
+                            조리 시작
+                        </button>
+                        <button type="button" class="btn btn-outline-success"
+                                th:if="${selectedOrder.status == '조리중'}"
+                                th:onclick="|location.href='@{/orders/delivering/{id}(id=${selectedOrder.id})}'|">
+                            배달 중
+                        </button>
+                        <button type="button" class="btn btn-secondary" disabled
+                                th:if="${selectedOrder.status == '완료'}">
+                            완료됨
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -92,12 +92,12 @@ public class CustomerServiceService {
 	
 	public String chatCounselor(String message) {
 		
-		String apiKey = "API 키";
+		String apiKey = "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";  // ChatGPTAPI
 		
-		RestTemplate restTemplate = new RestTemplate();
+		RestTemplate restTemplate = new RestTemplate();  //HTTP 요청을 보낼 때 사용하는 객체
 		
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.setContentType(MediaType.APPLICATION_JSON);		// content-Type 설정
 		headers.setBearerAuth(apiKey);
 		
 		Map<String, Object> systemMessage = Map.of("role", "system","content", 
@@ -105,16 +105,16 @@ public class CustomerServiceService {
 				+ "ProjectBOB 고객센터는 이메일만 받고 있습니다. \\\r\n"
 				+ "이메일: minitest0623@naver.com \\\r\n"
 				+ "이 정보 외에는 절대로 임의의 연락처를 만들지 마세요. 당신은 단순 안내 역할만 합니다. \\\\\\r\\n"
-				+ "기본적인 질문은 인터넷을 참조해서 답해도 됩니다.\"");
-		Map<String, Object> userMessage = Map.of("role", "user", "content", message);
-		List<Map<String, Object>> messages = List.of(systemMessage, userMessage);
-		Map<String, Object> requestBody = Map.of("model", "gpt-3.5-turbo","messages", messages);
+				+ "기본적인 질문은 인터넷을 참조해서 답해도 됩니다.\"");   // Chat GPT에게 역할을 부여하는 프롬프트
+		Map<String, Object> userMessage = Map.of("role", "user", "content", message);		// 사용자의 메시지
+		List<Map<String, Object>> messages = List.of(systemMessage, userMessage);	// 총 설정 보냄
+		Map<String, Object> requestBody = Map.of("model", "gpt-3.5-turbo","messages", messages);  // GPT 사용할 모델 (모델에 따라 사용료가 다름)
 		
-		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);	// 요청할 Header와 Body 모두 담은 요청 객체
 
-	    ResponseEntity<Map> response = restTemplate.exchange("https://api.openai.com/v1/chat/completions", HttpMethod.POST, entity, Map.class);
+	    ResponseEntity<Map> response = restTemplate.exchange("https://api.openai.com/v1/chat/completions", HttpMethod.POST, entity, Map.class); // Ghat API에 POST로 요청 받음
 
-	    List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+	    List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");		// 받은 응답을 파싱
 	    Map<String, Object> messageObject = (Map<String, Object>) choices.get(0).get("message");
 	    
 	    String answer = messageObject.get("content").toString();

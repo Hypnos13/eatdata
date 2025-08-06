@@ -1,6 +1,7 @@
 package com.projectbob.domain;
 
 import java.sql.Timestamp;
+import java.util.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,9 +24,10 @@ public class Orders {
 	private String request; //요청사항
 	private Timestamp regDate;//생성일
 	private Timestamp modiDate;//수정일
-	private String status;//상태 (대기: PENDING,수락: ACCEPTED, 거절: REJECTED)
+	private String status;//상태 (대기: PENDING,수락: ACCEPTED, 거절: REJECTED, 배차완료: DISPATCHED , 배달중: DELIVERING, 완료: COMPLETED)
 	private int quantity;//수량
 	private String menus; //주문메뉴
 	private String paymentUid; // 포트원 결제 고유ID
+	private String clientPhone; // 고객 연락처
 
 }

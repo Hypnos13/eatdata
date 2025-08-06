@@ -18,13 +18,22 @@
         <result property="quantity" column="quantity" />
         <result property="menus" column="menus" />
         <result property="paymentUid" column="payment_uid" />
+        <result property="clientPhone" column="client_phone" /> 
   </resultMap>
 
   <select id="findOrdersByStatusAndShop" resultMap="ordersResultMap">
-      SELECT * FROM orders 
-      WHERE status = #{status} AND s_id = #{sId} 
-      ORDER BY reg_date DESC
-  </select>
+  SELECT 
+      o.*, 
+      c.phone AS client_phone
+  FROM 
+      orders o
+  INNER JOIN
+      client c ON o.id = c.id COLLATE utf8mb4_unicode_ci
+  WHERE 
+      o.status = #{status} AND o.s_id = #{sId} 
+  ORDER BY 
+      o.reg_date DESC
+</select>
 
 <!-- 메뉴 성분표  -->
 <select id="getMenuCal" resultType="com.projectbob.domain.Menu">
@@ -441,5 +450,25 @@
 		</if>	
 	ORDER BY s.s_id DESC
 </select>
+
+<!-- 주문번호로 주문 정보 조회 -->
+    <select id="selectOrderByONo" parameterType="long" resultMap="ordersResultMap">
+  SELECT 
+      o.*, 
+      c.phone AS client_phone
+  FROM 
+      orders o
+  LEFT JOIN 
+      client c ON o.id = c.id
+  WHERE 
+      o.o_no = #{oNo}
+</select>
+
+<!-- 주문 상태 업데이트 -->
+    <update id="updateOrderStatus">
+        UPDATE orders
+        SET status = #{newStatus}, modi_date = NOW()
+        WHERE o_no = #{oNo}
+    </update>
 
 </mapper>

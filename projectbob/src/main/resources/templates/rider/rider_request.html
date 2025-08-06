@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>가상 라이더 - 배차 요청 목록</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2b87d757b240dd70a51d682dd3cc37ed&libraries=services"></script>
+    <style>
+        body { background-color: #343a40; color: white; }
+        .main-container { display: flex; height: 100vh; }
+        .request-list-panel { width: 380px; background-color: #212529; border-right: 1px solid #495057; display: flex; flex-direction: column; }
+        .request-list-header { padding: 1rem; border-bottom: 1px solid #495057; font-size: 1.2rem; font-weight: bold; }
+        .request-list { overflow-y: auto; flex-grow: 1; }
+        .request-card { padding: 1rem; border-bottom: 1px solid #495057; cursor: pointer; }
+        .request-card.active { background-color: #495057; }
+        .detail-panel { flex-grow: 1; padding: 2rem; }
+        .card { background-color: #495057; border: 1px solid #6c757d; }
+        .card-header { background-color: #212529; font-weight: bold; }
+        #map { width: 100%; height: 250px; border-radius: 0.375rem; }
+        .btn-accept { background-color: #28a745; color: white; font-weight: bold; border: none; }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="request-list-panel">
+            <div class="request-list-header">신규 배차 요청</div>
+            <div class="request-list" id="requestList">
+                <div class="p-3 text-center text-white-50" id="no-request-placeholder">대기 중인 배차 요청이 없습니다.</div>
+            </div>
+        </div>
+        <div class="detail-panel" id="detailPanel" style="display:none;">
+             <div class="card w-100">
+                <div class="card-header text-center fs-4">주문 상세 정보</div>
+                <div class="card-body">
+                    <div id="map" class="mb-3"></div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>주문 번호:</strong> <span id="orderId"></span></li>
+                        <li class="list-group-item"><strong>픽업지:</strong> <span id="shopAddress"></span><br><small class="text-white-50" id="shopPhone"></small></li>
+                        <li class="list-group-item"><strong>도착지:</strong> <span id="customerAddress"></span><br><small class="text-white-50" id="customerPhone"></small></li>
+                        <li class="list-group-item"><strong>픽업 시간:</strong> <span id="pickupTime"></span></li>
+                        <li class="list-group-item"><strong>완료 시간:</strong> <span id="deliveryTime"></span></li>
+                    </ul>
+                    <div class="d-grid mt-3">
+                        <button class="btn btn-accept fs-5" id="btnAcceptDispatch">배차 수락</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const requestList = document.getElementById('requestList');
+    const detailPanel = document.getElementById('detailPanel');
+    const placeholder = document.getElementById('no-request-placeholder');
+    let currentSelectedOrder = null;
+    
+    // --- 지도 관련 변수 ---
+    let map, geocoder;
+    let markers = []; // 지도에 표시된 마커들을 관리하기 위한 배열
+
+    // --- 웹소켓 연결 ---
+    const socket = new SockJS('/ws');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log('Rider connected: ' + frame);
+        stompClient.subscribe('/topic/rider/requests', function (message) {
+            const dispatchInfo = JSON.parse(message.body);
+            addRequestToList(dispatchInfo);
+        });
+    });
+
+    // --- 함수 정의 ---
+
+    // 지도에 픽업지와 도착지 마커를 표시하고 범위를 조정하는 함수
+    function updateMapMarkers(shopAddress, customerAddress) {
+        // 1. 기존에 있던 마커들을 지도에서 모두 제거
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+
+        // 2. 두 지점을 모두 포함할 수 있는 지도의 범위를 생성
+        const bounds = new kakao.maps.LatLngBounds();
+
+        // 3. 픽업지(가게) 주소를 좌표로 변환하여 파란색 마커로 표시
+        geocoder.addressSearch(shopAddress, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                markers.push(new kakao.maps.Marker({ map: map, position: coords, title: '픽업지' }));
+                bounds.extend(coords); // 지도 범위에 픽업지 좌표 추가
+                map.setBounds(bounds); // 지도 범위를 모든 마커가 보이도록 조정
+            }
+        });
+
+        // 4. 도착지(고객) 주소를 좌표로 변환하여 빨간색 마커로 표시
+        geocoder.addressSearch(customerAddress, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                const image = new kakao.maps.MarkerImage(
+                    'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png',
+                    new kakao.maps.Size(64, 69), 
+                    { offset: new kakao.maps.Point(27, 69) }
+                );
+                markers.push(new kakao.maps.Marker({ map: map, position: coords, title: '도착지', image: image }));
+                bounds.extend(coords); // 지도 범위에 도착지 좌표 추가
+                map.setBounds(bounds); // 지도 범위를 모든 마커가 보이도록 조정
+            }
+        });
+    }
+
+    // 목록에 새 요청 추가하는 함수
+    function addRequestToList(order) {
+        if (placeholder) placeholder.style.display = 'none';
+        
+        const card = document.createElement('div');
+        card.className = 'request-card';
+        card.dataset.orderId = order.orderId;
+        card.innerHTML = `<div><strong>${order.shopName}</strong></div><small>${order.shopAddress}</small>`;
+        
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.request-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            displayOrderDetails(order);
+        });
+        requestList.prepend(card);
+
+        // 첫 번째 요청이면 자동으로 상세 정보 표시
+        if (requestList.children.length === 1) {
+            card.click();
+        }
+    }
+
+    // 상세 정보 표시 함수
+    function displayOrderDetails(order) {
+        currentSelectedOrder = order;
+        detailPanel.style.display = 'block';
+
+        // 텍스트 정보 업데이트
+        document.getElementById('orderId').textContent = order.orderId;
+        document.getElementById('shopAddress').textContent = order.shopAddress;
+        document.getElementById('shopPhone').textContent = `📞 ${order.shopPhone}`;
+        document.getElementById('customerAddress').textContent = order.customerAddress;
+        document.getElementById('customerPhone').textContent = `📞 ${order.customerPhone}`;
+        document.getElementById('pickupTime').textContent = order.pickupTime;
+        document.getElementById('deliveryTime').textContent = order.deliveryTime;
+
+        // 지도가 처음 로드되는 경우 초기화
+        if (!map) {
+            map = new kakao.maps.Map(document.getElementById('map'), { center: new kakao.maps.LatLng(37.566826, 126.9786567), level: 4 });
+            geocoder = new kakao.maps.services.Geocoder();
+        }
+        
+        // ★★★ 지도에 마커를 표시하는 함수 호출 ★★★
+        updateMapMarkers(order.shopAddress, order.customerAddress);
+    }
+    
+    // 배차 수락 버튼 이벤트
+    document.getElementById('btnAcceptDispatch').addEventListener('click', async function() {
+        if (!currentSelectedOrder) return;
+        
+        try {
+            const orderId = currentSelectedOrder.orderId;
+            const response = await fetch(`/rider/orders/${orderId}/accept`, {
+                method: 'POST'
+            });
+
+            if (!response.ok) {
+                throw new Error('서버 응답이 올바르지 않습니다.');
+            }
+
+            const result = await response.json();
+            if (result.success) {
+                alert(`주문번호 ${orderId} 배차를 수락했습니다.`);
+                document.querySelector(`.request-card[data-order-id="${orderId}"]`).remove();
+                detailPanel.style.display = 'none';
+                if (requestList.children.length === 1 && placeholder) {
+                    placeholder.style.display = 'block';
+                }
+            } else {
+                alert(`배차 수락 실패: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('배차 수락 중 오류 발생:', error);
+            alert('배차 수락 과정에서 오류가 발생했습니다.');
+        }
+    });
+
+    // --- 페이지가 처음 열릴 때의 로직 ---
+    // URL 파라미터로 데이터가 넘어왔는지 확인
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('orderId')) {
+        const initialOrder = {
+            orderId: urlParams.get('orderId'),
+            shopName: urlParams.get('shopName'),
+            shopAddress: urlParams.get('shopAddress'),
+            shopPhone: urlParams.get('shopPhone'),
+            customerAddress: urlParams.get('customerAddress'),
+            customerPhone: urlParams.get('customerPhone'),
+            pickupTime: urlParams.get('pickupTime'),
+            deliveryTime: urlParams.get('deliveryTime')
+        };
+        addRequestToList(initialOrder);
+    }
+});
+</script>
+
+</body>
+</html>
+    
+  </body>
+</html>

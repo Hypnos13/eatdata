@@ -20,29 +20,35 @@
         </tr>
       </thead>
       <tbody>
-        <tr th:each="order : ${orders}" data-order-no="${order.oNo}">
+        <!-- 주문이 있을 때 -->
+		<tr th:each="order : ${orders}" data-order-no="${order.oNo}">
+          <!-- 주문번호 -->
 		  <td th:text="${order.oNo}">123</td>
-		  <td th:text="${#dates.format(order.regDate,'yyyy-MM-dd HH:mm')}">2025-07-31 10:00</td>
-		  <td th:text="${#numbers.formatInteger(order.totalPrice,0,'COMMA')} + '원'">15,200원</td>
-		  
-			<!-- ② 상태 셀에 class 와 data-order-no 추가 -->
-		    <td class="status-cell"
-		        data-order-no="${order.oNo}"
-		        th:text="${order.status}">접수완료</td>
-		        
+          <!-- 주문일시 -->
+		  <td th:text="${#dates.format(order.regDate,'yyyy-MM-dd HH:mm')}">2025-08-02 14:03</td>
+          <!-- 총금액 -->
+		  <td th:text="${#numbers.formatInteger(order.totalPrice,0,'COMMA')} + '원'">11,000원</td>
+          <!-- 상태 -->
+		  <td class="status-cell" th:text="${order.status}">REJECTED</td>
+          <!-- 상세보기 버튼 -->
 		  <td>
-		    <a th:href="@{|/shop/orderDetail?oNo=${order.oNo}|}"
-   				class="btn btn-sm btn-outline-primary">보기</a>
-		  </td>
-		</tr>
-        <tr th:if="${#lists.isEmpty(orders)}">
-          <td colspan="5" class="text-center text-muted">
-            주문내역이 없습니다.
+            <a th:href="@{|/shop/orderDetail?oNo=${order.oNo}|}"
+               class="btn btn-sm btn-outline-primary">보기</a>
           </td>
         </tr>
+        <!-- 주문이 없을 때 -->
+		<tr th:if="${#lists.isEmpty(orders)}">
+	      <td colspan="5" class="text-center text-muted">
+	        주문내역이 없습니다.
+	      </td>
+	    </tr>
       </tbody>
     </table>
-    <script th:src="@{/js/shop.js}"></script>
   </div>
+
+  <!-- 스크립트 로드 (layout에서 이미 shop.js를 포함하고 있지 않다면 추가하세요) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script th:src="@{/js/shop.js}"></script>
 </body>
 </html>

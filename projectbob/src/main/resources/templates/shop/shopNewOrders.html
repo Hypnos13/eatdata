@@ -1,53 +1,172 @@
-<html xmlns:th="http://www.thymeleaf.org"
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/shop_layout}">
-  <head>
-    <title>🔔 신규 주문</title>
-  </head>
-  <body>
-    <!-- 이 div가 반드시 필요합니다 -->
-    <div layout:fragment="content">
-      <div class="container py-3">
-        <h4 class="mb-3">🔔 신규 주문</h4>
-        <ul id="newOrderList" class="list-group" th:data-shop-id="${currentShop.sId}">
-		  <li th:each="o : ${orders}"
-		      class="list-group-item d-flex align-items-start mb-3 p-3">
-		
-		    <!-- 1) 왼쪽: 주문 내용 -->
-		    <div class="flex-grow-1 pe-3">
-		      <div class="mb-1">🛒 <span th:text="${o.menus}">치킨 x1, 콜라 x1</span></div>
-		      <div class="mb-1">💬 <span th:text="${o.request != null ? o.request : '요청사항 없음'}">초인종 금지</span></div>
-		      <div class="text-muted small"><i class="bi bi-clock"></i>
-		        <span th:text="${#dates.format(o.regDate,'HH:mm')}">11:07</span>
-		      </div>
-		    </div>
-		
-		    <!-- 2) 오른쪽: 버튼 그룹 -->
-			<div class="d-flex flex-column justify-content-between" style="min-width: 5rem;">
-			  <button
-			    type="button"
-			    class="btn btn-success btn-sm mb-2"
-			    th:onclick="|acceptOrder(${o.oNo})|">
+
+<head>
+  <meta charset="UTF-8">
+  <title>신규 주문 관리</title>
+  <style>
+    :root {
+      --theme-color: #43D091;
+      --light-gray: #f8f9fa;
+    }
+
+    .main-container { display: flex; height: calc(100vh - 70px); }
+
+    /* ─── 좌측: 주문 리스트 패널 ───────────────────────── */
+    .order-list-panel {
+      width: 380px;
+      background-color: white;
+      border-right: 1px solid #dee2e6;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .order-list-header {
+      padding: 1rem;
+      border-bottom: 1px solid #dee2e6;
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+    .order-list-header .badge {
+      margin-left: auto;
+    }
+    .order-list { overflow-y: auto; flex-grow: 1; }
+    .order-card {
+      padding: 1rem;
+      border-bottom: 1px solid #e9ecef;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .order-card:hover { background-color: #f1f3f5; }
+    .order-card.active {
+      background-color: #e6f9f2;
+      border-left: 4px solid var(--theme-color);
+    }
+    .order-card-title {
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+    }
+    .order-card-detail {
+      font-size: .9rem;
+      color: #495057;
+      margin-top: .5rem;
+    }
+
+    /* ─── 우측: 상세 패널 ───────────────────────────────── */
+    .order-detail-panel {
+      flex-grow: 1;
+      padding: 2rem;
+      background-color: var(--light-gray);
+      overflow-y: auto;
+    }
+    .order-detail-panel h4 {
+      margin-bottom: 1.5rem;
+    }
+    .order-detail-panel h6 {
+      margin-top: 1.5rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body data-shop-id="[[${currentShop.sId}]]">
+  <th:block layout:fragment="content">
+    <div class="main-container">
+
+      <!-- 좌측: 신규 주문 리스트 -->
+      <div class="order-list-panel">
+        <div class="order-list-header">
+          <i class="bi bi-bell text-warning"></i>
+          <span class="ms-2">신규 주문</span>
+          <span class="badge bg-warning rounded-pill" th:text="${#lists.size(orders)}">0</span>
+        </div>
+        <div class="order-list">
+          <div th:if="${#lists.isEmpty(orders)}"
+               class="text-center text-muted p-4">
+            대기 중인 주문이 없습니다.
+          </div>
+          <div class="order-card"
+			     th:each="o : ${orders}"
+			     th:classappend="${selectedOrder != null and o.oNo == selectedOrder.oNo} ? 'active' : ''"
+			     th:data-order-no="${o.oNo}"
+			     th:data-ono="${o.oNo}"
+			     th:data-regdate="${#dates.format(o.regDate, 'yyyy-MM-dd HH:mm')}"
+			     th:data-totalprice="${o.totalPrice}"
+			     th:data-quantity="${o.quantity}"
+			     th:data-oaddress="${o.oAddress}"
+			     th:data-menus="${o.menus}"
+			     th:data-request="${o.request}"
+			     th:onclick="selectNewOrder(this)">
+            
+            <div class="order-card-title">
+              <span>주문 #<span th:text="${o.oNo}">123</span></span>
+              <span th:text="${#dates.format(o.regDate,'HH:mm')}">12:34</span>
+            </div>
+            <div class="order-card-detail">
+              <span th:text="${o.totalPrice + '원'}">10,000원</span>
+              &nbsp;·&nbsp;
+              <span th:text="${o.quantity + '개'}">2개</span>
+              <br/>
+              <small th:text="${o.oAddress != null ? o.oAddress : '픽업'}"
+                     class="text-secondary">
+                주소 또는 픽업
+              </small>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+      <!-- 우측: 선택된 주문 상세 (신규 주문에 특화된 UI) -->
+		<div class="order-detail-panel">
+		  <th:block th:if="${selectedOrder != null}">
+		    <h4>신규 주문 #<span th:text="${selectedOrder.oNo}">123</span></h4>
+		    <p><strong>주문일시:</strong>
+		      <span th:text="${#dates.format(selectedOrder.regDate,'yyyy-MM-dd HH:mm')}">
+		        2025-08-05 09:00
+		      </span>
+		    </p>
+		    <p><strong>총액:</strong>
+		      <span th:text="${selectedOrder.totalPrice + '원'}">10,000원</span>
+		    </p>
+		    <p><strong>배달/픽업:</strong>
+		      <span th:text="${selectedOrder.oAddress != null ? '배달' : '픽업'}">배달</span>
+		    </p>
+		    <p th:if="${selectedOrder.oAddress}">
+		      <strong>주소:</strong>
+		      <span th:text="${selectedOrder.oAddress}">서울 강남구 …</span>
+		    </p>
+		    <p><strong>메뉴:</strong>
+		      <span th:utext="${selectedOrder.menus}">치킨 *1, 콜라 *1</span>
+		    </p>
+		    <p><strong>요청사항:</strong>
+		      <span th:text="${selectedOrder.request ?: '없음'}">없음</span>
+		    </p>
+		    <div class="mt-4">
+			  <button type="button" class="btn btn-success me-2"
+			          th:onclick="|acceptOrder(${selectedOrder.oNo})|">
 			    수락
 			  </button>
-			  <button
-			    type="button"
-			    class="btn btn-outline-danger btn-sm"
-			    th:onclick="|rejectOrder(${o.oNo})|">
+			  <button type="button" class="btn btn-outline-danger"
+			          th:onclick="|rejectOrder(${selectedOrder.oNo})|">
 			    거절
 			  </button>
 			</div>
-		  </li>
-		
-		  <li th:if="${#lists.isEmpty(orders)}"
-		      class="list-group-item text-center text-muted">
-		    대기 중인 주문이 없습니다.
-		  </li>
-		</ul>
-      </div>
+		  </th:block>
+		  <th:block th:if="${selectedOrder == null}">
+		    <div class="text-center text-muted my-auto">
+		      왼쪽 주문을 클릭하면 상세가 표시됩니다.
+		    </div>
+		  </th:block>
+		</div>
+
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <script th:src="@{/js/shop.js}"></script>
-  </body>
+  </th:block>
+</body>
 </html>

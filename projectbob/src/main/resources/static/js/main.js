@@ -1,10 +1,11 @@
+console.log("main.js (top): window.currentUserId =", window.currentUserId);
 var selectedMenuId = null;
 var selectedMenuName = '';
 var selectedMenuPrice = 0;
 var selectedShopId = null;
 var currentQuantity = 1; // 'count' 대신 'currentQuantity'로 변수명 변경 (혼동 방지)
-window.currentUserId = null;  // 로그인 시 서버에서 주입 (예: Thymeleaf)
-window.currentGuestId = null; // 서버에서 발급받아 세션에 있으면 가져옴
+//window.currentUserId = null;  // 로그인 시 서버에서 주입 (예: Thymeleaf)
+//window.currentGuestId = null; // 서버에서 발급받아 세션에 있으면 가져옴
 var currentCartData = []; 
 var currentTotalPrice = 0;
 var currentTotalQuantity = 0;
@@ -2226,8 +2227,8 @@ $(document).on("click", "#btnPayNow", function() {
                                 type: "POST",
                                 contentType: "application/json",
                                 data: JSON.stringify({
-																	merchant_uid: response.orderId,
-                                    paymentId: payment.paymentId, // PortOne SDK가 반환한 paymentId 사용
+																	merchantUid: payment.merchant_uid,
+                                    impUid: payment.imp_uid, // PortOne SDK가 반환한 paymentId 사용
                                     //orderId: response.orderId, // 백엔드에서 미리 생성한 orderId 사용
                                     paymentMethod: selectedMethod, // 선택된 결제 수단 추가
 
@@ -2275,66 +2276,4 @@ $(document).on("click", "#btnPayNow", function() {
     });
 });
 
-// 웹소켓
-window.onload = function() {
-    // 로그인한 사용자 ID가 있는지 확인 (Thymeleaf 등을 통해 서버에서 주입된 값)
-    if (window.currentUserId && window.currentUserId.trim() !== '') {
-        console.log("[WebSocket] User logged in, connecting...");
-        connectWebSocket();
-    }
-};
 
-function connectWebSocket() {
-    const socket = new SockJS('/ws');
-    const stompClient = Stomp.over(socket);
-
-    stompClient.connect({}, function (frame) {
-        console.log('[WebSocket] Connected: ' + frame);
-
-        // 개인화된 주문 상태 업데이트 채널 구독
-        stompClient.subscribe('/user/queue/order-updates', function (message) {
-            console.log('[WebSocket] Received order update:', message.body);
-            const payload = JSON.parse(message.body);
-            showOrderNotification(payload);
-        });
-    }, function(error) {
-        console.error('[WebSocket] Connection error: ' + error);
-        // 연결 실패 시 5초 후 재시도
-        setTimeout(connectWebSocket, 5000);
-    });
-}
-
-function showOrderNotification(payload) {
-    console.log(">>> showOrderNotification 함수 실행됨. 받은 payload:", payload); // 이 줄 추가
-    let message = payload.message || '주문 상태가 변경되었습니다.';
-    let isAccepted = payload.status === 'ACCEPTED';
-
-    // Toastify.js를 사용하여 알림 표시 (라이브러리가 추가되어 있다고 가정)
-    // 만약 Toastify.js가 없다면 alert()으로 대체할 수 있습니다.
-    if (typeof Toastify === 'function') {
-        Toastify({
-            text: message,
-            duration: isAccepted ? -1 : 5000, // 수락 시에는 사용자가 닫을 때까지 유지
-            close: true,
-            gravity: "top", 
-            position: "right", 
-            backgroundColor: isAccepted ? "linear-gradient(to right, #00b09b, #96c93d)" : "linear-gradient(to right, #ff5f6d, #ffc371)",
-            stopOnFocus: true, 
-            onClick: isAccepted ? function(){
-                // 주문 완료 페이지로 이동
-                window.location.href = '/end?orderId=' + payload.oNo;
-            } : function(){}
-        }).showToast();
-    } else {
-        // Toastify 라이브러리가 없을 경우 alert으로 대체
-        alert(message);
-        if (isAccepted) {
-            if (confirm("주문 완료 페이지로 이동하시겠습니까?")) {
-                window.location.href = '/end?orderId=' + payload.oNo;
-            }
-        }
-    }
-}
-
-$(document).ready(function() {
-});
