@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.ShopMapper" >
+
+<!-- 웹소켓 주문번호로 유저 아이디 가져오기 -->
+<select id="getUserIdByOrderNo" parameterType="int" resultType="string">
+    SELECT id FROM orders WHERE o_no = #{oNo}
+</select>
+
 	 <resultMap id="menuResultMap" type="com.projectbob.domain.Menu">
 	 	<id property="mId" column="m_id"/>
     <result property="sId" column="s_id"/>

@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ShopController {
 
     private final WebsocketService websocketService;
+    private final PortoneService portoneService; 
 
 	@Autowired
 	private ShopService shopService;
@@ -51,9 +52,10 @@ public class ShopController {
 	
 	@Autowired
     private ObjectMapper objectMapper;
-	
-    ShopController(WebsocketService websocketService) {
+
+    ShopController(WebsocketService websocketService, PortoneService portoneService) {
         this.websocketService = websocketService;
+        this.portoneService = portoneService;
     }
 	
 	// 식품영양성분DB API 검색
@@ -780,6 +782,7 @@ public class ShopController {
 	        return map;
 	    }).toList();
 	}
+
 	
 	/* ----------------------- 주문 상세 보기 ----------------------- */
 	@GetMapping("/shop/orderDetail")
@@ -803,11 +806,13 @@ public class ShopController {
 	@PostMapping("/shop/orderManage/{oNo}/status")
 	@ResponseBody
 	@Transactional
+
 	public ResponseEntity<Map<String,Object>> changeOrderStatus(
 	    @PathVariable("oNo") int oNo,
 	    @RequestParam("newStatus") String newStatus,
 	    @SessionAttribute(name="currentSId") Integer shopId
 	) {
+
 
 		// 1) DB 업데이트
 		  shopService.updateOrderStatus(oNo, newStatus);
@@ -816,12 +821,47 @@ public class ShopController {
 		  messagingTemplate.convertAndSend("/topic/orderStatus/" + oNo,
 		      Map.of("oNo", oNo, "newStatus", newStatus));
 
+
+		// 3. 주문 정보를 조회하여 사용자 ID를 얻습니다.
+		Orders order = shopService.findOrderByNo(oNo);
+		if (order != null) {
+			if ("REJECTED".equals(newStatus)) {
+				// 주문 거절 시 결제 환불 처리
+				String paymentUid = order.getPaymentUid();
+				int totalPrice = order.getTotalPrice();
+				if (paymentUid != null && totalPrice > 0) {
+					log.info("주문 거절: 결제 환불 시작. paymentUid: {}, totalPrice: {}", paymentUid, totalPrice);
+					boolean refunded = portoneService.cancelPayment(
+					    paymentUid,
+					    null, // merchant_uid는 사용하지 않음 (imp_uid로 충분)
+					    "가게 사정으로 인한 주문 거절", // reason
+					    null // 전액 환불
+					);
+					if (!refunded) {
+						log.error("결제 환불 실패: {}", "PortoneService.cancelPayment 반환값 false");
+						// 환불 실패 시 적절한 에러 처리 (예: 사용자에게 알림, 관리자에게 보고)
+						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "주문 거절은 되었으나 결제 환불에 실패했습니다."));
+					}
+					log.info("결제 환불 성공");
+				} else {
+					log.warn("주문 거절: paymentUid 또는 totalPrice가 없어 환불을 진행할 수 없습니다. oNo: {}", oNo);
+				}
+			}
+
+			if (order.getId() != null) {
+				// 4. 해당 사용자에게 개인화된 알림을 보냅니다.
+				Map<String, Object> payload = Map.of("oNo", oNo, "status", newStatus, "message",
+						"주문이 " + ("ACCEPTED".equals(newStatus) ? "수락" : "취소(환불)") + "되었습니다.");
+				websocketService.sendOrderStatusUpdateToUser(order.getId(), payload);
+			}
+		}
+
 		  // 3) ★가게 전체 갱신용
 		  messagingTemplate.convertAndSend("/topic/orderStatus/shop/" + shopId,
 		      Map.of("oNo", oNo, "newStatus", newStatus));
 
-		// 4) 사용자 개인화 알림(기존)
-		  Orders order = shopService.findOrderByNo(oNo);
+
+		// 4) 사용자 개인화 알림(기존)		  
 		  if (order != null && order.getId() != null) {
 		    websocketService.sendOrderStatusUpdateToUser(
 		      order.getId(),

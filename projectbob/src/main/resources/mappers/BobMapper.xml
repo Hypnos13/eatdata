@@ -451,4 +451,20 @@
 	ORDER BY s.s_id DESC
 </select>
 
+<!-- 주문번호로 주문 정보 조회 -->
+    <select id="selectOrderByONo" resultType="com.projectbob.domain.Orders">
+        SELECT
+            o_no AS oNo, s_id AS sId, id, total_price AS totalPrice, payment, o_address AS oAddress, request,
+            reg_date AS regDate, modi_date AS modiDate, status, quantity, menus, payment_uid AS paymentUid, client_phone AS clientPhone
+        FROM orders
+        WHERE o_no = #{oNo}
+    </select>
+
+<!-- 주문 상태 업데이트 -->
+    <update id="updateOrderStatus">
+        UPDATE orders
+        SET status = #{newStatus}, modi_date = NOW()
+        WHERE o_no = #{oNo}
+    </update>
+
 </mapper>

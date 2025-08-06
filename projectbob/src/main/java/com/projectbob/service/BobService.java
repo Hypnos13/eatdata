@@ -51,6 +51,17 @@ public class BobService {
         return bobMapper.findOrdersByStatusAndShop(status, sId);
     }
 
+    // 주문 번호(oNo)로 주문 정보를 조회하는 메서드
+    public Orders findOrderByONo(Long oNo) {
+        return bobMapper.selectOrderByONo(oNo);
+    }
+
+    // 주문 상태를 업데이트하는 메서드
+    @Transactional
+    public void updateOrderStatus(Long oNo, String newStatus) {
+        bobMapper.updateOrderStatus(oNo, newStatus);
+    }
+
 	public Menu getMenuCal(int mId) {
 		return bobMapper.getMenuCal(mId);
 	}

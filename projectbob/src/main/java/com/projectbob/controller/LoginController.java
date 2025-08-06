@@ -62,6 +62,7 @@ public class LoginController {
 	}
 	
 	// 로그인
+	/*  웹소켓 spring Security의 AuthenticationSucessHandler로 로직 이동
 	@PostMapping("/login")
 	public String login(Model model, @RequestParam("id") String id, @RequestParam("pass") String pass, HttpSession session,
 			HttpServletResponse response, @RequestParam(name = "redirectURL", required = false) String redirectURL )throws ServletException, IOException {
@@ -131,6 +132,7 @@ public class LoginController {
 			return "redirect:/main";
 		}
 	}
+	*/
 	
 	// 회원가입
 	@PostMapping("/joinMember")
@@ -471,7 +473,7 @@ public class LoginController {
 		 MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		 params.add("grant_type", "authorization_code");
 		 params.add("client_id", "a6ce69b235d3336723f4b86140c8a301");  // 카카오 API
-		 params.add("redirect_uri", "http://localhost:8080/kakao");  // 카카오에 등록된 URI
+		 params.add("redirect_uri", "http://localhost:8080/kakao");  // 카카오에 등록된 URI  43.200.97.14
 		 params.add("code", code);
 		
 		 HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(params, headers);

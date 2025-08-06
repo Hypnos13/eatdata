@@ -618,6 +618,7 @@ function clearBellBlink() {
   if (icon) icon.classList.remove('blink');
 }
 
+
 // ==== 10. 주문 관리 함수 (수락 / 거절) =====================
 // 주문 수락 함수 (기존)
 window.acceptOrder = function(oNo) {
@@ -662,6 +663,7 @@ window.rejectOrder = function(oNo) {
     })
     .catch(() => alert('주문 거절에 실패했습니다.'));
   };
+
 
 // ==== 11. 렌더링 헬퍼 =====================================
 function renderNewOrderItem(msg) {

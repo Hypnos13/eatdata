@@ -26,6 +26,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
@@ -36,13 +37,14 @@ dependencies {
 	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
 	
 	//--- 웹소켓---
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.webjars.npm:sockjs-client:1.5.0'
-	implementation 'org.webjars:stomp-websocket:2.3.4'
+	implementation 'org.webjars.npm:sockjs-client:1.6.1'
+	implementation 'org.webjars:stomp-websocket:2.3.3'
 	implementation 'org.webjars:webjars-locator-core:0.50'
 
 
