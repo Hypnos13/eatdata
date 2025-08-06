@@ -4,11 +4,8 @@
 <div th:fragment="header" class="top-bar row">
 
   <th:block th:if="${(session.loginDivision == 'client' || session.loginDivision == null && from != 'owner' )}">
-  <div class="col-5 logo-area d-flex align-items-center">
-    <a th:href="@{/main}"><img th:src="@{/images/Logo.png}" width="180px" height="45px" /></a>
-    
     <div id="notifyContainer"
-         th:if="${session.isLogin && session.loginDivision == 'client'}"
+         th:if="${session.isLogin != null && session.loginDivision == 'client'}"
          th:attr="data-client-id=${session.loginId}"
          class="position-relative ms-3 dropdown">
       <a href="#" id="headerNotifyBtn" data-bs-toggle="dropdown" aria-expanded="false">
@@ -74,7 +71,7 @@
   </div>
 </div>
 
-<script th:if="${session.isLogin && session.loginDivision == 'client'}">
+<script th:if="${session.isLogin != null && session.loginDivision == 'client'}">
 document.addEventListener('DOMContentLoaded', function() {
     const notifyContainer = document.getElementById('notifyContainer');
     if (!notifyContainer) return;
