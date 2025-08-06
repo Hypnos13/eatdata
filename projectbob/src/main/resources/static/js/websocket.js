@@ -246,10 +246,12 @@ function connectWebSocket() {
             console.log('[WebSocket] Received order update:', message.body);
             const payload = JSON.parse(message.body);
 
-            // 종 모양 알림 처리
-            handleBellIconNotification(payload);
+            // REJECTED 상태가 아닐 때만 종 모양 알림을 처리합니다.
+            if (payload.status !== 'REJECTED') {
+                handleBellIconNotification(payload);
+            }
 
-            // 토스티파이 알림 처리 (기존 로직)
+            // 토스티파이 알림은 모든 상태에 대해 항상 처리합니다.
             showOrderNotification(payload);
         });
     }, function(error) {

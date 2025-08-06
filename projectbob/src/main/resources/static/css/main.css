@@ -416,6 +416,7 @@ nav.navbar .nav-link.active {
 
 .bell-animated{
 	animation: bell-shake 10s ease-in-out infinite;
+}
 
 /* <!--메인 카테고리 카드--> */
 .main-category-card {
