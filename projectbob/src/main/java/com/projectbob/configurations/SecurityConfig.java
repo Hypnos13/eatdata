@@ -47,11 +47,7 @@ public class SecurityConfig {
 					"/css/**", "/js/**", "/images/**", "/bootstrap/**", "/error", "/favicon.ico", "/shopMain" // 정적 리소스 및 에러 페이지
 				).permitAll()
 				// 사장님만 접근 가능한 경로 (예시)
-<<<<<<< HEAD
-				.requestMatchers( "/shopMenu", "/shopInfo", "/shopReview", "/shopOrder", "/shopSales", "/shopNotice", "/shopQna", "/shopSetting", "/shopUpdate", "/shopRegister", "/shopRegisterForm", "/shopUpdateForm", "/shopMenuForm", "/shopNoticeForm", "/shopQnaForm", "/shopReviewForm", "/shopOrderForm", "/shopSalesForm", "/shopSettingForm").hasRole("OWNER") // "OWNER" 역할만 허용
-=======
 				.requestMatchers("/shopMenu", "/shopInfo", "/shopReview", "/shopOrder", "/shopSales", "/shopNotice", "/shopQna", "/shopSetting", "/shopUpdate", "/shopRegister", "/shopRegisterForm", "/shopUpdateForm", "/shopMenuForm", "/shopNoticeForm", "/shopQnaForm", "/shopReviewForm", "/shopOrderForm", "/shopSalesForm", "/shopSettingForm").hasRole("OWNER") // "OWNER" 역할만 허용
->>>>>>> develop
 				// 그 외 모든 요청은 인증된 사용자만 허용
 				.anyRequest().authenticated()
 				)
