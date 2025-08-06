@@ -51,7 +51,7 @@ public class ShopController {
 	
 	@Autowired
     private ObjectMapper objectMapper;
-
+	
     ShopController(WebsocketService websocketService) {
         this.websocketService = websocketService;
     }
@@ -190,22 +190,30 @@ public class ShopController {
 
 	/* ----------------------- 메인 ----------------------- */
 	@GetMapping("/shopMain")
-	public String shopMain(@RequestParam(value = "s_id", required = false) Integer sId,
-			@SessionAttribute(name = "loginId", required = false) String loginId, HttpSession session, Model model) {
+	public String shopMain(
+	    @RequestParam(value = "s_id", required = false) Integer sId,
+	    @SessionAttribute(name = "loginId", required = false) String loginId,
+	    HttpSession session, Model model) {
 
-		boolean isLogin = (loginId != null);
-		List<Shop> shopListMain = isLogin ? shopService.findShopListByOwnerId(loginId) : Collections.emptyList();
-		boolean hasShop = !shopListMain.isEmpty();
-		Shop currentShop = hasShop ? resolveCurrentShop(sId, loginId, session, shopListMain) : null;
+	    boolean isLogin = (loginId != null);
+	    List<Shop> shopListMain = isLogin ? shopService.findShopListByOwnerId(loginId) : Collections.emptyList();
+	    boolean hasShop = !shopListMain.isEmpty();
+	    Shop currentShop = hasShop ? resolveCurrentShop(sId, loginId, session, shopListMain) : null;
 
-		model.addAttribute("isLogin", isLogin);
-		model.addAttribute("hasShop", hasShop);
-		model.addAttribute("shopListMain", shopListMain);
-		model.addAttribute("currentShop", currentShop);
-		model.addAttribute("shopCnt", shopListMain.size());
-		model.addAttribute("selectedSid", (currentShop != null) ? currentShop.getSId() : null);
+	    model.addAttribute("isLogin", isLogin);
+	    model.addAttribute("hasShop", hasShop);
+	    model.addAttribute("shopListMain", shopListMain);
+	    model.addAttribute("currentShop", currentShop);
+	    model.addAttribute("shopCnt", shopListMain.size());
+	    model.addAttribute("selectedSid", (currentShop != null) ? currentShop.getSId() : null);
 
-		return "shop/shopMain";
+	    List<Orders> newOrders = isLogin ? shopService.findNewOrdersByOwner(loginId) : Collections.emptyList();
+	    model.addAttribute("newOrders", newOrders);
+
+	    // 👇 notifies를 빈 리스트라도 무조건 추가!
+	    model.addAttribute("notifies", Collections.emptyList());
+
+	    return "shop/shopMain";
 	}
 
 	/** 선택 가게 세션 저장 및 반환 */
@@ -673,64 +681,49 @@ public class ShopController {
 	/* ----------------------- 신규주문 ----------------------- */
 	@GetMapping("/shop/newOrders")
 	public String newOrders(
-	    @SessionAttribute(name = "currentSId", required = false) Integer sId,
-	    @SessionAttribute(name = "loginId", required = false) String loginId,
-	    Model model) {
+	        @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        HttpSession session,
+	        Model model) {
 
+	    // 1) 인증/세션 체크
 	    if (loginId == null || sId == null) {
 	        return "redirect:/login";
 	    }
-	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
-	    if (currentShop == null) {
-	        return "redirect:/shopMain";
-	    }
-	    List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
 
-	    model.addAttribute("orders", orders);
+	    // 2) 나의 가게 목록 & currentShop 세팅 (layout에서 사용하는 속성)
+	    List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+	    model.addAttribute("shopListMain", shopListMain);
+
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
 	    model.addAttribute("currentShop", currentShop);
 
+	    // 3) 신규 주문 리스트
+	    List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
+	    model.addAttribute("orders", orders);
 	    if (!orders.isEmpty()) {
 	        model.addAttribute("selectedOrder", orders.get(0));
 	    }
 
-	    return "shop/shopNewOrders"; // 신규주문 전용 템플릿
+	    // 4) layout에서 active 상태 표시용 status 속성
+	    model.addAttribute("status", "PENDING");
+
+	    return "shop/shopNewOrders";
 	}
 
-	
 	/* ----------------------- 주문 관리 ----------------------- */
 	@GetMapping("/shop/orderManage")
 	public String orderManage(
-	        @RequestParam(value = "status", defaultValue = "ALL") String status,
-	        @RequestParam(value = "oNo", required = false) Integer oNo,
-	        @SessionAttribute(name = "currentSId", required = false) Integer sId,
-	        @SessionAttribute(name = "loginId", required = false) String loginId,
-	        Model model) {
+	    @RequestParam(value="status", defaultValue="ACCEPTED") String status,
+	    @RequestParam(value="oNo",    required=false) Integer oNo,
+	    @SessionAttribute("currentSId") Integer sId,
+	    @SessionAttribute("loginId")     String loginId,
+	    Model model) {
 
-	    if (loginId == null || sId == null) {
-	        return "redirect:/login";
-	    }
 	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
-	    if (currentShop == null) {
-	        return "redirect:/shopMain";
-	    }
-
-	    // ① PENDING일 땐 신규주문 화면으로 강제 분기!
-	    if ("PENDING".equals(status)) {
-	        List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
-	        model.addAttribute("orders", orders);
-	        model.addAttribute("currentShop", currentShop);
-	        if (!orders.isEmpty()) {
-	            model.addAttribute("selectedOrder", orders.get(0));
-	        }
-	        return "shop/shopNewOrders";
-	    }
-
-	 // ②  주문관리 코드
 	    List<Orders> orders;
-	    if ("ALL".equals(status)) {
-	        orders = shopService.findOrdersByShopId(sId).stream()
-	            .filter(o -> !"REJECTED".equals(o.getStatus()) && !"DELIVERED".equals(o.getStatus()))
-	            .toList();
+	    if ("ALL".equalsIgnoreCase(status)) {
+	        orders = shopService.findOrdersByShopId(sId);
 	    } else {
 	        orders = shopService.findOrdersByStatusAndShop(status, sId);
 	    }
@@ -742,6 +735,50 @@ public class ShopController {
 	        model.addAttribute("selectedOrder", shopService.findOrderByNo(oNo));
 	    }
 	    return "shop/shopOrderManage";
+	}
+
+	// ----------------------- 주문 상태 변경 및 리다이렉트 -----------------------
+	@GetMapping("/shop/orderManage/{oNo}/status")
+	public String changeOrderStatusAndRedirect(
+	        @PathVariable("oNo") int oNo,             // <-- 변수명 명시
+	        @RequestParam("newStatus") String newStatus,
+	        @SessionAttribute("currentSId") Integer shopId,
+	        @SessionAttribute("loginId") String loginId,
+	        RedirectAttributes ra) {
+
+	    // 1) DB 상태 업데이트
+	    shopService.updateOrderStatus(oNo, newStatus);
+
+	    // 2) WebSocket 브로드캐스트 (운영자 화면 + 고객 화면)
+	    Map<String, Object> payload = Map.of("oNo", oNo, "newStatus", newStatus);
+	    messagingTemplate.convertAndSend("/topic/orderStatus/" + oNo, payload);
+	    messagingTemplate.convertAndSend("/topic/orderStatus/shop/" + shopId, payload);
+
+	    // 3) 같은 주문 번호로 주문관리 페이지로 되돌아가기
+	    // 바뀐 상태를 status 파라미터로 넘겨 줘야,
+	    // 버튼 눌렀을 때 해당 탭(DELIVERING 또는 COMPLETED 등)이 유지됩니다.
+	    return "redirect:/shop/orderManage?status=" 
+	          + newStatus 
+	          + "&oNo=" 
+	          + oNo;
+	}
+	
+	/* ----------------------- 헤더 알림용 PENDING 리스트 API (변경 없음) ----------------------- */
+	@GetMapping("/api/shop/{sId}/pendingOrders")
+	@ResponseBody
+	public List<Map<String, Object>> getPendingOrders(@PathVariable Integer sId) {
+	    List<Orders> pending = shopService.findOrdersByStatusAndShop("PENDING", sId);
+	    return pending.stream().map(o -> {
+	        Map<String, Object> map = new HashMap<>();
+	        map.put("oNo", o.getONo());
+	        map.put("menus", o.getMenus());
+	        map.put("regDate", o.getRegDate());
+	        map.put("totalPrice", o.getTotalPrice());
+	        map.put("quantity", o.getQuantity());
+	        map.put("oAddress", o.getOAddress());
+	        map.put("request", o.getRequest());
+	        return map;
+	    }).toList();
 	}
 	
 	/* ----------------------- 주문 상세 보기 ----------------------- */
@@ -766,25 +803,33 @@ public class ShopController {
 	@PostMapping("/shop/orderManage/{oNo}/status")
 	@ResponseBody
 	@Transactional
-	public ResponseEntity<Map<String, Object>> changeOrderStatus(@PathVariable int oNo,
-				@RequestParam("newStatus") String newStatus) {
+	public ResponseEntity<Map<String,Object>> changeOrderStatus(
+	    @PathVariable("oNo") int oNo,
+	    @RequestParam("newStatus") String newStatus,
+	    @SessionAttribute(name="currentSId") Integer shopId
+	) {
 
-		// 1. 주문 상태를 DB에 업데이트합니다.
-		shopService.updateOrderStatus(oNo, newStatus);
+		// 1) DB 업데이트
+		  shopService.updateOrderStatus(oNo, newStatus);
 
-		// 2. 가게의 다른 관리자 페이지 UI를 실시간으로 업데이트하기 위해 메시지를 보냅니다.
-		messagingTemplate.convertAndSend("/topic/orderStatus/" + oNo, Map.of("oNo", oNo, "newStatus", newStatus));
+		  // 2) 상세 갱신용
+		  messagingTemplate.convertAndSend("/topic/orderStatus/" + oNo,
+		      Map.of("oNo", oNo, "newStatus", newStatus));
 
-		// 3. 주문 정보를 조회하여 사용자 ID를 얻습니다.
-		Orders order = shopService.findOrderByNo(oNo);
-		if (order != null && order.getId() != null) {
-			// 4. 해당 사용자에게 개인화된 알림을 보냅니다.
-			Map<String, Object> payload = Map.of("oNo", oNo, "status", newStatus, "message",
-					"주문이 " + ("ACCEPTED".equals(newStatus) ? "수락" : "취소") + "되었습니다.");
-			websocketService.sendOrderStatusUpdateToUser(order.getId(), payload);
-		}
+		  // 3) ★가게 전체 갱신용
+		  messagingTemplate.convertAndSend("/topic/orderStatus/shop/" + shopId,
+		      Map.of("oNo", oNo, "newStatus", newStatus));
 
-		return ResponseEntity.ok(Map.of("success", true));
+		// 4) 사용자 개인화 알림(기존)
+		  Orders order = shopService.findOrderByNo(oNo);
+		  if (order != null && order.getId() != null) {
+		    websocketService.sendOrderStatusUpdateToUser(
+		      order.getId(),
+		      Map.of("oNo",oNo,"status",newStatus,"message",
+					"주문이 " + ("ACCEPTED".equals(newStatus) ? "수락" : "취소") + "되었습니다.")
+		      );
+		  }
+		  return ResponseEntity.ok(Map.of("success", true));
 	}
 
 	/* ----------------------- 기존 주문 내역 보기 ----------------------- */
@@ -811,6 +856,34 @@ public class ShopController {
 
 		// 2) 생성된 주문번호만 반환
 		return ResponseEntity.ok(Map.of("oNo", saved.getONo()));
+	}
+
+	/* ----------------------- 헤더알림 주문으로 이동 ----------------------- */
+	@GetMapping("/shopNewOrders")
+	public String showShopNewOrders(
+	        @RequestParam(value = "sOrderNo", required = false) Integer sOrderNo,
+	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        Model model
+	) {
+	    if (loginId == null) return "redirect:/login";
+
+	    List<Orders> orders = shopService.findNewOrdersByOwnerId(loginId);
+	    model.addAttribute("orders", orders);
+
+	    Orders selectedOrder = null;
+	    if (orders != null && !orders.isEmpty()) {
+	        if (sOrderNo != null) {
+	            selectedOrder = orders.stream()
+	                .filter(o -> o.getONo() == sOrderNo)
+	                .findFirst()
+	                .orElse(orders.get(0));
+	        } else {
+	            selectedOrder = orders.get(0);
+	        }
+	    }
+	    model.addAttribute("selectedOrder", selectedOrder);
+
+	    return "shop/shopNewOrders";
 	}
 	
 }
