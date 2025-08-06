@@ -28,20 +28,22 @@
         <li class="text-muted mb-0">알림이 없습니다.</li>
       </ul>
     </div>
+  <div class="col-5 logo-area">
+    <a th:href="@{/main}"><img th:src="@{/images/nlogo.png}"/></a>
   </div>
   </th:block>
   
   <th:block th:if="${session.loginDivision == 'owner' || from == 'owner'}">
   <div class="col-5 logo-area">
-    <a th:href="@{/shopMain}"><img th:src="@{/images/Logo.png}" width="180px" height="45px" /></a>
+    <a th:href="@{/shopMain}"><img th:src="@{/images/nlogo.png}"/></a>
   </div>
   </th:block>
   
   <th:block th:if="${session.loginDivision == 'master'}">
   <div class="col-5 logo-area">	
-    <a th:href="@{/main}"><img th:src="@{/images/Client.png}" width="180px" height="45px"/></a>
+    <a th:href="@{/main}"><img th:src="@{/images/Client.png}"/></a>
     <a th:href="@{/shopMain}">
-      <img th:src="@{/images/Owner.png}" width="180px" height="45px" />
+      <img th:src="@{/images/Owner.png}"/>
     </a>
   </div>
   </th:block>
