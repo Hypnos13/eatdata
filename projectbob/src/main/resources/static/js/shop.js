@@ -621,16 +621,7 @@ function clearBellBlink() {
   if (icon) icon.classList.remove('blink');
 }
 
-<<<<<<< HEAD
-// ==== 9. 주문 관리 함수 (수락 / 거절) =====================
-// 주문 수락 함수
-window.acceptOrder = function(oNo) {
-  if (!confirm(`주문 #${oNo}을(를) 수락하시겠습니까?`)) return;
 
-  fetch(`/shop/orderManage/${oNo}/status?newStatus=ACCEPTED`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-=======
 // ==== 10. 주문 관리 함수 (수락 / 거절) =====================
 // 주문 수락 함수 (기존)
 window.acceptOrder = function(oNo) {
@@ -650,48 +641,12 @@ window.acceptOrder = function(oNo) {
     } else {
       throw new Error('상태 변경 실패');
     }
->>>>>>> develop
   })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      alert('주문이 수락되었습니다.');
-      // 성공 시 진행중인 주문 관리 페이지로 이동하거나, 현재 페이지를 새로고침 할 수 있습니다.
-      window.location.href = '/shop/orderManage?status=ACCEPTED';
-    } else {
-      alert('오류: ' + (data.message || '알 수 없는 오류로 주문 수락에 실패했습니다.'));
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('요청 중 오류가 발생했습니다.');
-  });
+  .catch(() => alert('주문 수락에 실패했습니다.'));
 };
 
-// 주문 거절 함수 (환불 처리)
+// 주문 거절 함수 (추가)
 window.rejectOrder = function(oNo) {
-<<<<<<< HEAD
-  if (!confirm(`주문 #${oNo}을(를) 거절하고 환불 처리하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
-
-  fetch(`/shop/orderManage/${oNo}/status?newStatus=REJECTED`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      alert('주문이 거절되고 환불 처리되었습니다.');
-      window.location.reload(); // 성공 시 페이지를 새로고침하여 목록에서 제거
-    } else {
-      alert('오류: ' + (data.message || '알 수 없는 오류로 주문 거절에 실패했습니다.'));
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('요청 중 오류가 발생했습니다.');
-  });
-};
-=======
   fetch(`/shop/orderManage/${oNo}/status`, {
     method: 'POST',
     headers: {'Content-Type':'application/x-www-form-urlencoded'},
@@ -711,7 +666,7 @@ window.rejectOrder = function(oNo) {
     })
     .catch(() => alert('주문 거절에 실패했습니다.'));
   };
->>>>>>> develop
+
 
 // ==== 11. 렌더링 헬퍼 =====================================
 function renderNewOrderItem(msg) {

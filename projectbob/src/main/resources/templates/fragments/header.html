@@ -4,8 +4,30 @@
 <div th:fragment="header" class="top-bar row">
 
   <th:block th:if="${(session.loginDivision == 'client' || session.loginDivision == null && from != 'owner' )}">
-  <div class="col-5 logo-area">
+  <div class="col-5 logo-area d-flex align-items-center">
     <a th:href="@{/main}"><img th:src="@{/images/Logo.png}" width="180px" height="45px" /></a>
+    
+    <div id="notifyContainer"
+         th:if="${session.isLogin && session.loginDivision == 'client'}"
+         th:attr="data-client-id=${session.loginId}"
+         class="position-relative ms-3 dropdown">
+      <a href="#" id="headerNotifyBtn" data-bs-toggle="dropdown" aria-expanded="false">
+        <i id="notifyIcon" class="bi bi-bell-fill fs-4 text-warning"></i>
+      </a>
+      <span id="header-notif-badge"
+            th:text="${session.notifyCount}"
+            class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1"
+            th:classappend="${session.notifyCount == 0} ? 'd-none' : ''">
+        0
+      </span>
+      <ul id="header-notif-list"
+          class="dropdown-menu dropdown-menu-start p-2"
+          style="min-width:300px; max-width:500px;"
+          aria-labelledby="headerNotifyBtn">
+        <li><h6 class="dropdown-header">새로운 알림</h6></li>
+        <li class="text-muted mb-0">알림이 없습니다.</li>
+      </ul>
+    </div>
   </div>
   </th:block>
   
@@ -27,6 +49,9 @@
   <div class="col-7 text-end fs-6">
     <th:block th:if="${session.isLogin}">
       <a class="me-2">[[${session.loginNickname}]] 님 어서오세요.</a>
+      
+      
+
       <a th:href="@{/logout}" class="topbar-href">로그아웃</a>
       <a th:href="@{/myProfile}" class="topbar-href">내정보수정</a>
     </th:block>
@@ -46,3 +71,90 @@
     </th:block>
   </div>
 </div>
+
+<script th:if="${session.isLogin && session.loginDivision == 'client'}">
+document.addEventListener('DOMContentLoaded', function() {
+    const notifyContainer = document.getElementById('notifyContainer');
+    if (!notifyContainer) return;
+
+    const clientId = notifyContainer.dataset.clientId;
+    const notifyIcon = document.getElementById('notifyIcon');
+    const notifBadge = document.getElementById('header-notif-badge');
+    const notifList = document.getElementById('header-notif-list');
+
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS('/websocket'); // Assuming /websocket is your WebSocket endpoint
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function(frame) {
+            console.log('Connected: ' + frame);
+
+            // Subscribe to user-specific order status updates
+            stompClient.subscribe('/topic/orderStatus/user/' + clientId, function(message) {
+                const notification = JSON.parse(message.body);
+                console.log('Received notification:', notification);
+                addNotification(notification);
+            });
+
+        }, function(error) {
+            console.error('STOMP error:', error);
+            // Reconnect on error
+            setTimeout(connect, 5000);
+        });
+    }
+
+    function addNotification(notification) {
+        // Remove "알림이 없습니다." if it exists
+        const noNotifMessage = notifList.querySelector('li.text-muted');
+        if (noNotifMessage) {
+            noNotifMessage.remove();
+        }
+
+        const listItem = document.createElement('li');
+        listItem.classList.add('dropdown-item');
+        listItem.style.whiteSpace = 'normal'; // Allow text wrapping
+        listItem.style.wordBreak = 'break-word'; // Break long words
+
+        // Example: "주문이 수락되었습니다. (주문번호: 123)"
+        let messageText = notification.message || '새로운 알림이 도착했습니다.';
+        if (notification.oNo) {
+            messageText += ` (주문번호: ${notification.oNo})`;
+        }
+        
+        listItem.textContent = messageText;
+
+        // Add a click handler to mark as read or navigate
+        listItem.addEventListener('click', function() {
+            // Implement logic to mark notification as read or navigate
+            // For now, just remove it from the list
+            listItem.remove();
+            updateNotificationCount(-1);
+            if (notifList.children.length === 1) { // Only "새로운 알림" header remains
+                const newNoNotifMessage = document.createElement('li');
+                newNoNotifMessage.classList.add('text-muted', 'mb-0');
+                newNoNotifMessage.textContent = '알림이 없습니다.';
+                notifList.appendChild(newNoNotifMessage);
+            }
+        });
+
+        notifList.appendChild(listItem);
+        updateNotificationCount(1);
+    }
+
+    function updateNotificationCount(change) {
+        let currentCount = parseInt(notifBadge.textContent);
+        currentCount += change;
+        notifBadge.textContent = currentCount;
+
+        if (currentCount > 0) {
+            notifBadge.classList.remove('d-none');
+        } else {
+            notifBadge.classList.add('d-none');
+        }
+    }
+
+    // Initial connection
+    connect();
+});
+</script>

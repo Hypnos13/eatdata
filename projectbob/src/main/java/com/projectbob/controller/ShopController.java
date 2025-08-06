@@ -52,13 +52,8 @@ public class ShopController {
 	
 	@Autowired
     private ObjectMapper objectMapper;
-<<<<<<< HEAD
 
     ShopController(WebsocketService websocketService, PortoneService portoneService) {
-=======
-	
-    ShopController(WebsocketService websocketService) {
->>>>>>> develop
         this.websocketService = websocketService;
         this.portoneService = portoneService;
     }
@@ -716,52 +711,6 @@ public class ShopController {
 
 	/* ----------------------- 주문 관리 ----------------------- */
 	@GetMapping("/shop/orderManage")
-<<<<<<< HEAD
-	   public String orderManage(
-	           @RequestParam(value = "status", defaultValue = "ALL") String status,
-	           @RequestParam(value = "oNo", required = false) Integer oNo,
-	           @SessionAttribute(name = "currentSId", required = false) Integer sId,
-	           @SessionAttribute(name = "loginId", required = false) String loginId,
-	           Model model) {
-
-	       if (loginId == null || sId == null) {
-	           return "redirect:/login";
-	       }
-	       Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
-	       if (currentShop == null) {
-	           return "redirect:/shopMain";
-	       }
-
-	       // ① PENDING일 땐 신규주문 화면으로 강제 분기!
-	       if ("PENDING".equals(status)) {
-	           List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
-	           model.addAttribute("orders", orders);
-	           model.addAttribute("currentShop", currentShop);
-	           if (!orders.isEmpty()) {
-	               model.addAttribute("selectedOrder", orders.get(0));
-	           }
-	           return "shop/shopNewOrders";
-	       }
-
-	    // ②  주문관리 코드
-	       List<Orders> orders;
-	       if ("ALL".equals(status)) {
-	           orders = shopService.findOrdersByShopId(sId).stream()
-	               .filter(o -> !"REJECTED".equals(o.getStatus()) && !"DELIVERED".equals(o.getStatus()))
-	               .toList();
-	       } else {
-	           orders = shopService.findOrdersByStatusAndShop(status, sId);
-	       }
-
-	       model.addAttribute("orders", orders);
-	       model.addAttribute("status", status);
-	       model.addAttribute("currentShop", currentShop);
-	       if (oNo != null) {
-	           model.addAttribute("selectedOrder", shopService.findOrderByNo(oNo));
-	       }
-	       return "shop/shopOrderManage";
-	   }
-=======
 	public String orderManage(
 	    @RequestParam(value="status", defaultValue="ACCEPTED") String status,
 	    @RequestParam(value="oNo",    required=false) Integer oNo,
@@ -829,7 +778,7 @@ public class ShopController {
 	        return map;
 	    }).toList();
 	}
->>>>>>> develop
+
 	
 	/* ----------------------- 주문 상세 보기 ----------------------- */
 	@GetMapping("/shop/orderDetail")
@@ -853,16 +802,13 @@ public class ShopController {
 	@PostMapping("/shop/orderManage/{oNo}/status")
 	@ResponseBody
 	@Transactional
-<<<<<<< HEAD
-	public ResponseEntity<Map<String, Object>> changeOrderStatus(@PathVariable int oNo,
-			@RequestParam("newStatus") String newStatus) {
-=======
+
 	public ResponseEntity<Map<String,Object>> changeOrderStatus(
 	    @PathVariable("oNo") int oNo,
 	    @RequestParam("newStatus") String newStatus,
 	    @SessionAttribute(name="currentSId") Integer shopId
 	) {
->>>>>>> develop
+
 
 		// 1) DB 업데이트
 		  shopService.updateOrderStatus(oNo, newStatus);
@@ -871,7 +817,7 @@ public class ShopController {
 		  messagingTemplate.convertAndSend("/topic/orderStatus/" + oNo,
 		      Map.of("oNo", oNo, "newStatus", newStatus));
 
-<<<<<<< HEAD
+
 		// 3. 주문 정보를 조회하여 사용자 ID를 얻습니다.
 		Orders order = shopService.findOrderByNo(oNo);
 		if (order != null) {
@@ -905,14 +851,13 @@ public class ShopController {
 				websocketService.sendOrderStatusUpdateToUser(order.getId(), payload);
 			}
 		}
-=======
+
 		  // 3) ★가게 전체 갱신용
 		  messagingTemplate.convertAndSend("/topic/orderStatus/shop/" + shopId,
 		      Map.of("oNo", oNo, "newStatus", newStatus));
->>>>>>> develop
 
-		// 4) 사용자 개인화 알림(기존)
-		  Orders order = shopService.findOrderByNo(oNo);
+
+		// 4) 사용자 개인화 알림(기존)		  
 		  if (order != null && order.getId() != null) {
 		    websocketService.sendOrderStatusUpdateToUser(
 		      order.getId(),
