@@ -11,6 +11,17 @@
     <link rel="stylesheet" href="/css/shopInfo.css">
 </head>
 <body>
+  <script th:inline="javascript">
+        /*<![CDATA[*/
+        // 페이지가 로드될 때 서버의 PENDING 주문 목록으로 sessionStorage를 초기화합니다.
+        // 이렇게 하면 서버와 클라이언트(자바스크립트)의 상태가 항상 동일하게 시작됩니다.
+        const initialNotifications = /*[[${notifications}]]*/ [];
+        if (initialNotifications) {
+            const pendingOrderIds = initialNotifications.map(n => n.orderId);
+            sessionStorage.setItem('pendingOrders', JSON.stringify(pendingOrderIds));
+        }
+        /*]]>*/
+    </script>
     <div class="layout-wrapper">
     <!-- 헤더 fragment include -->
 
@@ -78,11 +89,10 @@
 			</div>
 
 		    <!-- 3. 배차관리 -->
-            <div class="col-4">
-              <a th:href="@{/shop/delivery}"
-                 class="card text-center py-3 border-0 bg-light">
-                <i class="bi bi-people fs-3 text-success"></i>
-                <div style="font-size:13px;">배차 관리</div>
+            <div class="col-4" th:if="${currentShop != null}">
+              <a th:href="@{|/shop/delivery?s_id=${currentShop.sId}|}"  class="card text-center py-3 border-0 bg-light">
+              <i class="bi bi-bicycle fs-3 text-success"></i>
+              <div style="font-size:13px;">배차 관리</div>
               </a>
             </div>
 		  </div>
@@ -127,12 +137,6 @@
 	  		<i class="bi bi-clock-history me-2"></i> 영업시간 관리
 	  	</a>
 	  </div>
-	  
-	  <div class="mb-2" th:if="${currentShop != null}">
-  <a th:href="@{|/shop/delivery?s_id=${currentShop.sId}|}" class="btn w-100 text-start sidebar-group-btn fw-bold">
-    <i class="bi bi-truck me-2"></i> 배달 관리
-  </a>
-</div>
 	  
 	  <div class="mb-2" th:if="${currentShop != null}">
 	  	<a th:href="@{|/shop/menuList?s_id=${currentShop.sId}|}" class="btn w-100 text-start sidebar-group-btn fw-bold">
@@ -199,6 +203,5 @@
 	  <script th:src="@{/js/shop.js}"></script>
 	  <!-- 6) 그 외 스크립트 -->
 	  <script th:src="@{/js/menu.js}"></script>
-	  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2b87d757b240dd70a51d682dd3cc37ed&libraries=services"></script>
 </body>
 </html>

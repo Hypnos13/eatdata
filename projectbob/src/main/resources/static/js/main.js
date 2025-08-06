@@ -1,10 +1,11 @@
+console.log("main.js (top): window.currentUserId =", window.currentUserId);
 var selectedMenuId = null;
 var selectedMenuName = '';
 var selectedMenuPrice = 0;
 var selectedShopId = null;
 var currentQuantity = 1; // 'count' 대신 'currentQuantity'로 변수명 변경 (혼동 방지)
-window.currentUserId = null;  // 로그인 시 서버에서 주입 (예: Thymeleaf)
-window.currentGuestId = null; // 서버에서 발급받아 세션에 있으면 가져옴
+//window.currentUserId = null;  // 로그인 시 서버에서 주입 (예: Thymeleaf)
+//window.currentGuestId = null; // 서버에서 발급받아 세션에 있으면 가져옴
 var currentCartData = []; 
 var currentTotalPrice = 0;
 var currentTotalQuantity = 0;
@@ -848,9 +849,7 @@ $(document).ready(function() {
         });
     }
 
-    // --- (이전에 작성했던 다른 JavaScript 코드들은 여기에 유지) ---
-    // 돋보기 버튼, 검색 제출 등 기존 기능들은 이 아래에 그대로 붙여넣으시면 됩니다.
-    // 카카오맵 API 관련 함수 (handleCurrentLocationSearch, triggerKakaoPostcodeSearch)는 삭제되었습니다.
+
 });
 
 // 모든 DOMContentLoaded 관련 스크립트를 하나의 jQuery $(document).ready() 블록으로 통합
@@ -1079,7 +1078,9 @@ document.addEventListener('click', function(e) {
     }
 });
 
+/*
 //위치버튼 클릭스 주소 
+
 function handleCurrentLocationSearch() {
     console.log("handleCurrentLocationSearch 함수 시작");
     if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
@@ -1151,6 +1152,94 @@ function handleCurrentLocationSearch() {
     });
 		console.log("이벤트 리스너 등록 완료");
 }
+*/
+
+function handleCurrentLocationSearch() {
+    console.log("handleCurrentLocationSearch 함수 시작");
+
+    if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
+        console.error("카카오 지도 API 또는 서비스 라이브러리가 로드되지 않았습니다.");
+        return;
+    }
+
+    const locationInputField = document.getElementById('location-input');
+    const currentLocationSearchBtn = document.getElementById('currentLocationSearchBtn');
+    const categoryCards = document.querySelectorAll('.category-card');
+
+    if (!locationInputField || !currentLocationSearchBtn || categoryCards.length === 0) {
+        console.warn("HTML 요소 누락 - 기능 초기화 실패");
+        return;
+    }
+
+    // 공통 위치 검색 및 페이지 이동 함수
+    function searchWithCurrentLocation(categoryTitle) {
+        if (!navigator.geolocation) {
+            alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const geocoder = new kakao.maps.services.Geocoder();
+                const coord = new kakao.maps.LatLng(lat, lon);
+
+                geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+                    if (status === kakao.maps.services.Status.OK && result.length > 0) {
+                        const address = result[0].address.address_name;
+                        locationInputField.value = address;
+
+                        const category = encodeURIComponent(categoryTitle || '전체보기');
+                        const url = `/shopList?category=${category}&address=${encodeURIComponent(address)}`;
+                        window.location.href = url;
+                    } else {
+                        alert('위치 → 주소 변환 실패');
+                        console.error("주소 변환 실패:", status, result);
+                    }
+                });
+            },
+            (error) => {
+                let errorMessage = '위치 정보를 가져오는 데 실패했습니다.';
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = '위치 정보 권한이 거부되었습니다.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = '위치 정보를 사용할 수 없습니다.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = '위치 요청 시간이 초과되었습니다.';
+                        break;
+                    default:
+                        errorMessage = `알 수 없는 오류: ${error.message}`;
+                }
+                alert(errorMessage);
+                console.error("위치 정보 오류:", error);
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
+    }
+
+    // 위치찾기 버튼 클릭
+    currentLocationSearchBtn.addEventListener('click', () => {
+        console.log("현재 위치 찾기 버튼 클릭");
+        searchWithCurrentLocation("전체보기");
+    });
+
+    // 카테고리 카드 클릭
+    categoryCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            e.preventDefault(); // 기존 링크 동작 방지
+            const categoryTitle = card.querySelector('.category-title')?.innerText || '전체보기';
+            console.log(`카테고리 클릭됨: ${categoryTitle}`);
+            searchWithCurrentLocation(categoryTitle);
+        });
+    });
+
+    console.log("이벤트 리스너 등록 완료");
+}
+
 
 // ==============================
 // 검색으로 주소 찾기
@@ -2226,8 +2315,8 @@ $(document).on("click", "#btnPayNow", function() {
                                 type: "POST",
                                 contentType: "application/json",
                                 data: JSON.stringify({
-																	merchant_uid: response.orderId,
-                                    paymentId: payment.paymentId, // PortOne SDK가 반환한 paymentId 사용
+																	merchantUid: payment.merchant_uid,
+                                    impUid: payment.imp_uid, // PortOne SDK가 반환한 paymentId 사용
                                     //orderId: response.orderId, // 백엔드에서 미리 생성한 orderId 사용
                                     paymentMethod: selectedMethod, // 선택된 결제 수단 추가
 
@@ -2275,66 +2364,4 @@ $(document).on("click", "#btnPayNow", function() {
     });
 });
 
-// 웹소켓
-window.onload = function() {
-    // 로그인한 사용자 ID가 있는지 확인 (Thymeleaf 등을 통해 서버에서 주입된 값)
-    if (window.currentUserId && window.currentUserId.trim() !== '') {
-        console.log("[WebSocket] User logged in, connecting...");
-        connectWebSocket();
-    }
-};
 
-function connectWebSocket() {
-    const socket = new SockJS('/ws');
-    const stompClient = Stomp.over(socket);
-
-    stompClient.connect({}, function (frame) {
-        console.log('[WebSocket] Connected: ' + frame);
-
-        // 개인화된 주문 상태 업데이트 채널 구독
-        stompClient.subscribe('/user/queue/order-updates', function (message) {
-            console.log('[WebSocket] Received order update:', message.body);
-            const payload = JSON.parse(message.body);
-            showOrderNotification(payload);
-        });
-    }, function(error) {
-        console.error('[WebSocket] Connection error: ' + error);
-        // 연결 실패 시 5초 후 재시도
-        setTimeout(connectWebSocket, 5000);
-    });
-}
-
-function showOrderNotification(payload) {
-    console.log(">>> showOrderNotification 함수 실행됨. 받은 payload:", payload); // 이 줄 추가
-    let message = payload.message || '주문 상태가 변경되었습니다.';
-    let isAccepted = payload.status === 'ACCEPTED';
-
-    // Toastify.js를 사용하여 알림 표시 (라이브러리가 추가되어 있다고 가정)
-    // 만약 Toastify.js가 없다면 alert()으로 대체할 수 있습니다.
-    if (typeof Toastify === 'function') {
-        Toastify({
-            text: message,
-            duration: isAccepted ? -1 : 5000, // 수락 시에는 사용자가 닫을 때까지 유지
-            close: true,
-            gravity: "top", 
-            position: "right", 
-            backgroundColor: isAccepted ? "linear-gradient(to right, #00b09b, #96c93d)" : "linear-gradient(to right, #ff5f6d, #ffc371)",
-            stopOnFocus: true, 
-            onClick: isAccepted ? function(){
-                // 주문 완료 페이지로 이동
-                window.location.href = '/end?orderId=' + payload.oNo;
-            } : function(){}
-        }).showToast();
-    } else {
-        // Toastify 라이브러리가 없을 경우 alert으로 대체
-        alert(message);
-        if (isAccepted) {
-            if (confirm("주문 완료 페이지로 이동하시겠습니까?")) {
-                window.location.href = '/end?orderId=' + payload.oNo;
-            }
-        }
-    }
-}
-
-$(document).ready(function() {
-});

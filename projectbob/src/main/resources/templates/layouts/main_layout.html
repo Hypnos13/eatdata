@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 <meta charset="UTF-8">
 <title>구조</title>
@@ -14,12 +15,10 @@
 
 <!-- window.currentUserId 주입 코드 추가 -->
 <script th:inline="javascript">
-	// Thymeleaf를 사용하여 세션에서 로그인 ID를 가져와 window.currentUserId에 할당
-	// 값이 문자열이면 자동으로 따옴표로 묶이고, null이면 JavaScript의 null 키워드로 렌더링됩니다.
-	window.currentUserId = /*[[${session.loginId}]]*/null;
-
-	// 디버깅을 위해 콘솔에 출력
-	console.log("Current User ID (from main_layout):", window.currentUserId);
+    /*<![CDATA[*/
+   window.currentUserId = /*[[${#authentication.name}]]*/ null;
+    console.log("main_layout.html: window.currentUserId : " + window.currentUserId);
+    /*]]>*/
 </script>
 
 <!-- Toastify.js CSS -->
@@ -168,6 +167,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
 	<script th:src="@{js/main.js}"></script>
+	<script th:src="@{js/websocket.js}"></script>
 </body>
 </html>
 

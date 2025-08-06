@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ShopController {
 
     private final WebsocketService websocketService;
+    private final PortoneService portoneService; 
 
 	@Autowired
 	private ShopService shopService;
@@ -51,9 +52,10 @@ public class ShopController {
 	
 	@Autowired
     private ObjectMapper objectMapper;
-	
-    ShopController(WebsocketService websocketService) {
+
+    ShopController(WebsocketService websocketService, PortoneService portoneService) {
         this.websocketService = websocketService;
+        this.portoneService = portoneService;
     }
 	
 	// 식품영양성분DB API 검색
@@ -97,46 +99,50 @@ public class ShopController {
 
 	// 입점 신청
 	@PostMapping("/insertShop")
-	public String insertShop(@RequestParam("id") String id, @RequestParam("sNumber") String sNumber,
-			@RequestParam("owner") String owner, @RequestParam("phone") String phone, @RequestParam("name") String name,
-			@RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1,
-			@RequestParam("address2") String address2, @RequestParam("sPicture") MultipartFile sPictureFile,
-			@RequestParam("sLicense") MultipartFile sLicenseFile, Model model) {
+	public String insertShop( @RequestParam("id") String id,
+	        @RequestParam("sNumber") String sNumber, @RequestParam("owner") String owner, 
+	        @RequestParam("phone") String phone, @RequestParam("name") String name, 
+	        @RequestParam("zipcode") String zipcode, @RequestParam("address1") String address1, 
+	        @RequestParam("address2") String address2, @RequestParam("sPicture") MultipartFile sPictureFile, 
+	        @RequestParam("sLicense") MultipartFile sLicenseFile, Model model ) { 
 
-		String sLicenseUrl = null;
-		String sPictureUrl = null;
+	    String sLicenseUrl = null;
+	    String sPictureUrl = null;
 
-		try {
-			sLicenseUrl = fileUploadService.uploadFile(sLicenseFile, "business-licenses/");
-			System.out.println("사업자등록증 업로드 성공. URL: " + sLicenseUrl);
-			if (sPictureFile != null && !sPictureFile.isEmpty()) {
-				sPictureUrl = fileUploadService.uploadFile(sPictureFile, "shop/");
-				System.out.println("가게 사진 업로드 성공. URL: " + sPictureUrl);
-			}
-		} catch (IllegalArgumentException e) {
-			model.addAttribute("errorMessage", e.getMessage()); // 파일이 비어있는 경우
-			return "/shop/shopJoinForm";
-		} catch (IOException e) {
-			e.printStackTrace();
-			model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-			return "/shop/shopJoinForm";
-		}
+	    try {
+	        // 1. 사업자 등록증 파일이 비어있지 않을 때만 업로드
+	        if (sLicenseFile != null && !sLicenseFile.isEmpty()) {
+	            sLicenseUrl = fileUploadService.uploadFile(sLicenseFile, "business-licenses/");
+	            log.info("사업자등록증 업로드 성공. URL: {}", sLicenseUrl);
+	        }
+	        
+	        // 2. 가게 사진 파일이 비어있지 않을 때만 업로드
+	        if (sPictureFile != null && !sPictureFile.isEmpty()) {
+	            sPictureUrl = fileUploadService.uploadFile(sPictureFile, "shop/");
+	            log.info("가게 사진 업로드 성공. URL: {}", sPictureUrl);
+	        }
 
-		Shop shop = new Shop();
-		shop.setId(id);
-		shop.setSNumber(sNumber);
-		shop.setOwner(owner);
-		shop.setPhone(phone);
-		shop.setName(name);
-		shop.setZipcode(zipcode);
-		shop.setAddress1(address1);
-		shop.setAddress2(address2);
-		shop.setSPictureUrl(sPictureUrl);
-		shop.setSLicenseUrl(sLicenseUrl);
-		shopService.insertShop(shop);
+	    } catch (IOException e) {
+	        log.error("파일 업로드 중 IOException 발생", e);
+	        model.addAttribute("errorMessage", "파일 업로드 중 오류가 발생했습니다. 다시 시도해주세요.");
+	        return "/shop/shopJoinForm";
+	    }
+	    
+	    Shop shop = new Shop();
+	    shop.setId(id);
+	    shop.setSNumber(sNumber);
+	    shop.setOwner(owner);
+	    shop.setPhone(phone);
+	    shop.setName(name);
+	    shop.setZipcode(zipcode);
+	    shop.setAddress1(address1);
+	    shop.setAddress2(address2);
+	    shop.setSPictureUrl(sPictureUrl);
+	    shop.setSLicenseUrl(sLicenseUrl);
+	    shopService.insertShop(shop);
 
-		model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
-		return "redirect:shopMain";
+	    model.addAttribute("message", "가게 정보가 성공적으로 등록되었습니다.");
+	    return "redirect:shopMain";
 	}
 	
 	//배달 대행 요청
@@ -183,7 +189,50 @@ public class ShopController {
 	public String riderRequestPage() {
 	    return "rider/rider_request";
 	}
+	
+	// 배차요청
+	// ShopController.java
 
+	@PostMapping("/shop/orders/{orderId}/dispatch")
+	@ResponseBody
+	public ResponseEntity<?> dispatchOrder(
+	        @PathVariable("orderId") int orderId,
+	        @RequestBody Map<String, String> payload,
+	        @SessionAttribute("loginId") String loginId,
+	        @SessionAttribute("currentSId") Integer sId) {
+
+	    log.info(">>>>>>>>>>>>> ✅✅✅ 최종 수정된 dispatchOrder 메서드 실행됨! ✅✅✅ <<<<<<<<<<<<<");
+
+	    // findByOwnerId(loginId) 호출은 완전히 삭제되어야 합니다.
+	    
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    Orders order = bobService.findOrderByONo((long)orderId);
+
+	    if (currentShop == null || order == null || order.getSId() != currentShop.getSId()) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("success", false, "message", "권한이 없습니다."));
+	    }
+
+	    String pickupTimeStr = payload.get("pickupTime");
+	    String deliveryTimeStr = payload.get("deliveryTime");
+	    
+	    DispatchInfo dispatchInfo = new DispatchInfo(
+	        order.getONo(),
+	        currentShop.getSId(),
+	        currentShop.getName(),
+	        currentShop.getAddress1() + " " + currentShop.getAddress2(),
+	        currentShop.getPhone(),
+	        order.getOAddress(),
+	        order.getClientPhone(),
+	        pickupTimeStr,
+	        deliveryTimeStr,
+	        "DISPATCH_REQUEST"
+	    );
+
+	    websocketService.sendDispatchToRiders(dispatchInfo);
+	    
+	    return ResponseEntity.ok(Map.of("success", true, "message", "배차를 요청했습니다."));
+	}
+	
 	/* ----------------------- 메인 ----------------------- */
 	@GetMapping("/shopMain")
 	public String shopMain(
@@ -727,7 +776,10 @@ public class ShopController {
 
 	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
 	    List<Orders> orders;
-	    if ("ALL".equalsIgnoreCase(status)) {
+	    if ("ACCEPTED".equalsIgnoreCase(status)) {
+	        // "조리 중" 탭에서는 ACCEPTED와 DISPATCHED 상태를 모두 조회
+	        orders = shopService.findOrdersByMultipleStatusesAndShop(List.of("ACCEPTED", "DISPATCHED"), sId);
+	    } else if ("ALL".equalsIgnoreCase(status)) {
 	        orders = shopService.findOrdersByShopId(sId);
 	    } else {
 	        orders = shopService.findOrdersByStatusAndShop(status, sId);
@@ -785,6 +837,7 @@ public class ShopController {
 	        return map;
 	    }).toList();
 	}
+
 	
 	/* ----------------------- 주문 상세 보기 ----------------------- */
 	@GetMapping("/shop/orderDetail")
@@ -808,11 +861,13 @@ public class ShopController {
 	@PostMapping("/shop/orderManage/{oNo}/status")
 	@ResponseBody
 	@Transactional
+
 	public ResponseEntity<Map<String,Object>> changeOrderStatus(
 	    @PathVariable("oNo") int oNo,
 	    @RequestParam("newStatus") String newStatus,
 	    @SessionAttribute(name="currentSId") Integer shopId
 	) {
+
 
 		// 1) DB 업데이트
 		  shopService.updateOrderStatus(oNo, newStatus);
@@ -821,12 +876,47 @@ public class ShopController {
 		  messagingTemplate.convertAndSend("/topic/orderStatus/" + oNo,
 		      Map.of("oNo", oNo, "newStatus", newStatus));
 
+
+		// 3. 주문 정보를 조회하여 사용자 ID를 얻습니다.
+		Orders order = shopService.findOrderByNo(oNo);
+		if (order != null) {
+			if ("REJECTED".equals(newStatus)) {
+				// 주문 거절 시 결제 환불 처리
+				String paymentUid = order.getPaymentUid();
+				int totalPrice = order.getTotalPrice();
+				if (paymentUid != null && totalPrice > 0) {
+					log.info("주문 거절: 결제 환불 시작. paymentUid: {}, totalPrice: {}", paymentUid, totalPrice);
+					boolean refunded = portoneService.cancelPayment(
+					    paymentUid,
+					    null, // merchant_uid는 사용하지 않음 (imp_uid로 충분)
+					    "가게 사정으로 인한 주문 거절", // reason
+					    null // 전액 환불
+					);
+					if (!refunded) {
+						log.error("결제 환불 실패: {}", "PortoneService.cancelPayment 반환값 false");
+						// 환불 실패 시 적절한 에러 처리 (예: 사용자에게 알림, 관리자에게 보고)
+						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "주문 거절은 되었으나 결제 환불에 실패했습니다."));
+					}
+					log.info("결제 환불 성공");
+				} else {
+					log.warn("주문 거절: paymentUid 또는 totalPrice가 없어 환불을 진행할 수 없습니다. oNo: {}", oNo);
+				}
+			}
+
+			if (order.getId() != null) {
+				// 4. 해당 사용자에게 개인화된 알림을 보냅니다.
+				Map<String, Object> payload = Map.of("oNo", oNo, "status", newStatus, "message",
+						"주문이 " + ("ACCEPTED".equals(newStatus) ? "수락" : "취소(환불)") + "되었습니다.");
+				websocketService.sendOrderStatusUpdateToUser(order.getId(), payload);
+			}
+		}
+
 		  // 3) ★가게 전체 갱신용
 		  messagingTemplate.convertAndSend("/topic/orderStatus/shop/" + shopId,
 		      Map.of("oNo", oNo, "newStatus", newStatus));
 
-		// 4) 사용자 개인화 알림(기존)
-		  Orders order = shopService.findOrderByNo(oNo);
+
+		// 4) 사용자 개인화 알림(기존)		  
 		  if (order != null && order.getId() != null) {
 		    websocketService.sendOrderStatusUpdateToUser(
 		      order.getId(),

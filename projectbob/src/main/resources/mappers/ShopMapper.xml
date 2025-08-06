@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.projectbob.mapper.ShopMapper" >
+
+<!-- 웹소켓 주문번호로 유저 아이디 가져오기 -->
+<select id="getUserIdByOrderNo" parameterType="int" resultType="string">
+    SELECT id FROM orders WHERE o_no = #{oNo}
+</select>
+
 	 <resultMap id="menuResultMap" type="com.projectbob.domain.Menu">
 	 	<id property="mId" column="m_id"/>
     <result property="sId" column="s_id"/>
@@ -25,6 +31,26 @@
        <result property="modiDate" column="modi_date"/>
        <result property="status" column="status"/>
    </resultMap>
+   <resultMap id="ordersResultMap" type="com.projectbob.domain.Orders">
+    <id property="oNo" column="o_no" />
+    <result property="sId" column="s_id" />
+    <result property="id" column="id" />
+    <result property="totalPrice" column="total_price" />
+    <result property="payment" column="payment" />
+    <result property="oAddress" column="o_address" />
+    <result property="request" column="request" />
+    <result property="regDate" column="reg_date" />
+    <result property="modiDate" column="modi_date" />
+    <result property="status" column="status" />
+    <result property="quantity" column="quantity" />
+    <result property="menus" column="menus" />
+    <result property="paymentUid" column="payment_uid" />
+    <result property="clientPhone" column="client_phone" />
+    </resultMap>
+    
+    <select id="countOrdersByStatusAndShop" resultType="int">
+    	SELECT COUNT(*) FROM orders WHERE status = #{status} AND s_id = #{sId}
+    </select>
    
    <!-- ===== Menu ===== -->
    <insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
@@ -131,6 +157,16 @@
     
 
 	<!-- ===== Shop ===== -->
+	
+	<select id="selectOrdersByMultipleStatusesAndShop" resultMap="ordersResultMap">
+  SELECT * FROM orders
+  WHERE s_id = #{sId} AND status IN
+  <foreach item="statusItem" collection="statuses" open="(" separator="," close=")">
+    #{statusItem}
+  </foreach>
+  ORDER BY reg_date DESC
+  </select>
+	
 	<insert id="insertShop" parameterType="com.projectbob.domain.Shop" useGeneratedKeys="true" keyProperty="sId">
         INSERT INTO shop(id, name, phone, zipcode, address1, address2, owner, s_number, s_pictureURL, s_licenseURL, reg_date)
         VALUES(#{id}, #{name}, #{phone}, #{zipcode}, #{address1}, #{address2}, #{owner}, #{sNumber}, #{sPictureUrl}, #{sLicenseUrl}, SYSDATE())
