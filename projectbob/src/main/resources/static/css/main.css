@@ -404,18 +404,23 @@ nav.navbar .nav-link.active {
 
 
 /* 종 모양 아이콘 깜빡임 효과 */
-@keyframes bell-shake{
-	0% {transform: rotate(0deg);}
-	10% {transform: rotate(15deg);}
-	20% {transform: rotate(-15deg);}
-	30% {transform: rotate(15deg);}
-	40% {transform: rotate(-15deg);}
-	50% {transform: rotate(0deg);}
-	100% {transform: rotate(0deg);}
+@keyframes bell-shake {
+  0%, 50%, 100% {
+    transform: rotate(0deg);
+    color: #ffc107; /* Bootstrap 'warning' color */
+  }
+  10%, 30% {
+    transform: rotate(15deg);
+    color: red;
+  }
+  20%, 40% {
+    transform: rotate(-15deg);
+    color: red;
+  }
 }
 
 .bell-animated{
-	animation: bell-shake 10s ease-in-out infinite;
+	animation: bell-shake 10s ease-in-out;
 }
 
 /* <!--메인 카테고리 카드--> */
@@ -487,3 +492,13 @@ nav.navbar .nav-link.active {
 	}
 }
 
+#header-notif-indicator {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    border: 2px solid white;
+}

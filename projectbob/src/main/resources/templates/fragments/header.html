@@ -6,7 +6,7 @@
   <th:block th:if="${(session.loginDivision == 'client' || session.loginDivision == null && from != 'owner' )}">
   
   <div class="col-5 logo-area d-flex align-items-center justify-content-between">
-  	<!-- <div class="row"> -->
+  	
   		<div class="col-4">
   			<a th:href="@{/main}"><img th:src="@{/images/nlogo.png}"/></a>
   		</div>
@@ -17,8 +17,10 @@
 			         class="position-relative dropdown"
 			         style="margin-left:auto;">
 			      <a href="#" id="headerNotifyBtn" data-bs-toggle="dropdown" aria-expanded="false">
-			        <i id="notifyIcon" class="bi bi-bell-fill fs-4 text-warning"></i>
-			      </a>
+        <i id="notifyIcon" class="bi bi-bell-fill fs-4 text-warning"></i>
+        
+        <span id="header-notif-indicator" class="d-none"></span>
+      </a>
 			      <span id="header-notif-badge"
 			            th:text="${session.notifyCount}"
 			            class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1"
@@ -34,7 +36,7 @@
 			      </ul>
 			</div>
 		</div>
-  	<!-- </div> -->
+  	
 
   </div>
   </th:block>

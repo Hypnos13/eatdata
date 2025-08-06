@@ -3,13 +3,75 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/main_layout}">
 <head>
-    <title>결제 완료</title>
+    <title>주문 현황</title>
+    <style>
+      /* 타임라인 */
+      .status-steps {
+        display:flex;
+        counter-reset:step;
+        margin:2rem 0;
+        list-style:none;
+        padding:0;
+      }
+      .status-steps li {
+        position:relative;
+        flex:1;
+        text-align:center;
+      }
+      .status-steps li:before {
+        counter-increment:step;
+        content:counter(step);
+        width:2rem; height:2rem; line-height:2rem;
+        border:2px solid #ccc;
+        border-radius:50%;
+        background:#fff;
+        display:block;
+        margin:0 auto;
+        z-index:1;
+      }
+      .status-steps li:after {
+        content:'';
+        position:absolute;
+        width:100%; height:2px;
+        background:#ccc;
+        top:1rem; left:-50%;
+        z-index:0;
+      }
+      .status-steps li:first-child:after { display:none; }
+      .status-steps li.completed:before,
+      .status-steps li.completed:after {
+        background:#43D091;
+        border-color:#43D091;
+        color: white;
+      }
+      .status-steps li span {
+        display:block;
+        margin-top:.5rem;
+        font-size:.9rem;
+      }
+    </style>
 </head>
 <body>
     <div layout:fragment="content">
-        <div class="complete-box text-center my-4">
-            <h3 class="mb-3 text-success fw-bold">🎉 주문(결제)이 완료되었습니다!</h3>
-            <p>주문번호 <strong th:text="${order.orderId}">#A20250704</strong>로 주문이 정상적으로 접수되었습니다.</p>
+        <div class="complete-box my-4">
+            <div class="text-center">
+                <h3 class="mb-3 text-success fw-bold">🎉 주문 현황</h3>
+                <p>주문번호 <strong th:text="${order.orderId}">#A20250704</strong>의 처리 현황입니다.</p>
+            </div>
+            
+            <!-- 동적 타임라인 -->
+            <ul class="status-steps">
+                <li th:classappend="${#lists.contains({'ACCEPTED', 'DELIVERING', 'COMPLETED'}, order.status)} ? 'completed'">
+                    <span>주문접수/조리중</span>
+                </li>
+                <li th:classappend="${#lists.contains({'DELIVERING', 'COMPLETED'}, order.status)} ? 'completed'">
+                    <span>배달중</span>
+                </li>
+                <li th:classappend="${order.status == 'COMPLETED'} ? 'completed'">
+                    <span>배달완료</span>
+                </li>
+            </ul>
+
             <hr />
             <h5 class="text-start">주문 정보</h5>
             <ul class="list-group text-start mb-3">
@@ -35,7 +97,9 @@
                 	<span th:text="${order.request}">요청사항 없음</span></li>
             </ul>
 
-            <a href="/" class="btn btn-success px-4">다른 메뉴 보러가기</a>
+            <div class="text-center">
+                 <a href="/" class="btn btn-success px-4">다른 메뉴 보러가기</a>
+            </div>
         </div>
     </div>
 </body>

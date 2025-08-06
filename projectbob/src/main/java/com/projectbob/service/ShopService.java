@@ -424,7 +424,7 @@ public class ShopService {
         String userId = shopMapper.getUserIdByOrderNo(oNo);
         int shopId = order.getSId();
 
-<<<<<<< HEAD
+
         // 3. Payload 생성
         String message = "";
         if ("ACCEPTED".equals(newStatus)) {
@@ -439,16 +439,11 @@ public class ShopService {
             message = "🔔 주문 #" + oNo + " 상태 업데이트: " + newStatus;
         }
 
-        Map<String, Object> payload = Map.of(
-            "oNo", oNo,
-            "status", newStatus, // newStatus를 status로 변경하여 일관성 유지
-            "message", message
-        );
-=======
+
         // 3. (핵심) 상태 변경 후, 최신 PENDING 주문 개수를 다시 DB에서 조회합니다.
         // 이 개수는 점주 페이지의 헤더 알림 뱃지를 실시간으로 정확하게 업데이트하는 데 사용됩니다.
         int newPendingCount = shopMapper.countOrdersByStatusAndShop("PENDING", shopId);
->>>>>>> develop
+
 
         // 4. WebsocketService를 통해 점주에게 변경 사실과 '최신 알림 개수'를 함께 전송합니다.
         websocketService.sendOrderStatusChange(oNo, shopId, newStatus, newPendingCount);

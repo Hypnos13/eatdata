@@ -4,6 +4,7 @@
 let notifyContainer = null;
 let notifBadge = null;
 let notifList = null;
+let notifIndicator = null; // 느낌표 아이콘
 
 // sessionStorage 키 (사용자 ID에 따라 동적으로 생성)
 let SESSION_STORAGE_KEY = 'bellNotifications'; // 초기값 설정
@@ -18,6 +19,7 @@ $(document).ready(function() {
         console.log('[BellIcon] notifyContainer found. Initializing bell icon notification setup.');
         notifBadge = document.getElementById('header-notif-badge');
         notifList = document.getElementById('header-notif-list');
+        notifIndicator = document.getElementById('header-notif-indicator'); // 느낌표 아이콘 초기화
         
         // 사용자 ID에 따라 sessionStorage 키 설정 및 알림 불러오기
         if (window.currentUserId) {
@@ -41,6 +43,52 @@ $(document).ready(function() {
         console.log("[WebSocket] User not logged in, skipping connection.");
     }
 });
+
+// *** NEW HELPER FUNCTION ***
+// 상세 알림 메시지를 생성하는 중앙 집중식 함수
+function generateNotificationMessage(payload) {
+    let message = '';
+    // 서버에서 보낸 payload.message가 있으면 그것을 최우선으로 사용
+    if (payload.message) {
+        return payload.message;
+    }
+
+    // payload.message가 없으면 status에 따라 메시지 생성
+    switch (payload.status) {
+        case 'ACCEPTED':
+            message = `✅ 주문 #${payload.oNo}이(가) 수락되었습니다! 곧 준비가 시작됩니다.`;
+            break;
+        case 'DELIVERING':
+            message = `🚚 주문 #${payload.oNo}의 배달이 시작되었습니다!`;
+            break;
+        case 'COMPLETED':
+            message = `🎉 주문 #${payload.oNo}이(가) 배달 완료되었습니다! 맛있게 드세요!`;
+            break;
+        case 'REJECTED':
+            message = `❌ 주문 #${payload.oNo}이(가) 가게 사정으로 취소되었습니다. 결제 금액은 자동으로 환불됩니다.`;
+            break;
+        default:
+            message = `🔔 주문 #${payload.oNo} 상태 업데이트: ${payload.status}`;
+            break;
+    }
+    return message;
+}
+
+// *** NEW FUNCTION ***
+// 알림 유무에 따라 느낌표 아이콘을 업데이트하는 함수
+function updateNotificationIndicator() {
+    if (!notifList || !notifIndicator) return;
+
+    // "알림이 없습니다" 메시지를 제외한 실제 알림 항목의 개수를 셉니다.
+    const actualNotificationsCount = notifList.querySelectorAll('li.dropdown-item').length;
+    
+    if (actualNotificationsCount > 0) {
+        notifIndicator.classList.remove('d-none'); // 알림이 있으면 느낌표 표시
+    } else {
+        notifIndicator.classList.add('d-none'); // 알림이 없으면 느낌표 숨김
+    }
+}
+
 
 // 종 모양 알림 처리 함수
 function handleBellIconNotification(notification) {
@@ -66,14 +114,15 @@ function handleBellIconNotification(notification) {
         console.log('[BellIcon] Existing item for oNo', oNo, ':', existingItem);
     }
 
+    // 상세 메시지를 생성하기 위해 새로운 헬퍼 함수를 호출합니다.
+    const messageText = generateNotificationMessage(notification);
+
     let listItem;
     if (existingItem) {
         listItem = existingItem;
         console.log('[BellIcon] Updating existing notification for oNo:', oNo);
         listItem.dataset.status = newStatus;
-        let messageText = notification.message || '새로운 알림이 도착했습니다.';
-        messageText += ` (주문번호: ${oNo})`;
-        listItem.textContent = messageText;
+        listItem.textContent = messageText; // 업데이트된 상세 메시지를 사용
     } else {
         const noNotifMessage = notifList.querySelector('li.text-muted');
         if (noNotifMessage) {
@@ -88,11 +137,7 @@ function handleBellIconNotification(notification) {
         listItem.dataset.oNo = oNo; // Store order number
         listItem.dataset.status = newStatus; // Store status
 
-        let messageText = notification.message || '새로운 알림이 도착했습니다.';
-        if (oNo) {
-            messageText += ` (주문번호: ${oNo})`;
-        }
-        listItem.textContent = messageText;
+        listItem.textContent = messageText; // 생성된 상세 메시지를 사용
         notifList.appendChild(listItem); // Add new item
         console.log('[BellIcon] Adding new notification for oNo:', oNo);
         updateBellIconNotificationCount(1); // Increment count for new item
@@ -115,18 +160,25 @@ function handleBellIconNotification(notification) {
                 notifList.appendChild(newNoNotifMessage);
             }
         }
+        updateNotificationIndicator(); // 알림 클릭 후에도 느낌표 상태 업데이트
     };
 
     // 알림을 sessionStorage에 저장
     saveNotificationsToSessionStorage();
+    updateNotificationIndicator(); // 새 알림 추가 후 느낌표 상태 업데이트
 
     // 종 모양 아이콘 깜빡임 효과 추가
     const notifyIconElement = document.getElementById('notifyIcon');
     if (notifyIconElement) {
+        // 1. 애니메이션 시작 전, 색상 클래스를 제거하고 애니메이션 클래스 추가
+        notifyIconElement.classList.remove('text-warning');
         notifyIconElement.classList.add('bell-animated');
+
+        // 2. 애니메이션 지속 시간(10초) 후에 클래스들을 원상 복구
         setTimeout(() => {
             notifyIconElement.classList.remove('bell-animated');
-        }, 500); // 0.5초 후에 애니메이션 클래스 제거
+            notifyIconElement.classList.add('text-warning');
+        }, 10000); // main.css의 애니메이션 시간과 일치시킴
     }
 }
 
@@ -214,6 +266,7 @@ function loadNotificationsFromSessionStorage() {
                     }
                 }
                 saveNotificationsToSessionStorage(); // 상태 변경 후 저장
+                updateNotificationIndicator(); // 알림 클릭 후에도 느낌표 상태 업데이트
             };
             notifList.appendChild(listItem);
             updateBellIconNotificationCount(1); // 카운트 증가
@@ -230,6 +283,7 @@ function loadNotificationsFromSessionStorage() {
             notifList.appendChild(newNoNotifMessage);
         }
     }
+    updateNotificationIndicator(); // 페이지 로드 시 느낌표 상태 최종 업데이트
 }
 
 
@@ -242,9 +296,22 @@ function connectWebSocket() {
 
         // 개인화된 주문 상태 업데이트 채널 구독
         stompClient.subscribe('/user/queue/order-updates', function (message) {
-            console.log('--- STOMP SUBSCRIBE CALLBACK ENTERED ---');
-            console.log('[WebSocket] Received order update:', message.body);
+            console.log('--- RAW MESSAGE RECEIVED ---');
+            console.log('Raw message body:', message.body); // 원본 메시지 로그
             const payload = JSON.parse(message.body);
+            console.log('Parsed payload (before normalization):', JSON.stringify(payload)); // 파싱 직후 로그
+
+            // 페이로드 정규화: 백엔드의 다른 부분에서 'newStatus' 또는 'status'를 보냅니다. JS는 'status'를 예상합니다.
+            if (payload.newStatus && !payload.status) {
+                console.log(`Normalizing: found newStatus '${payload.newStatus}', setting status.`);
+                payload.status = payload.newStatus;
+            }
+            // orderId/oNo도 정규화합니다.
+            if (payload.orderId && !payload.oNo) {
+                console.log(`Normalizing: found orderId '${payload.orderId}', setting oNo.`);
+                payload.oNo = payload.orderId;
+            }
+            console.log('Final payload (after normalization):', JSON.stringify(payload)); // 정규화 후 로그
 
             // REJECTED 상태가 아닐 때만 종 모양 알림을 처리합니다.
             if (payload.status !== 'REJECTED') {
@@ -263,9 +330,11 @@ function connectWebSocket() {
 
 
 function showOrderNotification(payload) {
-    console.log(">>> showOrderNotification 함수 실행됨. 받은 payload:", payload);
+    console.log(">>> showOrderNotification called with payload:", JSON.stringify(payload));
 
-    let notificationMessage = '';
+    // 상세 메시지를 생성하기 위해 새로운 헬퍼 함수를 호출합니다.
+    const notificationMessage = generateNotificationMessage(payload);
+    
     let onClickAction = function() {};
     let toastOptions = {
         duration: 5000,
@@ -275,33 +344,19 @@ function showOrderNotification(payload) {
         stopOnFocus: true,
     };
 
-    // payload.message가 있으면 그 값을 사용하고, 없으면 기존 로직으로 메시지 생성
-    if (payload.message) {
-        notificationMessage = payload.message;
-        // payload.message가 있을 때도 ACCEPTED 상태면 클릭 액션 할당
-        if (payload.status === 'ACCEPTED') {
-            onClickAction = function() {
-                window.location.href = '/end?orderId=' + payload.oNo;
-            };
-        } else if (payload.status === 'REJECTED') {
-            onClickAction = function() { alert(notificationMessage); };
-        }
-    } else if (payload.status === 'ACCEPTED') {
-        notificationMessage = `✅ 주문 #${payload.oNo}이(가) 수락되었습니다! 곧 준비가 시작됩니다.`;
+    // 클릭 액션 정의
+    if (['ACCEPTED', 'DELIVERING', 'COMPLETED'].includes(payload.status)) {
         onClickAction = function() {
             window.location.href = '/end?orderId=' + payload.oNo;
         };
     } else if (payload.status === 'REJECTED') {
-        notificationMessage = `❌ 주문 #${payload.oNo}이(가) 가게 사정으로 취소되었습니다. 결제 금액은 자동으로 환불됩니다.`;
         onClickAction = function() { alert(notificationMessage); };
-    } else {
-        notificationMessage = `🔔 주문 #${payload.oNo} 상태 업데이트: ${payload.status}`;
     }
 
     if (typeof Toastify === 'function') {
         toastOptions.text = notificationMessage;
         toastOptions.onClick = onClickAction;
-        toastOptions.duration = -1; // <-- 이 줄을 추가하여 클릭할 때까지 유지
+        toastOptions.duration = -1; // <-- 클릭할 때까지 유지
         Toastify(toastOptions).showToast();
     } else {
         if (payload.status === 'REJECTED') {

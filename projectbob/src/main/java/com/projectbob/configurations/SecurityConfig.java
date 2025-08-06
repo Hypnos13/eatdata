@@ -40,11 +40,7 @@ public class SecurityConfig {
 				.requestMatchers(
 					"/","/shopMain", "/main", "/shopList", "/MenuDetail", "/completed", // 고객이 보는 페이지
 					"/login", "/joinMember", "/searchIdPass", "/searchIdPassForm", // 로그인/회원가입/찾기
-<<<<<<< HEAD
-					"/naverLogin", "/naverJoin", "/updateNaverMember", "/deleteNaverMember", "/kakao","/members/**", // 소셜 로그인
-=======
 					"/naverLogin", "/naverJoin", "/updateNaverMember", "/deleteNaverMember", "/kakao", "/login/naver/callback", // 소셜 로그인
->>>>>>> develop
 					"/phoneCertify", "/certifyNumber", // 휴대폰 인증
 					"/ajax/menu/options", "/addCart", "/getCart", "/updateQuantity", "/deleteCart", "/removeAll", // AJAX 요청 (장바구니 등)
 					"/ws/**", "/user/**", "/topic/**", "/app/**", // 웹소켓 엔드포인트
