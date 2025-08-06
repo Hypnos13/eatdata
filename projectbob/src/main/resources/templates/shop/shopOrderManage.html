@@ -101,12 +101,23 @@
 	<th:block layout:fragment="content">
 	  <div class="main-container">
 	    
-	    <!-- 좌측 주문 리스트 -->
+	    <!-- 좌측: 상태 필터 & 리스트 -->
 	    <div class="order-list-panel">
 	      <div class="order-list-header">
 	        <i class="bi bi-receipt"></i>
 	        주문 관리
-	        <span class="badge bg-secondary ms-2" th:text="${status}">ALL</span>
+	        <span th:text="${status}">ACCEPTED</span>
+	      </div>
+	      <div class="btn-group w-100 mb-2">
+	        <a th:href="@{/shop/orderManage(status='ACCEPTED')}"
+	           th:classappend="${status=='ACCEPTED'}?'btn-primary':'btn-outline-primary'"
+	           class="btn">🍳 조리 중</a>
+	        <a th:href="@{/shop/orderManage(status='DELIVERING')}"
+	           th:classappend="${status=='DELIVERING'}?'btn-primary':'btn-outline-primary'"
+	           class="btn">🚚 배달 중</a>
+	        <a th:href="@{/shop/orderManage(status='COMPLETED')}"
+	           th:classappend="${status=='COMPLETED'}?'btn-primary':'btn-outline-primary'"
+	           class="btn">✅ 완료</a>
 	      </div>
 	      <div class="order-list">
 	        <div th:if="${#lists.isEmpty(orders)}"
@@ -203,26 +214,25 @@
 
 	<!-- WebSocket/STOMP 스크립트 -->
 	<script th:inline="javascript">
-	/*<![CDATA[*/
-	  window.selectedOrderNo = /*[[${selectedOrder!=null?selectedOrder.oNo:0}]]*/ 0;
-	  window.shopId         = /*[[${currentShop.sId}]]*/ 0;
+  /*<![CDATA[*/
+    const shopId         = /*[[${currentShop.sId}]]*/ 0;
+    let selectedOrderNo  = /*[[${selectedOrder!=null?selectedOrder.oNo:0}]]*/ 0;
 
-	  const socket      = new SockJS('[[${#request.contextPath}]]/ws');
-	  const stompClient = Stomp.over(socket);
+    const sock = new SockJS('[[${#request.contextPath}]]/ws');
+    const client = Stomp.over(sock);
 
-	  stompClient.connect({}, () => {
-	    if (window.selectedOrderNo > 0) {
-	      stompClient.subscribe(
-	        '/topic/orderStatus/' + window.selectedOrderNo,
-	        msg => { if (JSON.parse(msg.body).newStatus) location.reload(); }
-	      );
-	    }
-	    stompClient.subscribe(
-	      '/topic/orderStatus/shop/' + window.shopId,
-	      _ => location.reload()
-	    );
-	  });
-	/*]]>*/
-	</script>
+    client.connect({}, () => {
+      if (selectedOrderNo > 0) {
+        client.subscribe('/topic/orderStatus/' + selectedOrderNo, () => location.reload());
+      }
+      client.subscribe('/topic/orderStatus/shop/' + shopId, () => location.reload());
+    });
+
+    function changeStatus(oNo, newStatus) {
+      // 간단하게 GET 리다이렉트 방식으로 처리
+      window.location.href = `/shop/orderManage/${oNo}/status?newStatus=${newStatus}&status=${status}&oNo=${oNo}`;
+    }
+  /*]]>*/
+  </script>
 </body>
 </html>

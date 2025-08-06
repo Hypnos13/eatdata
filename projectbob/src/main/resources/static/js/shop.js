@@ -43,8 +43,8 @@ function renderPendingOrders(orderIds) {
       li.dataset.orderNo = oNo;
       li.innerHTML = `
         <a class="dropdown-item text-truncate"
-           href="/shop/orderManage?status=PENDING&oNo=${oNo}">
-          신규 주문 #${oNo} 알림이 도착했습니다.
+           href="/shop/newOrders?sOrderNo=${oNo}">
+          신규 주문이 도착했습니다.
         </a>`;
       ul.appendChild(li);
     });
@@ -717,8 +717,8 @@ function renderHeaderNotification(msg) {
   // 링크 구성
   const a = document.createElement('a');
   a.className = 'dropdown-item text-truncate';
-  a.href = `/shop/orderManage?status=NEW&oNo=${id}`;
-  a.textContent = '새 주문 알림이 도착했습니다.';
+  a.href = `/shop/newOrders?sOrderNo=${id}`;
+  a.textContent = `신규 주문이 도착했습니다.`;
 
   item.appendChild(a);
 
@@ -838,48 +838,53 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ==== 14. 클릭 시 상세 패널 표시 함수 ================
-function selectNewOrder(el) {
-  // 1. active 처리
-  document.querySelectorAll('.order-card').forEach(card => card.classList.remove('active'));
-  el.classList.add('active');
-
-  // 2. data-*에서 값 꺼내기
-  const oNo       = el.dataset.orderNo;
-  const regDate   = el.dataset.regdate;
-  const totalPrice= el.dataset.totalprice;
-  const oAddress  = el.dataset.oaddress;
-  const menus     = el.dataset.menus;
-  const request   = el.dataset.request;
-
-  // 3. 상세 패널 갱신
-  const panel = document.querySelector('.order-detail-panel');
-  if (!panel) return;
-  panel.innerHTML = `
-    <h4>신규 주문 #${oNo}</h4>
-    <p><strong>주문일시:</strong> ${regDate}</p>
-    <p><strong>총액:</strong> ${totalPrice}원</p>
-    <p><strong>배달/픽업:</strong> ${oAddress ? '배달' : '픽업'}</p>
-    ${oAddress ? `<p><strong>주소:</strong> ${oAddress}</p>` : ''}
-    <p><strong>메뉴:</strong> ${menus || ''}</p>
-    <p><strong>요청사항:</strong> ${request || '없음'}</p>
-    <div class="mt-4">
-      <button type="button" class="btn btn-success me-2" onclick="acceptOrder(${oNo})">수락</button>
-      <button type="button" class="btn btn-outline-danger" onclick="rejectOrder(${oNo})">거절</button>
-    </div>
-  `;
-}
-
-// newOrders 전용 요소(#newOrderList)가 있을 때만 실행
+// ==== 14. 신규주문(#newOrderList) 전용: 클릭 & 최초 자동 표시 =====
 if (document.getElementById('newOrderList')) {
-  // 1) 클릭 이벤트 바인딩
-  document.querySelectorAll('.order-list .order-card')
-    .forEach(card => {
+
+  // 1) selectNewOrder 정의 (이전과 똑같습니다)
+  function selectNewOrder(el) {
+    // a) active 토글
+    document.querySelectorAll('.order-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+
+    // b) data-* 값 꺼내기
+    const oNo        = el.dataset.orderNo;
+    const regDate    = el.dataset.regdate;
+    const totalPrice = el.dataset.totalprice;
+    const oAddress   = el.dataset.oaddress;
+    const menus      = el.dataset.menus;
+    const request    = el.dataset.request;
+
+    // c) 상세 패널 갱신
+    const panel = document.querySelector('.order-detail-panel');
+    if (!panel) return;
+    panel.innerHTML = `
+      <h4>신규 주문 #${oNo}</h4>
+      <p><strong>주문일시:</strong> ${regDate}</p>
+      <p><strong>총액:</strong> ${totalPrice}원</p>
+      <p><strong>배달/픽업:</strong> ${oAddress ? '배달' : '픽업'}</p>
+      ${oAddress ? `<p><strong>주소:</strong> ${oAddress}</p>` : ''}
+      <p><strong>메뉴:</strong> ${menus || ''}</p>
+      <p><strong>요청사항:</strong> ${request || '없음'}</p>
+      <div class="mt-4">
+        <button type="button" class="btn btn-success me-2" onclick="acceptOrder(${oNo})">수락</button>
+        <button type="button" class="btn btn-outline-danger" onclick="rejectOrder(${oNo})">거절</button>
+      </div>
+    `;
+  }
+
+  // 2) DOMContentLoaded 에 실행: 
+  //    - 모든 .order-card 에 클릭 바인딩
+  //    - 첫 카드를 자동으로 보여주기
+  document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.order-list .order-card');
+    cards.forEach(card => {
       card.addEventListener('click', () => selectNewOrder(card));
     });
-  // 2) 최초 진입 시 첫 주문 자동 표시
-document.addEventListener('DOMContentLoaded', function() {
-  const firstCard = document.querySelector('.order-card');
-  if (firstCard) selectNewOrder(firstCard);
-});
-};
+    if (cards.length) {
+      selectNewOrder(cards[0]);
+    }
+  });
+
+}
+

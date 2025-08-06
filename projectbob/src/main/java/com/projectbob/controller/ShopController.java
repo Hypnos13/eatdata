@@ -676,71 +676,62 @@ public class ShopController {
 
 	/* ----------------------- 신규주문 ----------------------- */
 	@GetMapping("/shop/newOrders")
-	public String newOrders(@SessionAttribute(name = "currentSId") Integer sId,
-	                        @SessionAttribute(name = "loginId") String loginId,
-	                        Model model) {
+	public String newOrders(
+	        @SessionAttribute(name = "currentSId", required = false) Integer sId,
+	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        HttpSession session,
+	        Model model) {
+
+	    // 1) 인증/세션 체크
+	    if (loginId == null || sId == null) {
+	        return "redirect:/login";
+	    }
+
+	    // 2) 나의 가게 목록 & currentShop 세팅 (layout에서 사용하는 속성)
+	    List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+	    model.addAttribute("shopListMain", shopListMain);
+
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    model.addAttribute("currentShop", currentShop);
+
+	    // 3) 신규 주문 리스트
 	    List<Orders> orders = shopService.findOrdersByStatusAndShop("PENDING", sId);
 	    model.addAttribute("orders", orders);
-	    if (!orders.isEmpty()) model.addAttribute("selectedOrder", orders.get(0));
+	    if (!orders.isEmpty()) {
+	        model.addAttribute("selectedOrder", orders.get(0));
+	    }
+
+	    // 4) layout에서 active 상태 표시용 status 속성
+	    model.addAttribute("status", "PENDING");
+
 	    return "shop/shopNewOrders";
 	}
 
 	/* ----------------------- 주문 관리 ----------------------- */
-	// ────────── 주문 관리 ──────────
 	@GetMapping("/shop/orderManage")
 	public String orderManage(
-	        @RequestParam(value="oNo", required=false) Integer oNo,
-	        @SessionAttribute(name="currentSId", required=false) Integer sId,
-	        @SessionAttribute(name="loginId", required=false) String loginId,
-	        Model model) {
+	    @RequestParam(value="status", defaultValue="ACCEPTED") String status,
+	    @RequestParam(value="oNo",    required=false) Integer oNo,
+	    @SessionAttribute("currentSId") Integer sId,
+	    @SessionAttribute("loginId")     String loginId,
+	    Model model) {
 
-	    // 1) 로그인/세션 체크
-	    if (loginId == null || sId == null) {
-	        return "redirect:/login";
-	    }
 	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
-	    if (currentShop == null) {
-	        return "redirect:/shopMain";
+	    List<Orders> orders;
+	    if ("ALL".equalsIgnoreCase(status)) {
+	        orders = shopService.findOrdersByShopId(sId);
+	    } else {
+	        orders = shopService.findOrdersByStatusAndShop(status, sId);
 	    }
-
-	    // 2) 대기 주문 조회
-	    List<Orders> pending = shopService.findOrdersByStatusAndShop("PENDING", sId);
-
-	    // 3) oNo 가 null 이거나, oNo 가 대기 주문 리스트에 속해 있으면 신규주문 화면
-	    boolean isPendingSelected = (oNo != null)
-	        && pending.stream().anyMatch(o -> o.getONo() == oNo);
-	    if (oNo == null || isPendingSelected) {
-	        model.addAttribute("orders", pending);
-	        Orders sel = (oNo != null) 
-	            ? shopService.findOrderByNo(oNo) 
-	            : (pending.isEmpty() ? null : pending.get(0));
-	        model.addAttribute("selectedOrder", sel);
-	        model.addAttribute("currentShop", currentShop);
-	        return "shop/shopNewOrders";
-	    }
-
-	    // 4) ACCEPTED + DELIVERING 만 뽑아서 주문관리 화면
-	    List<Orders> orders = shopService.findOrdersByShopId(sId).stream()
-	        .filter(o -> {
-	            String st = o.getStatus();
-	            return !"PENDING".equals(st)
-	                && !"REJECTED".equals(st)
-	                && !"COMPLETED".equals(st);
-	        })
-	        .toList();
 
 	    model.addAttribute("orders", orders);
+	    model.addAttribute("status", status);
 	    model.addAttribute("currentShop", currentShop);
-
-	    Orders sel = orders.stream()
-	        .filter(o -> o.getONo() == oNo)
-	        .findFirst()
-	        .orElse(orders.isEmpty() ? null : orders.get(0));
-	    model.addAttribute("selectedOrder", sel);
-
+	    if (oNo != null) {
+	        model.addAttribute("selectedOrder", shopService.findOrderByNo(oNo));
+	    }
 	    return "shop/shopOrderManage";
 	}
-
 
 	// ----------------------- 주문 상태 변경 및 리다이렉트 -----------------------
 	@GetMapping("/shop/orderManage/{oNo}/status")
