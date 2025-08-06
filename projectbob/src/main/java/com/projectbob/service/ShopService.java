@@ -420,9 +420,23 @@ public class ShopService {
         int shopId = order.getSId();
 
         // 3. Payload 생성
+        String message = "";
+        if ("ACCEPTED".equals(newStatus)) {
+            message = "✅ 주문 #" + oNo + "이(가) 수락되었습니다! 곧 준비가 시작됩니다.";
+        } else if ("REJECTED".equals(newStatus)) {
+            message = "❌ 주문 #" + oNo + "이(가) 가게 사정으로 취소되었습니다. 결제 금액은 자동 환불됩니다.";
+        } else if ("DELIVERING".equals(newStatus)) {
+            message = "🛵 주문 #" + oNo + "이(가) 배달을 시작했습니다!";
+        } else if ("COMPLETED".equals(newStatus)) {
+            message = "✅ 주문 #" + oNo + "이(가) 완료되었습니다! 맛있게 드세요.";
+        } else {
+            message = "🔔 주문 #" + oNo + " 상태 업데이트: " + newStatus;
+        }
+
         Map<String, Object> payload = Map.of(
             "oNo", oNo,
-            "newStatus", newStatus
+            "status", newStatus, // newStatus를 status로 변경하여 일관성 유지
+            "message", message
         );
 
         // 4. 사장님 페이지로 상태 변경 전송 (테이블 업데이트 등)

@@ -565,7 +565,7 @@ public class BobService {
 	 
 	 // 주문페이지에서 결제완료 페이지로 보내기
 	 @Transactional
-	 public int createOrder(Map<String, Object> req, HttpSession session, String paymentUid) {
+	 public int createOrder(Map<String, Object> req, HttpSession session, String paymentUid, CartSummaryDto cartSummary) {
 		 String userId = (String) session.getAttribute("loginId");
 		 String guestId = (String) session.getAttribute("guestId");
 		 log.info("createOrder (after session retrieval) - userId: {}, guestId: {}", userId, guestId);
@@ -580,7 +580,7 @@ public class BobService {
 		 String phone = (String) req.get("phone");
 		 String request = (String) req.get("orderRequest");
 		 
-		 CartSummaryDto cartSummary =getCartSummaryForUserOrGuest(userId, guestId);
+		 // CartSummaryDto cartSummary =getCartSummaryForUserOrGuest(userId, guestId); // 이 줄은 제거
 
 		 log.info("createOrder - userId: {}, guestId: {}, cartSummary is null: {}, cartList size: {}",
 		          userId, guestId, (cartSummary == null), (cartSummary != null ? cartSummary.getCartList().size() : "N/A"));

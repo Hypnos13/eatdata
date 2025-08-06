@@ -848,12 +848,7 @@ public class ShopController {
 				}
 			}
 
-			if (order.getId() != null) {
-				// 4. 해당 사용자에게 개인화된 알림을 보냅니다.
-				Map<String, Object> payload = Map.of("oNo", oNo, "status", newStatus, "message",
-						"주문이 " + ("ACCEPTED".equals(newStatus) ? "수락" : "취소(환불)") + "되었습니다.");
-				websocketService.sendOrderStatusUpdateToUser(order.getId(), payload);
-			}
+			
 		}
 
 		  // 3) ★가게 전체 갱신용
@@ -861,14 +856,7 @@ public class ShopController {
 		      Map.of("oNo", oNo, "newStatus", newStatus));
 
 
-		// 4) 사용자 개인화 알림(기존)		  
-		  if (order != null && order.getId() != null) {
-		    websocketService.sendOrderStatusUpdateToUser(
-		      order.getId(),
-		      Map.of("oNo",oNo,"status",newStatus,"message",
-					"주문이 " + ("ACCEPTED".equals(newStatus) ? "수락" : "취소") + "되었습니다.")
-		      );
-		  }
+		
 		  return ResponseEntity.ok(Map.of("success", true));
 	}
 

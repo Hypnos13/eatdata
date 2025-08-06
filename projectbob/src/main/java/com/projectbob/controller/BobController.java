@@ -346,7 +346,14 @@ public class BobController {
                 if (!verified) {
                 	return Map.of("success", false, "message", "결제 검증 실패");
                 }
-                int newOrderNo = bobService.createOrder(req, session, (String) req.get("paymentId"));
+                // 2. 장바구니 정보 조회 (주문 생성에 필요한 정보)
+        CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
+        if (cartSummary == null || cartSummary.getCartList().isEmpty()) {
+            return Map.of("success", false, "message", "주문할 상품이 장바구니에 없습니다. 다시 시도해주세요.");
+        }
+
+        // 3. 주문 생성 (장바구니 정보를 createOrder에 전달)
+        int newOrderNo = bobService.createOrder(req, session, (String) req.get("paymentId"), cartSummary);
                 
                 //장바구니 비우기
                 bobService.deleteAllCartItems(
@@ -382,8 +389,9 @@ public class BobController {
 
         // 4) 고객에게 알림 (WebSocket 푸시)
         Map<String,Object> payload = Map.of(
-            "orderId", orderId,
-            "status", "REJECTED"
+            "oNo", orderId, // oNo로 통일
+            "status", "REJECTED",
+            "message", "❌ 주문 #" + orderId + "이(가) 가게 사정으로 취소되었습니다. 결제 금액은 자동으로 환불됩니다."
         );
         websocketService.sendOrderStatusUpdateToUser(
             order.getId(),
@@ -406,8 +414,9 @@ public class BobController {
 
         // 3) 고객에게 알림 (WebSocket 푸시)
         Map<String,Object> payload = Map.of(
-            "orderId", orderId,
-            "status", "DELIVERING"
+            "oNo", orderId, // oNo로 통일
+            "status", "DELIVERING",
+            "message", "🛵 주문 #" + orderId + "이(가) 배달을 시작했습니다!"
         );
         websocketService.sendOrderStatusUpdateToUser(
             order.getId(),
@@ -430,8 +439,9 @@ public class BobController {
 
         // 3) 고객에게 알림 (WebSocket 푸시)
         Map<String,Object> payload = Map.of(
-            "orderId", orderId,
-            "status", "COMPLETED"
+            "oNo", orderId, // oNo로 통일
+            "status", "COMPLETED",
+            "message", "✅ 주문 #" + orderId + "이(가) 완료되었습니다! 맛있게 드세요."
         );
         websocketService.sendOrderStatusUpdateToUser(
             order.getId(),

@@ -386,7 +386,7 @@ nav.navbar .nav-link.active {
 	overflow-y: auto;
 }
 
-<<<<<<< HEAD
+
 
 /* 
 찜 버튼
@@ -413,6 +413,20 @@ nav.navbar .nav-link.active {
 }
 
 
+/* 종 모양 아이콘 깜빡임 효과 */
+@keyframes bell-shake{
+	0% {transform: rotate(0deg);}
+	10% {transform: rotate(15deg);}
+	20% {transform: rotate(-15deg);}
+	30% {transform: rotate(15deg);}
+	40% {transform: rotate(-15deg);}
+	50% {transform: rotate(0deg);}
+	100% {transform: rotate(0deg);}
+}
+
+.bell-animated{
+	animation: bell-shake 10s ease-in-out infinite;
+}
 
 
 
@@ -425,11 +439,10 @@ nav.navbar .nav-link.active {
 
 
 
-=======
 /* 모바일 대응 시 예시 (선택 사항) */
 @media ( max-width : 768px) {
 	#addressTabContent {
 		max-height: 200px;
 	}
 }
->>>>>>> seon
+
