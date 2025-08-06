@@ -13,6 +13,11 @@ public interface ShopMapper {
 	//웹소켓
 	public String getUserIdByOrderNo(@Param("oNo") int oNo);
 	
+	// 여러 상태값으로 주문 목록을 조회
+	List<Orders> selectOrdersByMultipleStatusesAndShop(@Param("statuses") List<String> statuses, @Param("sId") int sId);
+	
+	int countOrdersByStatusAndShop(@Param("status") String status, @Param("sId") int sId);
+	
 	/* === Shop === */
 	//가게 등록
 	public void insertShop(Shop shop);
