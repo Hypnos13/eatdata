@@ -46,7 +46,7 @@ public class SecurityConfig {
 					"/css/**", "/js/**", "/images/**", "/bootstrap/**", "/error", "/favicon.ico", "/rider/request" ,"/shopMain"  // 정적 리소스 및 에러 페이지
 				).permitAll()
 				// 사장님만 접근 가능한 경로 (예시)
-				.requestMatchers("/shop*", "/menu*").hasRole("OWNER") // "OWNER" 역할만 허용
+				.requestMatchers("/shop*", "/shop/*", "/menu*").hasRole("owner") // "owner" 역할만 허용
 				// 그 외 모든 요청은 인증된 사용자만 허용
 				.anyRequest().authenticated()
 				)

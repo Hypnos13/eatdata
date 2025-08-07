@@ -6,6 +6,7 @@ import java.util.*;
 import org.apache.ibatis.annotations.*;
 
 import com.projectbob.domain.*;
+import com.projectbob.domain.statistics.*;
 
 @Mapper
 public interface ShopMapper {
@@ -17,6 +18,8 @@ public interface ShopMapper {
 	List<Orders> selectOrdersByMultipleStatusesAndShop(@Param("statuses") List<String> statuses, @Param("sId") int sId);
 	
 	int countOrdersByStatusAndShop(@Param("status") String status, @Param("sId") int sId);
+	
+	List<MonthlySalesDto> getMonthlySalesStats(@Param("sId") int sId, @Param("year") int year);
 	
 	/* === Shop === */
 	//가게 등록
