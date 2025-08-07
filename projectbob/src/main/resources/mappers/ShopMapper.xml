@@ -51,6 +51,23 @@
     <select id="countOrdersByStatusAndShop" resultType="int">
     	SELECT COUNT(*) FROM orders WHERE status = #{status} AND s_id = #{sId}
     </select>
+    
+    <!-- 통계 -->
+    <select id="getMonthlySalesStats" resultType="com.projectbob.domain.statistics.MonthlySalesDto">
+    SELECT
+        DATE_FORMAT(reg_date, '%Y-%m') AS month,
+        SUM(total_price) AS totalSales
+    FROM
+        orders
+    WHERE
+        s_id = #{sId}
+      AND status = 'COMPLETED'  /* 실제 매출로 집계할 주문 상태 (필요시 수정) */
+      AND YEAR(reg_date) = #{year} /* 조회할 연도 */
+    GROUP BY
+        month
+    ORDER BY
+        month ASC
+    </select>
    
    <!-- ===== Menu ===== -->
    <insert id="insertMenu" parameterType="Menu" useGeneratedKeys="true" keyProperty="mId">
