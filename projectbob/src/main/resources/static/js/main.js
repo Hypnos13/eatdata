@@ -1422,11 +1422,13 @@ $("#rPicture").on("change", function () {
 	   $imgPreview.attr('src', e.target.result).show();
 	 };
 	 reader.readAsDataURL(file);
-	
+	});
 
 	
 	//검색버튼
-	document.getElementById('searchSubmitBtn').addEventListener('click', function () {
+	const searchSubmitBtn = document.getElementById('searchSubmitBtn');
+if (searchSubmitBtn) {
+    searchSubmitBtn.addEventListener('click', function () {
 	    const keyword = document.querySelector('#searchBox input[type="text"]').value.trim();
 
 	    // 현재 선택된 카테고리도 함께 보내고 싶다면 추가로 처리 가능
@@ -1439,7 +1441,8 @@ $("#rPicture").on("change", function () {
 	    window.location.href = searchUrl;
 	});
 	
-});
+};
+
 
 
 
