@@ -39,20 +39,21 @@ function renderPendingOrders(orderIds) {
     ul.innerHTML = '<li><h6 class="dropdown-header">새로운 알림</h6></li>';
     orderIds.forEach(oNo => {
       const li = document.createElement('li');
-      li.className = 'notif-item';
+      li.classList.add('notif-entry');
       li.dataset.orderNo = oNo;
-      li.innerHTML = `
-        <a class="dropdown-item text-truncate"
-           href="/shop/newOrders?sOrderNo=${oNo}">
-          신규 주문이 도착했습니다.
-        </a>`;
-      ul.appendChild(li);
-    });
+	  // a태그 생성
+        const a = document.createElement('a');
+        a.classList.add('dropdown-item', 'text-truncate');
+        a.href = `/shop/newOrders?sOrderNo=${oNo}`;
+        a.textContent = '🚨 신규 주문이 도착했습니다.';
+
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
     markBellAsUnread();
   } else {
     badge.classList.add('d-none');
     clearBellBlink();
-    clearHeaderList();
     ul.innerHTML = '<li class="text-muted mb-0">알림이 없습니다.</li>';
   }
 }
@@ -567,9 +568,8 @@ $('.reply-box')
 });
 
 // ==== 8. WebSocket 초기화 & 이벤트 처리 =================
-// 페이지 로드 후 한 번만 실행됩니다.
 document.addEventListener('DOMContentLoaded', () => {
-  // 7.0: shopId 조회 (헤더 알림 컨테이너에서)
+  // 8.0: shopId 조회 (헤더 알림 컨테이너에서)
   const notifyContainer = document.getElementById('notifyContainer');
   if (!notifyContainer) return;
   const shopId = notifyContainer.dataset.shopId;
@@ -582,25 +582,24 @@ document.addEventListener('DOMContentLoaded', () => {
   stompClient.connect({}, () => {
     console.log('[shop.js] STOMP connected, shopId=', shopId);
 
-	// 8.2.1: 신규 주문 알림 구독
-	stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
-	  console.log('[WS 新주문 콜백]', msg, typeof msg.body, msg.body);
-	  try {
-	    const o = JSON.parse(msg.body);
-	    console.log('[WS 新주문] 주문 객체:', o);
-	  } catch(e) {
-	    console.error('JSON parse error:', e, msg.body);
-	  }
+    // 8.2.1: 신규 주문 알림 구독
+    stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
+    
+  	// (1) 헤더 알림 + 벨 아이콘 깜빡임
+      renderHeaderNotification(msg);
+      markBellAsUnread();
 
-	  // 1) 헤더 알림 + 벨 아이콘 깜빡임 (모든 페이지 공통)
-	  renderHeaderNotification(msg);
-	  markBellAsUnread();
+  	// 2) 만약 현재 주소가 newOrders 페이지라면 강제 새로고침
+	if (location.pathname === '/shop/newOrders') {
+    	location.reload();
+    	return;
+  	}
 
-	  // 2) 신규 주문 리스트가 있는 페이지에서만 렌더링
-	  if (document.getElementById('newOrderList')) {
-	    renderNewOrderItem(msg);
-	  }
-	});
+    // 3) newOrders 페이지가 아닐 때는, 그냥 리스트에 항목만 추가
+    if (document.getElementById('newOrderList')) {
+      renderNewOrderItem(msg);
+    }
+  });
 
 	// 8.2.2: 가게 채널의 모든 주문 상태 변경 구독 (최종 수정본)
 	stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {

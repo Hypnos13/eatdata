@@ -192,11 +192,24 @@
 	  </select>
 	
 	<!-- 가게정보 불러오기 -->
-
-	<select id="findByOwnerId" resultType="com.projectbob.domain.Shop">
-	    SELECT *
-	    FROM shop
-	    WHERE id = #{ownerId}
+	<select id="findByOwnerId"
+        resultType="com.projectbob.domain.Shop"
+        parameterType="string">
+	  SELECT
+	    s_id, name, phone, zipcode, address1, address2, owner,
+	    s_number AS sNumber,
+	    s_pictureURL AS sPictureUrl,
+	    s_licenseURL AS sLicenseUrl,
+	    op_time    AS opTime,
+	    off_day    AS offDay,
+	    rating,
+	    info,
+	    s_info     AS sInfo,
+	    status,
+	    reg_date   AS regDate,
+	    modi_date  AS modiDate
+	  FROM shop
+	  WHERE id = #{ownerId}
 	</select>
 	
 	<!-- 가게 유무 확인 후 보여주기 -->
@@ -401,6 +414,8 @@
     <result property="opTime" column="op_time"/>
     <result property="offDay" column="off_day"/>
     <result property="rating" column="rating"/>
+    <result property="info" column="info"/>
+    <result property="sInfo" column="s_info"/>
 </resultMap>
 
 <!-- 주문내역 조회 -->

@@ -255,3 +255,53 @@ body {
     font-size: 22px;
     margin-bottom: 10px;
 }
+
+/* 벨 아이콘 깜빡임 */
+@keyframes bell-blink-red {
+  0%, 100% { color: inherit; }
+  50%      { color: #e74c3c; } /* 선명한 빨강(예: red 계열) */
+}
+#notifyIcon.blink {
+  animation: bell-blink-red 1s step-end infinite;
+}
+
+/* ─── 헤더 알림 드롭다운 최적화 ───────────────────────────── */
+/* 드롭다운 위치 및 변환 무효화 */
+#header-notif-list.dropdown-menu {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+/* 박스 크기 조정 */
+#header-notif-list {
+  width: 360px !important;
+  max-width: none !important;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 아이템 패딩 */
+#header-notif-list .dropdown-item,
+#header-notif-list .dropdown-header {
+  padding: 0.25rem 0.75rem !important;
+}
+
+/* 헤더 알림 리스트 내 알림 박스 스타일 */
+#header-notif-list .notif-entry {
+  background: #f8fdfb;
+  border: 1px solid #d4f1e2;
+  border-radius: 6px;
+  margin: 0.3rem 0;         /* 아이템 간 간격 */
+  padding: 0;               /* 내부는 a 태그가 담당 */
+}
+#header-notif-list .notif-entry a.dropdown-item {
+  padding: 0.5rem 1rem;     /* a 태그에 여백 추가 */
+  color: var(--dark-color);
+}
+#header-notif-list .notif-entry:last-child {
+  margin-bottom: 0.5rem;
+}

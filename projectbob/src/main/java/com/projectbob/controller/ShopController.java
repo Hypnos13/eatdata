@@ -322,9 +322,12 @@ public class ShopController {
 			model.addAttribute("errorMessage", "가게 정보를 찾을 수 없습니다.");
 			return "redirect:/shopMain";
 		}
-
+		
 		model.addAttribute("shop", currentShop);
 		model.addAttribute("currentShop", currentShop);
+		Shop fullShop = shopService.findByShopIdAndOwnerId(currentShop.getSId(), loginId);
+	    model.addAttribute("shop", fullShop);
+	    
 		return "shop/shopBasicView";
 	}
 
@@ -750,6 +753,12 @@ public class ShopController {
 	        model.addAttribute("selectedOrder", orders.get(0));
 	    }
 
+	    // 3-2) 헤더 알림 뱃지와 동기화: 
+	    //       - pending 리스트가 비어 있으면 0 으로 리셋  
+	    //       - 비어 있지 않으면 실제 개수로 덮어쓰기
+	    int pendingCount = orders.size();
+	    session.setAttribute("notifyCount", pendingCount);
+	    
 	    // 4) layout에서 active 상태 표시용 status 속성
 	    model.addAttribute("status", "PENDING");
 
