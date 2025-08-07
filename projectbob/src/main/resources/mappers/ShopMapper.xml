@@ -324,6 +324,13 @@
 	  WHERE s_id = #{sId}
 	</update>
 	
+	<update id="updateShopMinPrice" parameterType="map">
+	  UPDATE shop
+	  SET min_price = #{minPrice},
+	      modi_date = SYSDATE()
+	  WHERE s_id = #{sId}
+	</update>
+
 	<!-- 리뷰관리 -->
 	<select id="findReviewsByShopId" resultType="com.projectbob.domain.Review">
 	    SELECT

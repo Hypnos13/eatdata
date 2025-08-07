@@ -390,6 +390,11 @@ public class ShopService {
         shopMapper.updateShopInfo(sId, sInfo);
     }
     
+    @Transactional
+    public void updateShopMinPrice(Integer sId, int minPrice) {
+        shopMapper.updateShopMinPrice(sId, minPrice);
+    }
+    
     // 리뷰 + 답글 함께 불러오기
     public List<Review> getReviewsWithReplies(int sId) {
         List<Review> reviews = shopMapper.findReviewsByShopId(sId);

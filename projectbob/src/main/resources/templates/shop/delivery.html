@@ -21,12 +21,17 @@
             height: 100%;
         }
         .order-list-header {
-            padding: 1rem;
+        	padding: 1rem;
             border-bottom: 1px solid #dee2e6;
             font-size: 1.2rem;
             font-weight: bold;
             flex-shrink: 0;
+	        display: flex;
+      		align-items: center;
         }
+    	.order-list-header .badge {
+     	 margin-left: auto;
+    	}
         .order-list { overflow-y: auto; flex-grow: 1; }
         .order-card {
             padding: 1rem;

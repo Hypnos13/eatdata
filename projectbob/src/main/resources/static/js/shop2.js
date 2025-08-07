@@ -273,27 +273,74 @@ window.updateOrderStatus = function(oNo, newStatus) {
 
 // ==== 1.5. 신규 주문 상세 정보 표시 헬퍼 ====
 function selectNewOrder(el) {
-    document.querySelectorAll('.order-card').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
+  // 1) 리스트 활성화
+  document.querySelectorAll('.order-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
 
-    const { orderNo, regdate, totalprice, oaddress, menus, request } = el.dataset;
-    const panel = document.querySelector('.order-detail-panel');
-    if (!panel) return;
-    
-    panel.innerHTML = `
-      <h4>신규 주문 #${orderNo}</h4>
-      <p><strong>주문일시:</strong> ${regdate}</p>
-      <p><strong>총액:</strong> ${totalprice}원</p>
-      <p><strong>배달/픽업:</strong> ${oaddress ? '배달' : '픽업'}</p>
-      ${oaddress ? `<p><strong>주소:</strong> ${oaddress}</p>` : ''}
-      <p><strong>메뉴:</strong> ${menus || ''}</p>
-      <p><strong>요청사항:</strong> ${request || '없음'}</p>
-      <div class="mt-4">
-        <button type="button" class="btn btn-success me-2" onclick="updateOrderStatus(${orderNo}, 'ACCEPTED')">수락</button>
-        <button type="button" class="btn btn-outline-danger" onclick="updateOrderStatus(${orderNo}, 'REJECTED')">거절</button>
+  // 2) data- 속성에서 값 꺼내기
+  const { orderNo, regdate, totalprice, oaddress, menus, request } = el.dataset;
+  const panel = document.querySelector('.order-detail-panel');
+  if (!panel) return;
+
+  // 3) 현대식 카드 레이아웃으로 innerHTML 덮어쓰기
+  panel.innerHTML = `
+    <!-- 1. 헤더 박스 -->
+    <div class="order-detail-box order-detail-box--header">
+      <div class="d-flex justify-content-between">
+        <div>
+          <h4 class="mb-1">주문번호 ${orderNo}</h4>
+          <div class="text-muted">${oaddress}</div>
+        </div>
+        <div class="text-end">
+          <div class="text-muted mb-1">${regdate}</div>
+          <div class="fw-bold">${ oaddress ? '배달' : '픽업' }</div>
+        </div>
       </div>
-    `;
+    </div>
+    
+    <!-- 2. 주문 정보 박스 -->
+    <div class="order-detail-box order-detail-box--info">
+      <ul class="list-group list-group-flush mt-2">
+        <!-- 메뉴 -->
+        <li class="list-group-item d-flex align-items-center py-2">
+          <div class="flex-shrink-1 fw-bold">메뉴</div>
+          <div class="flex-grow-1 text-end">
+            ${ menus.replace(/,/g,'<br/>') }
+          </div>
+        </li>
+        <!-- 총액 -->
+        <li class="list-group-item d-flex align-items-center py-2">
+          <div class="flex-grow-1">총액</div>
+          <div class="fw-bold">${totalprice}원</div>
+        </li>
+        <!-- 요청사항 -->
+        <li class="list-group-item d-flex align-items-center py-2">
+          <div class="flex-grow-1">요청사항</div>
+          <div class="fw-bold">${request || '없음'}</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 3. 액션 버튼 박스 -->
+    <div class="order-detail-box order-detail-box--actions">
+      <button class="btn btn-success me-2"
+              onclick="updateOrderStatus(${orderNo}, 'ACCEPTED')">
+        수락
+      </button>
+      <button class="btn btn-outline-danger"
+              onclick="updateOrderStatus(${orderNo}, 'REJECTED')">
+        거절
+      </button>
+    </div>
+  `;
 }
+
+window.acceptOrder = function(oNo) {
+  updateOrderStatus(oNo, 'ACCEPTED');
+};
+window.rejectOrder = function(oNo) {
+  updateOrderStatus(oNo, 'REJECTED');
+};
 
 /**
  * ================================================================

@@ -14,6 +14,15 @@
     }
 
     .main-container { display: flex; height: calc(100vh - 70px); }
+    
+    /* 공통 박스 스타일 */
+	.order-detail-box {
+	  background: #fff;
+	  border: 1px solid #dee2e6;
+	  border-radius: 8px;
+	  padding: 1rem;
+	  margin-bottom: 1rem;
+	}
 
     /* ─── 좌측: 주문 리스트 패널 ───────────────────────── */
     .order-list-panel {
@@ -72,6 +81,27 @@
       margin-top: 1.5rem;
       font-weight: bold;
     }
+    
+	.order-detail-box--header .order-detail-box__title {
+	  font-size: 1.25rem;
+	  margin: 0;
+	}
+	
+	.order-detail-box--summary p,
+	.order-detail-box--info p {
+	  margin-bottom: 0.75rem;
+	}
+	
+	.order-detail-box--actions {
+	  display: flex;
+	  gap: 0.5rem;       /* 버튼 사이 여백 조정 (선택) */
+	}
+	
+	.order-detail-box--actions .btn {
+	  flex: 1;           /* 버튼 1개당 부모 너비의 1/n */
+	  margin: 0;         /* 기존 me-2 여백 제거 */
+	}
+	
   </style>
 </head>
 
@@ -124,44 +154,82 @@
       </div>
 
       <!-- 우측: 선택된 주문 상세 (신규 주문에 특화된 UI) -->
-		<div class="order-detail-panel">
+	  <div class="order-detail-panel">
+  		
+		  <!-- 선택된 주문이 있을 때 -->
 		  <th:block th:if="${selectedOrder != null}">
-		    <h4>신규 주문 #<span th:text="${selectedOrder.oNo}">123</span></h4>
-		    <p><strong>주문일시:</strong>
-		      <span th:text="${#dates.format(selectedOrder.regDate,'yyyy-MM-dd HH:mm')}">
-		        2025-08-05 09:00
-		      </span>
-		    </p>
-		    <p><strong>총액:</strong>
-		      <span th:text="${selectedOrder.totalPrice + '원'}">10,000원</span>
-		    </p>
-		    <p><strong>배달/픽업:</strong>
-		      <span th:text="${selectedOrder.oAddress != null ? '배달' : '픽업'}">배달</span>
-		    </p>
-		    <p th:if="${selectedOrder.oAddress}">
-		      <strong>주소:</strong>
-		      <span th:text="${selectedOrder.oAddress}">서울 강남구 …</span>
-		    </p>
-		    <p><strong>메뉴:</strong>
-		      <span th:utext="${selectedOrder.menus}">치킨 *1, 콜라 *1</span>
-		    </p>
-		    <p><strong>요청사항:</strong>
-		      <span th:text="${selectedOrder.request ?: '없음'}">없음</span>
-		    </p>
-		    <div class="mt-4">
-			  <button type="button" class="btn btn-success me-2"
-			          th:onclick="|acceptOrder(${selectedOrder.oNo})|">
-			    수락
-			  </button>
-			  <button type="button" class="btn btn-outline-danger"
-			          th:onclick="|rejectOrder(${selectedOrder.oNo})|">
-			    거절
-			  </button>
+		  
+		    <!-- 1. 주문번호 & 상단정보 -->
+			<div class="order-detail-box order-detail-box--header">
+			  <div class="d-flex justify-content-between">
+			    <!-- 좌측: 주문번호, 주소 -->
+			    <div>
+			      <h4 class="mb-1">
+			        주문번호 <span th:text="${selectedOrder.oNo}"></span>
+			      </h4>
+			      <div class="text-muted">
+			        <span th:text="${selectedOrder.oAddress}">서울 강남구</span>
+			      </div>
+			    </div>
+			    <!-- 우측: 주문일시, 배달/픽업 -->
+			    <div class="text-end">
+			      <div class="text-muted mb-1"
+			           th:text="${#dates.format(selectedOrder.regDate,'yyyy-MM-dd HH:mm')}">
+			        2025-08-06 12:34
+			      </div>
+			      <div class="fw-bold"
+			           th:text="${selectedOrder.oAddress != null ? '배달' : '픽업'}">
+			        배달
+			      </div>
+			    </div>
+			  </div>
 			</div>
-		  </th:block>
-		  <th:block th:if="${selectedOrder == null}">
-		    <div class="text-center text-muted my-auto">
-		      왼쪽 주문을 클릭하면 상세가 표시됩니다.
+		    
+		    <!-- 2. 주문정보 -->
+			<div class="order-detail-box order-detail-box--info">
+			  <ul class="list-group list-group-flush mt-2">
+			    <!-- 메뉴 -->
+			    <li class="list-group-item d-flex align-items-center py-2">
+			      <div class="flex-shrink-1 fw-bold">메뉴</div>
+			      <div class="flex-grow-1 text-end"
+			           th:utext="${#strings.replace(selectedOrder.menus, ',', '<br/>')}">
+			        <!-- 예시: 치킨 *1<br/>콜라 *1 -->
+			      </div>
+			    </li>
+			    <!-- 총액 -->
+			    <li class="list-group-item d-flex align-items-center py-2">
+			      <div class="flex-grow-1">총액</div>
+			      <div class="fw-bold" th:text="${selectedOrder.totalPrice + '원'}">
+			        32,500원
+			      </div>
+			    </li>
+			    <!-- 요청사항 -->
+			    <li class="list-group-item d-flex align-items-center py-2">
+			      <div class="flex-grow-1">요청사항</div>
+			      <div class="fw-bold" th:text="${selectedOrder.request ?: '없음'}">
+			        벨 눌러주세요
+			      </div>
+			    </li>
+			  </ul>
+			</div>
+		    
+			    <!-- 3. 액션 버튼 박스 -->
+			    <div class="order-detail-box order-detail-box--actions">
+			      <button type="button" class="btn btn-success me-2"
+			              th:onclick="|acceptOrder(${selectedOrder.oNo})|">
+			        수락
+			      </button>
+			      <button type="button" class="btn btn-outline-danger"
+			              th:onclick="|rejectOrder(${selectedOrder.oNo})|">
+			        거절
+			      </button>
+			    </div>
+		  	</th:block>
+		  	
+		  	<!-- 선택된 주문이 없을 때 -->
+		  	<th:block th:if="${selectedOrder == null}">
+		    	<div class="text-center text-muted my-auto">
+		      	왼쪽 주문을 클릭하면 상세가 표시됩니다.
 		    </div>
 		  </th:block>
 		</div>
