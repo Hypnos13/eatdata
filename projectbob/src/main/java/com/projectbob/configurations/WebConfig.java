@@ -19,11 +19,11 @@ public class WebConfig implements WebMvcConfigurer{
 		registry.addViewController("/login/naver/callback").setViewName("members/naverCallback");
 		registry.addViewController("/addAddressForm").setViewName("members/addAddressForm");
 	}
-<<<<<<< HEAD
 
-
-
-=======
-	
->>>>>>> develop
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		//URL /images/**
+		registry.addResourceHandler("/images/**")
+				  .addResourceLocations("file:" + uploadBaseDir + "/");
+	}
 }

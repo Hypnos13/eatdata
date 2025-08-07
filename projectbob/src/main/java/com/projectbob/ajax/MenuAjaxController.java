@@ -42,7 +42,7 @@ import com.projectbob.domain.Review;
 import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 import com.projectbob.service.BobService;
-// import com.projectbob.service.FileUploadService; // FileUploadService 임포트 제거
+ import com.projectbob.service.FileUploadService; 
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,8 +53,8 @@ public class MenuAjaxController {
 	@Autowired
 	private BobService bobService;
 
-	// @Autowired
-	// private FileUploadService fileUploadService; // FileUploadService 주입 제거
+	 @Autowired
+	 private FileUploadService fileUploadService; 
 
 	@Value("${file.upload-dir}") // application.properties의 file.upload-dir 값을 주입
 	private String uploadBaseDir;
@@ -331,7 +331,7 @@ public class MenuAjaxController {
 	}
 		
 	// 댓글 쓰기 메서드
-	@PostMapping("/reviewWrite.ajax")
+	@PostMapping(value = "/reviewWrite.ajax")
 	@ResponseBody
 	public Map<String, Object> addReview(@ModelAttribute Review review,
 			@RequestParam(value="reviewUploadFile", required=false) MultipartFile rPicture){
@@ -523,7 +523,7 @@ public class MenuAjaxController {
 		if(shop != null) {
 			shopOwnerId = shop.getId();
 		}
-		result.put("shopOwerId", shopOwnerId);
+		result.put("shopOwnerId", shopOwnerId);
 		
 		return result;
 	}
