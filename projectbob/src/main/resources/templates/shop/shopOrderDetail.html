@@ -1,50 +1,81 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/shop_layout}">
-  <head>
-    <meta charset="UTF-8">
-    <title>📦 주문 상세</title>
-  </head>
-  <body>
-    <!-- content 영역에만 페이지별 내용을 넣습니다 -->
-    <div layout:fragment="content">
-		<div class="container py-3" th:attr="data-order-no=${order.oNo}">
-		  <h4>📦 주문 #<span th:text="${order.oNo}">123</span> 상세</h4>
+<head>
+  <meta charset="UTF-8">
+  <title>📦 주문 상세</title>
+  <style>
+    .order-detail-dl {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .order-detail-dl dt,
+    .order-detail-dl dd {
+      margin: 0;
+      padding: .5rem 0;
+      border-bottom: 1px solid #eee;
+    }
+    .order-detail-dl dd:last-child {
+      border-bottom: none;
+    }
+    @media (max-width:576px) {
+      .order-detail-dl dt,
+      .order-detail-dl dd {
+        width: 100%;
+        text-align: left !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <th:block layout:fragment="content">
+    <div class="container py-3" th:attr="data-order-no=${order.oNo}">
+      <h4>📦 주문 #<span th:text="${order.oNo}">123</span> 상세</h4>
 
-		  <dl class="row mb-3">
-		    <dt class="col-4">고객</dt>
-		    <dd class="col-8" th:text="${order.id}">honggd</dd>
+      <dl class="row order-detail-dl">
+        <dt class="col-sm-4">고객</dt>
+        <dd class="col-sm-8 text-start text-sm-end" th:text="${order.id}">honggd</dd>
 
-		    <dt class="col-4">주소</dt>
-		    <dd class="col-8" th:text="${order.oAddress}">서울 관악구 …</dd>
+        <dt class="col-sm-4">주소</dt>
+        <dd class="col-sm-8 text-start text-sm-end" th:text="${order.oAddress}">서울 관악구 …</dd>
 
-		    <dt class="col-4">메뉴</dt>
-		    <dd class="col-8" th:text="${order.menus}">치킨 x1</dd>
+        <dt class="col-sm-4">메뉴</dt>
+        <dd class="col-sm-8 text-start text-sm-end"
+            th:utext="${#strings.replace(order.menus, ',', '<br/>')}">
+          치킨 x1<br/>콜라 x1
+        </dd>
 
-		    <dt class="col-4">요청사항</dt>
-		    <dd class="col-8" th:text="${order.request}">초인종 금지</dd>
+        <dt class="col-sm-4">요청사항</dt>
+        <dd class="col-sm-8 text-start text-sm-end" th:text="${order.request ?: '없음'}">
+          초인종 금지
+        </dd>
 
-		    <dt class="col-4">결제수단</dt>
-		    <dd class="col-8" th:text="${order.payment}">KAKAO</dd>
+        <dt class="col-sm-4">결제수단</dt>
+        <dd class="col-sm-8 text-start text-sm-end" th:text="${order.payment}">KAKAO</dd>
 
-		    <dt class="col-4">주문시간</dt>
-		    <dd class="col-8" th:text="${#dates.format(order.regDate,'yyyy-MM-dd HH:mm')}">
-		      2025-08-02 14:03
-		    </dd>
+        <dt class="col-sm-4">주문시간</dt>
+        <dd class="col-sm-8 text-start text-sm-end"
+            th:text="${#dates.format(order.regDate,'yyyy-MM-dd HH:mm')}">
+          2025-08-02 14:03
+        </dd>
 
-		    <dt class="col-4">총 금액</dt>
-		    <dd class="col-8" th:text="${#numbers.formatInteger(order.totalPrice,0,'COMMA')} + '원'">
-		      11,000원
-		    </dd>
+        <dt class="col-sm-4">총 결제 금액</dt>
+        <dd class="col-sm-8 text-start text-sm-end"
+            th:text="${#numbers.formatInteger(order.totalPrice,0,'COMMA')} + '원'">
+          11,000원
+        </dd>
 
-		    <dt class="col-4">상태</dt>
-		    <dd class="col-8" th:text="${order.status}">REJECTED</dd>
-		  </dl>
-		</div>
+        <dt class="col-sm-4">상태</dt>
+        <dd class="col-sm-8 text-start text-sm-end" th:text="${order.status}">REJECTED</dd>
+      </dl>
     </div>
+  </th:block>
 
-    <!-- shop.js 로 WebSocket, 타이머, 버튼 스크립트를 함께 로드 -->
-    <script th:src="@{/js/shop.js}"></script>
-  </body>
+  <script th:src="@{/js/shop.js}"></script>
+</body>
 </html>

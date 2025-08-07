@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Year;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.projectbob.domain.*;
+import com.projectbob.domain.statistics.*;
 import com.projectbob.mapper.ShopMapper;
 import com.projectbob.service.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -231,6 +233,65 @@ public class ShopController {
 	    websocketService.sendDispatchToRiders(dispatchInfo);
 	    
 	    return ResponseEntity.ok(Map.of("success", true, "message", "배차를 요청했습니다."));
+	}
+	
+	/**
+	 * [통계] 가게 주인을 위한 통계 페이지를 보여줍니다.
+	 * @param sId 세션에서 가져온 현재 가게 ID
+	 * @param loginId 세션에서 가져온 로그인 ID
+	 * @param model View에 데이터를 전달하기 위한 객체
+	 * @return 통계 페이지 view 이름
+	 */
+	@GetMapping("/shop/statistics")
+	public String statisticsPage(@SessionAttribute(name = "currentSId") Integer sId,
+	                             @SessionAttribute(name = "loginId") String loginId,
+	                             Model model) {
+	    
+	    // 현재 가게 정보와 가게 목록을 모델에 추가 (레이아웃 등에서 필요)
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+	    model.addAttribute("currentShop", currentShop);
+	    model.addAttribute("shopListMain", shopListMain);
+	    
+	    // 현재 연도를 모델에 추가하여 View에서 사용할 수 있게 함
+	    model.addAttribute("currentYear", Year.now().getValue());
+	    
+	    return "shop/statistics"; // `resources/templates/shop/statistics.html` 파일을 가리킴
+	}
+
+	/**
+	 * [API] 월별 매출 통계 데이터를 JSON 형태로 제공합니다.
+	 * @param sId 세션에서 가져온 현재 가게 ID
+	 * @param year 조회할 연도 (기본값: 현재 연도)
+	 * @return 월별 매출 데이터 리스트를 담은 ResponseEntity
+	 */
+	@GetMapping("/api/shop/statistics/monthly-sales")
+	@ResponseBody
+	public ResponseEntity<List<MonthlySalesDto>> getMonthlySalesData(
+	                                @SessionAttribute(name = "currentSId") Integer sId,
+	                                @RequestParam(value = "year", defaultValue = "0") int year) {
+	    
+	    // year 파라미터가 없으면 현재 연도로 설정
+	    if (year == 0) {
+	        year = Year.now().getValue();
+	    }
+	    
+	    List<MonthlySalesDto> salesData = shopService.getMonthlySalesStats(sId, year);
+	    return ResponseEntity.ok(salesData);
+	}
+
+	/**
+	 * [API] 메뉴별 주문 횟수(인기) 통계 데이터를 JSON 형태로 제공합니다.
+	 * @param sId 세션에서 가져온 현재 가게 ID
+	 * @return 메뉴별 주문 횟수 데이터 리스트를 담은 ResponseEntity
+	 */
+	@GetMapping("/api/shop/statistics/menu-popularity")
+	@ResponseBody
+	public ResponseEntity<List<MenuPopularityDto>> getMenuPopularityData(
+	                                @SessionAttribute(name = "currentSId") Integer sId) {
+	    
+	    List<MenuPopularityDto> popularityData = shopService.getMenuPopularityStats(sId);
+	    return ResponseEntity.ok(popularityData);
 	}
 	
 	/* ----------------------- 메인 ----------------------- */
@@ -594,11 +655,12 @@ public class ShopController {
 		return "shop/shopNotice";
 	}
 
-	// ── 사장님 공지 & 가게소개 저장 ─────────────────────────────
+	// ── 사장님 공지 & 가게소개 & 최소주문금액 저장 ─────────────────────────────
 	@PostMapping("/shopNotice")
 	public String updateNotice(@RequestParam("s_id") Integer sId,
 			@RequestParam(value = "notice", required = false) String notice,
 			@RequestParam(value = "s_info", required = false) String sInfo, @RequestParam("action") String action,
+			@RequestParam(value = "minPrice", required = false) Integer minPrice,
 			@SessionAttribute(name = "loginId", required = false) String loginId, RedirectAttributes ra) {
 
 		if (loginId == null) {
@@ -618,6 +680,9 @@ public class ShopController {
 		} else if ("info".equals(action)) {
 			shopService.updateShopInfo(sId, sInfo);
 			ra.addFlashAttribute("message", "가게소개가 저장되었습니다.");
+		} else if ("minPrice".equals(action)) {
+			shopService.updateShopMinPrice(sId, minPrice);
+			ra.addFlashAttribute("message", "최소 금액이 저장되었습니다.");
 		}
 
 		return "redirect:/shopNotice?s_id=" + sId;

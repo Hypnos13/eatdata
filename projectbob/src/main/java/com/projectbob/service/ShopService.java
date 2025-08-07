@@ -3,6 +3,8 @@ package com.projectbob.service;
 import java.io.*;
 import java.util.*;
 import java.sql.Timestamp;
+import java.time.LocalDate; // 날짜 처리를 위해 임포트
+import java.util.stream.Collectors; // 스트림 사용을 위해 임포트
 
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.ui.Model;
 
 import com.projectbob.domain.*;
+import com.projectbob.domain.statistics.MenuPopularityDto; // DTO 임포트
+import com.projectbob.domain.statistics.MonthlySalesDto;   // DTO 임포트
 import com.projectbob.mapper.*;
 import com.projectbob.service.PortoneService;
 
@@ -200,6 +204,59 @@ public class ShopService {
 	public List<Orders> findOrdersByMultipleStatusesAndShop(List<String> statuses, int sId) {
 	    return shopMapper.selectOrdersByMultipleStatusesAndShop(statuses, sId);
 	}
+	
+	/**
+	 * [통계] 특정 가게의 연간 월별 매출 통계를 조회합니다.
+	 * @param sId 가게 ID
+	 * @param year 조회할 연도
+	 * @return 월별 매출 데이터 리스트
+	 */
+	public List<MonthlySalesDto> getMonthlySalesStats(int sId, int year) {
+	    // MyBatis Mapper에 정의된 쿼리를 호출합니다.
+	    return shopMapper.getMonthlySalesStats(sId, year);
+	}
+
+	/**
+	 * [통계] 특정 가게의 메뉴별 주문 횟수(인기 메뉴)를 조회합니다.
+	 * @param sId 가게 ID
+	 * @return 메뉴별 주문 횟수 데이터 리스트
+	 */
+	@Transactional(readOnly = true) // 읽기 전용 트랜잭션으로 성능 향상
+	public List<MenuPopularityDto> getMenuPopularityStats(int sId) {
+	    // 1. 해당 가게의 '완료' 상태인 모든 주문을 조회합니다.
+	    List<Orders> completedOrders = shopMapper.selectOrdersByStatusAndShop("COMPLETED", sId);
+	    
+	    // 2. 메뉴 이름을 키로, 주문 횟수를 값으로 저장할 Map을 생성합니다.
+	    Map<String, Long> menuFrequencyMap = new HashMap<>();
+
+	    // 3. 완료된 주문 목록을 하나씩 순회합니다.
+	    for (Orders order : completedOrders) {
+	        String menusString = order.getMenus();
+	        if (menusString == null || menusString.isBlank()) {
+	            continue; // 메뉴 정보가 없으면 건너뜁니다.
+	        }
+
+	        // 4. "짜장면 * 1, 탕수육 * 1" 형태의 문자열을 파싱합니다.
+	        String[] menuEntries = menusString.split(","); // 쉼표(,)를 기준으로 각 메뉴 항목을 분리
+
+	        for (String entry : menuEntries) {
+	            // "짜장면 * 1" 에서 메뉴 이름 부분("짜장면")만 추출합니다.
+	            String[] menuParts = entry.split("\\*"); // 별표(*)를 기준으로 메뉴명과 수량을 분리
+	            if (menuParts.length > 0) {
+	                String menuName = menuParts[0].trim(); // 공백 제거
+	                
+	                // 5. Map에서 해당 메뉴의 카운트를 1 증가시킵니다.
+	                menuFrequencyMap.put(menuName, menuFrequencyMap.getOrDefault(menuName, 0L) + 1);
+	            }
+	        }
+	    }
+
+	    // 6. 집계된 Map을 DTO 리스트로 변환하여 반환합니다.
+	    return menuFrequencyMap.entrySet().stream()
+	            .map(entry -> new MenuPopularityDto(entry.getKey(), entry.getValue()))
+	            .sorted(Comparator.comparing(MenuPopularityDto::getOrderCount).reversed()) // 주문 횟수 내림차순 정렬
+	            .collect(Collectors.toList());
+	}
 
 	/* ---------- Shop ---------- */
 	//가게 등록
@@ -331,6 +388,11 @@ public class ShopService {
     @Transactional
     public void updateShopInfo(Integer sId, String sInfo) {
         shopMapper.updateShopInfo(sId, sInfo);
+    }
+    
+    @Transactional
+    public void updateShopMinPrice(Integer sId, int minPrice) {
+        shopMapper.updateShopMinPrice(sId, minPrice);
     }
     
     // 리뷰 + 답글 함께 불러오기

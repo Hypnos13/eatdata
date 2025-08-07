@@ -1,3 +1,4 @@
+/*
 // ==== 알림 렌더링 헬퍼 함수 ====
 // 기존 리스트를 완전히 지우는 함수
 function clearHeaderList() {
@@ -8,7 +9,7 @@ function clearHeaderList() {
 /**
  * PENDING 주문 ID 배열을 받아 헤더 알림 UI(뱃지, 드롭다운 목록)를 렌더링합니다.
  * @param {number[]} orderIds PENDING 상태인 주문 ID 배열
- */
+ 
 function renderPendingOrders(orderIds) {
   // 1. 헤더에서 알림 뱃지와 리스트 요소를 찾습니다.
   const badge = document.getElementById('header-notif-badge');
@@ -417,7 +418,7 @@ function shopViewShowMap(address) {
     if (!(window.kakao && kakao.maps && kakao.maps.services)) {
         alert("카카오맵 라이브러리 없음");
         return;
-    }*/
+    }
     var mapContainer = document.getElementById('shop-map');
     var mapOption = {
         center: new kakao.maps.LatLng(37.566826, 126.9786567),
@@ -910,4 +911,4 @@ if (document.getElementById('newOrderList')) {
   });
 
 }
-
+*/

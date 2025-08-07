@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/shop_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${currentShop.name} + ' - 매출 통계'">매출 통계</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 차트가 컨테이너에 꽉 차도록 스타일 추가 */
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 400px; /* 차트 높이 조절 */
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-bar-chart-line-fill"></i> 매출 통계
+        </h2>
+        <div>
+            <select id="yearSelector" class="form-select" onchange="loadCharts()">
+                <th:block th:with="currentYear=${T(java.time.Year).now().getValue()}">
+                    <option th:each="i : ${#numbers.sequence(0, 4)}" 
+                            th:value="${currentYear - i}" 
+                            th:text="${currentYear - i} + '년'" 
+                            th:selected="${(currentYear - i) == currentYear}"></option>
+                </th:block>
+            </select>
+        </div>
+    </div>
+
+    <div class="main-content-card card shadow-sm p-4" style="min-height:480px;">
+        
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="my-1"><i class="bi bi-calendar-month"></i> 월별 매출</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="monthlySalesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="my-1"><i class="bi bi-star-fill"></i> 메뉴별 주문 횟수 (인기 메뉴 TOP 10)</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="menuPopularityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /* Thymeleaf를 통해 서버에서 전달된 현재 연도 값 가져오기 */
+        const CURRENT_YEAR = /*[[${currentYear}]]*/ 2025;
+        
+        // 차트 객체를 저장할 전역 변수 (연도 변경 시 기존 차트 파괴를 위해)
+        let monthlyChart;
+        let menuChart;
+
+        // 페이지가 완전히 로드되면 차트를 그리는 함수를 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCharts();
+        });
+
+        // 연도 선택이 변경될 때 차트를 다시 그리는 함수
+        function loadCharts() {
+            const selectedYear = document.getElementById('yearSelector').value;
+            loadMonthlySalesChart(selectedYear); // 월별 매출 차트 로드
+            loadMenuPopularityChart();          // 메뉴 인기 차트는 연도와 무관하게 항상 전체 데이터를 보여줌
+        }
+
+        // 월별 매출 통계 차트를 불러오고 그리는 비동기 함수
+        async function loadMonthlySalesChart(year) {
+            try {
+                // 서버 API에 월별 매출 데이터 요청 (fetch 사용)
+                const response = await fetch(`/api/shop/statistics/monthly-sales?year=${year}`);
+                if (!response.ok) throw new Error('월별 매출 데이터를 불러오는 데 실패했습니다.');
+                
+                const salesData = await response.json();
+
+                // Chart.js에 필요한 형식으로 데이터 가공 (라벨과 데이터 분리)
+                const labels = salesData.map(d => d.month.substring(5) + '월'); // "2025-08" -> "08월"
+                const data = salesData.map(d => d.totalSales);
+
+                const ctx = document.getElementById('monthlySalesChart').getContext('2d');
+                
+                // 만약 이전에 그려진 차트가 있다면, 파괴하고 새로 그림 (연도 변경 시 필요)
+                if (monthlyChart) {
+                    monthlyChart.destroy();
+                }
+
+                // Chart.js를 사용하여 새 차트 생성
+                monthlyChart = new Chart(ctx, {
+                    type: 'bar', // 막대 그래프
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `${year}년 월별 매출 (원)`,
+                            data: data,
+                            backgroundColor: 'rgba(67, 208, 145, 0.6)',
+                            borderColor: 'rgba(67, 208, 145, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { // y축 눈금에 '원' 단위를 붙여주는 콜백 함수
+                                    callback: function(value) {
+                                        return new Intl.NumberFormat('ko-KR').format(value) + ' 원';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('monthlySalesChart').parentElement.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+            }
+        }
+
+        // 메뉴별 주문 횟수(인기) 통계 차트를 불러오고 그리는 비동기 함수
+        async function loadMenuPopularityChart() {
+            try {
+                // 서버 API에 메뉴별 인기 데이터 요청
+                const response = await fetch('/api/shop/statistics/menu-popularity');
+                if (!response.ok) throw new Error('메뉴별 인기 데이터를 불러오는 데 실패했습니다.');
+                
+                const popularityData = await response.json();
+                
+                // 상위 10개 데이터만 잘라서 사용
+                const top10Data = popularityData.slice(0, 10);
+
+                const labels = top10Data.map(d => d.menuName);
+                const data = top10Data.map(d => d.orderCount);
+                
+                const ctx = document.getElementById('menuPopularityChart').getContext('2d');
+
+                if (menuChart) {
+                    menuChart.destroy();
+                }
+
+                menuChart = new Chart(ctx, {
+                    type: 'bar', // 가로 막대 그래프로 표시
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '주문 횟수 (건)',
+                            data: data,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)',
+                                'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)',
+                                'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)',
+                                'rgba(99, 255, 132, 0.6)', 'rgba(162, 54, 235, 0.6)',
+                                'rgba(206, 255, 86, 0.6)', 'rgba(192, 75, 192, 0.6)'
+                            ],
+                            borderColor: 'rgba(255, 255, 255, 0.8)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', // 이 옵션으로 가로 막대 차트 생성
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 } // x축 눈금을 1단위로
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false } // 범례(label) 숨기기
+                        }
+                    }
+                });
+
+            } catch(error) {
+                console.error(error);
+                document.getElementById('menuPopularityChart').parentElement.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

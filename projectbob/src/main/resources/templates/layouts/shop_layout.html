@@ -149,30 +149,13 @@
 	  		<i class="bi bi-chat-dots me-2"></i> 리뷰 관리
 	  	</a>
 	  </div>
-		
-		<!-- 주문 관리 추가
-		<div class="mb-2">
-		  <button class="btn w-100 text-start sidebar-group-btn fw-bold"
-		          data-bs-toggle="collapse"
-		          data-bs-target="#collapseOrderManage"
-		          aria-expanded="false">
-		    <i class="bi bi-list-check me-2"></i> 주문 관리
-		    <i class="bi bi-chevron-down float-end"></i>
-		  </button>
-		  <div class="collapse" id="collapseOrderManage">
-		    <ul class="list-unstyled ps-3 mb-0 sidebar-submenu">
-		      <li>
-		        <a th:href="@{/shop/orderManage(status='PENDING')}"
-		           class="sidebar-sub-link">신규 주문</a>
-		      </li>
-		      <li>
-		        <a th:href="@{/orders}"
-		           class="sidebar-sub-link">주문 내역</a>
-		      </li>
-		    </ul>
-		  </div>
-		</div>		 -->
-		
+	  
+	  <div class="mb-2" th:if="${currentShop != null}">
+	  	<a th:href="@{|/shop/statistics?s_id=${currentShop.sId}|}" class="btn w-100 text-start sidebar-group-btn fw-bold">
+	  		<i class="bi bi-bar-chart-line me-2"></i> 통계
+	  	</a>
+	  </div>
+	  	
 		</div>
 	  	</aside>
        
@@ -200,7 +183,7 @@
 	  <!-- 4) 카카오맵 -->
 	  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2b87d757b240dd70a51d682dd3cc37ed&libraries=services"></script>
 	  <!-- 5) shop.js (WebSocket + 알림 로직) -->
-	  <script th:src="@{/js/shop.js}"></script>
+	  <script th:src="@{/js/shop2.js}"></script>
 	  <!-- 6) 그 외 스크립트 -->
 	  <script th:src="@{/js/menu.js}"></script>
 </body>
