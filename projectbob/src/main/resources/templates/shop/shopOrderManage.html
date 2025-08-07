@@ -293,14 +293,9 @@
 
 			<!-- 상태 변경 버튼 -->
 			<div class="btn-group">
-					  <button th:if="${selectedOrder.status=='ACCEPTED' or selectedOrder.status=='DISPATCHED'}"
-					          class="btn btn-warning me-2" type="button"
-					          th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus='DELIVERING')}'|">
-					    🚚 배달 시작
-					  </button>
-				  </div>
-
-			  <button th:if="${selectedOrder.status=='DELIVERING'}"
+				<button th:if="${selectedOrder.status=='ACCEPTED' or selectedOrder.status=='DISPATCHED'}"class="btn btn-warning me-2" type="button"
+						th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus='DELIVERING')}'|">🚚 배달 시작</button>
+			 	<button th:if="${selectedOrder.status=='DELIVERING'}"
 			          class="btn btn-success me-2"
 			          type="button"
 			          th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus=COMPLETED)}'|">

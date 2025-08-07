@@ -38,16 +38,20 @@ public class SecurityConfig {
 		http.authorizeHttpRequests(authorize -> authorize
 				// 로그인 없이 접근 가능한 경로들 (LoginCheckInterceptor의 guestAllowedUrls 역할)
 				.requestMatchers(
+<<<<<<< HEAD
 					"/","/shopMain", "/main", "/shopList", "/MenuDetail", "/completed", // 고객이 보는 페이지
+=======
+					"/main", "/shopList", "/MenuDetail", "/completed", // 고객이 보는 페이지
+>>>>>>> develop
 					"/login", "/joinMember", "/searchIdPass", "/searchIdPassForm", // 로그인/회원가입/찾기
 					"/naverLogin", "/naverJoin", "/updateNaverMember", "/deleteNaverMember", "/kakao", "/login/naver/callback", // 소셜 로그인
 					"/phoneCertify", "/certifyNumber", // 휴대폰 인증
 					"/ajax/menu/options", "/addCart", "/getCart", "/updateQuantity", "/deleteCart", "/removeAll", // AJAX 요청 (장바구니 등)
 					"/ws/**", "/user/**", "/topic/**", "/app/**", // 웹소켓 엔드포인트
-					"/css/**", "/js/**", "/images/**", "/bootstrap/**", "/error", "/favicon.ico", "/shopMain" // 정적 리소스 및 에러 페이지
+					"/css/**", "/js/**", "/images/**", "/bootstrap/**", "/error", "/favicon.ico", "/rider/request" ,"/shopMain" // 정적 리소스 및 에러 페이지
 				).permitAll()
 				// 사장님만 접근 가능한 경로 (예시)
-				.requestMatchers("/shopMenu", "/shopInfo", "/shopReview", "/shopOrder", "/shopSales", "/shopNotice", "/shopQna", "/shopSetting", "/shopUpdate", "/shopRegister", "/shopRegisterForm", "/shopUpdateForm", "/shopMenuForm", "/shopNoticeForm", "/shopQnaForm", "/shopReviewForm", "/shopOrderForm", "/shopSalesForm", "/shopSettingForm").hasRole("OWNER") // "OWNER" 역할만 허용
+				.requestMatchers("/shop*", "/menu*").hasRole("OWNER") // "OWNER" 역할만 허용
 				// 그 외 모든 요청은 인증된 사용자만 허용
 				.anyRequest().authenticated()
 				)

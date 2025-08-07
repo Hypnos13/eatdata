@@ -1,3 +1,26 @@
+// ==== 주문관리 배달시작/완료 버튼 ====
+let stompClient;       // 전역으로 빼서 나중에도 접근 가능하게
+window.changeStatus = function(oNo, newStatus) {
+  // stompClient 가 아직 연결되기 전일 수도 있으니
+  if (!stompClient) return;
+
+  stompClient.send(
+    '/app/order/changeStatus',
+    {}, 
+    JSON.stringify({ oNo: oNo, newStatus: newStatus })
+  );
+};
+
+// 그 다음에 DOMContentLoaded 안에서 stompClient 연결
+document.addEventListener('DOMContentLoaded', () => {
+  const socket = new SockJS('/ws');
+  stompClient = Stomp.over(socket);
+
+  stompClient.connect({}, () => {
+    // (주문 상세 갱신, 리스트 갱신 구독 로직)
+  });
+});
+
 // ==== 알림 렌더링 헬퍼 함수 ====
 // 기존 리스트를 완전히 지우는 함수
 function clearHeaderList() {
@@ -5,22 +28,10 @@ function clearHeaderList() {
 }
 
 // 주문 ID 배열을 받아서 헤더 알림(뱃지 + 리스트)을 그려주는 함수
-/**
- * PENDING 주문 ID 배열을 받아 헤더 알림 UI(뱃지, 드롭다운 목록)를 렌더링합니다.
- * @param {number[]} orderIds PENDING 상태인 주문 ID 배열
- */
 function renderPendingOrders(orderIds) {
-  // 1. 헤더에서 알림 뱃지와 리스트 요소를 찾습니다.
   const badge = document.getElementById('header-notif-badge');
   const ul    = document.getElementById('header-notif-list');
 
-  // 2. (핵심 수정사항) 뱃지(badge)나 리스트(ul)가 존재하는지 먼저 확인합니다.
-  //    로그아웃 상태에서는 이 요소들이 없으므로(null), 오류를 방지하기 위해 함수를 즉시 종료합니다.
-  if (!badge || !ul) {
-    return; 
-  }
-
-  // 3. 요소가 존재할 경우에만 아래의 UI 업데이트 로직을 실행합니다.
   badge.textContent = orderIds.length;
   if (orderIds.length > 0) {
     badge.classList.remove('d-none');
@@ -28,25 +39,22 @@ function renderPendingOrders(orderIds) {
     ul.innerHTML = '<li><h6 class="dropdown-header">새로운 알림</h6></li>';
     orderIds.forEach(oNo => {
       const li = document.createElement('li');
-      // 다른 함수들과의 일관성을 위해 클래스명을 'notif-item'으로 통일합니다.
-      li.className = 'notif-item'; 
+      li.classList.add('notif-entry');
       li.dataset.orderNo = oNo;
+	  // a태그 생성
+        const a = document.createElement('a');
+        a.classList.add('dropdown-item', 'text-truncate');
+        a.href = `/shop/newOrders?sOrderNo=${oNo}`;
+        a.textContent = '🚨 신규 주문이 도착했습니다.';
 
-      const a = document.createElement('a');
-      a.className = 'dropdown-item text-truncate';
-      a.href = `/shop/newOrders?sOrderNo=${oNo}`;
-      // 사용자가 어떤 주문인지 알 수 있도록 주문 번호를 텍스트에 추가합니다.
-      a.textContent = `🚨 신규 주문이 도착했습니다. (#${oNo})`;
-
-      li.appendChild(a);
-      ul.appendChild(li);
-    });
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
     markBellAsUnread();
   } else {
     badge.classList.add('d-none');
     clearBellBlink();
-    // "알림 없음" 메시지를 좀 더 보기 좋게 수정합니다.
-    ul.innerHTML = '<li><p class="text-center text-muted my-2 mb-0">새로운 알림이 없습니다.</p></li>';
+    ul.innerHTML = '<li class="text-muted mb-0">알림이 없습니다.</li>';
   }
 }
 
@@ -559,76 +567,87 @@ $('.reply-box')
   });
 });
 
-// ================================================================
-// SECTION: 최종 WebSocket 초기화 및 이벤트 처리 로직
-// - 페이지 로드 완료 후, 안정적인 시점에 웹소켓 연결을 설정합니다.
-// ================================================================
+// ==== 8. WebSocket 초기화 & 이벤트 처리 =================
 document.addEventListener('DOMContentLoaded', () => {
-    // 페이지의 다른 스크립트가 모두 준비될 시간을 벌기 위해 0.15초 지연 실행
-    setTimeout(() => {
-        const notifyContainer = document.getElementById('notifyContainer');
-        // notifyContainer가 없는 페이지(예: 로그인 페이지)에서는 웹소켓을 연결하지 않습니다.
-        if (!notifyContainer) {
-            return; 
-        }
+  // 8.0: shopId 조회 (헤더 알림 컨테이너에서)
+  const notifyContainer = document.getElementById('notifyContainer');
+  if (!notifyContainer) return;
+  const shopId = notifyContainer.dataset.shopId;
 
-        const shopId = notifyContainer.dataset.shopId;
-        if (!shopId) {
-            console.error('[WebSocket] 가게 ID(shopId)를 찾을 수 없어 연결을 시작할 수 없습니다.');
-            return;
-        }
+  // 8.1: SockJS & STOMP 클라이언트 생성
+  const socket      = new SockJS('/ws');
+  const stompClient = Stomp.over(socket);
 
-        const socket = new SockJS('/ws');
-        const stompClient = Stomp.over(socket);
-        stompClient.debug = null; // 콘솔에 STOMP 상세 로그를 출력하지 않음
+  // 8.2: STOMP 연결 후 구독 시작
+  stompClient.connect({}, () => {
+    console.log('[shop.js] STOMP connected, shopId=', shopId);
 
-        stompClient.connect({}, () => {
-            console.log(`[WebSocket] STOMP 연결 성공 (가게 ID: ${shopId})`);
+    // 8.2.1: 신규 주문 알림 구독
+    stompClient.subscribe(`/topic/newOrder/${shopId}`, msg => {
+    
+  	// (1) 헤더 알림 + 벨 아이콘 깜빡임
+      renderHeaderNotification(msg);
+      markBellAsUnread();
 
-            // 구독 1: 신규 주문 알림 채널 (`/topic/newOrder/{shopId}`)
-            stompClient.subscribe(`/topic/newOrder/${shopId}`, (msg) => {
-                console.log('[WS] 신규 주문 수신:', msg.body);
-                renderHeaderNotification(msg);
-                markBellAsUnread();
-                if (window.location.pathname.includes('/shop/newOrders')) {
-                    location.reload();
-                }
-            });
+  	// 2) 만약 현재 주소가 newOrders 페이지라면 강제 새로고침
+	if (location.pathname === '/shop/newOrders') {
+    	location.reload();
+    	return;
+  	}
 
-            // 구독 2: 주문 상태 변경 알림 채널 (`/topic/orderStatus/shop/{shopId}`)
-            stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, (msg) => {
-                console.log('[WS] 주문 상태 변경 수신:', msg.body);
-                const payload = JSON.parse(msg.body);
-                
-                // 2-1. 헤더 알림 UI 업데이트
-                const badge = document.getElementById('header-notif-badge');
-                if (badge) {
-                    badge.textContent = payload.newPendingCount;
-                    if (payload.newPendingCount > 0) {
-                        badge.classList.remove('d-none');
-                    } else {
-                        badge.classList.add('d-none');
-                        clearBellBlink();
-                    }
-                }
-                const notifItem = document.querySelector(`#header-notif-list .notif-item[data-order-no="${payload.oNo}"]`);
-                if (notifItem) {
-                    notifItem.remove();
-                }
+    // 3) newOrders 페이지가 아닐 때는, 그냥 리스트에 항목만 추가
+    if (document.getElementById('newOrderList')) {
+      renderNewOrderItem(msg);
+    }
+  });
 
-                // 2-2. 주문 관리 페이지에 있을 경우, 실시간 처리
-                if (window.location.pathname.includes('/shop/orderManage')) {
-                    if (payload.newStatus === 'DISPATCHED') {
-                        markBellAsUnread();
-                        alert('라이더 배차가 완료되었습니다!');
-                        location.reload();
-                    }
-                }
-            });
+	// 8.2.2: 가게 채널의 모든 주문 상태 변경 구독 (최종 수정본)
+	stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, msg => {
+	    console.log('[WS] 가게 채널 상태 변경 수신:', msg.body);
+	    const payload = JSON.parse(msg.body);
 
-        }); // connect callback 끝
-    }, 150); // 0.15초 지연
+	    // --- 1. 헤더 알림 실시간 업데이트 ---
+	    // 서버가 보내준 최신 PENDING 주문 개수로 뱃지를 직접 업데이트합니다.
+	    const badge = document.getElementById('header-notif-badge');
+	    if (badge) {
+	        const newCount = payload.newPendingCount;
+	        badge.textContent = newCount;
+	        if (newCount > 0) {
+	            badge.classList.remove('d-none');
+	        } else {
+	            badge.classList.add('d-none');
+	            clearBellBlink(); // 깜빡임도 제거
+	        }
+	    }
+	    // 헤더 드롭다운 목록에서 해당 주문을 찾아 제거합니다.
+	    const notifItem = document.querySelector(`#header-notif-list .notif-item[data-order-no="${payload.oNo}"]`);
+	    if (notifItem) {
+	        notifItem.remove();
+	    }
+	    // --- 2. 주문 관리 페이지 실시간 업데이트 ---
+	    // 현재 페이지가 주문 관리 페이지일 때만 아래 로직을 실행합니다.
+	    if (window.location.pathname.includes('/shop/orderManage')) {
+	        if (payload.newStatus === 'DISPATCHED') {
+						markBellAsUnread(); 
+	          alert('라이더 배차가 완료되었습니다!');
+	          location.reload();
+					}
+	    }
+	});
+
+    // 8.2.3: 주문 상태 변경 구독 (테이블 업데이트)
+    document.querySelectorAll('tr[data-order-no]').forEach(row => {
+      const oNo = row.dataset.orderNo;
+      stompClient.subscribe(`/topic/orderStatus/order/${oNo}`, msg => {
+        console.log('[WS 상태변경_테이블]', msg.body);
+        const { newStatus } = JSON.parse(msg.body);
+        const cell = document.querySelector(`.status-cell[data-order-no="${oNo}"]`);
+        if (cell) cell.textContent = newStatus;
+      });
+    });
+  });
 });
+
 // ==== 9. 알림 아이콘 깜박임 제어 ===========================
 //알림 아이콘 깜박임 시작
 function markBellAsUnread() {
