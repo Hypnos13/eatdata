@@ -35,14 +35,12 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler, Authen
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
     	
-    	System.out.println("진입");
     	String id = (String)request.getParameter("username");
     	String pass = (String)request.getParameter("password");
     	String redirectURL = (String)request.getParameter("redirectURL");
     	HttpSession session = request.getSession();
-    	System.out.println("id= "+id+" , pass= "+pass+" , URL = "+redirectURL);
+
     	int login = loginService.login(id, pass);   // login : -2(관리자에게 사용금지 당함) / -1 (존재하지 않음) / 0 (아이디는 있으나 비밀번호 불일치) / 1 (아이디 비밀번호 일치)
-    	System.out.println("login 은 "+login);
     	
 		Member member = loginService.getMember(id);
 		
@@ -89,9 +87,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler, Authen
     	String pass = (String)request.getParameter("password");
     	String redirectURL = (String)request.getParameter("redirectURL");
 
-    	System.out.println("Fid= "+id+" , Fpass= "+pass+" , URL = "+redirectURL);
     	int login = loginService.login(id, pass);   // login : -2(관리자에게 사용금지 당함) / -1 (존재하지 않음) / 0 (아이디는 있으나 비밀번호 불일치) / 1 (아이디 비밀번호 일치)
-    	System.out.println("login 은 "+login);
     	
     	response.setContentType("text/html; charset=utf-8");
     	PrintWriter out = response.getWriter();
