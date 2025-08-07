@@ -1,7 +1,5 @@
 package com.projectbob.configurations;
 
-import java.util.Collections;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,13 +10,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.projectbob.service.LoginService; // LoginService 임포트
 import com.projectbob.domain.Member; // Member 클래스 임포트
-import com.projectbob.configurations.LoginSuccessHandler; // LoginSuccessHandler 임포트
 
 @Configuration
 @EnableWebSecurity
@@ -44,7 +40,7 @@ public class SecurityConfig {
 					"/main", "/shopList", "/MenuDetail", "/completed", // 고객이 보는 페이지
 					"/login", "/joinMemberForm", "/joinMember", "/searchIdPass", "/searchIdPassForm", "/overlapId.ajax", // 로그인/회원가입/찾기
 					"/naverLogin", "/naverJoin", "/updateNaverMember", "/deleteNaverMember", "/kakao", "/login/naver/callback", // 소셜 로그인
-					"/phoneCertify", "/certifyNumber", // 휴대폰 인증
+					"/phoneCertify", "/certifyNumber", "/faqList", // 휴대폰 인증  
 					"/ajax/menu/options", "/addCart", "/getCart", "/updateQuantity", "/deleteCart", "/removeAll", // AJAX 요청 (장바구니 등)
 					"/ws/**", "/user/**", "/topic/**", "/app/**", // 웹소켓 엔드포인트
 					"/css/**", "/js/**", "/images/**", "/bootstrap/**", "/error", "/favicon.ico", "/rider/request" ,"/shopMain" // 정적 리소스 및 에러 페이지
