@@ -23,14 +23,17 @@ import com.projectbob.configurations.LoginSuccessHandler; // LoginSuccessHandler
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final CustomAuthProvider customAuthProvider;
 	
 	private final LoginService loginService; // LoginService 주입을 위한 필드
     private final LoginSuccessHandler loginSuccessHandler; // LoginSuccessHandler 주입을 위한 필드
 
 	// 생성자 주입
-	public SecurityConfig(LoginService loginService, LoginSuccessHandler loginSuccessHandler) {
+	public SecurityConfig(LoginService loginService, LoginSuccessHandler loginSuccessHandler, CustomAuthProvider customAuthProvider) {
 		this.loginService = loginService;
         this.loginSuccessHandler = loginSuccessHandler;
+        this.customAuthProvider = customAuthProvider;
 	}
 	
 	@Bean
@@ -39,7 +42,7 @@ public class SecurityConfig {
 				// 로그인 없이 접근 가능한 경로들 (LoginCheckInterceptor의 guestAllowedUrls 역할)
 				.requestMatchers(
 					"/main", "/shopList", "/MenuDetail", "/completed", // 고객이 보는 페이지
-					"/login", "/joinMember", "/searchIdPass", "/searchIdPassForm", // 로그인/회원가입/찾기
+					"/login", "/joinMemberForm", "/joinMember", "/searchIdPass", "/searchIdPassForm", // 로그인/회원가입/찾기
 					"/naverLogin", "/naverJoin", "/updateNaverMember", "/deleteNaverMember", "/kakao", "/login/naver/callback", // 소셜 로그인
 					"/phoneCertify", "/certifyNumber", // 휴대폰 인증
 					"/ajax/menu/options", "/addCart", "/getCart", "/updateQuantity", "/deleteCart", "/removeAll", // AJAX 요청 (장바구니 등)
@@ -52,13 +55,13 @@ public class SecurityConfig {
 				.anyRequest().authenticated()
 				)
 		.csrf(csrf -> csrf.disable()) // 개발 편의를 위해 CSRF 비활성화
+		.authenticationProvider(customAuthProvider)
 		.formLogin(form -> form // 폼 로그인 설정
 				.loginPage("/login") // 실제 로그인 페이지 url
 				.loginProcessingUrl("/loginProc")	// 로그인 처리 url
-				// .defaultSuccessUrl("/main", true)	// 로그인 성공 시 리다이렉트될 url
-				.failureUrl("/login?error=true")	// 로그인 실패 시 리다이렉트될 url
 				.permitAll()	// 로그인 페이지는 모두 접근 가능
 				.successHandler(loginSuccessHandler) // <-- 이 라인 추가
+				.failureHandler(loginSuccessHandler)
 				)
 		.logout(logout -> logout
 				.logoutUrl("/logout")	// 로그아웃 처리 url
