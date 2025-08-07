@@ -4,8 +4,9 @@
 <div th:fragment="header" class="top-bar row">
 
   <th:block th:if="${(session.loginDivision == 'client' || session.loginDivision == null && from != 'owner' )}">
-  <div class="col-5 logo-area">
-  	<div class="row">
+  
+  <div class="col-5 logo-area d-flex align-items-center justify-content-between">
+  	
   		<div class="col-4">
   			<a th:href="@{/main}"><img th:src="@{/images/nlogo.png}"/></a>
   		</div>
@@ -13,10 +14,13 @@
 			<div id="notifyContainer"
 			         th:if="${session.isLogin != null && session.loginDivision == 'client'}"
 			         th:attr="data-client-id=${session.loginId}"
-			         class="position-relative ms-3 dropdown">
+			         class="position-relative dropdown"
+			         style="margin-left:auto;">
 			      <a href="#" id="headerNotifyBtn" data-bs-toggle="dropdown" aria-expanded="false">
-			        <i id="notifyIcon" class="bi bi-bell-fill fs-4 text-warning"></i>
-			      </a>
+        <i id="notifyIcon" class="bi bi-bell-fill fs-4 text-warning"></i>
+        
+        <span id="header-notif-indicator" class="d-none"></span>
+      </a>
 			      <span id="header-notif-badge"
 			            th:text="${session.notifyCount}"
 			            class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1"
@@ -32,7 +36,8 @@
 			      </ul>
 			</div>
 		</div>
-  	</div>
+  	
+
   </div>
   </th:block>
   
@@ -73,4 +78,10 @@
     	<a th:href="@{/couponManage}" class="topbar-href">쿠폰관리</a>
     </th:block>
   </div>
+
 </div>
+
+
+
+
+</html>

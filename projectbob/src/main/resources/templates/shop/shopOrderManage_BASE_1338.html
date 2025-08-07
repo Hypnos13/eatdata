@@ -8,18 +8,7 @@
 <title>주문 관리</title>
 <style>
   /* ─── 레이아웃 ─────────────────────────────── */
-  :root {
-  --theme-color: #43D091;
-}
-  .main-container { display: flex; height: calc(100vh - 70px); 
-  }
-  .order-detail-box {
-  background: #ffffff;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
+  .main-container { display: flex; height: calc(100vh - 70px); }
   .order-list-panel {
     width: 360px;
     background: var(--light-color);
@@ -32,8 +21,6 @@
     font-weight:bold;
     color: var(--dark-color);
     border-bottom:1px solid #dee2e6;
-  	display: flex;
-  	align-items: center;
   }
   .btn-group.w-100 .btn {
     flex:1;
@@ -49,11 +36,7 @@
     color: var(--main-color);
   }
 
-  .order-list-header .badge {
-     margin-left: auto;
-   }
-  .order-list { overflow-y:auto; flex-grow:1; 
-  }
+  .order-list { overflow-y:auto; flex-grow:1; }
   .order-card {
     padding:.75rem 1rem;
     border-bottom:1px solid #e9ecef;
@@ -78,53 +61,48 @@
   }
 
   /* ─── 타임라인 ───────────────────────────── */
-.status-steps {
-  display: flex;
-  margin: 1rem 0;
-  padding: 0 1.5rem;           /* ← 좌우 여백 조정 */
-  list-style: none;
-  background: #fff;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-}
-
+  .status-steps {
+    display:flex;
+    counter-reset:step;
+    margin:1rem 0;
+    list-style:none;
+    padding:0;
+  }
   .status-steps li {
-  position: relative;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem 0.5rem;
-  z-index: 1;                  /* 선보다 위에 */
-}
-
-/* 아이콘 스타일 */
-.status-steps li i {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-  color: #ccc;
-  position: relative;
-  z-index: 1;
-}
-
-/* 완료된 단계 강조 */
-.status-steps li.completed i {
-  color: var(--theme-color);
-}
-
-/* 각 단계 사이의 선 */
-.status-steps li + li::before {
-  content: '';
-  position: absolute;
-  /* 아이콘 패딩(1rem) + 아이콘 높이(1.5rem)의 절반 */
-  top: 1.75rem;
-  left: -50%;
-  width: 100%;
-  height: 2px;
-  background: #ccc;
-  z-index: -1;
-  transform: none;
-}
+    position:relative;
+    flex:1;
+    text-align:center;
+  }
+  .status-steps li:before {
+    counter-increment:step;
+    content:counter(step);
+    width:2rem; height:2rem; line-height:2rem;
+    border:2px solid #ccc;
+    border-radius:50%;
+    background: var(--light-color);
+    margin:0 auto;
+    z-index:1;
+  }
+  .status-steps li:after {
+    content:'';
+    position:absolute;
+    width:100%; height:2px;
+    background:#ccc;
+    top:1rem; left:-50%;
+    z-index:0;
+  }
+  .status-steps li:first-child:after { display:none; }
+  .status-steps li.completed:before,
+  .status-steps li.completed:after {
+    background: var(--main-color);
+    border-color: var(--main-color);
+  }
+  .status-steps li span {
+    display:block;
+    margin-top:.5rem;
+    font-size:.9rem;
+    color: var(--dark-color);
+  }
 
   /* ─── 주문 정보 카드 ───────────────────────── */
   .order-info-card {
@@ -171,21 +149,6 @@
     font-weight: 600;
     color: var(--dark-color);
   }
-  .order-detail-box--info .order-info-card {
-     width: 100%;
-     max-width: none;   /* 기존 max-width:600px 무시 */
-     margin: 0;         /* margin-left:auto 제거 */
-  }
-  .order-detail-box--info .list-group-item {
-  border: none;
-  border-bottom: 1px solid #eee;
-}
-  .order-detail-box--info .list-group-item:last-child {
-  border-bottom: none;
-}
-.order-detail-box--info h5 {
-  margin-bottom: .75rem;
-}
   @media (max-width:576px) {
     .order-info-card .list-group-item {
       flex-wrap: wrap;
@@ -216,21 +179,11 @@
     border-color: var(--main-color);
     color: var(--light-color);
   }
-  .order-detail-box--actions .btn-group {
-  display: flex;
-  width: 100%;
-}
-  .order-detail-box--actions .btn-group .btn {
-  flex: 1;
-  margin: 0; 
-}
-.order-detail-box--actions .btn-group .btn + .btn {
-  margin-left: 0.5rem;
-}
 </style>
 </head>
 <body>
 	<th:block layout:fragment="content">
+	  <div class="content-card">
 	  <div class="main-container">
 	    
 	    <!-- 좌측: 상태 필터 & 리스트 -->
@@ -238,10 +191,8 @@
 	      <div class="order-list-header">
 	        <i class="bi bi-receipt"></i>
 	        주문 관리
-	      <span class="badge bg-primary rounded-pill" th:text="${#lists.size(orders)}">0</span>
+	        
 	      </div>
-	      
-	      
 	      <div class="btn-group w-100 mb-2">
 	        <a th:href="@{/shop/orderManage(status='ACCEPTED')}"
 	           th:classappend="${status=='ACCEPTED'}?'btn-primary':'btn-outline-primary'"
@@ -263,7 +214,7 @@
 	           class="order-card"
 	           th:classappend="(selectedOrder?.oNo == o.oNo) or (selectedOrder==null and iter.index==0) ? ' active'">
 	          <div class="order-card-title">
-	            <span>주문번호 <span th:text="${o.oNo}"></span></span>
+	            <span>주문 #<span th:text="${o.oNo}"></span></span>
 	            <span th:text="${o.payment}"></span>
 	          </div>
 	          <div class="order-card-detail">
@@ -276,123 +227,80 @@
 	    
 	    <!-- 우측 상세 패널 -->
 	    <div class="order-detail-panel">
-			
-			<!-- 주문 선택 시 -->
-		  	<th:block th:if="${selectedOrder != null}">
-	        
-	        <!-- 1. 주문번호 & 상단정보 -->
-			<div class="order-detail-box order-detail-box--header">
-			  <div class="d-flex justify-content-between">
-			    <!-- 좌측: 주문번호, 주소·수량 -->
-			    <div>
-			      <h4 class="mb-1">
-			        주문번호 <span th:text="${selectedOrder.oNo}"></span>
-			      </h4>
-			      <div class="text-muted">
-			        <span th:text="${selectedOrder.oAddress}">서울 강남구</span>
-				</div>
-			    </div>
-			    <!-- 우측: 주문일시, 배달/픽업 -->
-			    <div class="text-end">
-			      <div class="text-muted mb-1"
-			           th:text="${#dates.format(selectedOrder.regDate,'yyyy-MM-dd HH:mm')}">
-			        2025-08-06 12:34
-			      </div>
-			      <div class="fw-bold"
-			           th:text="${selectedOrder.oAddress != null ? '배달' : '픽업'}">
-			        배달
-			      </div>
-			    </div>
+
+	      <th:block th:if="${selectedOrder!=null}">
+	        <h4>주문번호 <span th:text="${selectedOrder.oNo}"></span></h4>
+
+	        <!-- 타임라인 -->
+	        <ul class="status-steps">
+	        	<li th:classappend="${#lists.contains({'ACCEPTED', 'DISPATCHED', 'DELIVERING', 'COMPLETED'}, selectedOrder.status)} ? 'completed'">
+    				<span>조리 중</span>
+					  </li>
+					  <li th:classappend="${#lists.contains({'DISPATCHED', 'DELIVERING', 'COMPLETED'}, selectedOrder.status)} ? 'completed'">
+					    <span>배차 완료</span>
+					  </li>
+					  <li th:classappend="${#lists.contains({'DELIVERING', 'COMPLETED'}, selectedOrder.status)} ? 'completed'">
+					    <span>배달 중</span>
+					  </li>
+					  <li th:classappend="${selectedOrder.status=='COMPLETED'} ? 'completed'">
+					    <span>완료</span>
+					  </li>
+					</ul>
+
+	        <!-- 주문 정보 카드 -->
+			<div class="card order-info-card mb-4">
+			  <div class="card-header bg-white border-0 px-0 pb-0">
+			    <h5 class="mb-0"><i class="bi bi-receipt me-2 text-primary"></i>주문 정보</h5>
 			  </div>
-			</div>
-
-	        <!-- 2. 타임라인 -->
-		    <div class="order-detail-section timeline">
-		      <ul class="status-steps">
-				  <li th:classappend="${#lists.contains({'ACCEPTED','DISPATCHED','DELIVERING','COMPLETED'},selectedOrder.status)} ? 'completed'">
-				    <i class="bi bi-clock-fill"></i>
-				    <span>조리 중</span>
-				  </li>
-				  <li th:classappend="${#lists.contains({'DISPATCHED','DELIVERING','COMPLETED'},selectedOrder.status)} ? 'completed'">
-				    <i class="bi bi-box-seam"></i>
-				    <span>배차 완료</span>
-				  </li>
-				  <li th:classappend="${#lists.contains({'DELIVERING','COMPLETED'},selectedOrder.status)} ? 'completed'">
-				    <i class="bi bi-truck"></i>
-				    <span>배달 중</span>
-				  </li>
-				  <li th:classappend="${selectedOrder.status=='COMPLETED'} ? 'completed'">
-				    <i class="bi bi-check-circle-fill"></i>
-				    <span>완료</span>
-				  </li>
-				</ul>
-		    </div>
-
-	        <!-- 3. 주문정보 -->
-	        <div class="order-detail-box order-detail-box--info">
 			  <ul class="list-group list-group-flush mt-2">
-			    <!-- 메뉴 -->
 			    <li class="list-group-item d-flex align-items-center py-2">
-			    <i class="text-secondary me-3 fs-5"></i>
-				   <div class="flex-shrink-1">메뉴</div>
-				  <div class="flex-grow-1 text-end"
-				       th:utext="${#strings.replace(selectedOrder.menus, ',', '<br/>')}">
-			        <!-- 예시: 치킨 *1<br/>콜라 *1 -->
+			      <i class="bi bi-clock-history text-secondary me-3 fs-5"></i>
+			      <div class="flex-grow-1">주문일시</div>
+			      <div class="fw-bold" th:text="${#dates.format(selectedOrder.regDate,'yyyy-MM-dd HH:mm')}">2025-08-06 12:34</div>
+			    </li>
+			    <li class="list-group-item d-flex align-items-center py-2">
+			      <i class="bi bi-truck text-secondary me-3 fs-5"></i>
+			      <div class="flex-grow-1">배달/픽업</div>
+			      <div class="fw-bold" th:text="${selectedOrder.oAddress!=null?'배달':'픽업'}">배달</div>
+			    </li>
+			    <li class="list-group-item d-flex align-items-center py-2" th:if="${selectedOrder.oAddress}">
+			      <i class="bi bi-geo-alt text-secondary me-3 fs-5"></i>
+			      <div class="flex-grow-1">주소</div>
+			      <div class="text-end" th:text="${selectedOrder.oAddress}">서울 강남구 …</div>
+			    </li>
+			    <li class="list-group-item d-flex align-items-center py-2">
+			      <i class="bi bi-currency-won text-secondary me-3 fs-5"></i>
+			      <div class="flex-grow-1">총액/수량</div>
+			      <div class="fw-bold">
+			        <span th:text="${selectedOrder.totalPrice + '원'}">11,000원</span> /
+			        <span th:text="${selectedOrder.quantity + '개'}">1개</span>
 			      </div>
 			    </li>
-			    <!-- 총액 -->
-			    <li class="list-group-item d-flex align-items-center py-2">
-			      <i class="text-secondary me-3 fs-5"></i>
-			      <div class="flex-grow-1">총액</div>
-			      <div class="fw-bold" th:text="${selectedOrder.totalPrice + '원'}">
-			        32,500원
+			    <li class="list-group-item py-2">
+			      <i class="bi bi-list-ul text-secondary me-3 fs-5"></i>
+			      <div class="d-flex w-100">
+			        <div class="flex-grow-1">메뉴</div>
+			        <div class="fw-bold text-end" th:utext="${selectedOrder.menus}">치킨 *1</div>
 			      </div>
 			    </li>
-			    <!-- 요청사항 -->
 			    <li class="list-group-item d-flex align-items-center py-2">
-			      <i class="text-secondary me-3 fs-5"></i>
+			      <i class="bi bi-chat-square-text text-secondary me-3 fs-5"></i>
 			      <div class="flex-grow-1">요청사항</div>
-			      <div class="fw-bold" th:text="${selectedOrder.request ?: '없음'}">
-			        벨 눌러주세요
-			      </div>
+			      <div class="fw-bold" th:text="${selectedOrder.request ?: '없음'}">없음</div>
 			    </li>
 			  </ul>
 			</div>
-		
-			<!-- 4. 버튼 -->
-		    <div class="order-detail-box order-detail-box--actions"
-					th:if="${selectedOrder.status != 'COMPLETED'}">
-		      <div class="btn-group">
-		        <button
-		          th:if="${selectedOrder.status=='ACCEPTED' or selectedOrder.status=='DISPATCHED'}"
-		          class="btn btn-warning me-2"
-		          th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus=DELIVERING)}'|">
-		          🚚 배달 시작
-		        </button>
-		        <button
-		          th:if="${selectedOrder.status=='DELIVERING'}"
-		          class="btn btn-success"
-		          th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus=COMPLETED)}'|">
-		          ✅ 배달 완료
-		        </button>
-		      </div>
-		    </div>
-		
-		  </th:block>
 
-<<<<<<< HEAD
-	      <!-- 주문 미선택 시 -->
-		  <th:block th:if="${selectedOrder == null}">
-		    <div class="text-center text-muted p-5">
-		      왼쪽에서 주문을 선택하세요.
-		    </div>
-		  </th:block>
-=======
 			<!-- 상태 변경 버튼 -->
 			<div class="btn-group">
-				<button th:if="${selectedOrder.status=='ACCEPTED' or selectedOrder.status=='DISPATCHED'}"class="btn btn-warning me-2" type="button"
-						th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus='DELIVERING')}'|">🚚 배달 시작</button>
-			 	<button th:if="${selectedOrder.status=='DELIVERING'}"
+					  <button th:if="${selectedOrder.status=='ACCEPTED' or selectedOrder.status=='DISPATCHED'}"
+					          class="btn btn-warning me-2" type="button"
+					          th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus='DELIVERING')}'|">
+					    🚚 배달 시작
+					  </button>
+				  </div>
+
+			  <button th:if="${selectedOrder.status=='DELIVERING'}"
 			          class="btn btn-success me-2"
 			          type="button"
 			          th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus=COMPLETED)}'|">
@@ -406,9 +314,8 @@
 	          왼쪽에서 주문을 선택하세요.
 	        </div>
 	      </th:block>
->>>>>>> develop
 	    </div>
-		
+		</div>
 	  </div>
 	</th:block>
 </body>

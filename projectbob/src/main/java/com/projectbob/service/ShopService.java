@@ -429,9 +429,26 @@ public class ShopService {
         String userId = shopMapper.getUserIdByOrderNo(oNo);
         int shopId = order.getSId();
 
+
+        // 3. Payload 생성
+        String message = "";
+        if ("ACCEPTED".equals(newStatus)) {
+            message = "✅ 주문 #" + oNo + "이(가) 수락되었습니다! 곧 준비가 시작됩니다.";
+        } else if ("REJECTED".equals(newStatus)) {
+            message = "❌ 주문 #" + oNo + "이(가) 가게 사정으로 취소되었습니다. 결제 금액은 자동 환불됩니다.";
+        } else if ("DELIVERING".equals(newStatus)) {
+            message = "🛵 주문 #" + oNo + "이(가) 배달을 시작했습니다!";
+        } else if ("COMPLETED".equals(newStatus)) {
+            message = "✅ 주문 #" + oNo + "이(가) 완료되었습니다! 맛있게 드세요.";
+        } else {
+            message = "🔔 주문 #" + oNo + " 상태 업데이트: " + newStatus;
+        }
+
+
         // 3. (핵심) 상태 변경 후, 최신 PENDING 주문 개수를 다시 DB에서 조회합니다.
         // 이 개수는 점주 페이지의 헤더 알림 뱃지를 실시간으로 정확하게 업데이트하는 데 사용됩니다.
         int newPendingCount = shopMapper.countOrdersByStatusAndShop("PENDING", shopId);
+
 
         // 4. WebsocketService를 통해 점주에게 변경 사실과 '최신 알림 개수'를 함께 전송합니다.
         websocketService.sendOrderStatusChange(oNo, shopId, newStatus, newPendingCount);

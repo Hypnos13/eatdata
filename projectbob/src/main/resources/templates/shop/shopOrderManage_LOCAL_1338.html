@@ -380,33 +380,12 @@
 		
 		  </th:block>
 
-<<<<<<< HEAD
 	      <!-- 주문 미선택 시 -->
 		  <th:block th:if="${selectedOrder == null}">
 		    <div class="text-center text-muted p-5">
 		      왼쪽에서 주문을 선택하세요.
 		    </div>
 		  </th:block>
-=======
-			<!-- 상태 변경 버튼 -->
-			<div class="btn-group">
-				<button th:if="${selectedOrder.status=='ACCEPTED' or selectedOrder.status=='DISPATCHED'}"class="btn btn-warning me-2" type="button"
-						th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus='DELIVERING')}'|">🚚 배달 시작</button>
-			 	<button th:if="${selectedOrder.status=='DELIVERING'}"
-			          class="btn btn-success me-2"
-			          type="button"
-			          th:onclick="|location.href='@{/shop/orderManage/{oNo}/status(oNo=${selectedOrder.oNo},newStatus=COMPLETED)}'|">
-			    ✅ 배달 완료
-			  </button>
-			</div>
-	      </th:block>
-
-	      <th:block th:if="${selectedOrder==null}">
-	        <div class="text-center text-muted p-5">
-	          왼쪽에서 주문을 선택하세요.
-	        </div>
-	      </th:block>
->>>>>>> develop
 	    </div>
 		
 	  </div>
