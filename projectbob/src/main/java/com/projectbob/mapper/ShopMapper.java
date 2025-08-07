@@ -51,6 +51,8 @@ public interface ShopMapper {
 
     int updateShopInfo(@Param("sId") Integer sId, @Param("sInfo") String sInfo);
 
+    int updateShopMinPrice(@Param("sId") Integer sId, @Param("minPrice") int minPrice);
+
     // 리뷰 목록 (XML 의 <select id="findReviewsByShopId">)
     List<Review> findReviewsByShopId(@Param("sId") int sId);
     

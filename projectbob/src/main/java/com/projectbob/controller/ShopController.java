@@ -594,11 +594,12 @@ public class ShopController {
 		return "shop/shopNotice";
 	}
 
-	// ── 사장님 공지 & 가게소개 저장 ─────────────────────────────
+	// ── 사장님 공지 & 가게소개 & 최소주문금액 저장 ─────────────────────────────
 	@PostMapping("/shopNotice")
 	public String updateNotice(@RequestParam("s_id") Integer sId,
 			@RequestParam(value = "notice", required = false) String notice,
 			@RequestParam(value = "s_info", required = false) String sInfo, @RequestParam("action") String action,
+			@RequestParam(value = "minPrice", required = false) Integer minPrice,
 			@SessionAttribute(name = "loginId", required = false) String loginId, RedirectAttributes ra) {
 
 		if (loginId == null) {
@@ -618,6 +619,9 @@ public class ShopController {
 		} else if ("info".equals(action)) {
 			shopService.updateShopInfo(sId, sInfo);
 			ra.addFlashAttribute("message", "가게소개가 저장되었습니다.");
+		} else if ("minPrice".equals(action)) {
+			shopService.updateShopMinPrice(sId, minPrice);
+			ra.addFlashAttribute("message", "최소 금액이 저장되었습니다.");
 		}
 
 		return "redirect:/shopNotice?s_id=" + sId;

@@ -10,7 +10,6 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <th:block th:replace="~{fragments/shopHeader :: shopHeader}" />
 
   <div layout:fragment="content">
     <div class="content-card">
@@ -39,10 +38,20 @@
 		          가게정보 저장
 		        </button>
 	        </div>
+	        
+          	<div class="mb-3">
+		    	<label for="minPrice" class="form-label">주문 최소 금액</label>
+		    	<input id="minPrice" name="minPrice" type="number" class="form-control"
+		           	th:value="${shop.minPrice}" placeholder="예: 10000" />
+		  	</div>
+		  	<div class="d-flex justify-content-end">
+		    	<button type="submit" name="action" value="minPrice" class="btn btn-primary">
+		      	최소 금액 저장
+		    	</button>
+		  	</div>
 	      </form>
 	  </div>
   </div>
 
-  <th:block th:replace="~{fragments/shopFooter :: shopFooter}" />
 </body>
 </html>
