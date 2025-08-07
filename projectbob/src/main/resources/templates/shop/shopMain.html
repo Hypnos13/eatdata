@@ -43,51 +43,51 @@
                         <div class="mains-icon-label">서비스 홈</div>
                     </a>
                 </div>
-
+                
+                <!-- ========= 가게 공지 ========= -->
+                <div class="icon-col">
+                    <a th:if="${#lists.isEmpty(shopListMain)}"
+                       th:href="@{/shopInfo}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
+                        <div class="mains-icon-label">가게 공지</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+                       th:href="@{/shopNotice(s_id=${currentShop.sId})}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
+                        <div class="mains-icon-label">가게 공지</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+                       th:href="@{/shopNotice}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
+                        <div class="mains-icon-label">가게 공지</div>
+                    </a>
+                </div>
+                
                 <!-- ========= 기본설정 ========= -->
                 <div class="icon-col">
                     <a th:if="${#lists.isEmpty(shopListMain)}"
                        th:href="@{/shopInfo}"
                        class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+                        <div class="mains-icon"><i class="bi bi-gear"></i></div>
                         <div class="mains-icon-label">기본설정</div>
                     </a>
                     <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
                        th:href="@{/shopBasicView(s_id=${currentShop.sId})}"
                        class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+                        <div class="mains-icon"><i class="bi bi-gear"></i></div>
                         <div class="mains-icon-label">기본설정</div>
                     </a>
                     <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
                        th:href="@{/shopListMain}"
                        class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-card-list"></i></div>
+                        <div class="mains-icon"><i class="bi bi-gear"></i></div>
                         <div class="mains-icon-label">기본설정</div>
                     </a>
                 </div>
-
-				<!-- ========= 사장님 공지 ========= 
-				<div class="icon-col">
-				  <a th:if="${#lists.isEmpty(shopListMain)}"
-				     th:href="@{/shopInfo}"
-				     class="mains-icon-box login-required">
-				    <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
-				    <div class="mains-icon-label">사장님 공지</div>
-				  </a>
-				  <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
-				     th:href="@{/shopNotice(s_id=${currentShop.sId})}"
-				     class="mains-icon-box login-required">
-				    <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
-				    <div class="mains-icon-label">사장님 공지</div>
-				  </a>
-				  <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
-				     th:href="@{/shopListMain}"
-				     class="mains-icon-box login-required">
-				    <div class="mains-icon"><i class="bi bi-megaphone"></i></div>
-				    <div class="mains-icon-label">사장님 공지</div>
-				  </a>
-				</div>		-->
-
+                
                 <!-- ========= 영업 시간 ========= -->
                 <div class="icon-col">
                     <a th:if="${#lists.isEmpty(shopListMain)}"
@@ -109,29 +109,7 @@
                         <div class="mains-icon-label">영업 시간</div>
                     </a>
                 </div>
-
-                <!-- ========= 영업 상태 =========
-                <div class="icon-col">
-                    <a th:if="${#lists.isEmpty(shopListMain)}"
-                       th:href="@{/shopInfo}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-toggle-on"></i></div>
-                        <div class="mains-icon-label">영업 상태</div>
-                    </a>
-                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
-                       th:href="@{/shopStatus(s_id=${currentShop.sId})}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-toggle-on"></i></div>
-                        <div class="mains-icon-label">영업 상태</div>
-                    </a>
-                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
-                       th:href="@{/shopListMain}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-toggle-on"></i></div>
-                        <div class="mains-icon-label">영업 상태</div>
-                    </a>
-                </div>		-->
-
+                
                 <!-- ========= 메뉴 리스트 ========= -->
                 <div class="icon-col">
                     <a th:if="${#lists.isEmpty(shopListMain)}"
@@ -153,63 +131,26 @@
                         <div class="mains-icon-label">메뉴 리스트</div>
                     </a>
                 </div>
-
-                <!-- ========= 메뉴 등록 ========= 
+                
+                <!-- ========= 통계 ========= -->
                 <div class="icon-col">
                     <a th:if="${#lists.isEmpty(shopListMain)}"
                        th:href="@{/shopInfo}"
                        class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-receipt"></i></div>
-                        <div class="mains-icon-label">메뉴 등록</div>
-                    </a>
-                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
-                       th:href="@{/shop/menuRegisterForm(s_id=${currentShop.sId})}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-receipt"></i></div>
-                        <div class="mains-icon-label">메뉴 등록</div>
-                    </a>
-                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
-                       th:href="@{/shopListMain}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-receipt"></i></div>
-                        <div class="mains-icon-label">메뉴 등록</div>
-                    </a>
-                </div>		-->
-
-                <!-- ========= 메뉴 관리 ========= 
-                <div class="icon-col">
-                    <a th:if="${#lists.isEmpty(shopListMain)}"
-                       th:href="@{/shopInfo}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-list-task"></i></div>
-                        <div class="mains-icon-label">메뉴 관리</div>
-                    </a>
-                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
-                       th:href="@{/shop/menuUpdateForm(s_id=${currentShop.sId})}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-list-task"></i></div>
-                        <div class="mains-icon-label">메뉴 관리</div>
-                    </a>
-                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
-                       th:href="@{/shopListMain}"
-                       class="mains-icon-box login-required">
-                        <div class="mains-icon"><i class="bi bi-list-task"></i></div>
-                        <div class="mains-icon-label">메뉴 관리</div>
-                    </a>
-                </div>		-->
-
-                <!-- ========== 추가 예정 아이콘들 ========== -->
-                <div class="icon-col">
-                    <a href="javascript:void(0)" class="mains-icon-box disabled" title="추가 예정">
-                        <div class="mains-icon"><i class="bi bi-calendar3"></i></div>
-                        <div class="mains-icon-label">추가예정</div>
-                    </a>
-                </div>
-
-                <div class="icon-col">
-                    <a href="javascript:void(0)" class="mains-icon-box disabled" title="추가 예정">
                         <div class="mains-icon"><i class="bi bi-graph-up-arrow"></i></div>
-                        <div class="mains-icon-label">추가예정</div>
+                        <div class="mains-icon-label">통계</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop != null}"
+                       th:href="@{/shop/statistics(s_id=${currentShop.sId})}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                        <div class="mains-icon-label">통계</div>
+                    </a>
+                    <a th:if="${!#lists.isEmpty(shopListMain) and currentShop == null}"
+                       th:href="@{/shop/statistics}"
+                       class="mains-icon-box login-required">
+                        <div class="mains-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                        <div class="mains-icon-label">통계</div>
                     </a>
                 </div>
 
@@ -226,7 +167,7 @@
     </section>
 
     <section id="benefits" class="section">
-        <h2>왜 Project Bob 인가요?</h2>
+        <h2>왜 BoB 인가요?</h2>
         <div class="benefits-grid">
             <div class="benefit-card">
                 <div class="icon">✓</div>
