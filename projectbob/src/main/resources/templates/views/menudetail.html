@@ -25,7 +25,7 @@
 				<div class="col-md-8">
 
 					<div class="d-flex align-items-center mb-3">
-						<img src="https://i.imgur.com/6p4jYkF.png" alt="맥도날드" width="50" />
+						<img th:src="${shop.sPictureUrl}" alt="가게사진" width="50" />
 						<div class="ms-3">
 							<h5 class="mb-0">[[ ${shop.name} ]] - [[ ${shop.address1} ]]</h5>
 							<small>★ [[${#numbers.formatDecimal(reviewAvg, 1, 1)}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원</small>
@@ -239,7 +239,7 @@
 								</div>
 								<!-- 리뷰 사진  -->
 								<div th:if="${review.rPicture != null}">
-									<img th:src="@{'/images/review/' + ${review.rPicture} + '?t=' + ${now}}" alt="리뷰사진" 
+									<img th:src="@{${review.rPicture} + '?t=' + ${now}}" alt="리뷰사진" 
 													style="max-width:200px;" class="rounded shadow-sm mb-2" />
 								</div>
 								<!-- 메뉴 설명 -->

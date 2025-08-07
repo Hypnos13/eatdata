@@ -398,11 +398,15 @@ public class MenuAjaxController {
 				log.info("MenuAjaxController: Target file location = {}", targetLocation); 
 
 				// 파일 저장
-				rPicture.transferTo(targetLocation.toAbsolutePath().toFile());
-				log.info("MenuAjaxController: File saved successfully to {}", targetLocation); 
+				/*
+				 * rPicture.transferTo(targetLocation.toAbsolutePath().toFile());
+				 * log.info("MenuAjaxController: File saved successfully to {}",
+				 * targetLocation);
+				 */
 
 				// DB에 저장할 웹 접근 가능한 URL 형식으로 설정
-				review.setRPicture("/images/" + subDirectory + "/" + savedFilename);
+				String fileUrl = fileUploadService.uploadFile(rPicture, subDirectory);
+				review.setRPicture(fileUrl);
 				log.info("MenuAjaxController: rPicture set to {}", review.getRPicture()); // 추가
 
 			} catch (IOException e) {
@@ -474,7 +478,8 @@ public class MenuAjaxController {
 				log.info("MenuAjaxController: File saved successfully to {}", targetLocation); // 추가
 
 		        // DB에 저장할 웹 접근 가능한 URL 형식으로 설정
-		        review.setRPicture("/images/" + subDirectory + "/" + savedFilename);
+				String fileUrl = fileUploadService.uploadFile(rPicture, subDirectory);
+		        review.setRPicture(fileUrl);
 				log.info("MenuAjaxController: rPicture set to {}", review.getRPicture()); // 추가
 
 		    } catch (IOException e) {

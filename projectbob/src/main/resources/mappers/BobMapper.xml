@@ -436,7 +436,7 @@
 	SELECT
 		s.s_id AS sId, s.id AS id, s.name AS name, s.phone AS phone, s.zipcode AS zipcode, 
 		s.address1 AS address1, s.address2 AS address2, s.owner AS owner, 
-		s.s_number AS sNumber, s.category AS category, s.s_pictureURL AS sPicture,
+		s.s_number AS sNumber, s.category AS category, s.s_pictureURL AS sPictureUrl,
 		COALESCE(ROUND(( SELECT AVG(r.rating) FROM review r WHERE r.s_id = s.s_id
 		), 1), 0.0) AS rating,
 		s.heart AS heart, s.min_price AS minPrice,s.status AS status, s.reg_date AS regDate, s.modi_date AS modiDate

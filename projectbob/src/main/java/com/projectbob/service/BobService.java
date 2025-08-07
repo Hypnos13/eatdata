@@ -103,7 +103,7 @@ public class BobService {
 			totalQuantity = allCartItems.stream().filter(item -> item.getCaPid() == null) // ca_pid가 없는 것이 메인 메뉴
 					.mapToInt(Cart::getQuantity).sum();
 			// 모든 장바구니 항목의 totalPrice 합산 (메인 메뉴 + 옵션)
-			totalPrice = allCartItems.stream().mapToInt(Cart::getTotalPrice).sum();
+			totalPrice = allCartItems.stream().mapToInt(Cart::getTotalPrice).sum() + 3000; // 배달비 3000원 추가
 		}
 
 		return new CartSummaryDto(allCartItems, totalQuantity, totalPrice);
@@ -236,7 +236,7 @@ public class BobService {
 
 		// 전체 총액은 각 카트 항목의 totalPrice를 모두 합산합니다.
 		// 이 totalPrice는 DB에 (단가 * 수량)으로 정확히 저장되어 있다고 가정합니다.
-		int overallTotalPrice = allCartItems.stream().mapToInt(Cart::getTotalPrice).sum();
+		int overallTotalPrice = allCartItems.stream().mapToInt(Cart::getTotalPrice).sum() + 3000; // 배달비 3000원 추가
 
 		log.info("장바구니 총 수량: {}, 계산된 최종 총액: {}", totalQuantity, overallTotalPrice);
 		// --- 수정된 부분 끝 ---

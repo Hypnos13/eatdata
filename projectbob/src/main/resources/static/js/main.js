@@ -2100,7 +2100,7 @@ function recallReviewList(reviewArr, reviewreplyMap, shopOwnerId, loginId){
 						<span class="fw-bold ms-1">${r.rating}점</span>
 					</div>
 					${r.rpicture ? `<div>
-							<img src="/images/review/${r.rpicture}?t=${Date.now()}" alt="리뷰사진" 
+							<img src="${r.rpicture}?t=${Date.now()}" alt="리뷰사진" 
 								style="max-width:200px;" class="rounded shadow-sm mb-2" />
 					</div>` : ''}
 					<div class="text-secondary small mb-1"><span>${r.menuName}</span></div>
