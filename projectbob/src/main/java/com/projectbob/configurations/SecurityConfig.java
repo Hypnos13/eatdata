@@ -40,10 +40,10 @@ public class SecurityConfig {
 					"/main", "/shopList", "/MenuDetail", "/completed", // 고객이 보는 페이지
 					"/login", "/joinMemberForm", "/joinMember", "/searchIdPass", "/searchIdPassForm", "/overlapId.ajax", // 로그인/회원가입/찾기
 					"/naverLogin", "/naverJoin", "/updateNaverMember", "/deleteNaverMember", "/kakao", "/login/naver/callback", // 소셜 로그인
-					"/phoneCertify", "/certifyNumber", "/faqList", // 휴대폰 인증  
+					"/phoneCertify", "/certifyNumber", "/faqList", "shopManage",  // 휴대폰 인증  
 					"/ajax/menu/options", "/addCart", "/getCart", "/updateQuantity", "/deleteCart", "/removeAll", // AJAX 요청 (장바구니 등)
 					"/ws/**", "/user/**", "/topic/**", "/app/**", // 웹소켓 엔드포인트
-					"/css/**", "/js/**", "/images/**", "/bootstrap/**", "/error", "/favicon.ico", "/rider/request" ,"/shopMain" // 정적 리소스 및 에러 페이지
+					"/css/**", "/js/**", "/images/**", "/bootstrap/**", "/error", "/favicon.ico", "/rider/request" ,"/shopMain"  // 정적 리소스 및 에러 페이지
 				).permitAll()
 				// 사장님만 접근 가능한 경로 (예시)
 				.requestMatchers("/shop*", "/menu*").hasRole("OWNER") // "OWNER" 역할만 허용
