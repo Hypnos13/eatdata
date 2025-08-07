@@ -19,32 +19,5 @@ public class WebConfig implements WebMvcConfigurer{
 		registry.addViewController("/login/naver/callback").setViewName("members/naverCallback");
 		registry.addViewController("/addAddressForm").setViewName("members/addAddressForm");
 	}
-
-
-	/*
-	 * @Override public void addInterceptors(InterceptorRegistry registry) {
-	 * registry.addInterceptor(new LoginCheckInterceptor())
-	 * .order(1).addPathPatterns("/shop*", "/menu*")
-	 * .excludePathPatterns("/shopMain"); }
-	 */
-
 	
-
-
-	//리뷰 사진 추가
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler("/images/review/**")
-			.addResourceLocations("file:///C:/projectbob/images/review/");
-		
-		// ─── 불러올 업로드 디렉터리 (외부 경로) ───
-        // /images/shop/**           → {uploadBaseDir}/shop/
-        // /images/business-licenses/** → {uploadBaseDir}/business-licenses/
-        String base = "file:///" + uploadBaseDir.replace("\\", "/") + "/";
-        registry.addResourceHandler("/images/shop/**")
-                .addResourceLocations(base + "shop/");
-        registry.addResourceHandler("/images/business-licenses/**")
-                .addResourceLocations(base + "business-licenses/");
-	}
-
 }
