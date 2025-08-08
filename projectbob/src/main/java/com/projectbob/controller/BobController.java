@@ -150,8 +150,29 @@ public class BobController {
 		  }
 		  
 		  List<Menu> menuList = bobService.getMenuListByShopId(sId);
+		  
+		  // 1. 메뉴를 카테고리별로 그룹화합니다.
+		  Map<String, List<Menu>> menuByCategory = menuList.stream().collect(Collectors.groupingBy(Menu::getCategory));
+
+		  // 2. 순서를 보장하는 새로운 맵(LinkedHashMap)을 생성합니다.
+		  Map<String, List<Menu>> sortedMenuByCategory = new LinkedHashMap<>();
+
+		  // 3. 카테고리 키를 숫자 접두사를 기준으로 정렬합니다.
+		  menuByCategory.keySet().stream()
+		      .sorted(Comparator.comparingInt(category -> {
+		          try {
+		              // 카테고리 이름에서 '.' 앞의 숫자 부분을 추출합니다.
+		              String prefix = category.split("\\.")[0];
+		              return Integer.parseInt(prefix);
+		          } catch (Exception e) {
+		              // 숫자 접두사가 없거나 형식이 잘못된 경우 맨 뒤로 보냅니다.
+		              return Integer.MAX_VALUE;
+		          }
+		      }))
+		      .forEach(category -> sortedMenuByCategory.put(category, menuByCategory.get(category)));
+		      
 		  model.addAttribute("shop", shop);
-		  model.addAttribute("menuList", menuList);
+		  model.addAttribute("menuByCategory", sortedMenuByCategory);
 		  
 		  List<Review> reviewList = bobService.getReviewList(sId);
 		  model.addAttribute("reviewList", reviewList);
