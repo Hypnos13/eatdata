@@ -342,6 +342,8 @@ nav.navbar .nav-link.active {
 	color: #ffc700;
 }
 
+.pre-line { white-space: pre-line; }
+
 /* 주소 검색 창 */
 /* 팝업 창의 스타일 */
 .address-popup-wrapper {

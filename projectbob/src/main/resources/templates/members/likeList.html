@@ -4,6 +4,7 @@
 		layout:decorate="~{layouts/main_layout}">
 <th:block layout:fragment="content">
 <script th:src="@{/js/faq.js}"></script>
+<link rel="stylesheet" href="/css/admin.css">
 <div class="container my-5" style="max-width: 800px; margin-top: 3rem; margin-bottom: 3rem;">
     <h4 class="mb-4 text-center fw-bold">나의 찜 목록</h4>
 
@@ -24,14 +25,12 @@
 	                    ⭐ 평점: <span th:text="${#numbers.formatDecimal(shop.rating, 1, 1)}"></span>
 	                </div>
 	                <div class="text-secondary small">
-	                    가게정보: <span th:text="${shop.sInfo}">설명</span>
+	                    <span class="shop-detail-info" th:text="${shop.sInfo}">설명</span>
 	                </div>
 	            </div>
 	
 	            <div class="text-end">
-	                <button type="button"
-	                        class="btn p-0 border-0 bg-transparent toggle-heart" th:data-no="${shop.sId}">
-	                        
+	                <button type="button" class="btn p-0 border-0 bg-transparent toggle-heart d-inline-flex align-items-center" th:data-no="${shop.sId}">      
 	                    <i class="bi bi-heart-fill text-danger fs-4"></i>
 	                    <span class="text-danger small fw-semibold ms-1" th:text="'(' + ${shop.heart} + ')'"></span>
 	                </button>
