@@ -18,7 +18,7 @@
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="content-card">
+    <div class="content-panel">
         <h2 class="text-center fw-bold mb-4">기본 정보 수정</h2>
         <form method="post" enctype="multipart/form-data" th:action="@{/shop/updateBasic}">
             <input type="hidden" name="sId" th:value="${shop.sId}" />

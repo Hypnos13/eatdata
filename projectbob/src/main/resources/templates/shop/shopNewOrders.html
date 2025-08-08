@@ -101,12 +101,12 @@
 	  flex: 1;           /* 버튼 1개당 부모 너비의 1/n */
 	  margin: 0;         /* 기존 me-2 여백 제거 */
 	}
-	
   </style>
 </head>
 
 <body data-shop-id="[[${currentShop.sId}]]">
   <th:block layout:fragment="content">
+  	<div class="content-panel">
     <div class="main-container">
 
       <!-- 좌측: 신규 주문 리스트 -->
@@ -233,7 +233,7 @@
 		    </div>
 		  </th:block>
 		</div>
-
+	  </div>
     </div>
   </th:block>
 </body>
