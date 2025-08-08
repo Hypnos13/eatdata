@@ -48,6 +48,10 @@ public class FileUploadService {
 		
 		Files.copy(file.getInputStream(), targetLocation);
 		
+		if (subDirectory != null && subDirectory.endsWith("/")) {
+            subDirectory = subDirectory.substring(0, subDirectory.length() - 1);
+        }
+		
 		return "/images/" + subDirectory + "/" + savedFilename;
 	}
 	
