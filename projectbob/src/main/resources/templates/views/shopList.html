@@ -211,10 +211,10 @@
 									      th:style="${shop.status == 'N'} ? 'pointer-events: none; cursor: default;' : ''">
 										
 										<div class="row g-0">
-											<div class="col-4">
+											<div class="col-4 d-flex align-items-center">
 												<!-- 업로드된 이미지가 있으면 그 경로를, 없으면 기본 플레이스홀더를 보여줌 -->
-												<img th:src="${shop.sPictureUrl != null ? shop.sPictureUrl : '/images/default-shop.png'}"
-												     class="img-fluid rounded-start h-100 object-fit-cover"
+												<img th:src="${shop.sPictureUrl ?: '/images/karina.jpg'}"
+												     class="img-fluid rounded-start shop-List-img"
 												     th:alt="${shop.name} + ' 이미지'" />												
 											</div>
 

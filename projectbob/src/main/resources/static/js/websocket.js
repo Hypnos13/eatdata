@@ -357,6 +357,13 @@ function showOrderNotification(payload) {
         toastOptions.text = notificationMessage;
         toastOptions.onClick = onClickAction;
         toastOptions.duration = -1; // <-- 클릭할 때까지 유지
+        
+        if (payload.status === 'REJECTED') {
+            toastOptions.style = {
+                background: "red",
+            };
+        }
+        
         Toastify(toastOptions).showToast();
     } else {
         if (payload.status === 'REJECTED') {

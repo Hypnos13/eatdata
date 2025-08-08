@@ -423,6 +423,12 @@ nav.navbar .nav-link.active {
 	animation: bell-shake 10s ease-in-out;
 }
 
+/* shopList 이미지 컨테이너 중앙 정렬 */
+.card .row .col-4 {
+	display: flex;
+	align-items: center;
+}
+
 /* <!--메인 카테고리 카드--> */
 .main-category-card {
   width: 100%;
