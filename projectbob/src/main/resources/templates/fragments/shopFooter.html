@@ -1,7 +1,10 @@
 <!-- templates/fragments/shopFooter.html -->
 <footer th:fragment="shopFooter" class="footer">
-   <p>Project BoB | EatData</p>
-   <p>
-       <a href="#">이용약관</a> | <a th:href="@{/noticeList(from='owner')}">공지사항</a> | <a th:href="@{/faqList(from='owner')}">FAQ</a> | <a th:href="@{/main}">관련사이트</a>
-   </p>
+  <p>
+	  <a class="footer-href" th:href="@{|/noticeList?from=${from}|}">공지사항</a> | 
+	  <a class="footer-href" th:href="@{|/faqList?from=${from}|}">FAQ</a> |
+	  <a class="footer-href" th:href="@{/main}">관련사이트</a>
+  </p>
+  <p>EatData | 서울특별시 관악구 남부순환로 1820 6A</p>
+  <p>고객센터: minitest0623@naver.com</p>
 </footer>
