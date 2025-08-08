@@ -660,7 +660,7 @@ public class ShopController {
 	public String updateNotice(@RequestParam("s_id") Integer sId,
 			@RequestParam(value = "notice", required = false) String notice,
 			@RequestParam(value = "s_info", required = false) String sInfo, @RequestParam("action") String action,
-			@RequestParam(value = "minPrice", required = false) Integer minPrice,
+			@RequestParam(value = "minPrice", required = false) String minPrice,
 			@SessionAttribute(name = "loginId", required = false) String loginId, RedirectAttributes ra) {
 
 		if (loginId == null) {

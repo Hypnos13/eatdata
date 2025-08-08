@@ -262,6 +262,7 @@
 	    address2,
 	    owner,
 	    s_number,
+	    min_price,
 	    s_pictureURL,
 	    s_licenseURL,
 	    category,
