@@ -466,6 +466,17 @@ public class ShopService {
         return shopMapper.selectOrdersByShopId(sId);
     }
     
+    // 주문 총 개수
+    public int countOrdersByShopId(int sId) {
+        return shopMapper.countOrdersByShopId(sId);
+    }
+
+    // 페이징된 주문 목록
+    public List<Orders> findOrdersByShopIdPaged(int sId, int page, int size) {
+        int offset = (page - 1) * size;
+        return shopMapper.selectOrdersByShopIdPaged(sId, offset, size);
+    }
+    
     // 단일 주문 상세 조회 
     public Orders findOrderByNo(int oNo) {
         return shopMapper.selectOrderByNo(oNo);

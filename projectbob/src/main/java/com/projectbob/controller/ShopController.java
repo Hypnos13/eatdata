@@ -982,19 +982,48 @@ public class ShopController {
 		  return ResponseEntity.ok(Map.of("success", true));
 	}
 
-	/* ----------------------- 기존 주문 내역 보기 ----------------------- */
+	/* ----------------------- 기존 주문 내역 보기 (페이징) ----------------------- */
 	@GetMapping("/shop/orders")
 	public String viewOrders(
 	        @RequestParam("s_id") Integer sId,
+	        @RequestParam(value = "page", defaultValue = "1") int page,
+	        @RequestParam(value = "size", defaultValue = "10") int size,
 	        @SessionAttribute(name = "loginId", required = false) String loginId,
+	        HttpSession session,
 	        Model model) {
+
 	    if (loginId == null || sId == null) {
 	        return "redirect:/login";
 	    }
-	    List<Orders> orders = shopService.findOrdersByShopId(sId);
+
+	    // 레이아웃에서 쓰는 사이드 드롭다운/현재가게
+	    List<Shop> shopListMain = shopService.findShopListByOwnerId(loginId);
+	    model.addAttribute("shopListMain", shopListMain);
+	    Shop currentShop = shopService.findByShopIdAndOwnerId(sId, loginId);
+	    model.addAttribute("currentShop", currentShop);
+
+	    // 총 개수 & 페이지 보정
+	    int totalOrders = shopService.countOrdersByShopId(sId);
+	    int totalPages = (int) Math.ceil((double) totalOrders / size);
+	    if (totalPages == 0) totalPages = 1;
+	    page = Math.max(1, Math.min(page, totalPages));
+
+	    // 목록 조회
+	    List<Orders> orders = shopService.findOrdersByShopIdPaged(sId, page, size);
+
+	    // 페이지 그룹(리뷰 페이지와 동일)
+	    int groupSize = 10;
+	    int startPageGroup = ((page - 1) / groupSize) * groupSize + 1;
+	    int endPageGroup = Math.min(startPageGroup + groupSize - 1, totalPages);
+
 	    model.addAttribute("orders", orders);
-	    model.addAttribute("currentShop",
-	           shopService.findByShopIdAndOwnerId(sId, loginId));
+	    model.addAttribute("currentPage", page);
+	    model.addAttribute("pageSize", size);
+	    model.addAttribute("totalOrders", totalOrders);
+	    model.addAttribute("totalPages", totalPages);
+	    model.addAttribute("startPageGroup", startPageGroup);
+	    model.addAttribute("endPageGroup", endPageGroup);
+
 	    return "shop/shopOrders";
 	}
 

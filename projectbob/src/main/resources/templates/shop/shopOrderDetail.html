@@ -74,6 +74,12 @@
         <dt class="col-sm-4">상태</dt>
         <dd class="col-sm-8 text-start text-sm-end" th:text="${order.status}">REJECTED</dd>
       </dl>
+      
+      <!-- 뒤로가기 버튼 -->
+	  <button type="button" class="btn btn-success" onclick="history.back()">
+	  	← 뒤로가기
+	  </button>
+      
     </div>
     </div>
   </th:block>

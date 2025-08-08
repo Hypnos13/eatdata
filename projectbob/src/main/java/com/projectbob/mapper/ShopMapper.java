@@ -107,6 +107,37 @@ public interface ShopMapper {
     //주문내역 조회
     List<Orders> selectOrdersByShopId(@Param("sId") int sId);
     
+    // 주문 총 개수
+    @Select("SELECT COUNT(*) FROM orders WHERE s_id = #{sId}")
+    int countOrdersByShopId(@Param("sId") int sId);
+
+    // 페이징 주문 목록
+    @Select({
+      "SELECT",
+      "  o_no        AS oNo,",
+      "  s_id        AS sId,",
+      "  id          AS id,",
+      "  total_price AS totalPrice,",
+      "  payment     AS payment,",
+      "  o_address   AS oAddress,",
+      "  request     AS request,",
+      "  reg_date    AS regDate,",
+      "  modi_date   AS modiDate,",
+      "  status      AS status,",
+      "  quantity    AS quantity,",
+      "  menus       AS menus,",
+      "  payment_uid AS paymentUid",
+      "FROM orders",
+      "WHERE s_id = #{sId}",
+      "ORDER BY reg_date DESC",
+      "LIMIT #{limit} OFFSET #{offset}"
+    })
+    List<Orders> selectOrdersByShopIdPaged(
+        @Param("sId") int sId,
+        @Param("offset") int offset,
+        @Param("limit") int limit
+    );
+    
     // 상태별 & 가게별 주문 리스트 조회
     List<Orders> selectOrdersByStatusAndShop(
         @Param("status") String status,

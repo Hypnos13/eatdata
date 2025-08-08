@@ -4,11 +4,38 @@
       layout:decorate="~{layouts/shop_layout}">
 <head>
   <title>주문내역</title>
+  <style>
+  .pagination .page-link {
+    color: #198754;
+  }
+	
+  .pagination .page-item.active .page-link {
+    background-color: #198754;
+    border-color: #198754;
+    color: white;
+  }
+  </style>
 </head>
 <body>
   <div layout:fragment="content">
   	<div class="content-panel">
-    <h3 class="mb-4">📦 주문내역</h3>
+    <!-- 타이틀 + 페이지당 개수 선택을 같은 줄에 -->
+	<div class="d-flex justify-content-between align-items-center mb-3">
+	  <h3 class="mb-0">📦 주문내역</h3>
+	  
+	  <form id="pageSizeForm" th:action="@{/shop/orders}" method="get" class="d-flex">
+	    <!-- s_id 유지 -->
+	    <input type="hidden" name="s_id" th:value="${currentShop != null ? currentShop.sId : sId}" />
+	    <!-- 사이즈 변경 시 1페이지로 -->
+	    <input type="hidden" name="page" value="1" />
+	    <label class="me-2 mb-0">개수:</label>
+	    <select name="size" class="form-select w-auto" onchange="this.form.submit()">
+	      <option th:value="10" th:selected="${pageSize==10}">10개</option>
+	      <option th:value="20" th:selected="${pageSize==20}">20개</option>
+	      <option th:value="30" th:selected="${pageSize==30}">30개</option>
+	    </select>
+	  </form>
+	</div>
 
     <table class="table">
       <thead>
@@ -45,6 +72,45 @@
 	    </tr>
       </tbody>
     </table>
+    
+    <!-- 페이지네이션 (리뷰와 동일 구조) -->
+      <nav aria-label="Page navigation" th:if="${totalPages != null and totalPages > 0}">
+        <ul class="pagination justify-content-center">
+          <!-- 이전 그룹 -->
+          <li class="page-item" th:classappend="${startPageGroup>1} ? '' : 'disabled'">
+            <a class="page-link"
+               th:href="@{/shop/orders(
+                 s_id=${currentShop != null ? currentShop.sId : sId},
+                 page=${startPageGroup-1},
+                 size=${pageSize}
+               )}">«</a>
+          </li>
+
+          <!-- 페이지 번호들 -->
+          <li class="page-item"
+              th:each="i : ${#numbers.sequence(startPageGroup, endPageGroup)}"
+              th:classappend="${i==currentPage} ? 'active'">
+            <a class="page-link"
+               th:href="@{/shop/orders(
+                 s_id=${currentShop != null ? currentShop.sId : sId},
+                 page=${i},
+                 size=${pageSize}
+               )}"
+               th:text="${i}">1</a>
+          </li>
+
+          <!-- 다음 그룹 -->
+          <li class="page-item" th:classappend="${endPageGroup<totalPages} ? '' : 'disabled'">
+            <a class="page-link"
+               th:href="@{/shop/orders(
+                 s_id=${currentShop != null ? currentShop.sId : sId},
+                 page=${endPageGroup+1},
+                 size=${pageSize}
+               )}">»</a>
+          </li>
+        </ul>
+      </nav>
+    
   </div>
 </div>
   <!-- 스크립트 로드 (layout에서 이미 shop.js를 포함하고 있지 않다면 추가하세요) -->
