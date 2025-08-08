@@ -404,8 +404,10 @@ public class ShopController {
 		if (currentShop == null)
 			return "redirect:/shopMain";
 
-		model.addAttribute("shop", currentShop);
-		return "shop/shopBasicSet";
+		Shop fullShop = shopService.findByShopIdAndOwnerId(currentShop.getSId(), loginId);
+	    model.addAttribute("shop", fullShop);
+	    model.addAttribute("currentShop", fullShop);
+	    return "shop/shopBasicSet";
 	}
 
 	// 기본정보 수정 로직
