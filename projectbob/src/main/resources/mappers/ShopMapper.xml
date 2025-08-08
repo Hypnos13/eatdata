@@ -262,8 +262,14 @@
 	    address2,
 	    owner,
 	    s_number,
+<<<<<<< HEAD
 	    s_pictureURL AS s_picture_url,
 	    s_licenseURL AS s_license_url,
+=======
+	    min_price,
+	    s_pictureURL,
+	    s_licenseURL,
+>>>>>>> Yong
 	    category,
 	    info,
 	    notice,
