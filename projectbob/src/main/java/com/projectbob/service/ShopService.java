@@ -391,7 +391,7 @@ public class ShopService {
     }
     
     @Transactional
-    public void updateShopMinPrice(Integer sId, int minPrice) {
+    public void updateShopMinPrice(Integer sId, String minPrice) {
         shopMapper.updateShopMinPrice(sId, minPrice);
     }
     
