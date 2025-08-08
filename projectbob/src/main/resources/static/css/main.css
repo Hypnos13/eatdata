@@ -97,8 +97,16 @@ nav.navbar .nav-link.active {
 	background-color: #43d091;
 	color: white !important;
 	font-weight: bold;
-	border-bottom: 2px solid #43d091;
+	    border: 2px solid white;
 }
+
+/* shoplist.html 이미지 사이즈 고정 */
+.shop-list-img {
+  width: 100%;
+  height: 120px; /* 이미지 높이 고정 */
+  object-fit: cover; /* 이미지가 영역을 꽉 채우도록 설정 */
+}
+
 
 /* 결제 제목 */
 .section-title {
@@ -423,12 +431,6 @@ nav.navbar .nav-link.active {
 	animation: bell-shake 10s ease-in-out;
 }
 
-/* shopList 이미지 컨테이너 중앙 정렬 */
-.card .row .col-4 {
-	display: flex;
-	align-items: center;
-}
-
 /* <!--메인 카테고리 카드--> */
 .main-category-card {
   width: 100%;
@@ -507,4 +509,15 @@ nav.navbar .nav-link.active {
     background-color: red;
     border-radius: 50%;
     border: 2px solid white;
+}
+
+/* 메뉴 상세 페이지 카테고리 제목 스타일 */
+.menu-category-title {
+  background-color: #e8f5e9; /* 아주 연한 초록색 */
+  color: #1e4620; /* 진한 초록색 글씨 */
+  font-weight: bold; /* 두껍게 */
+  padding: 10px 15px; /* 안쪽 여백 */
+  border-radius: 8px; /* 둥근 모서리 */
+  border-left: 5px solid #4CAF50; /* 왼쪽 강조선 */
+  margin-bottom: 20px; /* 아래쪽 여백 */
 }
