@@ -224,8 +224,12 @@ public class CustomerServiceService {
 		for(Map<String, Object> order : myOrderList) {
 			String menuStr = (String) order.get("menu");
 			String sId = (String) order.get("sId").toString();
+			int oNo = Integer.parseInt(order.get("no").toString());
 			
 			List<Map<String, Object>> parsedMenus = new ArrayList<>();
+			Review review = csMapper.isReview(oNo); 
+			boolean hasReview = (review != null);
+			order.put("hasReview", hasReview);
 			
 			for (String item : menuStr.split("\\s*,\\s*")) {
 			   Matcher m = Pattern.compile("(.+?)\\s*\\*\\s*(\\d+)(?:\\s*\\((.+?)\\))?").matcher(item);
@@ -283,4 +287,5 @@ public class CustomerServiceService {
 		
 		return myOrderList;
 	}
+	
 }

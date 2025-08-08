@@ -229,6 +229,7 @@
 	FROM orders o, shop s
 	WHERE o.s_id = s.s_id
 	AND o.id = #{id}
+	ORDER BY o.reg_date DESC
 </select>
 
 <select id="getMenuPrice" resultType="map">
@@ -243,6 +244,12 @@
 	FROM menu_option
 	WHERE m_id = #{mId}
 	AND content = #{content}
+</select>
+
+<select id="isReview" resultType="review">
+	select *
+	from review
+	where o_no = #{oNo}
 </select>
 </mapper>	
 

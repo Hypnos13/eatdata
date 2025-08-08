@@ -38,6 +38,12 @@ body {
   pointer-events: none;
 }
 
+.content-panel {
+            background-color: #fff;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
 /* ===== 본문 카드 ===== */
 .content-card {
   width: 100%;          /* 가득 채움 */
