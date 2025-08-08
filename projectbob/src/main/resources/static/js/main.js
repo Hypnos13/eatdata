@@ -41,7 +41,7 @@ $(document).ready(function() {
     console.log('파싱된 총 결제 금액 (숫자):', totalPrice);
 
     const shopMinPriceStr = $('.shopMinPrice').val();
-    const shopMinPrice = parseInt(shopMinPriceStr);
+    const shopMinPrice = parseInt(shopMinPriceStr) || 0;
     console.log('최소 주문 금액 (문자열):', shopMinPriceStr);
     console.log('최소 주문 금액 (숫자):', shopMinPrice);
 		
@@ -1231,7 +1231,7 @@ function handleCurrentLocationSearch() {
     categoryCards.forEach(card => {
         card.addEventListener('click', (e) => {
             e.preventDefault(); // 기존 링크 동작 방지
-            const categoryTitle = card.querySelector('.category-title')?.innerText || '전체보기';
+            const categoryTitle = card.querySelector('.main-category-title')?.innerText || '전체보기';
             console.log(`카테고리 클릭됨: ${categoryTitle}`);
             searchWithCurrentLocation(categoryTitle);
         });

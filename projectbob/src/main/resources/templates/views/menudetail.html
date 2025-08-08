@@ -28,7 +28,7 @@
 						<img th:src="${shop.sPictureUrl}" alt="가게사진" width="50" />
 						<div class="ms-3">
 							<h5 class="mb-0">[[ ${shop.name} ]] - [[ ${shop.address1} ]]</h5>
-							<small>★ [[${#numbers.formatDecimal(reviewAvg, 1, 1)}]] / 최소주문금액 [[${#numbers.formatInteger(shop.minPrice,0,'COMMA')}]]원</small>
+							<small th:text="'★ ' + ${#numbers.formatDecimal(reviewAvg, 1, 1)} + ' / 최소주문금액 ' + (${shop.minPrice == null} ? '0' : ${#numbers.formatInteger(shop.minPrice, 0, 'COMMA')}) + '원'"></small>
 						</div>
 						<input type="hidden" class="shopMinPrice" th:value="${shop.minPrice}"  />
 						<!-- 찜버튼 -->
