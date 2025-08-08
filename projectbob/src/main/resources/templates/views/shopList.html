@@ -226,7 +226,7 @@
 														계산 중...</p>
 
 													<p class="card-text text-success fw-semibold mb-0">
-														평점 ★[[${shop.rating}]] <i
+														평점 ★<span th:text="${shop.rating == 0} ? '0' : ${#numbers.formatDecimal(shop.rating, 1, 1)}"></span> <i
 															class="bi bi-heart-fill text-danger ms-1"
 															th:if="${likeShopList != null and likeShopList.contains(shop.sId)}"></i>
 													</p>

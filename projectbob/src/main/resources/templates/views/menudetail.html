@@ -4,7 +4,7 @@
 	layout:decorate="~{layouts/main_layout}">
 <head>
 <meta charset="UTF-8">
-<title>가게 상세 페이지</title>
+<title>메인 페이지</title>
 
 <!-- Bootstrap CSS -->
 <link
@@ -28,7 +28,8 @@
 						<img th:src="${shop.sPictureUrl}" alt="가게사진" width="50" />
 						<div class="ms-3">
 							<h5 class="mb-0">[[ ${shop.name} ]] - [[ ${shop.address1} ]]</h5>
-							<small th:text="'★ ' + ${#numbers.formatDecimal(reviewAvg, 1, 1)} + ' / 최소주문금액 ' + (${shop.minPrice == null} ? '0' : ${#numbers.formatInteger(shop.minPrice, 0, 'COMMA')}) + '원'"></small>
+							<small th:with="ratingDisplay=${reviewAvg == 0 ? '0' : #numbers.formatDecimal(reviewAvg, 1, 1)}"
+							th:text="'★ ' + ${ratingDisplay} + ' / 최소주문금액 ' + (${shop.minPrice == null} ? '0' : ${#numbers.formatInteger(shop.minPrice, 0, 'COMMA')}) + '원'"></small>
 						</div>
 						<input type="hidden" class="shopMinPrice" th:value="${shop.minPrice}"  />
 						<!-- 찜버튼 -->
@@ -85,7 +86,7 @@
 												<span class="menu-title">[[ ${menu.name} ]]</span>
 											</div>
 
-											<img th:src="${menu.mPictureUrl}" alt="메뉴 사진"
+											<img th:src="${menu.mPictureUrl ?: '/images/menu/reimages3.png'}" alt="메뉴 사진"
 												class="img-fluid mb-2" />
 
 											<div class="fw-semibold">[[ ${menu.mInfo} ]]</div>
@@ -109,7 +110,7 @@
 										<i class="bi bi-star-fill"></i>
 									</span>								
 											<span class="fs-5">별점&nbsp; </span>	
-								<h2 class="fw-bold me-3" th:text="${#numbers.formatDecimal(reviewAvg, 1, 1)}">4.9</h2>
+								<h2 class="fw-bold me-3" th:text="${reviewAvg == 0 ? '0' : #numbers.formatDecimal(reviewAvg, 1, 1)}">4.9</h2>
 													
 							</div>
 							<!-- 하트버튼 -->
@@ -300,27 +301,26 @@
 
 						<!-- 가게 정보 -->
 						<div class="tab-pane fade" id="info">
-<!-- 							
 							<p>
 							  <strong>가게 정보:</strong><br />
-							  <div class="pre-line" th:text="${shop.sInfo}">가게에 대한 간단한 설명</div>
-							</p>
-							<hr />
- -->
-							<!-- 공지사항 -->
-							<p>
-							  <strong>공지사항:</strong><br />
-							  <div class="pre-line" th:text="${shop.notice}">진행 중인 이벤트</div>
-							</p>
-							<hr />
-							
-							<!-- 원산지 -->
-							<p>
-							  <strong>원산지:</strong><br />
-							  <div class="pre-line" th:text="${shop.info}">가게의 기타 정보</div>
+							  <span th:text="${shop.sInfo}">가게에 대한 간단한 설명</span>
 							</p>
 							<hr />
 
+							<!-- 원산지 -->
+							<p>
+							  <strong>원산지:</strong><br />
+							  <span th:text="${shop.info}">가게의 기타 정보</span>
+							</p>
+							<hr />
+
+							<!-- 공지사항 -->
+							<p>
+							  <strong>공지사항:</strong><br />
+							  <span th:text="${shop.notice}">진행 중인 이벤트</span>
+							</p>
+							<hr />
+							
 							
 							
 							  <p><strong>영업시간:</strong>
