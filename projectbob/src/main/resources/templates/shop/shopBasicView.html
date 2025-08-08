@@ -7,7 +7,6 @@
 <head>
     <meta charset="UTF-8">
     <title>가게 기본 정보</title>
-    <!-- 지도/주소 API 연동 시 이렇게 JS키를 넣습니다 -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script
 	  src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2b87d757b240dd70a51d682dd3cc37ed&libraries=services">
@@ -18,52 +17,50 @@
 <div layout:fragment="content">
     <div class="content-card">
 	    <h2 class="text-center fw-bold mb-4">기본 설정</h2>
-	    <ul class="list-group list-group-flush shop-basic-list">
-	        <!--
-			<li class="list-group-item d-flex align-items-center">
-	            <i class="bi bi-shop me-3 text-primary fs-4"></i>
-	            <span class="fw-semibold me-2">가게명</span>
-	            <span class="ms-auto" th:text="${shop.name}"></span>
-	        </li>
-			-->
-			<!-- 가게명 -->
-		  <li class="list-group-item d-flex align-items-center">
-		    <i class="bi bi-shop me-3 text-primary fs-4"></i>
-		    <span class="fw-semibold me-2">가게명</span>
-		    <span class="ms-auto" th:text="${shop.name}"></span>
-		  </li>
-		
-		  <!-- 가게 사진 -->
-			<li class="list-group-item ps-5">
-			  <img th:if="${shop.sPictureUrl}"
-			       th:src="@{${shop.sPictureUrl}}"
-			       alt="가게 사진"
-			       class="img-fluid d-block mx-auto" />
-			</li>
-			
-	        <li class="list-group-item d-flex align-items-center">
-	            <i class="bi bi-telephone me-3 text-success fs-4"></i>
-	            <span class="fw-semibold me-2">연락처</span>
-	            <span class="ms-auto" th:text="${shop.phone}"></span>
-	        </li>
-      	
-	        <li class="list-group-item d-flex align-items-start"> <!-- align-items-start로 위쪽 정렬 -->
-		        <i class="bi bi-geo-alt me-3 text-danger fs-4"></i>
-		        <span class="fw-semibold me-2 mt-1">주소</span>
-		        <div class="ms-auto" style="min-width:200px;">
-		            <div>
-		                <span class="text-secondary small">[</span>
-		                <span th:text="${shop.zipcode}"></span>
-		                <span class="text-secondary small">]</span>
-		                <span id="address1" th:text="${shop.address1}"></span>
-		            </div>
-		            <div th:text="${shop.address2}" class="text-body-secondary small"></div>
-		        </div>
-		    </li>
-	    </ul>
-		    
-		<!-- 지도 영역 -->
-		<div id="shop-map" style="width:100%;height:320px;border-radius:14px;margin-bottom:18px;"></div>
+
+        <div class="row align-items-center g-4 mb-4">
+        
+        		<div class="col-lg-5 text-center">
+                <img th:if="${shop.sPictureUrl}"
+                     th:src="@{${shop.sPictureUrl}}"
+                     alt="가게 사진"
+                     class="img-fluid rounded-3 shadow-sm"
+                     style="max-width: 350px; height: auto; object-fit: cover;" />
+                <div th:if="${shop.sPictureUrl == null}" class="text-muted p-5 border rounded-3">
+                    <i class="bi bi-image-alt fs-1"></i>
+                    <div>등록된 사진이 없습니다.</div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <ul class="list-group list-group-flush shop-basic-list">
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-shop me-3 text-primary fs-4"></i>
+                        <span class="fw-semibold me-2">가게명</span>
+                        <span class="ms-auto" th:text="${shop.name}"></span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-telephone me-3 text-success fs-4"></i>
+                        <span class="fw-semibold me-2">연락처</span>
+                        <span class="ms-auto" th:text="${shop.phone}"></span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-start">
+                        <i class="bi bi-geo-alt me-3 text-danger fs-4"></i>
+                        <span class="fw-semibold me-2 mt-1">주소</span>
+                        <div class="ms-auto text-end" style="min-width:200px;">
+                            <div>
+                                <span class="text-secondary small">[</span>
+                                <span th:text="${shop.zipcode}"></span>
+                                <span class="text-secondary small">]</span>
+                                <span id="address1" th:text="${shop.address1}"></span>
+                            </div>
+                            <div th:text="${shop.address2}" class="text-body-secondary small"></div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+        </div> <div id="shop-map" style="width:100%;height:320px;border-radius:14px;margin-bottom:18px;"></div>
 
         <ul class="list-group list-group-flush shop-basic-list">
 	        <li class="list-group-item d-flex align-items-center">
@@ -71,29 +68,14 @@
 	            <span class="fw-semibold me-2">대표자명</span>
 	            <span class="ms-auto" th:text="${shop.owner}"></span>
 	        </li>
-	        <!--
+	       
 			<li class="list-group-item d-flex align-items-center">
-	            <i class="bi bi-file-earmark-text me-3 text-info fs-4"></i>
-	            <span class="fw-semibold me-2">사업자등록번호</span>
-	            <span class="ms-auto" th:text="${shop.sNumber}"></span>
-	        </li>
-			-->
-			<!-- 사업자등록번호 -->
-			  <li class="list-group-item d-flex align-items-center">
 			    <i class="bi bi-file-earmark-text me-3 text-info fs-4"></i>
 			    <span class="fw-semibold me-2">사업자등록번호</span>
 			    <span class="ms-auto" th:text="${shop.sNumber}"></span>
 			  </li>
 			
-			  <!-- 사업자등록증 (항상 노출) -->
-			  <li class="list-group-item ps-5">
-			    <img th:if="${shop.sLicenseUrl}"
-			         th:src="@{${shop.sLicenseUrl}}"
-			         alt="사업자등록증"
-			         class="img-fluid d-block mx-auto" />
-			  </li>
-					
-			<li class="list-group-item d-flex align-items-center">
+			  <li class="list-group-item d-flex align-items-center">
 	            <i class="bi bi-box-seam me-3 text-info fs-4"></i>
 	            <span class="fw-semibold me-2">원산지 안내</span>
 	            <span class="ms-auto" th:text="${shop.info}"></span>

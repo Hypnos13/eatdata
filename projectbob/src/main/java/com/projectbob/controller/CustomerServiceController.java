@@ -454,6 +454,7 @@ public class CustomerServiceController {
 		String id = (String) session.getAttribute("loginId");
 		
 		List<Map<String, Object>> orderList = csService.myOrderList(id);
+		
 		model.addAttribute("orderList", orderList);
 		
 		return "members/myOrders";

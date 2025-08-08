@@ -17,11 +17,14 @@
 		  <th:block th:each="order, status: ${orderList}">
 		  	<div class="address-card">
 				<div class="row mb-1">
-			      	<div class="col-7 text-start">
-			      		<a class="addressbook-title">* [[${order['shopName']}]]  - [[${order['address']}]]</a>	
+			      	<div class="col-9 text-start">
+			      		<div class="title-and-btn">
+				      		<a class="addressbook-title">* [[${order['shopName']}]]  - [[${order['address']}]]</a>  
+				      		<th:block th:unless="${order['hasReview']}">&nbsp <input class="btn myrv-btn-success" type="button" value="리뷰작성" th:onclick="|location.href='@{/MenuDetail(sId=${order.sId})}'|"></th:block>
+				      	</div>
 			      	</div>			
-			      	<div class="col-5 text-end">
-			      		<span class="span-address1">주문일시: [[${#dates.format(order['regDate'], 'yyyy-MM-dd HH:mm')}]] (결제 : [[${order['payment']}]])</span>
+			      	<div class="col-3 text-end">
+			      		<span class="span-address1">[[${#dates.format(order['regDate'], 'yyyy-MM-dd HH:mm')}]] (결제 : [[${order['payment']}]])</span>
 			      	</div>								 
 			   </div>
 			

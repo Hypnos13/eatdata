@@ -34,6 +34,7 @@
 </head>
 <body>
   <th:block layout:fragment="content">
+  <div class="content-panel">
     <div class="container py-3" th:attr="data-order-no=${order.oNo}">
       <h4>📦 주문 #<span th:text="${order.oNo}">123</span> 상세</h4>
 
@@ -73,6 +74,13 @@
         <dt class="col-sm-4">상태</dt>
         <dd class="col-sm-8 text-start text-sm-end" th:text="${order.status}">REJECTED</dd>
       </dl>
+      
+      <!-- 뒤로가기 버튼 -->
+	  <button type="button" class="btn btn-success" onclick="history.back()">
+	  	← 뒤로가기
+	  </button>
+      
+    </div>
     </div>
   </th:block>
 
