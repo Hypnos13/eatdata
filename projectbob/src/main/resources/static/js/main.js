@@ -44,7 +44,7 @@ $(document).ready(function() {
     const shopMinPrice = parseInt(shopMinPriceStr);
     console.log('최소 주문 금액 (문자열):', shopMinPriceStr);
     console.log('최소 주문 금액 (숫자):', shopMinPrice);
-		/*
+		
     if (isNaN(shopMinPrice)) {
       alert('최소 주문 금액이 맞지 않습니다.');
       return;
@@ -58,7 +58,7 @@ $(document).ready(function() {
       alert(`최소 주문 금액은 ${shopMinPrice.toLocaleString()}원입니다.\n결제 금액을 추가해주세요.`);
       console.log(`최소 주문 금액 미만 - totalPrice: ${totalPrice}, shopMinPrice: ${shopMinPrice}`);
       return;
-    }*/
+    }
 
     console.log('모든 조건 충족 - 결제 페이지로 이동');
     window.location.href = '/pay';
