@@ -871,7 +871,7 @@ public class ShopController {
 	        RedirectAttributes ra) {
 
 	    // 1) DB 상태 업데이트
-	    shopService.updateOrderStatus(oNo, newStatus,null);
+	    shopService.updateOrderStatus(oNo, newStatus);
 
 	    // 2) WebSocket 브로드캐스트 (운영자 화면 + 고객 화면)
 	    Map<String, Object> payload = Map.of("oNo", oNo, "newStatus", newStatus);
@@ -937,7 +937,7 @@ public class ShopController {
 
 
 		// 1) DB 업데이트
-		  shopService.updateOrderStatus(oNo, newStatus, null);
+		  shopService.updateOrderStatus(oNo, newStatus);
 
 		  // 2) 상세 갱신용
 		  messagingTemplate.convertAndSend("/topic/orderStatus/" + oNo,

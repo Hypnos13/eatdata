@@ -61,7 +61,7 @@
             
             <!-- 동적 타임라인 -->
             <ul class="status-steps">
-                <li th:classappend="${#lists.contains({'ACCEPTED','DISPATCHED', 'DELIVERING', 'COMPLETED'}, order.status)} ? 'completed'">
+                <li th:classappend="${#lists.contains({'ACCEPTED', 'DELIVERING', 'COMPLETED'}, order.status)} ? 'completed'">
                     <span>주문접수/조리중</span>
                 </li>
                 <li th:classappend="${#lists.contains({'DELIVERING', 'COMPLETED'}, order.status)} ? 'completed'">
