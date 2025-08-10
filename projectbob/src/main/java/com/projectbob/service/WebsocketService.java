@@ -74,5 +74,19 @@ public class WebsocketService {
 	 * public void sendNewOrder(int shopId, int orderId) { NewOrder msg = new
 	 * NewOrder(orderId); template.convertAndSend("/topic/orders/" + shopId, msg); }
 	 */
+
+    /**
+     * 특정 고객에게 배달 예상 시간 등 상세 정보를 전송합니다.
+     * @param userId 고객의 ID
+     * @param dispatchInfo 전송할 배달 정보
+     */
+    public void sendDeliveryInfoToCustomer(String userId, DispatchInfo dispatchInfo) {
+        log.info("고객에게 배달 정보 전송. userId: {}, info: {}", userId, dispatchInfo);
+        template.convertAndSendToUser(
+            userId,
+            "/queue/delivery-info", // 배달 정보 전용 주소
+            dispatchInfo
+        );
+    }
     
 }

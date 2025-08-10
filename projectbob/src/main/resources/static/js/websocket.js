@@ -58,6 +58,9 @@ function generateNotificationMessage(payload) {
         case 'ACCEPTED':
             message = `✅ 주문 #${payload.oNo}이(가) 수락되었습니다! 곧 준비가 시작됩니다.`;
             break;
+		case 'DISPATCHED':
+			message = `🔔 주문 #${payload.oNo}의 배차가 지정되었습니다.`;
+			break;
         case 'DELIVERING':
             message = `🚚 주문 #${payload.oNo}의 배달이 시작되었습니다!`;
             break;
@@ -297,33 +300,85 @@ function connectWebSocket() {
         // 개인화된 주문 상태 업데이트 채널 구독
         stompClient.subscribe('/user/queue/order-updates', function (message) {
             console.log('--- RAW MESSAGE RECEIVED ---');
-            console.log('Raw message body:', message.body); // 원본 메시지 로그
+            console.log('Raw message body:', message.body);
             const payload = JSON.parse(message.body);
-            console.log('Parsed payload (before normalization):', JSON.stringify(payload)); // 파싱 직후 로그
+            console.log('Parsed payload (before normalization):', JSON.stringify(payload));
 
-            // 페이로드 정규화: 백엔드의 다른 부분에서 'newStatus' 또는 'status'를 보냅니다. JS는 'status'를 예상합니다.
+            // 페이로드 정규화
             if (payload.newStatus && !payload.status) {
-                console.log(`Normalizing: found newStatus '${payload.newStatus}', setting status.`);
                 payload.status = payload.newStatus;
             }
-            // orderId/oNo도 정규화합니다.
             if (payload.orderId && !payload.oNo) {
-                console.log(`Normalizing: found orderId '${payload.orderId}', setting oNo.`);
                 payload.oNo = payload.orderId;
             }
-            console.log('Final payload (after normalization):', JSON.stringify(payload)); // 정규화 후 로그
 
-            // REJECTED 상태가 아닐 때만 종 모양 알림을 처리합니다.
+            // ★★★★★ 이 부분을 추가합니다 ★★★★★
+            // 현재 페이지가 completed.html일 때만 타임라인 업데이트 함수를 호출합니다.
+            if (document.querySelector('.status-steps')) {
+                updateTimeline(payload.status);
+            }
+            // ★★★★★ 여기까지 입니다 ★★★★★
+
+            // ★★★★★ 핵심 로직 ★★★★★
+            // newStatus가 'DISPATCHED'인 경우, 배달 시간 정보를 화면에 표시합니다.
+            if (payload.status === 'DISPATCHED') {
+                console.log('배차 완료(DISPATCHED) 메시지 수신:', payload);
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentOrderId = urlParams.get('orderId');
+
+                // 현재 페이지가 해당 주문의 완료 페이지일 때만 DOM 조작
+                if (currentOrderId && parseInt(currentOrderId) === payload.oNo) {
+                    const deliveryInfoList = document.querySelector('.list-group.text-start.mb-4');
+                    if (deliveryInfoList) {
+                        const existingDeliveryInfo = document.getElementById('dynamic-delivery-info');
+                        if (existingDeliveryInfo) {
+                            existingDeliveryInfo.remove();
+                        }
+                        const newListItem = document.createElement('li');
+                        newListItem.id = 'dynamic-delivery-info';
+                        newListItem.className = 'list-group-item';
+                        newListItem.innerHTML = `
+                            <i class="bi bi-info-circle-fill text-success"></i> <strong>배달 예상 시간</strong>
+                            <br>
+                            <span class="ms-3" style="font-size: 0.9rem;">- 조리 완료(픽업 예상): ${payload.pickupTime}</span>
+                            <br>
+                            <span class="ms-3" style="font-size: 0.9rem;">- 배달 완료 예상: ${payload.deliveryTime}</span>
+                        `;
+                        deliveryInfoList.appendChild(newListItem);
+                    }
+                }
+            }
+
+            // newStatus가 'COMPLETED'인 경우, 배달 완료 시간으로 내용을 교체합니다.
+            if (payload.status === 'COMPLETED') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentOrderId = urlParams.get('orderId');
+
+                if (currentOrderId && parseInt(currentOrderId) === payload.oNo) {
+                    const deliveryInfoElem = document.getElementById('dynamic-delivery-info');
+                    if (deliveryInfoElem) {
+                        const now = new Date();
+                        // '오후 5:30:00' 와 같은 형식으로 시간을 표시
+                        const formattedTime = now.toLocaleTimeString('ko-KR'); 
+                        deliveryInfoElem.innerHTML = `
+                            <i class="bi bi-check-circle-fill text-success"></i> <strong>배달 완료</strong>
+                            <br>
+                            <span class="ms-3" style="font-size: 0.9rem;">- 완료 시간: ${formattedTime}</span>
+                        `;
+                    }
+                }
+            }
+            // ★★★★★ 핵심 로직 끝 ★★★★★
+
+            // 일반 알림 처리 (모든 상태에 대해 공통으로 처리)
             if (payload.status !== 'REJECTED') {
                 handleBellIconNotification(payload);
             }
-
-            // 토스티파이 알림은 모든 상태에 대해 항상 처리합니다.
             showOrderNotification(payload);
         });
+
     }, function(error) {
         console.error('[WebSocket] Connection error: ' + error);
-        // 연결 실패 시 5초 후 재시도
         setTimeout(connectWebSocket, 5000);
     });
 }
@@ -345,7 +400,7 @@ function showOrderNotification(payload) {
     };
 
     // 클릭 액션 정의
-    if (['ACCEPTED', 'DELIVERING', 'COMPLETED'].includes(payload.status)) {
+    if (['ACCEPTED', 'DELIVERING', 'COMPLETED', 'DISPATCHED'].includes(payload.status)) {
         onClickAction = function() {
             window.location.href = '/end?orderId=' + payload.oNo;
         };
@@ -369,5 +424,25 @@ function showOrderNotification(payload) {
         if (payload.status === 'REJECTED') {
             alert(notificationMessage);
         }
+    }
+}
+
+function updateTimeline(status) {
+    // completed.html에 있는 타임라인의 li 요소들을 모두 선택합니다.
+    const steps = document.querySelectorAll('.status-steps li');
+    if (!steps || steps.length < 3) return; // 타임라인이 없으면 함수 종료
+
+    // 일단 모든 단계의 'completed' 클래스를 제거하여 초기화합니다.
+    steps.forEach(step => step.classList.remove('completed'));
+
+    // 새로운 상태에 따라 'completed' 클래스를 단계별로 다시 추가합니다.
+    if (status === 'ACCEPTED' || status === 'DISPATCHED' || status === 'DELIVERING' || status === 'COMPLETED') {
+        steps[0].classList.add('completed');
+    }
+    if (status === 'DELIVERING' || status === 'COMPLETED') {
+        steps[1].classList.add('completed');
+    }
+    if (status === 'COMPLETED') {
+        steps[2].classList.add('completed');
     }
 }
