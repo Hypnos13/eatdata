@@ -158,19 +158,23 @@ $(function(){
 		
 		if($("#rEmail:checked").val()){			
 			check += CheckEmail();
+			if(check != 3){
+				return false;
+			}
 		}else if($("#rPhone:checked").val()){
 			check += CheckPhone();
-		}
+			
+			if(phoneIsReadOnly){
+					check += 1;
+			}else{
+					alert("핸드폰 인증을 완료해주세요.");
+			}
+			
+			if(check != 4){
+				return false;
+			}
+		}	
 		
-		if(phoneIsReadOnly){
-			check += 1;
-		}else{
-			alert("핸드폰 인증을 완료해주세요.");
-		}
-		
-		if(check != 4){
-			return false;
-		}
 		
 	});
 	
