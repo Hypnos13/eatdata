@@ -12,15 +12,91 @@
 				<!-- 왼쪽 입력 영역 -->
 				<div class="col-md-8">
 					<div class="section-title">결제하기</div>
+					
 					<div class="mb-3">
-						<label class="form-label">주소</label>
+						<div class="d-flex align-items-center">
+						   <label class="form-label mb-0">주소</label>
+						   <button type="button" class="btn btn-outline-primary btn-sm ms-auto mb-2 " id="openAddressPopupBtn">주소변경</button>
+						   
+						 </div>
+						 
 						 <input type="text" name="address1" class="form-control"
-						 	th:value="${member != null ? member.address1 : ''}"
+						 	th:value="${member != null ? session.userAddress : ''}"
 							 placeholder="(필수)주소를 입력하세연" />
 						<input type="text" class="form-control mt-2" name="address2"
 							th:value="${member != null ? member.address2 : ''}"
 							placeholder="(필수) 상세주소 입력" />
+							
 					</div>
+					
+					<!-- 주소 변경 모달 -->
+					<div class="modal fade" id="addressModal2" tabindex="-1" aria-labelledby="addressModalLabel2" aria-hidden="true">
+					  <div class="modal-dialog modal-lg">
+					    <div class="modal-content">
+					      
+					      <!-- 모달 헤더 -->
+					      <div class="modal-header">
+					        <h5 class="modal-title" id="addressModalLabel2">배달 주소 변경</h5>
+					        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+					      </div>
+
+					      <!-- 모달 본문 -->
+					      <div class="modal-body">
+					        <!-- 주소 탭 -->
+					        <ul class="nav nav-tabs mt-2" id="addressTabs2" role="tablist" 
+					            th:if="${session.loginId != null}">
+					          <li class="nav-item" role="presentation">
+					            <button class="nav-link active" id="home-tab2" data-bs-toggle="tab"
+					                    data-bs-target="#home-addresses2" type="button" role="tab"
+					                    aria-controls="home-addresses2" aria-selected="true">집</button>
+					          </li>
+					          <li class="nav-item" role="presentation">
+					            <button class="nav-link" id="company-tab2" data-bs-toggle="tab"
+					                    data-bs-target="#company-addresses2" type="button" role="tab"
+					                    aria-controls="company-addresses2" aria-selected="false">회사</button>
+					          </li>
+					          <li class="nav-item" role="presentation">
+					            <button class="nav-link" id="etc-tab2" data-bs-toggle="tab"
+					                    data-bs-target="#etc-addresses2" type="button" role="tab"
+					                    aria-controls="etc-addresses2" aria-selected="false">그 외</button>
+					          </li>
+					        </ul>
+
+					        <!-- 탭 콘텐츠 -->
+					        <div class="tab-content border border-top-0 p-3" id="addressTabContent2" 
+					             th:if="${session.loginId != null}">
+
+					          <!-- 집 주소 -->
+					          <div class="tab-pane fade show active" id="home-addresses2"
+					               role="tabpanel" aria-labelledby="home-tab2">
+					            <p class="text-muted">주소를 불러오는 중입니다...</p>
+					          </div>
+
+					          <!-- 회사 주소 -->
+					          <div class="tab-pane fade" id="company-addresses2" role="tabpanel"
+					               aria-labelledby="company-tab2">
+					            <p class="text-muted">주소를 불러오는 중입니다...</p>
+					          </div>
+
+					          <!-- 기타 주소 -->
+					          <div class="tab-pane fade" id="etc-addresses2" role="tabpanel"
+					               aria-labelledby="etc-tab2">
+					            <p class="text-muted">주소를 불러오는 중입니다...</p>
+					          </div>
+
+					        </div>
+					      </div>
+
+					      <!-- 모달 푸터 -->
+					      <div class="modal-footer">
+					        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+					      </div>
+
+					    </div>
+					  </div>
+					</div>
+					<!-- 모달 끝 -->
+					
 					<div class="mb-3">
 						<label class="form-label">휴대전화번호</label> <input type="text"
 							id="phone" class="form-control" placeholder="(필수) 휴대전화 번호 입력"
@@ -56,10 +132,53 @@
 					<div class="mt-4">
 						<label class="form-label">할인 쿠폰</label>
 						<div class="input-group">
-							<input type="text" class="form-control" placeholder="쿠폰 코드 입력" />
-							<button class="btn btn-outline-danger">적용</button>
+							<input type="text" class="form-control" placeholder="쿠폰 선택 (쿠폰은 1개만 사용가능)" />
+							<button id="openCouponModalBtn"  class="btn btn-outline-danger">선택하기</button>
 						</div>
 					</div>
+					
+					<!-- 쿠폰 리스트 모달 -->
+					<div class="modal fade" id="couponModal" tabindex="-1" aria-labelledby="couponModalLabel" aria-hidden="true">
+					  <div class="modal-dialog modal-md">
+					    <div class="modal-content">
+					      <!-- 모달 헤더 -->
+					      <div class="modal-header">
+					        <h5 class="modal-title" id="couponModalLabel">할인 쿠폰 리스트</h5>
+					        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+					      </div>
+					      <!-- 모달 본문 -->
+						  <div class="modal-body">
+						          <ul class="list-group" id="couponList">
+						            <li th:if="${#lists.isEmpty(couponList)}" class="list-group-item text-center text-muted">
+						              사용 가능한 쿠폰이 없습니다.
+						            </li>
+
+						            <li th:each="coupon : ${couponList}"
+						                class="list-group-item d-flex justify-content-between align-items-center">
+						              <div>
+						                <div><strong th:text="${coupon.name}">쿠폰명</strong></div>
+						                <small>할인금액: <span th:text="${#numbers.formatInteger(coupon.disPrice, 0, 'COMMA')} + '원'">0원</span></small><br/>
+						                <small>최소주문금액: <span th:text="${#numbers.formatInteger(coupon.minPrice, 0, 'COMMA')} + '원'">0원</span></small><br/>
+						                <small>유효기간: <span th:text="${#dates.format(coupon.delDate, 'yyyy-MM-dd')}">2025-01-01</span></small>
+						              </div>
+									  <button type="button" 
+									          class="btn btn-sm btn-primary select-coupon-btn"
+									          th:data-coupon-id="${coupon.cNo}"
+									          th:data-coupon-name="${coupon.name}"
+									          th:data-coupon-disprice="${coupon.disPrice}">
+									    선택
+									  </button>
+						            </li>
+						          </ul>
+						        </div>
+					      <!-- 모달 푸터 -->
+					      <div class="modal-footer">
+					        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+					      </div>
+					    </div>
+					  </div>
+					</div>
+					
 				</div>
 				
 				<div class="col-12 col-md-4">
@@ -97,12 +216,12 @@
 				            </div>
 				        </div>
 
-				        <div id="totalOrderPrice" class="mb-2 fw-bold">
-				            총 결제 금액: <span th:text="${#numbers.formatInteger(finalTotalPrice, 0, 'COMMA')} + '원'" th:data-price="${finalTotalPrice}"></span>
-				        </div>
 				        <div id="orderSummaryInfo" class="mb-3"
 				             th:classappend="${#lists.isEmpty(orderedItems)} ? 'd-none' : ''">
 				            <small class="text-muted d-block mt-1"> (배달비 3,000원 추가) </small>
+				        </div>
+				        <div id="totalOrderPrice" class="mb-2 fw-bold">
+				            총 결제 금액: <span th:text="${#numbers.formatInteger(finalTotalPrice, 0, 'COMMA')} + '원'" th:data-price="${finalTotalPrice}"></span>
 				        </div>
 
 				        <button class="btn btn-sm w-100 text-white" 

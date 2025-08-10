@@ -398,13 +398,13 @@
 				            </div>
 				        </div>
 
-				        <div id="totalOrderPrice" class="mb-2 fw-bold">
-				            총 결제 금액: <span
-				                th:text="${#numbers.formatInteger(totalPrice, 0, 'COMMA')} + '원'">0원</span>
-				        </div>
 				        <div id="orderSummaryInfo" class="mb-3"
 				             th:classappend="${#lists.isEmpty(cartList)} ? 'd-none' : ''">
 				            <small class="text-muted d-block mt-1"> (배달비 3,000원 추가) </small>
+				        </div>
+				        <div id="totalOrderPrice" class="mb-2 fw-bold">
+				            총 결제 금액: <span
+				                th:text="${#numbers.formatInteger(totalPrice, 0, 'COMMA')} + '원'">0원</span>
 				        </div>
 
 				        <button class="btn btn-danger w-100 btn-sm mb-2" id="btnRemoveAllItems">주문 전체 취소</button>

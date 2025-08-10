@@ -21,18 +21,22 @@ $(document).ready(function() {
     e.preventDefault();
 
     console.log('주문하기 버튼 클릭 이벤트 시작');
-
-    if (!window.currentUserId || window.currentUserId.trim() === '') {
-      alert('로그인이 필요합니다.');
-      console.log('로그인 필요 - currentUserId:', window.currentUserId);
-      return;
-    }
-
+	
     if (!currentCartData || currentCartData.length === 0) {
       alert('장바구니가 비어있습니다. 메뉴를 추가해주세요.');
       console.log('장바구니 비어있음 - currentCartData:', currentCartData);
       return;
     }
+
+    if (!window.currentUserId || window.currentUserId.trim() === '') {
+      alert('로그인이 필요합니다.');
+      console.log('로그인 필요 - currentUserId:', window.currentUserId);
+	  
+	const currentUrl = encodeURIComponent(window.location.href);
+	   window.location.href = `/login?redirectURL=${currentUrl}`;
+      return;
+    }
+
 
     const totalText = $('#totalOrderPrice').text();
     console.log('총 결제 금액 텍스트:', totalText);
@@ -740,7 +744,7 @@ $(document).ready(function() {
             if (searchAddressInput) {
                 searchAddressInput.focus();
             }
-						loadAndPopulateSavedAddresses(); 
+						//loadAndPopulateSavedAddresses(); 
         }
     }
 
@@ -834,22 +838,29 @@ $(document).ready(function() {
 		}
 
     // 5. '이 주소 선택' 버튼 클릭 이벤트: 메인 input에 반영하고 팝업 닫기
-    if (selectSearchedAddressBtn && mainAddressInput) {
-        selectSearchedAddressBtn.addEventListener('click', function() {
-            const postcode = searchedPostcodeP.textContent.replace('우편번호: ', '');
-            const basicAddress = searchedAddressP.textContent.replace('기본 주소: ', '');
-            const detailAddress = searchedDetailAddressInput.value.trim();
+	if (selectSearchedAddressBtn && mainAddressInput) {
+	    selectSearchedAddressBtn.addEventListener('click', function() {
+	        const basicAddress = searchedAddressP.textContent.replace('기본 주소: ', '');
 
-            if (basicAddress && basicAddress !== '기본 주소: ') { // 실제 주소가 있는지 확인
-                mainAddressInput.value = `${basicAddress} ${detailAddress}`.trim();
-                closeAddressPopup(); // 팝업 닫기
-            } else {
-                alert('선택할 주소가 없습니다. 먼저 주소를 검색해주세요.');
-            }
-        });
-    }
+	        if (basicAddress && basicAddress !== '기본 주소: ') { // 실제 주소가 있는지 확인
+	            mainAddressInput.value = basicAddress;
+	            closeAddressPopup(); // 팝업 닫기
+	        } else {
+	            alert('선택할 주소가 없습니다. 먼저 주소를 검색해주세요.');
+	        }
+	    });
+	}
 
 
+});
+
+//pay 주소변경 버튼
+$('#openAddressPopupBtn').on('click', function() {
+    const addressModalEl = document.getElementById('addressModal2');
+    const addressModal = new bootstrap.Modal(addressModalEl);
+    addressModal.show();
+
+    loadAndPopulateSavedAddresses2();
 });
 
 // 모든 DOMContentLoaded 관련 스크립트를 하나의 jQuery $(document).ready() 블록으로 통합
@@ -928,16 +939,6 @@ $(document).ready(function() {
 	   }
 
 
-    // 검색 제출 버튼 (키워드 검색)
-    $("#searchSubmitBtn")?.on("click", function () {
-        const keyword = $('#searchBox input[type="text"]')?.val().trim();
-        if (keyword) {
-            window.location.href = `/shopList?keyword=${encodeURIComponent(keyword)}`;
-        } else {
-            alert("검색어를 입력해주세요.");
-        }
-    });
-
     // 주소 검색/지우기 버튼 로직 
     const locationInput = document.getElementById('location-input');
     const addressInputSearchBtn  = document.getElementById('addressInputSearchBtn'); // HTML에 'id="searchButton"'이 반드시 있어야 합니다.
@@ -998,48 +999,19 @@ $(document).ready(function() {
 // ==============================
 // 저장된 주소 불러오기 및 팝업 탭에 채우는 함수
 // ==============================
-function loadAndPopulateSavedAddresses() {
-    console.log("저장된 주소 불러오기 AJAX 요청 시작: /getAddress (세션 ID 사용)");
-
-    const savedAddressesSection = document.getElementById('savedAddressesSection');
-
-
+function loadAndPopulateSavedAddresses2() {
     $.ajax({
-        url: "/getAddress", // 저장된 주소를 가져올 URL
-        type: "POST",       // POST 메소드 사용
+        url: "/getAddress",
+        type: "POST",
         success: function(response) {
-            console.log("저장된 주소 불러오기 성공: /getAddress 응답:", response);
-            
-            // 응답 성공 시 (로그인 상태), 탭 영역을 보여주고 데이터를 채웁니다.
-            if (savedAddressesSection) { // 요소가 존재하는지 확인
-                savedAddressesSection.classList.remove('d-none'); 
-            }
-
             if (response.success && response.addressList) {
-                populateAddressTabs(response.addressList); // 불러온 주소로 탭 업데이트
+                populateAddressTabs2(response.addressList);
             } else {
-                console.error("저장된 주소 로드 실패 (서버 응답):", response.message || "알 수 없는 오류");
-                populateAddressTabs([]); // 실패 시 빈 목록 표시 (내부에 '저장된 주소 없음' 메시지 처리)
+                populateAddressTabs2([]);
             }
         },
-        error: function(xhr, status, error) {
-            //console.error("저장된 주소 로드 서버 오류:", status, error, xhr.responseText);
-            
-            // 어떤 종류의 오류든 (특히 401) 탭 영역을 숨깁니다.
-            if (savedAddressesSection) { // 요소가 존재하는지 확인
-                savedAddressesSection.classList.add('d-none'); // 탭 영역 전체 숨김
-            }
-
-            // 401 Unauthorized (로그인 필요 없음) 경우에만 경고창을 띄우지 않습니다.
-            if (xhr.status === 401) {
-                // "로그인이 필요합니다." alert 제거 (요청에 따라)
-                console.log("로그인되지 않은 사용자: 저장된 주소 탭 숨김.");
-            } else {
-                // 그 외 다른 서버 오류는 사용자에게 알립니다.
-                alert("주소 조회 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-            }
-            
-            // 탭 섹션을 숨겼으므로 populateAddressTabs([]) 호출은 필요 없습니다.
+        error: function() {
+            populateAddressTabs2([]);
         }
     });
 }
@@ -1047,96 +1019,86 @@ function loadAndPopulateSavedAddresses() {
 // ==============================
 // 주소록 탭(집, 회사, 그 외)에 주소 데이터 채우는 함수 - 보류 
 // ==============================
-function populateAddressTabs(addresses) {
-    const $homeAddressesTab = $('#home-addresses');
-    const $companyAddressesTab = $('#company-addresses');
-    const $etcAddressesTab = $('#etc-addresses');
+function populateAddressTabs2(addresses) {
+    const $homeTab2 = $('#home-addresses2');
+    const $companyTab2 = $('#company-addresses2');
+    const $etcTab2 = $('#etc-addresses2');
 
-    // 기존 내용 비우기
-    $homeAddressesTab.empty();
-    $companyAddressesTab.empty();
-    $etcAddressesTab.empty();
-		
-		console.log("📦 [populateAddressTabs] 호출됨 - 전체 주소 목록:", addresses);
+    $homeTab2.empty();
+    $companyTab2.empty();
+    $etcTab2.empty();
 
     if (!addresses || addresses.length === 0) {
-        $homeAddressesTab.html('<p class="text-muted">저장된 집 주소가 없습니다.</p>');
-        $companyAddressesTab.html('<p class="text-muted">저장된 회사 주소가 없습니다.</p>');
-        $etcAddressesTab.html('<p class="text-muted">저장된 기타 주소가 없습니다.</p>');
+        $homeTab2.html('<p class="text-muted">저장된 집 주소가 없습니다.</p>');
+        $companyTab2.html('<p class="text-muted">저장된 회사 주소가 없습니다.</p>');
+        $etcTab2.html('<p class="text-muted">저장된 기타 주소가 없습니다.</p>');
         return;
     }
 
-    // 주소를 카테고리별로 분류하여 HTML 생성 후 추가
-		addresses.forEach(addr => {
-		
-		    const aNameTrimmed = addr.aname ? addr.aname.trim() : '';
-				 console.log(` aName:`, addr.aName, '| trim:', aNameTrimmed);
+    addresses.forEach(addr => {
+        const aName2 = (addr.aname || '').trim();
+        const addressHtml2 = `
+          <div class="saved-address-item2 border p-2 mb-2 rounded" data-address1="${addr.address1}" data-address2="${addr.address2}">
+            <div>${addr.address1} ${addr.address2 || ''}</div>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-1 select-saved-address-btn2">선택</button>
+          </div>
+        `;
 
-		    const addressHtml = `
-		        <div class="saved-address-item border p-2 mb-2 rounded"
-		             data-no="${addr.no}"
-		             data-address1="${addr.address1}"
-		             data-address2="${addr.address2}"
-		             data-aname="${addr.aName}">
-		            <div>${addr.address1} ${addr.address2 || ''}</div>
-		            <button type="button" class="btn btn-sm btn-outline-primary mt-1 select-saved-address-btn">선택</button>
-		        </div>
-		    `;
-		    
-			if (aNameTrimmed === '집') {
-			       console.log('집 주소 → home-addresses 탭에 추가');
-			       $homeAddressesTab.append(addressHtml);
-			   } else if (aNameTrimmed === '회사') {
-			       console.log('회사 주소 → company-addresses 탭에 추가');
-			       $companyAddressesTab.append(addressHtml);
-			   } else {
-			       console.log('그 외 주소 → etc-addresses 탭에 추가');
-			       $etcAddressesTab.append(addressHtml);
-			   }
-		});
-
-    // 각 탭에 내용이 없으면 "저장된 주소가 없습니다." 메시지 다시 표시
-    if ($homeAddressesTab.children().length === 0) {
-        $homeAddressesTab.html('<p class="text-muted">저장된 집 주소가 없습니다.</p>');
-    }
-    if ($companyAddressesTab.children().length === 0) {
-        $companyAddressesTab.html('<p class="text-muted">저장된 회사 주소가 없습니다.</p>');
-    }
-    if ($etcAddressesTab.children().length === 0) {
-        $etcAddressesTab.html('<p class="text-muted">저장된 기타 주소가 없습니다.</p>');
-    }
+        if (aName2 === '집') {
+            $homeTab2.append(addressHtml2);
+        } else if (aName2 === '회사') {
+            $companyTab2.append(addressHtml2);
+        } else {
+            $etcTab2.append(addressHtml2);
+        }
+    });
 }
 
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('select-saved-address-btn')) {
-        const savedAddressItem = e.target.closest('.saved-address-item');
-        if (!savedAddressItem) return;
+// ==============================
+// 주소 선택 버튼 클릭시 주소 넣고 모달닫기
+// ==============================
+$(document).on('click', '.select-saved-address-btn2', function() {
+    const $parent = $(this).closest('.saved-address-item2');
+    const address1 = $parent.data('address1') || '';
+    const address2 = $parent.data('address2') || '';
 
-        const address1 = savedAddressItem.dataset.address1 || '';
+    // 주소 input에 값 설정
+    $('input[name="address1"]').val(address1);
+    $('input[name="address2"]').val(address2);
 
-        console.log("선택된 주소1:", address1);
-
-        const mainAddressInput = document.getElementById('location-input');
-        if (mainAddressInput) {
-            mainAddressInput.value = address1;
-        }
-
-        // 직접 팝업 닫기 동작 (closeAddressPopup 함수 없이)
-        const addressPopupWrapper = document.querySelector('.address-popup-wrapper');
-        const popupOverlay = document.querySelector('.popup-overlay');
-
-        if (addressPopupWrapper) {
-            addressPopupWrapper.classList.remove('show');
-            addressPopupWrapper.classList.add('d-none');
-        }
-        if (popupOverlay) {
-            popupOverlay.classList.add('d-none');
-        }
-    }
+    // 모달 닫기
+    const modalEl = document.getElementById('addressModal2');
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    if (modalInstance) modalInstance.hide();
 });
 
 
+// 쿠폰모달 열기
+document.getElementById('openCouponModalBtn').addEventListener('click', function() {
+  const couponModalEl = document.getElementById('couponModal');
+  const couponModal = new bootstrap.Modal(couponModalEl);
+  couponModal.show();
+});
 
+// 쿠폰 선택 버튼 클릭 이벤트 예시 (필요 시 추가 동작 구현)
+document.addEventListener('click', function(e) {
+	if(e.target && e.target.classList.contains('select-coupon-btn')) {
+	   const couponName = e.target.dataset.couponName;
+	   const disPrice = e.target.dataset.couponDisprice;
+
+	   // input 요소 찾아서 value 세팅 (id로 찾거나 적절히 수정하세요)
+	   const couponInput = document.querySelector('input[placeholder^="쿠폰 선택"]');
+	   if (couponInput) {
+	     couponInput.value = `${couponName} : -${Number(disPrice).toLocaleString()}원`;
+	   }
+    // 쿠폰모달 닫기
+    const couponModalEl = document.getElementById('couponModal');
+    const couponModal = bootstrap.Modal.getInstance(couponModalEl);
+    if(couponModal) couponModal.hide();
+  }
+});
+
+//뭐였지 이건 ?
 function handleCurrentLocationSearch() {
     console.log("handleCurrentLocationSearch 함수 시작");
 

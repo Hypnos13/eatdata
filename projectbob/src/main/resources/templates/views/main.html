@@ -51,54 +51,12 @@
 					class="mb-3 p-2 border rounded d-none">
 					<p class="mb-0" id="searchedPostcode">우편번호:</p>
 					<p class="mb-0" id="searchedAddress">기본 주소:</p>
-					<input type="text" id="searchedDetailAddress"
-						class="form-control mt-2" placeholder="상세 주소를 입력하세요">
+				
 					<button type="button" id="selectSearchedAddressBtn"
 						class="btn btn-success btn-sm mt-2 w-100">이 주소 선택</button>
 				</div>
 
-				<!-- 주소 탭 -->
-				<ul class="nav nav-tabs mt-4" id="addressTabs" role="tablist"
-					th:if="${session.loginId != null}">
-					<li class="nav-item" role="presentation">
-						<button class="nav-link active" id="home-tab" data-bs-toggle="tab"
-							data-bs-target="#home-addresses" type="button" role="tab"
-							aria-controls="home-addresses" aria-selected="true">집</button>
-					</li>
-					<li class="nav-item" role="presentation">
-						<button class="nav-link" id="company-tab" data-bs-toggle="tab"
-							data-bs-target="#company-addresses" type="button" role="tab"
-							aria-controls="company-addresses" aria-selected="false">회사</button>
-					</li>
-					<li class="nav-item" role="presentation">
-						<button class="nav-link" id="etc-tab" data-bs-toggle="tab"
-							data-bs-target="#etc-addresses" type="button" role="tab"
-							aria-controls="etc-addresses" aria-selected="false">그 외</button>
-					</li>
-				</ul>
 
-				<div class="tab-content border border-top-0 p-3"
-					id="addressTabContent" th:if="${session.loginId != null}">
-
-					<!-- 집 주소 -->
-					<div class="tab-pane fade show active" id="home-addresses"
-						role="tabpanel" aria-labelledby="home-tab">
-						<p class="text-muted">주소를 불러오는 중입니다...</p>
-					</div>
-
-					<!-- 회사 주소 -->
-					<div class="tab-pane fade" id="company-addresses" role="tabpanel"
-						aria-labelledby="company-tab">
-						<p class="text-muted">주소를 불러오는 중입니다...</p>
-					</div>
-
-					<!-- 기타 주소 -->
-					<div class="tab-pane fade" id="etc-addresses" role="tabpanel"
-						aria-labelledby="etc-tab">
-						<p class="text-muted">주소를 불러오는 중입니다...</p>
-					</div>
-
-				</div>
 
 				<button type="button" id="closeAddressSectionBtn"
 					class="btn btn-secondary mt-3 w-100">닫기</button>

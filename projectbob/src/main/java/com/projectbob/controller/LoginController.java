@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.projectbob.domain.Member;
 import com.projectbob.service.LoginService;
@@ -52,11 +53,15 @@ public class LoginController {
 	String NAVER_EMAIL;
 	final DefaultMessageService MESSAGE_SERVICE = NurigoApp.INSTANCE.initialize("NCSAPQWVSQ1DX1ZB", "RQSJXZYQH0YRPL75MUVMM999RLC5L7IP", "https://api.coolsms.co.kr");  //핸드폰 인증시 사용되는 서비스
 	
+
 	//로그인 폼
 	@GetMapping("/login")
-	public String loginForm(Model model, @RequestParam(name ="from", defaultValue = "client") String from) {
+	public String loginForm(Model model, @RequestParam(name ="from", defaultValue = "client") String from,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl) {
 		
 		model.addAttribute("from", from);
+		model.addAttribute("redirectUrl", redirectUrl);
+		
 		
 		return "members/login";
 	}
