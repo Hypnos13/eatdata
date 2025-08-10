@@ -169,14 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const orderId = currentSelectedOrder.orderId;
             const response = await fetch(`/rider/orders/${orderId}/accept`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    pickupTime: currentSelectedOrder.pickupTime,
-                    deliveryTime: currentSelectedOrder.deliveryTime
-                })
+                method: 'POST'
             });
 
             if (!response.ok) {

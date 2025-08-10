@@ -3,8 +3,8 @@ package com.projectbob.service;
 import java.io.*;
 import java.util.*;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.util.stream.Collectors;
+import java.time.LocalDate; // 날짜 처리를 위해 임포트
+import java.util.stream.Collectors; // 스트림 사용을 위해 임포트
 
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
@@ -16,8 +16,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.ui.Model;
 
 import com.projectbob.domain.*;
-import com.projectbob.domain.statistics.MenuPopularityDto;
-import com.projectbob.domain.statistics.MonthlySalesDto;
+import com.projectbob.domain.statistics.MenuPopularityDto; // DTO 임포트
+import com.projectbob.domain.statistics.MonthlySalesDto;   // DTO 임포트
 import com.projectbob.mapper.*;
 import com.projectbob.service.PortoneService;
 
@@ -28,22 +28,21 @@ import lombok.extern.slf4j.Slf4j;
 public class ShopService {
 
     private final WebsocketService websocketService;
-    
-    @Autowired
-    private ShopMapper shopMapper;
+	
+	@Autowired
+	private ShopMapper shopMapper;
 
-    @Autowired
-    private PortoneService portoneService;
-    
-    @Autowired
-    private FileUploadService fileUploadService;
-
-    @Autowired
-    public ShopService(WebsocketService websocketService) {
+	@Autowired
+	private PortoneService portoneService;
+	
+	@Autowired
+	private FileUploadService fileUploadService;
+	
+    ShopService(WebsocketService websocketService) {
         this.websocketService = websocketService;
     }
-
-	/* ---------- Menu ---------- */
+	
+    /* ---------- Menu ---------- */
 	// 메뉴 등록
 	@Transactional
 	public void insertMenu(Menu menu, MultipartFile mPicture) throws IOException {
@@ -149,7 +148,7 @@ public class ShopService {
 			for(MenuOption option : menu.getOptions()) {
 				// 옵션의 이름과 내용이 비어있지 않고, 유효한 옵션만 저장
 				if(option != null && StringUtils.hasText(option.getMOption()) && StringUtils.hasText(option.getContent()) 
-												&& !"deleted".equals(option.getStatus())) {
+							&& !"deleted".equals(option.getStatus())) {
 					option.setMId(menu.getMId());
 					option.setStatus("active");
 					shopMapper.insertMenuOption(option);
@@ -301,7 +300,7 @@ public class ShopService {
 	//가게 정보 불러오기
 	public Shop findByOwnerId(String ownerId) {
 	    return shopMapper.findByOwnerId(ownerId);
-	} 	
+	}	
 	
 	//가게 유무 판단해서 보여주기
 	public List<Shop> findShopListByOwnerId(String ownerId) {
@@ -485,43 +484,47 @@ public class ShopService {
 
     // 주문 상태 변경
     @Transactional
-    public void updateOrderStatus(int oNo, String newStatus, Map<String, Object> deliveryInfo) {
+    public void updateOrderStatus(int oNo, String newStatus) {
         // 1. 주문 상태를 DB에서 먼저 업데이트합니다.
         shopMapper.updateOrderStatus(oNo, newStatus);
 
-        // 2. 알림 전송에 필요한 추가 정보를 조회합니다.
+        // 2. 알림 전송에 필요한 추가 정보를 조회합니다 (가게ID, 고객ID 등).
         Orders order = findOrderByNo(oNo);
         if (order == null) {
             log.error("주문 정보를 찾을 수 없습니다. (oNo: {})", oNo);
             return;
         }
-        String userId = order.getId();
+        String userId = shopMapper.getUserIdByOrderNo(oNo);
         int shopId = order.getSId();
 
-        // 3. (핵심) 점주에게 보낼 payload와 고객에게 보낼 payload를 준비합니다.
-        int newPendingCount = shopMapper.countOrdersByStatusAndShop("PENDING", shopId);
-        
-        // 3.1 점주에게 보낼 기본 payload
-        Map<String, Object> payloadForShop = new HashMap<>();
-        payloadForShop.put("oNo", oNo);
-        payloadForShop.put("newStatus", newStatus);
-        payloadForShop.put("newPendingCount", newPendingCount);
 
-        // 3.2 고객에게 보낼 payload (기본 정보 복사)
-        Map<String, Object> payloadForUser = new HashMap<>(payloadForShop);
-        
-        // 3.3 배달 시간 정보가 있다면, 고객용 payload에만 추가합니다.
-        if (deliveryInfo != null && !deliveryInfo.isEmpty()) {
-            payloadForUser.putAll(deliveryInfo);
+        // 3. Payload 생성
+        String message = "";
+        if ("ACCEPTED".equals(newStatus)) {
+            message = "✅ 주문 #" + oNo + "이(가) 수락되었습니다! 곧 준비가 시작됩니다.";
+        } else if ("REJECTED".equals(newStatus)) {
+            message = "❌ 주문 #" + oNo + "이(가) 가게 사정으로 취소되었습니다. 결제 금액은 자동 환불됩니다.";
+        } else if ("DELIVERING".equals(newStatus)) {
+            message = "🛵 주문 #" + oNo + "이(가) 배달을 시작했습니다!";
+        } else if ("COMPLETED".equals(newStatus)) {
+            message = "✅ 주문 #" + oNo + "이(가) 완료되었습니다! 맛있게 드세요.";
+        } else {
+            message = "🔔 주문 #" + oNo + " 상태 업데이트: " + newStatus;
         }
 
-        // 4. WebsocketService를 통해 점주에게 변경 사실을 전송합니다.
+
+        // 3. (핵심) 상태 변경 후, 최신 PENDING 주문 개수를 다시 DB에서 조회합니다.
+        // 이 개수는 점주 페이지의 헤더 알림 뱃지를 실시간으로 정확하게 업데이트하는 데 사용됩니다.
+        int newPendingCount = shopMapper.countOrdersByStatusAndShop("PENDING", shopId);
+
+
+        // 4. WebsocketService를 통해 점주에게 변경 사실과 '최신 알림 개수'를 함께 전송합니다.
         websocketService.sendOrderStatusChange(oNo, shopId, newStatus, newPendingCount);
 
         // 5. 주문한 고객에게만 보내는 1:1 알림을 전송합니다.
         if (userId != null && !userId.isEmpty()) {
-            // 고객에게는 배달 시간이 포함된 payloadForUser를 전송합니다.
-            websocketService.sendOrderStatusUpdateToUser(userId, payloadForUser);
+            Map<String, Object> payload = Map.of("oNo", oNo, "newStatus", newStatus);
+            websocketService.sendOrderStatusUpdateToUser(userId, payload);
             log.info("고객에게 주문 상태 변경 알림 전송 완료. userId: {}, oNo: {}, status: {}", userId, oNo, newStatus);
         } else {
             log.error("고객 ID를 찾을 수 없어 주문 상태 변경 알림을 전송하지 못했습니다. (oNo: {})", oNo);
@@ -546,7 +549,7 @@ public class ShopService {
 
         // 3. 결제 취소 성공 시 주문 상태 변경
         if (isCancelled) {
-            updateOrderStatus(oNo, "REJECTED",null);
+            updateOrderStatus(oNo, "REJECTED");
             log.info("주문이 성공적으로 거절되고 환불 처리되었습니다. (oNo: {})", oNo);
             return true;
         } else {
@@ -622,24 +625,6 @@ public class ShopService {
     //헤더알림 주문으로 이동
     public List<Orders> findNewOrdersByOwnerId(String ownerId) {
         return shopMapper.findNewOrdersByOwnerId(ownerId);
-    }
-    
-    // 픽업시간, 배달완료 예정 시간 고객한테 전송
-    public void dispatchOrder(Long oNo, DispatchInfo dispatchInfo) {
-        Orders order = shopMapper.selectOrderByNo(oNo.intValue());
-        if (order == null) {
-            throw new IllegalArgumentException("주문을 찾을 수 없습니다: " + oNo);
-        }
-
-        // 기존에 사용하던 Map 방식의 payload를 만듭니다.
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("oNo", oNo);
-        payload.put("newStatus", "DISPATCHED"); // 이 메시지를 식별하기 위한 가상의 상태
-        payload.put("pickupTime", dispatchInfo.getPickupTime());
-        payload.put("deliveryTime", dispatchInfo.getDeliveryTime());
-
-        // 기존에 잘 동작하던, 고객에게 상태를 보내는 메소드를 호출합니다.
-        websocketService.sendOrderStatusUpdateToUser(order.getId(), payload);
     }
 
 }
