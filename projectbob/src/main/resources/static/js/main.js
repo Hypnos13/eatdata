@@ -21,18 +21,22 @@ $(document).ready(function() {
     e.preventDefault();
 
     console.log('주문하기 버튼 클릭 이벤트 시작');
-
-    if (!window.currentUserId || window.currentUserId.trim() === '') {
-      alert('로그인이 필요합니다.');
-      console.log('로그인 필요 - currentUserId:', window.currentUserId);
-      return;
-    }
-
+	
     if (!currentCartData || currentCartData.length === 0) {
       alert('장바구니가 비어있습니다. 메뉴를 추가해주세요.');
       console.log('장바구니 비어있음 - currentCartData:', currentCartData);
       return;
     }
+
+    if (!window.currentUserId || window.currentUserId.trim() === '') {
+      alert('로그인이 필요합니다.');
+      console.log('로그인 필요 - currentUserId:', window.currentUserId);
+	  
+	const currentUrl = encodeURIComponent(window.location.href);
+	   window.location.href = `/login?redirectURL=${currentUrl}`;
+      return;
+    }
+
 
     const totalText = $('#totalOrderPrice').text();
     console.log('총 결제 금액 텍스트:', totalText);
@@ -740,7 +744,7 @@ $(document).ready(function() {
             if (searchAddressInput) {
                 searchAddressInput.focus();
             }
-						loadAndPopulateSavedAddresses(); 
+						//loadAndPopulateSavedAddresses(); 
         }
     }
 
@@ -834,34 +838,39 @@ $(document).ready(function() {
 		}
 
     // 5. '이 주소 선택' 버튼 클릭 이벤트: 메인 input에 반영하고 팝업 닫기
-    if (selectSearchedAddressBtn && mainAddressInput) {
-        selectSearchedAddressBtn.addEventListener('click', function() {
-            const postcode = searchedPostcodeP.textContent.replace('우편번호: ', '');
-            const basicAddress = searchedAddressP.textContent.replace('기본 주소: ', '');
-            const detailAddress = searchedDetailAddressInput.value.trim();
+	if (selectSearchedAddressBtn && mainAddressInput) {
+	    selectSearchedAddressBtn.addEventListener('click', function() {
+	        const basicAddress = searchedAddressP.textContent.replace('기본 주소: ', '');
 
-            if (basicAddress && basicAddress !== '기본 주소: ') { // 실제 주소가 있는지 확인
-                mainAddressInput.value = `${basicAddress} ${detailAddress}`.trim();
-                closeAddressPopup(); // 팝업 닫기
-            } else {
-                alert('선택할 주소가 없습니다. 먼저 주소를 검색해주세요.');
-            }
-        });
-    }
+	        if (basicAddress && basicAddress !== '기본 주소: ') { // 실제 주소가 있는지 확인
+	            mainAddressInput.value = basicAddress;
+	            closeAddressPopup(); // 팝업 닫기
+	        } else {
+	            alert('선택할 주소가 없습니다. 먼저 주소를 검색해주세요.');
+	        }
+	    });
+	}
 
 
+});
+
+//pay 주소변경 버튼
+$('#openAddressPopupBtn').on('click', function() {
+    const addressModalEl = document.getElementById('addressModal2');
+    const addressModal = new bootstrap.Modal(addressModalEl);
+    addressModal.show();
+
+    loadAndPopulateSavedAddresses2();
 });
 
 // 모든 DOMContentLoaded 관련 스크립트를 하나의 jQuery $(document).ready() 블록으로 통합
 $(document).ready(function() {
 		
-	
-	
     // 탭 전환 시 가게 지도 표시
     $('a[href="#info"]')?.on('shown.bs.tab', function () {
         showStoreOnMap();
     });
-		
+		/*
 		if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
 		      initAddressSearchInput();
 		      console.log("주소 검색 기능 초기화 완료.");
@@ -869,15 +878,43 @@ $(document).ready(function() {
 		      console.warn("경고: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않아 주소 검색 기능을 초기화할 수 없습니다.");
 		  }
 
-
 		  // --- 2. 현재 위치 검색 버튼 (currentLocationSearchBtn) 기능 초기화 ---
 		  // 카카오 지도 API가 로드된 후에만 이 함수가 호출되도록 조건부 실행
+		  
 		  if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
 		      handleCurrentLocationSearch();
 		      console.log("현재 위치 검색 기능 초기화 완료.");
 		  } else {
 		      console.warn("경고: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않아 현재 위치 검색 기능을 초기화할 수 없습니다.");
 		  }
+		  */
+		  function waitForKakaoAndInit() {
+		       if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
+		           // 주소 검색 초기화
+		           initAddressSearchInput();
+		           console.log("주소 검색 기능 초기화 완료.");
+
+		           // 현재 위치 검색 초기화
+		           handleCurrentLocationSearch();
+		           console.log("현재 위치 검색 기능 초기화 완료.");
+		       } else {
+		           console.warn("카카오 지도 API가 아직 준비되지 않아 200ms 후 재시도");
+		           setTimeout(waitForKakaoAndInit, 200);
+		       }
+		   }
+		   waitForKakaoAndInit();
+
+		   // --- 주소 입력값 로컬스토리지 복원 ---
+		   const locationInput1 = document.getElementById('location-input');
+		   if (locationInput1) {
+		       const savedAddress = localStorage.getItem("userAddress");
+		       if (savedAddress) {
+		           locationInput1.value = savedAddress;
+		       }
+		       locationInput1.addEventListener("input", () => {
+		           localStorage.setItem("userAddress", locationInput1.value);
+		       });
+		   }
 			
 
 	const searchMenuBtn = document.getElementById('searchMenuBtn');
@@ -902,16 +939,6 @@ $(document).ready(function() {
 	   }
 
 
-    // 검색 제출 버튼 (키워드 검색)
-    $("#searchSubmitBtn")?.on("click", function () {
-        const keyword = $('#searchBox input[type="text"]')?.val().trim();
-        if (keyword) {
-            window.location.href = `/shopList?keyword=${encodeURIComponent(keyword)}`;
-        } else {
-            alert("검색어를 입력해주세요.");
-        }
-    });
-
     // 주소 검색/지우기 버튼 로직 
     const locationInput = document.getElementById('location-input');
     const addressInputSearchBtn  = document.getElementById('addressInputSearchBtn'); // HTML에 'id="searchButton"'이 반드시 있어야 합니다.
@@ -935,54 +962,56 @@ $(document).ready(function() {
     } else {
         console.warn("경고: 주소 검색 또는 초기화를 위한 HTML 요소('location-input' 또는 'addressInputSearchBtn')를 찾을 수 없습니다.");
     }
+	
+	const categoryLinks = document.querySelectorAll('.nav.flex-nowrap li a');
+
+	if (locationInput) {
+	  // 로컬스토리지에서 복원 (필요시)
+	  const savedInputAddress = localStorage.getItem('inputaddress');
+	  if (savedInputAddress) {
+	    locationInput.value = savedInputAddress;
+	  }
+
+	  // 주소 입력 시 로컬스토리지에 저장
+	  locationInput.addEventListener('input', () => {
+	    localStorage.setItem('inputaddress', locationInput.value);
+	  });
+	}
+
+	if (categoryLinks.length > 0) {
+	  categoryLinks.forEach(link => {
+	    link.addEventListener('click', (e) => {
+	      e.preventDefault();
+	      const url = new URL(link.href, window.location.origin);
+	      const currentAddress = locationInput ? locationInput.value.trim() : '';
+	      if (currentAddress) {
+	        url.searchParams.set('inputaddress', currentAddress);
+	      } else {
+	        url.searchParams.delete('inputaddress');
+	      }
+	      window.location.href = url.toString();
+	    });
+	  });
+	}
 
 });
 
 // ==============================
 // 저장된 주소 불러오기 및 팝업 탭에 채우는 함수
 // ==============================
-function loadAndPopulateSavedAddresses() {
-    console.log("저장된 주소 불러오기 AJAX 요청 시작: /getAddress (세션 ID 사용)");
-
-    const savedAddressesSection = document.getElementById('savedAddressesSection');
-
-
+function loadAndPopulateSavedAddresses2() {
     $.ajax({
-        url: "/getAddress", // 저장된 주소를 가져올 URL
-        type: "POST",       // POST 메소드 사용
+        url: "/getAddress",
+        type: "POST",
         success: function(response) {
-            console.log("저장된 주소 불러오기 성공: /getAddress 응답:", response);
-            
-            // 응답 성공 시 (로그인 상태), 탭 영역을 보여주고 데이터를 채웁니다.
-            if (savedAddressesSection) { // 요소가 존재하는지 확인
-                savedAddressesSection.classList.remove('d-none'); 
-            }
-
             if (response.success && response.addressList) {
-                populateAddressTabs(response.addressList); // 불러온 주소로 탭 업데이트
+                populateAddressTabs2(response.addressList);
             } else {
-                console.error("저장된 주소 로드 실패 (서버 응답):", response.message || "알 수 없는 오류");
-                populateAddressTabs([]); // 실패 시 빈 목록 표시 (내부에 '저장된 주소 없음' 메시지 처리)
+                populateAddressTabs2([]);
             }
         },
-        error: function(xhr, status, error) {
-            //console.error("저장된 주소 로드 서버 오류:", status, error, xhr.responseText);
-            
-            // 어떤 종류의 오류든 (특히 401) 탭 영역을 숨깁니다.
-            if (savedAddressesSection) { // 요소가 존재하는지 확인
-                savedAddressesSection.classList.add('d-none'); // 탭 영역 전체 숨김
-            }
-
-            // 401 Unauthorized (로그인 필요 없음) 경우에만 경고창을 띄우지 않습니다.
-            if (xhr.status === 401) {
-                // "로그인이 필요합니다." alert 제거 (요청에 따라)
-                console.log("로그인되지 않은 사용자: 저장된 주소 탭 숨김.");
-            } else {
-                // 그 외 다른 서버 오류는 사용자에게 알립니다.
-                alert("주소 조회 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-            }
-            
-            // 탭 섹션을 숨겼으므로 populateAddressTabs([]) 호출은 필요 없습니다.
+        error: function() {
+            populateAddressTabs2([]);
         }
     });
 }
@@ -990,170 +1019,86 @@ function loadAndPopulateSavedAddresses() {
 // ==============================
 // 주소록 탭(집, 회사, 그 외)에 주소 데이터 채우는 함수 - 보류 
 // ==============================
-function populateAddressTabs(addresses) {
-    const $homeAddressesTab = $('#home-addresses');
-    const $companyAddressesTab = $('#company-addresses');
-    const $etcAddressesTab = $('#etc-addresses');
+function populateAddressTabs2(addresses) {
+    const $homeTab2 = $('#home-addresses2');
+    const $companyTab2 = $('#company-addresses2');
+    const $etcTab2 = $('#etc-addresses2');
 
-    // 기존 내용 비우기
-    $homeAddressesTab.empty();
-    $companyAddressesTab.empty();
-    $etcAddressesTab.empty();
-		
-		console.log("📦 [populateAddressTabs] 호출됨 - 전체 주소 목록:", addresses);
+    $homeTab2.empty();
+    $companyTab2.empty();
+    $etcTab2.empty();
 
     if (!addresses || addresses.length === 0) {
-        $homeAddressesTab.html('<p class="text-muted">저장된 집 주소가 없습니다.</p>');
-        $companyAddressesTab.html('<p class="text-muted">저장된 회사 주소가 없습니다.</p>');
-        $etcAddressesTab.html('<p class="text-muted">저장된 기타 주소가 없습니다.</p>');
+        $homeTab2.html('<p class="text-muted">저장된 집 주소가 없습니다.</p>');
+        $companyTab2.html('<p class="text-muted">저장된 회사 주소가 없습니다.</p>');
+        $etcTab2.html('<p class="text-muted">저장된 기타 주소가 없습니다.</p>');
         return;
     }
 
-    // 주소를 카테고리별로 분류하여 HTML 생성 후 추가
-		addresses.forEach(addr => {
-		
-		    const aNameTrimmed = addr.aname ? addr.aname.trim() : '';
-				 console.log(` aName:`, addr.aName, '| trim:', aNameTrimmed);
+    addresses.forEach(addr => {
+        const aName2 = (addr.aname || '').trim();
+        const addressHtml2 = `
+          <div class="saved-address-item2 border p-2 mb-2 rounded" data-address1="${addr.address1}" data-address2="${addr.address2}">
+            <div>${addr.address1} ${addr.address2 || ''}</div>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-1 select-saved-address-btn2">선택</button>
+          </div>
+        `;
 
-		    const addressHtml = `
-		        <div class="saved-address-item border p-2 mb-2 rounded"
-		             data-no="${addr.no}"
-		             data-address1="${addr.address1}"
-		             data-address2="${addr.address2}"
-		             data-aname="${addr.aName}">
-		            <div>${addr.address1} ${addr.address2 || ''}</div>
-		            <button type="button" class="btn btn-sm btn-outline-primary mt-1 select-saved-address-btn">선택</button>
-		        </div>
-		    `;
-		    
-			if (aNameTrimmed === '집') {
-			       console.log('집 주소 → home-addresses 탭에 추가');
-			       $homeAddressesTab.append(addressHtml);
-			   } else if (aNameTrimmed === '회사') {
-			       console.log('회사 주소 → company-addresses 탭에 추가');
-			       $companyAddressesTab.append(addressHtml);
-			   } else {
-			       console.log('그 외 주소 → etc-addresses 탭에 추가');
-			       $etcAddressesTab.append(addressHtml);
-			   }
-		});
-
-    // 각 탭에 내용이 없으면 "저장된 주소가 없습니다." 메시지 다시 표시
-    if ($homeAddressesTab.children().length === 0) {
-        $homeAddressesTab.html('<p class="text-muted">저장된 집 주소가 없습니다.</p>');
-    }
-    if ($companyAddressesTab.children().length === 0) {
-        $companyAddressesTab.html('<p class="text-muted">저장된 회사 주소가 없습니다.</p>');
-    }
-    if ($etcAddressesTab.children().length === 0) {
-        $etcAddressesTab.html('<p class="text-muted">저장된 기타 주소가 없습니다.</p>');
-    }
+        if (aName2 === '집') {
+            $homeTab2.append(addressHtml2);
+        } else if (aName2 === '회사') {
+            $companyTab2.append(addressHtml2);
+        } else {
+            $etcTab2.append(addressHtml2);
+        }
+    });
 }
 
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('select-saved-address-btn')) {
-        const savedAddressItem = e.target.closest('.saved-address-item');
-        if (!savedAddressItem) return;
+// ==============================
+// 주소 선택 버튼 클릭시 주소 넣고 모달닫기
+// ==============================
+$(document).on('click', '.select-saved-address-btn2', function() {
+    const $parent = $(this).closest('.saved-address-item2');
+    const address1 = $parent.data('address1') || '';
+    const address2 = $parent.data('address2') || '';
 
-        const address1 = savedAddressItem.dataset.address1 || '';
+    // 주소 input에 값 설정
+    $('input[name="address1"]').val(address1);
+    $('input[name="address2"]').val(address2);
 
-        console.log("선택된 주소1:", address1);
-
-        const mainAddressInput = document.getElementById('location-input');
-        if (mainAddressInput) {
-            mainAddressInput.value = address1;
-        }
-
-        // 직접 팝업 닫기 동작 (closeAddressPopup 함수 없이)
-        const addressPopupWrapper = document.querySelector('.address-popup-wrapper');
-        const popupOverlay = document.querySelector('.popup-overlay');
-
-        if (addressPopupWrapper) {
-            addressPopupWrapper.classList.remove('show');
-            addressPopupWrapper.classList.add('d-none');
-        }
-        if (popupOverlay) {
-            popupOverlay.classList.add('d-none');
-        }
-    }
+    // 모달 닫기
+    const modalEl = document.getElementById('addressModal2');
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    if (modalInstance) modalInstance.hide();
 });
 
-/*
-//위치버튼 클릭스 주소 
 
-function handleCurrentLocationSearch() {
-    console.log("handleCurrentLocationSearch 함수 시작");
-    if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
-        console.error("오류: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않았습니다. 현재 위치 검색을 실행할 수 없습니다.");
-        return;
-    }
-		console.log("카카오 API 로드 확인 완료");
-    const currentLocationSearchBtn = document.getElementById('currentLocationSearchBtn'); // ★ HTML ID: currentLocationSearchBtn ★
-    const locationInputField = document.getElementById('location-input'); // 주소 입력 필드 ID
+// 쿠폰모달 열기
+document.getElementById('openCouponModalBtn').addEventListener('click', function() {
+  const couponModalEl = document.getElementById('couponModal');
+  const couponModal = new bootstrap.Modal(couponModalEl);
+  couponModal.show();
+});
 
-    if (!currentLocationSearchBtn || !locationInputField) {
-        console.warn("경고: 'currentLocationSearchBtn' 또는 'location-input' 요소를 찾을 수 없어 현재 위치 검색 기능을 초기화할 수 없습니다.");
-        return;
-    }
-		console.log("HTML 요소 찾음");
-		
-    currentLocationSearchBtn.addEventListener('click', () => {
-			console.log("위치 찾기 버튼 클릭됨");
-        if (!navigator.geolocation) {
-            alert('이 브라우저는 위치 정보를 지원하지 않습니다. 최신 브라우저를 사용해주세요.');
-            return;
-        }
-	
-				console.log("Geolocation 지원됨");	
-				
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-							console.log("위치 정보 가져오기 성공:", position);
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-								console.log(`위치 정보 가져오기 성공: 위도 ${lat}, 경도 ${lon}`);
-                const geocoder = new kakao.maps.services.Geocoder();
-                const coord = new kakao.maps.LatLng(lat, lon);
+// 쿠폰 선택 버튼 클릭 이벤트 예시 (필요 시 추가 동작 구현)
+document.addEventListener('click', function(e) {
+	if(e.target && e.target.classList.contains('select-coupon-btn')) {
+	   const couponName = e.target.dataset.couponName;
+	   const disPrice = e.target.dataset.couponDisprice;
 
-                geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
-                    if (status === kakao.maps.services.Status.OK && result.length > 0) {
-                        const address = result[0].address.address_name;
-                        locationInputField.value = address; // 입력 필드에 주소 자동 채우기
+	   // input 요소 찾아서 value 세팅 (id로 찾거나 적절히 수정하세요)
+	   const couponInput = document.querySelector('input[placeholder^="쿠폰 선택"]');
+	   if (couponInput) {
+	     couponInput.value = `${couponName} : -${Number(disPrice).toLocaleString()}원`;
+	   }
+    // 쿠폰모달 닫기
+    const couponModalEl = document.getElementById('couponModal');
+    const couponModal = bootstrap.Modal.getInstance(couponModalEl);
+    if(couponModal) couponModal.hide();
+  }
+});
 
-                        const url = `/shopList?category=전체보기&address=${encodeURIComponent(address)}`;
-                        window.location.href = url;
-                    } else {
-                        alert('위치 정보를 주소로 변환하는 데 실패했습니다. 다시 시도해주세요.');
-                        console.error("주소 변환 실패:", status, result);
-                    }
-                });
-            },
-            (error) => {
-                let errorMessage = '위치 정보를 가져오는 데 실패했습니다.';
-                switch (error.code) {
-                    case error.PERMISSION_DENIED:
-                        errorMessage = '위치 정보 사용 권한이 거부되었습니다. 브라우저 설정에서 허용해주세요.';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        errorMessage = '위치 정보를 사용할 수 없습니다.';
-                        break;
-                    case error.TIMEOUT:
-                        errorMessage = '위치 정보를 가져오는 요청 시간이 초과되었습니다.';
-                        break;
-                    default:
-                        errorMessage = `알 수 없는 오류: ${error.message}`;
-                        break;
-                }
-                alert(errorMessage);
-                console.error("위치 정보 가져오기 오류:", error);
-            },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-        );
-    });
-		console.log("이벤트 리스너 등록 완료");
-}
-*/
-
+//뭐였지 이건 ?
 function handleCurrentLocationSearch() {
     console.log("handleCurrentLocationSearch 함수 시작");
 
@@ -1166,10 +1111,17 @@ function handleCurrentLocationSearch() {
     const currentLocationSearchBtn = document.getElementById('currentLocationSearchBtn');
     const categoryCards = document.querySelectorAll('.category-card');
 
-    if (!locationInputField || !currentLocationSearchBtn || categoryCards.length === 0) {
+    if (!locationInputField || !currentLocationSearchBtn ) {
         console.warn("HTML 요소 누락 - 기능 초기화 실패");
         return;
     }
+	
+	// categoryCards는 없어도 무방하게 처리하고 싶다면 이벤트 등록도 조건부로
+	if (categoryCards.length > 0) {
+	  categoryCards.forEach(card => {
+	    // ...
+	  });
+	}
 
     // 공통 위치 검색 및 페이지 이동 함수
     function searchWithCurrentLocation(categoryTitle) {
@@ -1222,10 +1174,14 @@ function handleCurrentLocationSearch() {
     }
 
     // 위치찾기 버튼 클릭
-    currentLocationSearchBtn.addEventListener('click', () => {
-        console.log("현재 위치 찾기 버튼 클릭");
-        searchWithCurrentLocation("전체보기");
-    });
+	if (currentLocationSearchBtn) {
+	  currentLocationSearchBtn.addEventListener('click', () => {
+	    console.log("현재 위치 찾기 버튼 클릭");
+	    searchWithCurrentLocation("전체보기");
+	  });
+	} else {
+	  console.warn("#currentLocationSearchBtn 버튼을 찾을 수 없습니다.");
+	}
 
     // 카테고리 카드 클릭
     categoryCards.forEach(card => {
@@ -1431,22 +1387,20 @@ if (searchSubmitBtn) {
     searchSubmitBtn.addEventListener('click', function () {
 	    const keyword = document.querySelector('#searchBox input[type="text"]').value.trim();
 
-	    // 현재 선택된 카테고리도 함께 보내고 싶다면 추가로 처리 가능
-	    // 예: const category = '치킨'; 또는 URL에서 파싱 가능
+		const locationInput = document.getElementById('location-input');
+		      const address = locationInput ? locationInput.value.trim() : '';
 
-	    // URL 구성
-	    const searchUrl = `/shopList?keyword=${encodeURIComponent(keyword)}`;
+		      // URL 구성 (keyword, address 둘 다 포함)
+			  let searchUrl = `/shopList?keyword=${encodeURIComponent(keyword)}`;
+			  if (address) {
+			      searchUrl += `&address=${encodeURIComponent(address)}`;
+			  }
 
 	    // 페이지 이동
 	    window.location.href = searchUrl;
 	});
 	
 };
-
-
-
-
-
 
 
 

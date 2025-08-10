@@ -362,7 +362,14 @@ body {
   font-size: 1em;
   font-weight: 500;
 }
-
+.pagination .page-link {
+  color: #198754; /* success 색상 텍스트 */
+}
+.pagination .page-item.active .page-link {
+  background-color: #198754; /* success 배경 */
+  border-color: #198754;
+  color: #fff;
+}
 /* ===== 스위치 버튼(휴무 등) ===== */
 .switch {
   position: relative;

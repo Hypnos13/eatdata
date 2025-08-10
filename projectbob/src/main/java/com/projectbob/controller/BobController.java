@@ -32,7 +32,9 @@ public class BobController {
 	@Autowired
 	private BobService bobService; // 가게 전체 게시글 리스트 요청을 처리하는 메서드
 	
-
+	@Autowired
+	private CustomerServiceService customerServiceService;
+	
 	@Autowired
 	private LoginService loginService;
 
@@ -121,7 +123,15 @@ public class BobController {
 			}
 	  model.addAttribute("sList",bobService.shopList(category,keyword));
 	  model.addAttribute("selectedCategory", category);
-	  model.addAttribute("userAddress", address);
+	  
+	  // 주소가 파라미터로 넘어왔으면 세션에 저장
+	    if (address != null && !address.isEmpty()) {
+	        session.setAttribute("userAddress", address);
+	    }
+	    
+	    // 세션에 저장된 주소를 뷰에 넘겨줌 (파라미터로 안 넘어왔을 때도 보여주기 위해)
+	    String sessionAddress = (String) session.getAttribute("userAddress");
+	    model.addAttribute("userAddress", sessionAddress);
 	  
 	  String loginId = (String) session.getAttribute("loginId");
 	  if(loginId != null) {
@@ -270,6 +280,8 @@ public class BobController {
 
 		      // 세션 기준 주문 내역 조회
 		      CartSummaryDto cartSummary = bobService.getCartSummaryForUserOrGuest(userId, guestId);
+		      List<Coupon> couponList = customerServiceService.myCoupon(userId);
+		      
 
 			  log.info("Pay Page - Total Price from Service: {}", cartSummary.getTotalPrice());
 
@@ -277,6 +289,7 @@ public class BobController {
 		      model.addAttribute("orderSummary", cartSummary);
 		      model.addAttribute("orderedItems", cartSummary.getCartList());
 		      model.addAttribute("finalTotalPrice", cartSummary.getTotalPrice());
+		      model.addAttribute("couponList", couponList);
 
 		      return "views/pay";
 		  }

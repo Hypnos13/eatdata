@@ -27,6 +27,9 @@
 			        <input type="password" class="form-control" name="password" id="pass" placeholder="비밀번호를 입력해주세요">
 			      </div>
 			    </div>
+				
+				<input type="hidden" name="redirectURL" th:value="${param.redirectURL}" />
+				
 			    <!-- 로그인 버튼 -->
 			    <div class="d-flex align-items-center">
 			      <button type="submit" class="login-side-btn">로그인</button>

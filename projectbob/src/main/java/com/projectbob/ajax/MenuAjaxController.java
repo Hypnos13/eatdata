@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.projectbob.domain.Cart;
 import com.projectbob.domain.CartSummaryDto;
+import com.projectbob.domain.Coupon;
 import com.projectbob.domain.MenuOption;
 import com.projectbob.domain.OrderData;
 import com.projectbob.domain.Orders;
@@ -42,7 +43,8 @@ import com.projectbob.domain.Review;
 import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 import com.projectbob.service.BobService;
- import com.projectbob.service.FileUploadService; 
+import com.projectbob.service.CustomerServiceService;
+import com.projectbob.service.FileUploadService; 
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,13 +54,18 @@ public class MenuAjaxController {
 
 	@Autowired
 	private BobService bobService;
+	
+	@Autowired
+	private  CustomerServiceService customerServiceService;
 
 	 @Autowired
 	 private FileUploadService fileUploadService; 
 
 	@Value("${file.upload-dir}") // application.properties의 file.upload-dir 값을 주입
 	private String uploadBaseDir;
+	
 
+	
 
 	@PostMapping("/getCart")
     public ResponseEntity<Map<String, Object>> getCart(@RequestBody Map<String, String> request, HttpSession session) {
