@@ -127,43 +127,92 @@
 
 					<!-- 카테고리 목록 -->
 					<ul class="nav flex-nowrap">
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '전체보기' ? ' active'"
-								th:href="@{/shopList(category='전체보기')}">전체보기</a></li>
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '1인분주문' ? ' active'"
-								th:href="@{/shopList(category='1인분주문')}">1인분 주문</a></li>
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '프랜차이즈' ? ' active'"
-								th:href="@{/shopList(category='프랜차이즈')}">프랜차이즈</a></li>
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '치킨' ? ' active'"
-								th:href="@{/shopList(category='치킨')}">치킨</a></li>
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '피자/양식' ? ' active'"
-								th:href="@{/shopList(category='피자/양식')}">피자/양식</a></li>
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '중국집' ? ' active'"
-								th:href="@{/shopList(category='중국집')}">중국집</a></li>
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '한식' ? ' active'"
-								th:href="@{/shopList(category='한식')}">한식</a></li>
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '일식/돈까스' ? ' active'"
-								th:href="@{/shopList(category='일식/돈까스')}">일식/돈까스</a></li>
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '족발/보쌈' ? ' active'"
-								th:href="@{/shopList(category='족발/보쌈')}">족발/보쌈</a></li>
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '야식' ? ' active'"
-								th:href="@{/shopList(category='야식')}">야식</a></li>
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '분식' ? ' active'"
-								th:href="@{/shopList(category='분식')}">분식</a></li>
-						<li class="nav-item"><a class="nav-link"
-								th:classappend="${selectedCategory} == '카페/디저트' ? ' active'"
-								th:href="@{/shopList(category='카페/디저트')}">카페/디저트</a></li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '전체보기' ? ' active'"
+					           th:href="@{/shopList(category='전체보기', address=${param.address})}">
+					           전체보기
+					        </a>
+					    </li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '1인분주문' ? ' active'"
+					           th:href="@{/shopList(category='1인분주문', address=${param.address})}">
+					           1인분 주문
+					        </a>
+					    </li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '프랜차이즈' ? ' active'"
+					           th:href="@{/shopList(category='프랜차이즈',  address=${param.address})}">
+					           프랜차이즈
+					        </a>
+					    </li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '치킨' ? ' active'"
+					           th:href="@{/shopList(category='치킨', address=${param.address})}">
+					           치킨
+					        </a>
+					    </li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '피자/양식' ? ' active'"
+					           th:href="@{/shopList(category='피자/양식', address=${param.address})}">
+					           피자/양식
+					        </a>
+					    </li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '중국집' ? ' active'"
+					           th:href="@{/shopList(category='중국집', address=${param.address})}">
+					           중국집
+					        </a>
+					    </li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '한식' ? ' active'"
+					           th:href="@{/shopList(category='한식', address=${param.address})}">
+					           한식
+					        </a>
+					    </li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '일식/돈까스' ? ' active'"
+					           th:href="@{/shopList(category='일식/돈까스', address=${param.address})}">
+					           일식/돈까스
+					        </a>
+					    </li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '족발/보쌈' ? ' active'"
+					           th:href="@{/shopList(category='족발/보쌈', address=${param.address})}">
+					           족발/보쌈
+					        </a>
+					    </li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '야식' ? ' active'"
+					           th:href="@{/shopList(category='야식', address=${param.address})}">
+					           야식
+					        </a>
+					    </li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '분식' ? ' active'"
+					           th:href="@{/shopList(category='분식', address=${param.address})}">
+					           분식
+					        </a>
+					    </li>
+					    <li class="nav-item">
+					        <a class="nav-link" 
+					           th:classappend="${selectedCategory} == '카페/디저트' ? ' active'"
+					           th:href="@{/shopList(category='카페/디저트', address=${param.address})}">
+					           카페/디저트
+					        </a>
+					    </li>
 					</ul>
+
 
 				</div>
 			</nav>

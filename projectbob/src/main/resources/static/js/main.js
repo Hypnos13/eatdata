@@ -855,13 +855,11 @@ $(document).ready(function() {
 // 모든 DOMContentLoaded 관련 스크립트를 하나의 jQuery $(document).ready() 블록으로 통합
 $(document).ready(function() {
 		
-	
-	
     // 탭 전환 시 가게 지도 표시
     $('a[href="#info"]')?.on('shown.bs.tab', function () {
         showStoreOnMap();
     });
-		
+		/*
 		if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
 		      initAddressSearchInput();
 		      console.log("주소 검색 기능 초기화 완료.");
@@ -869,15 +867,43 @@ $(document).ready(function() {
 		      console.warn("경고: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않아 주소 검색 기능을 초기화할 수 없습니다.");
 		  }
 
-
 		  // --- 2. 현재 위치 검색 버튼 (currentLocationSearchBtn) 기능 초기화 ---
 		  // 카카오 지도 API가 로드된 후에만 이 함수가 호출되도록 조건부 실행
+		  
 		  if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
 		      handleCurrentLocationSearch();
 		      console.log("현재 위치 검색 기능 초기화 완료.");
 		  } else {
 		      console.warn("경고: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않아 현재 위치 검색 기능을 초기화할 수 없습니다.");
 		  }
+		  */
+		  function waitForKakaoAndInit() {
+		       if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
+		           // 주소 검색 초기화
+		           initAddressSearchInput();
+		           console.log("주소 검색 기능 초기화 완료.");
+
+		           // 현재 위치 검색 초기화
+		           handleCurrentLocationSearch();
+		           console.log("현재 위치 검색 기능 초기화 완료.");
+		       } else {
+		           console.warn("카카오 지도 API가 아직 준비되지 않아 200ms 후 재시도");
+		           setTimeout(waitForKakaoAndInit, 200);
+		       }
+		   }
+		   waitForKakaoAndInit();
+
+		   // --- 주소 입력값 로컬스토리지 복원 ---
+		   const locationInput1 = document.getElementById('location-input');
+		   if (locationInput1) {
+		       const savedAddress = localStorage.getItem("userAddress");
+		       if (savedAddress) {
+		           locationInput1.value = savedAddress;
+		       }
+		       locationInput1.addEventListener("input", () => {
+		           localStorage.setItem("userAddress", locationInput1.value);
+		       });
+		   }
 			
 
 	const searchMenuBtn = document.getElementById('searchMenuBtn');
@@ -935,6 +961,37 @@ $(document).ready(function() {
     } else {
         console.warn("경고: 주소 검색 또는 초기화를 위한 HTML 요소('location-input' 또는 'addressInputSearchBtn')를 찾을 수 없습니다.");
     }
+	
+	const categoryLinks = document.querySelectorAll('.nav.flex-nowrap li a');
+
+	if (locationInput) {
+	  // 로컬스토리지에서 복원 (필요시)
+	  const savedInputAddress = localStorage.getItem('inputaddress');
+	  if (savedInputAddress) {
+	    locationInput.value = savedInputAddress;
+	  }
+
+	  // 주소 입력 시 로컬스토리지에 저장
+	  locationInput.addEventListener('input', () => {
+	    localStorage.setItem('inputaddress', locationInput.value);
+	  });
+	}
+
+	if (categoryLinks.length > 0) {
+	  categoryLinks.forEach(link => {
+	    link.addEventListener('click', (e) => {
+	      e.preventDefault();
+	      const url = new URL(link.href, window.location.origin);
+	      const currentAddress = locationInput ? locationInput.value.trim() : '';
+	      if (currentAddress) {
+	        url.searchParams.set('inputaddress', currentAddress);
+	      } else {
+	        url.searchParams.delete('inputaddress');
+	      }
+	      window.location.href = url.toString();
+	    });
+	  });
+	}
 
 });
 
@@ -1078,81 +1135,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-/*
-//위치버튼 클릭스 주소 
 
-function handleCurrentLocationSearch() {
-    console.log("handleCurrentLocationSearch 함수 시작");
-    if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
-        console.error("오류: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않았습니다. 현재 위치 검색을 실행할 수 없습니다.");
-        return;
-    }
-		console.log("카카오 API 로드 확인 완료");
-    const currentLocationSearchBtn = document.getElementById('currentLocationSearchBtn'); // ★ HTML ID: currentLocationSearchBtn ★
-    const locationInputField = document.getElementById('location-input'); // 주소 입력 필드 ID
-
-    if (!currentLocationSearchBtn || !locationInputField) {
-        console.warn("경고: 'currentLocationSearchBtn' 또는 'location-input' 요소를 찾을 수 없어 현재 위치 검색 기능을 초기화할 수 없습니다.");
-        return;
-    }
-		console.log("HTML 요소 찾음");
-		
-    currentLocationSearchBtn.addEventListener('click', () => {
-			console.log("위치 찾기 버튼 클릭됨");
-        if (!navigator.geolocation) {
-            alert('이 브라우저는 위치 정보를 지원하지 않습니다. 최신 브라우저를 사용해주세요.');
-            return;
-        }
-	
-				console.log("Geolocation 지원됨");	
-				
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-							console.log("위치 정보 가져오기 성공:", position);
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-								console.log(`위치 정보 가져오기 성공: 위도 ${lat}, 경도 ${lon}`);
-                const geocoder = new kakao.maps.services.Geocoder();
-                const coord = new kakao.maps.LatLng(lat, lon);
-
-                geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
-                    if (status === kakao.maps.services.Status.OK && result.length > 0) {
-                        const address = result[0].address.address_name;
-                        locationInputField.value = address; // 입력 필드에 주소 자동 채우기
-
-                        const url = `/shopList?category=전체보기&address=${encodeURIComponent(address)}`;
-                        window.location.href = url;
-                    } else {
-                        alert('위치 정보를 주소로 변환하는 데 실패했습니다. 다시 시도해주세요.');
-                        console.error("주소 변환 실패:", status, result);
-                    }
-                });
-            },
-            (error) => {
-                let errorMessage = '위치 정보를 가져오는 데 실패했습니다.';
-                switch (error.code) {
-                    case error.PERMISSION_DENIED:
-                        errorMessage = '위치 정보 사용 권한이 거부되었습니다. 브라우저 설정에서 허용해주세요.';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        errorMessage = '위치 정보를 사용할 수 없습니다.';
-                        break;
-                    case error.TIMEOUT:
-                        errorMessage = '위치 정보를 가져오는 요청 시간이 초과되었습니다.';
-                        break;
-                    default:
-                        errorMessage = `알 수 없는 오류: ${error.message}`;
-                        break;
-                }
-                alert(errorMessage);
-                console.error("위치 정보 가져오기 오류:", error);
-            },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-        );
-    });
-		console.log("이벤트 리스너 등록 완료");
-}
-*/
 
 function handleCurrentLocationSearch() {
     console.log("handleCurrentLocationSearch 함수 시작");
@@ -1166,10 +1149,17 @@ function handleCurrentLocationSearch() {
     const currentLocationSearchBtn = document.getElementById('currentLocationSearchBtn');
     const categoryCards = document.querySelectorAll('.category-card');
 
-    if (!locationInputField || !currentLocationSearchBtn || categoryCards.length === 0) {
+    if (!locationInputField || !currentLocationSearchBtn ) {
         console.warn("HTML 요소 누락 - 기능 초기화 실패");
         return;
     }
+	
+	// categoryCards는 없어도 무방하게 처리하고 싶다면 이벤트 등록도 조건부로
+	if (categoryCards.length > 0) {
+	  categoryCards.forEach(card => {
+	    // ...
+	  });
+	}
 
     // 공통 위치 검색 및 페이지 이동 함수
     function searchWithCurrentLocation(categoryTitle) {
@@ -1222,10 +1212,14 @@ function handleCurrentLocationSearch() {
     }
 
     // 위치찾기 버튼 클릭
-    currentLocationSearchBtn.addEventListener('click', () => {
-        console.log("현재 위치 찾기 버튼 클릭");
-        searchWithCurrentLocation("전체보기");
-    });
+	if (currentLocationSearchBtn) {
+	  currentLocationSearchBtn.addEventListener('click', () => {
+	    console.log("현재 위치 찾기 버튼 클릭");
+	    searchWithCurrentLocation("전체보기");
+	  });
+	} else {
+	  console.warn("#currentLocationSearchBtn 버튼을 찾을 수 없습니다.");
+	}
 
     // 카테고리 카드 클릭
     categoryCards.forEach(card => {
@@ -1431,22 +1425,20 @@ if (searchSubmitBtn) {
     searchSubmitBtn.addEventListener('click', function () {
 	    const keyword = document.querySelector('#searchBox input[type="text"]').value.trim();
 
-	    // 현재 선택된 카테고리도 함께 보내고 싶다면 추가로 처리 가능
-	    // 예: const category = '치킨'; 또는 URL에서 파싱 가능
+		const locationInput = document.getElementById('location-input');
+		      const address = locationInput ? locationInput.value.trim() : '';
 
-	    // URL 구성
-	    const searchUrl = `/shopList?keyword=${encodeURIComponent(keyword)}`;
+		      // URL 구성 (keyword, address 둘 다 포함)
+			  let searchUrl = `/shopList?keyword=${encodeURIComponent(keyword)}`;
+			  if (address) {
+			      searchUrl += `&address=${encodeURIComponent(address)}`;
+			  }
 
 	    // 페이지 이동
 	    window.location.href = searchUrl;
 	});
 	
 };
-
-
-
-
-
 
 
 
