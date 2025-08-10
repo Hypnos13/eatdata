@@ -36,7 +36,7 @@
 							<div class="ms-auto">									
 								<button type="button" id="btnLikeList" th:data-sid="${shop.sId}" 
 								class="btn btn-outline-secondary" 
-								th:classappend="${liked} ? ' btn-secondary liked' : ' btn-outline-secondary'">
+								th:classappend="${liked} ? 'btn-danger liked' : 'btn-outline-secondary'">
 								<i class="bi bi-heart-fill me-1"></i>
 								<span id="likeText" th:text="${liked} ? '찜' : '찜 하기'">()찜</span>			
 								(<span id="likeCount" th:text="${heartCount}">0</span>)						
@@ -219,7 +219,7 @@
 									<button th:if="${member != null and review.id == member.id }" class="deleteReview btn btn-outline-dark btn-sm" th:data-no="${review.rNo}" th:data-sid="${review.sId}">
 										<i class="bi bi-trash">삭제</i>
 									</button>
-									<button th:unless="${member != null and review.id == member.id}" class="btn btn-outline-danger btn-sm" th:onclick="reportReview('${review.rNo}')">
+									<button th:unless="${member != null and review.id == member.id}" class="btn btn-outline-danger btn-sm report-review-btn" th:data-rno="${review.rNo}">
 										<i class="bi bi-telephone-outbound">신고</i>
 									</button>
 									</div>
