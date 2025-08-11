@@ -7,6 +7,8 @@ body {
 	background-color: #f9f9f9;
 }
 
+html, body { overflow-x: hidden; }
+
 /* 상단 바 */
 .top-bar {
 	background-color: #f9f9f9;
