@@ -1118,12 +1118,12 @@ function handleCurrentLocationSearch() {
 
     // 공통 위치 검색 및 페이지 이동 함수
     function searchWithCurrentLocation(categoryTitle) {
-        if (!navigator.geolocation) {
+       /* if (!navigator.geolocation) {
             alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
             return;
-        }
+        }*/
 
-        navigator.geolocation.getCurrentPosition(
+/*        navigator.geolocation.getCurrentPosition(
             (position) => {
                 //const lat = position.coords.latitude;
                 //const lon = position.coords.longitude;
@@ -1166,7 +1166,26 @@ function handleCurrentLocationSearch() {
                 console.error("위치 정보 오류:", error);
             },
             { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-        );
+        );*/
+				const lat = 37.4784;  // 관악구청 위도
+				const lon = 126.9515; // 관악구청 경도
+
+				const geocoder = new kakao.maps.services.Geocoder();
+				const coord = new kakao.maps.LatLng(lat, lon);
+
+				geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+				    if (status === kakao.maps.services.Status.OK && result.length > 0) {
+				        const address = result[0].address.address_name;
+				        locationInputField.value = address;
+
+				        const category = encodeURIComponent(categoryTitle || '전체보기');
+				        const url = `/shopList?category=${category}&address=${encodeURIComponent(address)}`;
+				        window.location.href = url;
+				    } else {
+				        alert('위치 → 주소 변환 실패');
+				        console.error("주소 변환 실패:", status, result);
+				    }
+				});
     }
 
     // 위치찾기 버튼 클릭
