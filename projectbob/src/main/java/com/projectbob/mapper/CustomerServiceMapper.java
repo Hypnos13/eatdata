@@ -13,6 +13,7 @@ import com.projectbob.domain.CustomerService;
 import com.projectbob.domain.NoticeBoard;
 import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
+import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 
 @Mapper
@@ -51,5 +52,5 @@ public interface CustomerServiceMapper {
 	List<Map<String, Object>> getMenuPrice(@Param("sId") String sId, @Param("name") String name);
 	int getMenuOptionPrice(@Param("mId") int mId, @Param("content") String content);
 	Review isReview(int oNo);
-	
+	List<Map<String, Object>> reviewReplyList(String id);
 }

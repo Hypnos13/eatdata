@@ -25,10 +25,33 @@
 			      	</div>								 
 			   </div>	
 			   <div class="mb-1">
+			   		<th:block th:if="${review['r_picture']} != null">
+			   			<img th:src="${review['r_picture']}" style="max-width:200px; max-height:200px; display:block; margin-bottom:5px;" alt="리뷰 이미지">
+			   		</th:block>
 			        <span class="span-address1">[[${review['content']}]]</span>
 			   </div>
+
+			    <th:block th:each="reply : ${reviewReplyList}">
+			   	<div class="address-card mt-2"  th:if="${reply['rNo']} == ${review['r_no']}">
+			        <div class="row">
+			          <div class="col-8 text-start">
+			            <strong>사장님 답글</strong>
+			            <span class="ms-2" th:text="${reply['writer']}">owner</span>
+			          </div>
+			          <div class="col-4 text-end">
+			            <small th:text="${#temporals.format(reply['created_at'], 'yyyy-MM-dd HH:mm')}">2025-08-03 17:01</small>
+			          </div>
+			        </div>
+			        <div class="mt-1">
+			          <span th:text="${reply['content']}">답글 내용</span>
+			        </div>
+			    </div>
+			    </th:block>
+
 			</div>
-		    
+		  	
+		  	
+		  	
 		  </th:block>
 		</th:block>
 		
