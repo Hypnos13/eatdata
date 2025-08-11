@@ -1,25 +1,29 @@
 package com.projectbob.controller;
 
-import com.projectbob.service.*;
+import com.projectbob.service.ShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import java.util.Map;
 
 @Controller
 public class RiderController {
 
     @Autowired
-    private ShopService shopService; // <-- BobService 대신 ShopService 주입
-
-    // WebsocketService는 더 이상 직접 호출할 필요가 없으므로 삭제
+    private ShopService shopService;
 
     @PostMapping("/rider/orders/{orderId}/accept")
     @ResponseBody
-    public ResponseEntity<?> acceptDispatch(@PathVariable("orderId") int orderId) { // Long -> int 로 변경
-        // 1. DB 업데이트와 모든 알림 전송을 한 번에 처리하는 강력한 서비스 메서드 호출
-        shopService.updateOrderStatus(orderId, "DISPATCHED");
+    public ResponseEntity<?> acceptDispatch(@PathVariable("orderId") int orderId,
+                                            @RequestBody Map<String, Object> deliveryInfo) { // @RequestBody로 배달 시간 정보 받기
+        
+        // ShopService의 새 메소드를 호출하면서, 세 번째 인자로 deliveryInfo를 전달합니다.
+        shopService.updateOrderStatus(orderId, "DISPATCHED", deliveryInfo);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "배차를 수락했습니다."));
     }
