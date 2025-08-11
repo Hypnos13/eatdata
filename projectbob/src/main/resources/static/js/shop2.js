@@ -757,36 +757,70 @@ function initWebSocket() {
         return;
     }
 
-    setTimeout(() => {
-        const socket = new SockJS('/ws');
-        const stompClient = Stomp.over(socket);
-        stompClient.debug = null;
+    // 1. setTimeout 제거! 즉시 연결 시작
+    const socket = new SockJS('/ws');
+    const stompClient = Stomp.over(socket);
+    stompClient.debug = null; // 디버그 로그를 보려면 이 줄을 주석 처리하거나 stompClient.debug = console.log; 로 변경
 
-        stompClient.connect({}, () => {
-            console.log(`[WebSocket] STOMP 연결 성공 (가게 ID: ${shopId})`);
+    // 2. 연결 콜백 함수 안에서 모든 구독을 처리
+    stompClient.connect({}, (frame) => { // frame 인자 추가 (연결 성공 정보)
+        console.log(`[WebSocket] STOMP 연결 성공 (가게 ID: ${shopId})`, frame);
 
-            stompClient.subscribe(`/topic/newOrder/${shopId}`, (msg) => {
-                console.log('[WS] 신규 주문 수신:', msg.body);
-                renderHeaderNotification(msg);
-                markBellAsUnread();
-                if (window.location.pathname.includes('/shop/newOrders')) {
-                    renderNewOrderItem(msg);
-                }
-            });
-
-            stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, (msg) => {
-                console.log('[WS] 주문 상태 변경 수신:', msg.body);
-                const payload = JSON.parse(msg.body);
-                removeHeaderNotification(payload.oNo);
-
-                if (window.location.pathname.includes('/shop/orderManage') && payload.newStatus === 'DISPATCHED') {
-                    markBellAsUnread();
-                    alert('라이더 배차가 완료되었습니다!');
-                    location.reload();
-                }
-            });
+        // 신규 주문 알림 구독
+        stompClient.subscribe(`/topic/newOrder/${shopId}`, (msg) => {
+            console.log('[WS] 신규 주문 수신:', msg.body);
+            renderHeaderNotification(msg);
+            markBellAsUnread();
+            if (window.location.pathname.includes('/shop/newOrders')) {
+                renderNewOrderItem(msg);
+            }
         });
-    }, 150);
+
+        // 주문 상태 변경 알림 구독 (라이더 배차 완료 포함)
+				
+				stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, (msg) => {
+				    console.log('[WS] 주문 상태 변경 수신:', msg.body);
+				    const payload = JSON.parse(msg.body);
+				    removeHeaderNotification(payload.oNo); 
+
+				    if (window.location.pathname.includes('/shop/orderManage') && payload.newStatus === 'DISPATCHED') {
+				        markBellAsUnread();
+
+				        // 기존 alert 대신 SweetAlert2 사용
+				        Swal.fire({
+				            icon: 'success', // 아이콘 (success, error, warning, info, question)
+				            title: '배차 완료!',
+				            text: `주문번호 ${payload.oNo}번의 라이더 배차가 완료되었습니다.`,
+				            confirmButtonText: '확인' // 버튼 텍스트
+				        }).then((result) => {
+				            // then() 안의 코드는 사용자가 버튼을 누른 후에만 실행됩니다.
+				            if (result.isConfirmed) { // 사용자가 '확인' 버튼을 눌렀다면
+				                location.reload(); // 페이지를 새로고침합니다.
+				            }
+				        });
+				    }
+				});
+				
+				
+        /*stompClient.subscribe(`/topic/orderStatus/shop/${shopId}`, (msg) => {
+            console.log('[WS] 주문 상태 변경 수신:', msg.body);
+            const payload = JSON.parse(msg.body);
+            
+            // 신규주문 목록(PENDING)에서는 이 주문을 제거해야 함
+            removeHeaderNotification(payload.oNo); 
+
+            // 현재 페이지가 '주문 관리'이고 상태가 '배차 완료'일 때 알림창 표시
+            if (window.location.pathname.includes('/shop/orderManage') && payload.newStatus === 'DISPATCHED') {
+                markBellAsUnread();
+                alert(`주문번호 ${payload.oNo}의 라이더 배차가 완료되었습니다!`);
+								//setTimeout(() => {location.reload();}, 1000);
+            }
+        });*/
+
+    }, (error) => {
+        // 3. 연결 실패 시 에러 처리 로직 추가 (권장)
+        console.error('[WebSocket] STOMP 연결 실패:', error);
+    });
 }
 
 /**
