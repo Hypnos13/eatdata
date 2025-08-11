@@ -37,7 +37,7 @@ public class SecurityConfig {
 		http.authorizeHttpRequests(authorize -> authorize
 				// 로그인 없이 접근 가능한 경로들 (LoginCheckInterceptor의 guestAllowedUrls 역할)
 				.requestMatchers(
-					"/main", "/shopList", "/MenuDetail", "/completed", // 고객이 보는 페이지
+					"/main", "/shopList", "/menuDetail", "/completed", // 고객이 보는 페이지
 					"/login", "/joinMemberForm", "/joinMember", "/searchIdPass", "/searchIdPassForm", "/overlapId.ajax", // 로그인/회원가입/찾기
 					"/naverLogin", "/naverJoin", "/updateNaverMember", "/deleteNaverMember", "/kakao", "/login/naver/callback", // 소셜 로그인
 					"/phoneCertify", "/certifyNumber", "/faqList", "shopManage",  // 휴대폰 인증  
