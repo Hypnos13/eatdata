@@ -1638,6 +1638,7 @@ $(document).on("click", ".modifyReview", function(){
 	let rno = $(this).data("no");
 	let ono = $(this).data("ono");
 	let menus = $(this).data("menus");
+	let mid = $(this).data("mid"); // Get mId from the button
 	let sIdFromButton = $(this).data("sid"); // Get sId from the button
 	console.log("sId from modify button:", sIdFromButton); // Add this line
 	lastEditRno = rno;
@@ -1649,7 +1650,8 @@ $(document).on("click", ".modifyReview", function(){
 	$form.find("#reviewContent").val($.trim(reviewContent));			
 	$form.attr("id", "reviewUpdateForm").attr("data-no", rno);
 	$form.data("ono", ono); // Store ono in data attribute
-	$form.data("sid", $(this).data("sid")); // Store sid in data attribute		
+	$form.data("sid", $(this).data("sid")); // Store sid in data attribute
+	$form.data("mid", mid); // Store mid in data attribute		
 	$("#reviewForm input[type='submit']").val("댓글수정").text("댓글수정");
 
 	// 주문 선택 드롭다운 비활성화 및 값 설정
@@ -1678,6 +1680,18 @@ $(document).on("submit", "#reviewUpdateForm", function(e){
 	formData.append("rNo", $(form).attr("data-no"));
 	formData.append("oNo", $(form).data("ono"));
 	formData.append("sId", $(form).data("sid"));
+	let midValue = $(form).data("mid");
+	// Convert "undefined" string to null or actual number
+	if (typeof midValue === 'string' && midValue.toLowerCase() === 'undefined') {
+	    midValue = null; // Or 0, depending on what the backend expects for a missing mId
+	} else if (typeof midValue === 'string') {
+	    midValue = parseInt(midValue); // Ensure it's a number if it's a string representation of a number
+	    if (isNaN(midValue)) {
+	        midValue = null; // If parsing fails, set to null
+	    }
+	}
+    console.log("DEBUG: mId value before appending to formData:", midValue); // ADD THIS LINE
+	formData.append("mId", midValue);
 	
 	console.log("전송할 rNo (수정):", $(form).attr("data-no"));
 	console.log("전송할 FormData:", formData);
