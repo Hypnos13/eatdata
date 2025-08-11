@@ -625,7 +625,7 @@ $(document).ready(function () {
 // #location-input 값으로 가게와의 거리 구하기 
 // =========================================================================
 $(document).ready(function() {
-    const geocoder = new kakao.maps.services.Geocoder();
+    //const geocoder = new kakao.maps.services.Geocoder();
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
         const R = 6371;
@@ -883,7 +883,7 @@ $(document).ready(function() {
 		           console.log("현재 위치 검색 기능 초기화 완료.");
 		       } else {
 		           console.warn("카카오 지도 API가 아직 준비되지 않아 200ms 후 재시도");
-		           setTimeout(waitForKakaoAndInit, 200);
+		           //setTimeout(waitForKakaoAndInit, 200);
 		       }
 		   }
 		   waitForKakaoAndInit();
@@ -1118,17 +1118,17 @@ function handleCurrentLocationSearch() {
 
     // 공통 위치 검색 및 페이지 이동 함수
     function searchWithCurrentLocation(categoryTitle) {
-       /* if (!navigator.geolocation) {
+        if (!navigator.geolocation) {
             alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
             return;
-        }*/
+        }
 
-/*        navigator.geolocation.getCurrentPosition(
+        navigator.geolocation.getCurrentPosition(
             (position) => {
-                //const lat = position.coords.latitude;
-                //const lon = position.coords.longitude;
-								const lat = 37.4784;  // 관악구청 위도
-								const lon = 126.9515; // 관악구청 경도
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+								//const lat = 37.4784;  // 관악구청 위도
+								//const lon = 126.9515; // 관악구청 경도
 								
                 const geocoder = new kakao.maps.services.Geocoder();
                 const coord = new kakao.maps.LatLng(lat, lon);
@@ -1148,7 +1148,7 @@ function handleCurrentLocationSearch() {
                 });
             },
             (error) => {
-                let errorMessage = '위치 정보를 가져오는 데 실패했습니다.';
+               /* let errorMessage = '위치 정보를 가져오는 데 실패했습니다.';
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
                         errorMessage = '위치 정보 권한이 거부되었습니다.';
@@ -1163,29 +1163,32 @@ function handleCurrentLocationSearch() {
                         errorMessage = `알 수 없는 오류: ${error.message}`;
                 }
                 alert(errorMessage);
-                console.error("위치 정보 오류:", error);
+                console.error("위치 정보 오류:", error);*/
+								console.warn("위치 정보 오류 발생, 대체 좌표 사용:", error);
+
+								            const lat = 37.4784;  // 관악구청 위도 (대체 좌표)
+								            const lon = 126.9515; // 관악구청 경도 (대체 좌표)
+
+								            const geocoder = new kakao.maps.services.Geocoder();
+								            const coord = new kakao.maps.LatLng(lat, lon);
+
+								            geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+								                if (status === kakao.maps.services.Status.OK && result.length > 0) {
+								                    const address = result[0].address.address_name;
+								                    locationInputField.value = address;
+
+								                    const category = encodeURIComponent(categoryTitle || '전체보기');
+								                    const url = `/shopList?category=${category}&address=${encodeURIComponent(address)}`;
+								                    window.location.href = url;
+								                } else {
+								                    alert('위치 → 주소 변환 실패');
+								                    console.error("주소 변환 실패:", status, result);
+								                }
+								            });
             },
             { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-        );*/
-				const lat = 37.4784;  // 관악구청 위도
-				const lon = 126.9515; // 관악구청 경도
-
-				const geocoder = new kakao.maps.services.Geocoder();
-				const coord = new kakao.maps.LatLng(lat, lon);
-
-				geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
-				    if (status === kakao.maps.services.Status.OK && result.length > 0) {
-				        const address = result[0].address.address_name;
-				        locationInputField.value = address;
-
-				        const category = encodeURIComponent(categoryTitle || '전체보기');
-				        const url = `/shopList?category=${category}&address=${encodeURIComponent(address)}`;
-				        window.location.href = url;
-				    } else {
-				        alert('위치 → 주소 변환 실패');
-				        console.error("주소 변환 실패:", status, result);
-				    }
-				});
+        );
+		
     }
 
     // 위치찾기 버튼 클릭
