@@ -625,7 +625,7 @@ $(document).ready(function () {
 // #location-input 값으로 가게와의 거리 구하기 
 // =========================================================================
 $(document).ready(function() {
-    //const geocoder = new kakao.maps.services.Geocoder();
+    const geocoder = new kakao.maps.services.Geocoder();
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
         const R = 6371;
@@ -1127,9 +1127,7 @@ function handleCurrentLocationSearch() {
             (position) => {
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
-								//const lat = 37.4784;  // 관악구청 위도
-								//const lon = 126.9515; // 관악구청 경도
-								
+
                 const geocoder = new kakao.maps.services.Geocoder();
                 const coord = new kakao.maps.LatLng(lat, lon);
 
@@ -1148,7 +1146,7 @@ function handleCurrentLocationSearch() {
                 });
             },
             (error) => {
-               /* let errorMessage = '위치 정보를 가져오는 데 실패했습니다.';
+                let errorMessage = '위치 정보를 가져오는 데 실패했습니다.';
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
                         errorMessage = '위치 정보 권한이 거부되었습니다.';
@@ -1163,7 +1161,7 @@ function handleCurrentLocationSearch() {
                         errorMessage = `알 수 없는 오류: ${error.message}`;
                 }
                 alert(errorMessage);
-                console.error("위치 정보 오류:", error);*/
+                console.error("위치 정보 오류:", error);
 								console.warn("위치 정보 오류 발생, 대체 좌표 사용:", error);
 
 								            const lat = 37.4784;  // 관악구청 위도 (대체 좌표)
