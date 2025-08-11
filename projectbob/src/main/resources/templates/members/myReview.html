@@ -15,7 +15,7 @@
 		
 		<th:block th:unless="${#lists.isEmpty(reviewList)}">
 		  <th:block th:each="review, status: ${reviewList}">
-		  	<div class="address-card" th:onclick="|location.href='@{/MenuDetail(sId=${review['s_id']})}'|">
+		  	<div class="address-card" th:onclick="|location.href='@{/menuDetail(sId=${review['s_id']})}'|">
 				<div class="row mb-1">
 			      	<div class="col-7 text-start">
 			      		<a class="addressbook-title">* [[${review['name']}]]</a>	

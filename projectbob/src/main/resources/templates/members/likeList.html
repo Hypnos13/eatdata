@@ -10,7 +10,7 @@
 
 	<th:block th:if="${!#lists.isEmpty(shopList)}">
 	    <div th:each="shop : ${shopList}" class="card mb-4 p-3 shadow-sm rounded-4 border-0">
-	        <div class="d-flex justify-content-between align-items-center"  th:onclick="|location.href='@{/MenuDetail(sId=${shop.sId})}'|">
+	        <div class="d-flex justify-content-between align-items-center"  th:onclick="|location.href='@{/menuDetail(sId=${shop.sId})}'|">
 	            
 	            <div class="flex-grow-1 pe-3">
 	                <div class="d-flex align-items-center mb-1">
