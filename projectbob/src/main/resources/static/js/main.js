@@ -870,24 +870,8 @@ $(document).ready(function() {
     $('a[href="#info"]')?.on('shown.bs.tab', function () {
         showStoreOnMap();
     });
-		/*
-		if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
-		      initAddressSearchInput();
-		      console.log("주소 검색 기능 초기화 완료.");
-		  } else {
-		      console.warn("경고: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않아 주소 검색 기능을 초기화할 수 없습니다.");
-		  }
 
-		  // --- 2. 현재 위치 검색 버튼 (currentLocationSearchBtn) 기능 초기화 ---
-		  // 카카오 지도 API가 로드된 후에만 이 함수가 호출되도록 조건부 실행
-		  
-		  if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
-		      handleCurrentLocationSearch();
-		      console.log("현재 위치 검색 기능 초기화 완료.");
-		  } else {
-		      console.warn("경고: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않아 현재 위치 검색 기능을 초기화할 수 없습니다.");
-		  }
-		  */
+		
 		  function waitForKakaoAndInit() {
 		       if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
 		           // 주소 검색 초기화
@@ -1074,11 +1058,20 @@ $(document).on('click', '.select-saved-address-btn2', function() {
 
 
 // 쿠폰모달 열기
-document.getElementById('openCouponModalBtn').addEventListener('click', function() {
+/*document.getElementById('openCouponModalBtn').addEventListener('click', function() {
   const couponModalEl = document.getElementById('couponModal');
   const couponModal = new bootstrap.Modal(couponModalEl);
   couponModal.show();
-});
+});*/
+
+const btn = document.getElementById('openCouponModalBtn');
+if (btn) {
+  btn.addEventListener('click', function() {
+    const couponModalEl = document.getElementById('couponModal');
+    const couponModal = new bootstrap.Modal(couponModalEl);
+    couponModal.show();
+  });
+}
 
 // 쿠폰 선택 버튼 클릭 이벤트 예시 (필요 시 추가 동작 구현)
 document.addEventListener('click', function(e) {
@@ -1098,7 +1091,7 @@ document.addEventListener('click', function(e) {
   }
 });
 
-//뭐였지 이건 ?
+//위치찾아주는 함수인듯 ?
 function handleCurrentLocationSearch() {
     console.log("handleCurrentLocationSearch 함수 시작");
 
@@ -1125,15 +1118,18 @@ function handleCurrentLocationSearch() {
 
     // 공통 위치 검색 및 페이지 이동 함수
     function searchWithCurrentLocation(categoryTitle) {
-        if (!navigator.geolocation) {
+       /* if (!navigator.geolocation) {
             alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
             return;
-        }
+        }*/
 
-        navigator.geolocation.getCurrentPosition(
+/*        navigator.geolocation.getCurrentPosition(
             (position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
+                //const lat = position.coords.latitude;
+                //const lon = position.coords.longitude;
+								const lat = 37.4784;  // 관악구청 위도
+								const lon = 126.9515; // 관악구청 경도
+								
                 const geocoder = new kakao.maps.services.Geocoder();
                 const coord = new kakao.maps.LatLng(lat, lon);
 
@@ -1170,7 +1166,26 @@ function handleCurrentLocationSearch() {
                 console.error("위치 정보 오류:", error);
             },
             { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-        );
+        );*/
+				const lat = 37.4784;  // 관악구청 위도
+				const lon = 126.9515; // 관악구청 경도
+
+				const geocoder = new kakao.maps.services.Geocoder();
+				const coord = new kakao.maps.LatLng(lat, lon);
+
+				geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+				    if (status === kakao.maps.services.Status.OK && result.length > 0) {
+				        const address = result[0].address.address_name;
+				        locationInputField.value = address;
+
+				        const category = encodeURIComponent(categoryTitle || '전체보기');
+				        const url = `/shopList?category=${category}&address=${encodeURIComponent(address)}`;
+				        window.location.href = url;
+				    } else {
+				        alert('위치 → 주소 변환 실패');
+				        console.error("주소 변환 실패:", status, result);
+				    }
+				});
     }
 
     // 위치찾기 버튼 클릭
@@ -1629,8 +1644,9 @@ $(document).on("click", ".modifyReview", function(){
 	let rno = $(this).data("no");
 	let ono = $(this).data("ono");
 	let menus = $(this).data("menus");
-	let sIdFromButton = $(this).data("sid"); // Get sId from the button
-	console.log("sId from modify button:", sIdFromButton); // Add this line
+	let mid = $(this).data("mid"); 
+	let sIdFromButton = $(this).data("sid"); 
+	console.log("sId from modify button:", sIdFromButton); 
 	lastEditRno = rno;
 	
 	$reviewRow.after($("#reviewForm").removeClass("d-none"));
@@ -1640,7 +1656,8 @@ $(document).on("click", ".modifyReview", function(){
 	$form.find("#reviewContent").val($.trim(reviewContent));			
 	$form.attr("id", "reviewUpdateForm").attr("data-no", rno);
 	$form.data("ono", ono); // Store ono in data attribute
-	$form.data("sid", $(this).data("sid")); // Store sid in data attribute		
+	$form.data("sid", $(this).data("sid")); // Store sid in data attribute
+	$form.data("mid", mid); // Store mid in data attribute		
 	$("#reviewForm input[type='submit']").val("댓글수정").text("댓글수정");
 
 	// 주문 선택 드롭다운 비활성화 및 값 설정
@@ -1669,6 +1686,8 @@ $(document).on("submit", "#reviewUpdateForm", function(e){
 	formData.append("rNo", $(form).attr("data-no"));
 	formData.append("oNo", $(form).data("ono"));
 	formData.append("sId", $(form).data("sid"));
+	formData.append("mId", $(form).data("mid"));
+
 	
 	console.log("전송할 rNo (수정):", $(form).attr("data-no"));
 	console.log("전송할 FormData:", formData);

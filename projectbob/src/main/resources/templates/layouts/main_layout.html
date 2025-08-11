@@ -170,6 +170,39 @@
 	<script th:src="@{js/main.js}"></script>
 	<script th:src="@{js/websocket.js}"></script>
 	<!-- <script th:src="@{js/review.js}"></script> -->
+	
+	 <script>
+      // ipapi.co를 통해 클라이언트 위치 조회
+      fetch('https://ipapi.co/json/')
+        .then(response => response.json())
+        .then(data => {
+          console.log("ipapi 위치 데이터:", data);
+
+          // 위치 정보 보여주기
+          const locInfo = `내 위치: ${data.city}, ${data.region}, ${data.country_name}`;
+          document.getElementById('locationInfo').textContent = locInfo;
+
+          // 카카오맵 생성 및 중심 좌표 설정
+          const container = document.getElementById('map');
+          const options = {
+            center: new kakao.maps.LatLng(data.latitude, data.longitude),
+            level: 4,
+          };
+          const map = new kakao.maps.Map(container, options);
+
+          // 마커 표시
+          const markerPosition = new kakao.maps.LatLng(data.latitude, data.longitude);
+          const marker = new kakao.maps.Marker({ position: markerPosition });
+          marker.setMap(map);
+        })
+        .catch(err => {
+          console.error("위치 조회 실패:", err);
+          document.getElementById('locationInfo').textContent = '위치 정보를 불러오는데 실패했습니다.';
+        });
+    </script>
+    
+	
+	
 </body>
 </html>
 

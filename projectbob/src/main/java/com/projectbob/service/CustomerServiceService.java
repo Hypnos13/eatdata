@@ -25,6 +25,7 @@ import com.projectbob.domain.LikeList;
 import com.projectbob.domain.NoticeBoard;
 import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
+import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 import com.projectbob.mapper.CustomerServiceMapper;
 
@@ -258,11 +259,18 @@ public class CustomerServiceService {
 	            	    System.out.println("선택된 m_id: " + mId);
 
 	            	    if (!option.isEmpty()) {
-	            	    	int optionPrice = csMapper.getMenuOptionPrice(mId, option);
-	            	        parsed.put("optionPrice", optionPrice);
-	            	    } else {
-	            	        parsed.put("optionPrice", 0);
-	            	    }
+	                        // 1. Mapper의 반환 타입이 Integer로 변경되었다고 가정
+	                        Integer optionPrice = csMapper.getMenuOptionPrice(mId, option);
+
+	                        // 2. null 체크: 반환된 가격이 null이 아닐 때만 값을 사용하고, null이면 0을 사용
+	                        if (optionPrice != null) {
+	                            parsed.put("optionPrice", optionPrice);
+	                        } else {
+	                            parsed.put("optionPrice", 0);
+	                        }
+	                    } else {
+	                        parsed.put("optionPrice", 0);
+	                    }
 	                } else {
 	                    parsed.put("menuPrice", 0);
 	                    parsed.put("optionPrice", 0);
@@ -288,4 +296,7 @@ public class CustomerServiceService {
 		return myOrderList;
 	}
 	
+	public List<Map<String, Object>> reviewReplyList(String id){
+		return csMapper.reviewReplyList(id);
+	}
 }

@@ -405,7 +405,7 @@ public class LoginController {
 		 MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		 params.add("grant_type", "authorization_code");
 		 params.add("client_id", "a6ce69b235d3336723f4b86140c8a301");  // 카카오 API
-		 params.add("redirect_uri", "http://localhost:8080/kakao");  // 카카오에 등록된 URI  43.200.97.14
+		 params.add("redirect_uri", "http://43.200.97.14:8080/kakao");  // 카카오에 등록된 URI  43.200.97.14
 		 params.add("code", code);
 		
 		 HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(params, headers);

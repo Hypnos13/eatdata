@@ -247,9 +247,16 @@
 </select>
 
 <select id="isReview" resultType="review">
-	select *
-	from review
-	where o_no = #{oNo}
+	SELECT *
+	FROM review
+	WHERE o_no = #{oNo}
+</select>
+
+<select id="reviewReplyList" resultType="map">
+	SELECT r.id as id, r.r_no as rNo , rr.rr_no as rrNo , rr.content as content , rr.reg_date as regDate
+	FROM review r , review_reply rr
+	WHERE r.r_no = rr.r_no
+	AND r.id = #{id}
 </select>
 </mapper>	
 

@@ -144,7 +144,7 @@ public class BobController {
 
 
 	  	// 가게 상세보기 메서드		
-		  @GetMapping("/MenuDetail") 
+		  @GetMapping("/menuDetail") 
 
 		  public String getMenuDetail(Model model,HttpSession session,	  
 		  @RequestParam("sId") int sId) {
@@ -253,7 +253,7 @@ public class BobController {
 		 List<String> openLines = shopService.buildOpenTextLines(shop);
          model.addAttribute("openLines", openLines);
 		 
-		  return "views/MenuDetail"; 
+		  return "views/menudetail"; 
 		  }
 		  
 	// 모달창 메뉴옵션보기 메서드

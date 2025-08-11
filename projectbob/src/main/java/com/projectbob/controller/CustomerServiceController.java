@@ -23,6 +23,7 @@ import com.projectbob.domain.Member;
 import com.projectbob.domain.NoticeBoard;
 import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
+import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 import com.projectbob.service.CustomerServiceService;
 import com.projectbob.service.LoginService;
@@ -442,7 +443,10 @@ public class CustomerServiceController {
 		String id = (String) session.getAttribute("loginId");
 		
 		List<Map<String, Object>> reviewList = csService.myReviewList(id);
+		List<Map<String, Object>> reviewReplyList = csService.reviewReplyList(id);
+		
 		model.addAttribute("reviewList", reviewList);
+		model.addAttribute("reviewReplyList", reviewReplyList);
 		
 		return "members/myReview";
 	}
