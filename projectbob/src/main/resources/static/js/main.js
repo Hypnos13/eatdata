@@ -870,24 +870,8 @@ $(document).ready(function() {
     $('a[href="#info"]')?.on('shown.bs.tab', function () {
         showStoreOnMap();
     });
-		/*
-		if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
-		      initAddressSearchInput();
-		      console.log("주소 검색 기능 초기화 완료.");
-		  } else {
-		      console.warn("경고: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않아 주소 검색 기능을 초기화할 수 없습니다.");
-		  }
 
-		  // --- 2. 현재 위치 검색 버튼 (currentLocationSearchBtn) 기능 초기화 ---
-		  // 카카오 지도 API가 로드된 후에만 이 함수가 호출되도록 조건부 실행
-		  
-		  if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
-		      handleCurrentLocationSearch();
-		      console.log("현재 위치 검색 기능 초기화 완료.");
-		  } else {
-		      console.warn("경고: 카카오 지도 API 또는 서비스 라이브러리가 로드되지 않아 현재 위치 검색 기능을 초기화할 수 없습니다.");
-		  }
-		  */
+		
 		  function waitForKakaoAndInit() {
 		       if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
 		           // 주소 검색 초기화
@@ -1107,7 +1091,7 @@ document.addEventListener('click', function(e) {
   }
 });
 
-//뭐였지 이건 ?
+//위치찾아주는 함수인듯 ?
 function handleCurrentLocationSearch() {
     console.log("handleCurrentLocationSearch 함수 시작");
 
@@ -1141,8 +1125,11 @@ function handleCurrentLocationSearch() {
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
+                //const lat = position.coords.latitude;
+                //const lon = position.coords.longitude;
+								const lat = 37.4784;  // 관악구청 위도
+								const lon = 126.9515; // 관악구청 경도
+								
                 const geocoder = new kakao.maps.services.Geocoder();
                 const coord = new kakao.maps.LatLng(lat, lon);
 
