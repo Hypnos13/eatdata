@@ -20,7 +20,7 @@
 			      	<div class="col-9 text-start">
 			      		<div class="title-and-btn">
 				      		<a class="addressbook-title">* [[${order['shopName']}]]  - [[${order['address']}]]</a>  
-				      		<th:block th:unless="${order['hasReview']}">&nbsp <input class="btn myrv-btn-success" type="button" value="리뷰작성" th:onclick="|location.href='@{/MenuDetail(sId=${order.sId})}'|"></th:block>
+				      		<th:block th:unless="${order['hasReview']}">&nbsp <input class="btn myrv-btn-success" type="button" value="리뷰작성" th:onclick="|location.href='@{/menuDetail(sId=${order.sId})}'|"></th:block>
 				      	</div>
 			      	</div>			
 			      	<div class="col-3 text-end">
