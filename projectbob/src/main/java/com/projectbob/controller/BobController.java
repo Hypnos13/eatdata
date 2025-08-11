@@ -144,7 +144,7 @@ public class BobController {
 
 
 	  	// 가게 상세보기 메서드		
-		  @GetMapping("/MenuDetail") 
+		  @GetMapping("/menuDetail") 
 
 		  public String getMenuDetail(Model model,HttpSession session,	  
 		  @RequestParam("sId") int sId) {

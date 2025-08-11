@@ -212,7 +212,7 @@
 								       </div>
 
 							
-									   <a th:href="${shop.status == 'N'} ? '#' : @{/MenuDetail(sId=${shop.sId})}"
+									   <a th:href="${shop.status == 'N'} ? '#' : @{/menuDetail(sId=${shop.sId})}"
 									      th:onclick="${shop.status == 'N'} ? 'return false;' : null"
 									      class="text-decoration-none text-dark"
 									      th:style="${shop.status == 'N'} ? 'pointer-events: none; cursor: default;' : ''">
