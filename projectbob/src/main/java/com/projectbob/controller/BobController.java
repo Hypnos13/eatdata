@@ -253,7 +253,7 @@ public class BobController {
 		 List<String> openLines = shopService.buildOpenTextLines(shop);
          model.addAttribute("openLines", openLines);
 		 
-		  return "views/MenuDetail"; 
+		  return "views/menudetail"; 
 		  }
 		  
 	// 모달창 메뉴옵션보기 메서드
