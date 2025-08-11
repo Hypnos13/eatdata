@@ -25,6 +25,7 @@ import com.projectbob.domain.LikeList;
 import com.projectbob.domain.NoticeBoard;
 import com.projectbob.domain.Orders;
 import com.projectbob.domain.Review;
+import com.projectbob.domain.ReviewReply;
 import com.projectbob.domain.Shop;
 import com.projectbob.mapper.CustomerServiceMapper;
 
@@ -288,4 +289,7 @@ public class CustomerServiceService {
 		return myOrderList;
 	}
 	
+	public List<Map<String, Object>> reviewReplyList(String id){
+		return csMapper.reviewReplyList(id);
+	}
 }
