@@ -45,7 +45,8 @@
 				<div class="col text-center">
 					 <div id="naver_id_login"></div>
 					  <script type="text/javascript">
-						  	var naver_id_login = new naver_id_login("geNaa92ft6eNyAmK2TxC", "http://43.200.97.14:8080/login/naver/callback");
+					  <!--  var naver_id_login = new naver_id_login("geNaa92ft6eNyAmK2TxC", "http://43.200.97.14:8080/login/naver/callback"); -->
+						  	var naver_id_login = new naver_id_login("geNaa92ft6eNyAmK2TxC", "http://localhost:8080/login/naver/callback");
 						  	var state = naver_id_login.getUniqState();
 						  	naver_id_login.setButton("white", 3,40);
 						  	naver_id_login.setDomain("http://43.200.97.14:8080/");
@@ -57,7 +58,8 @@
 			<!-- 카카오 로그인 버튼 (기존과 동일) -->
 			<div class="row my-2">
 				<div class="col text-center">
-					 <a href="https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a6ce69b235d3336723f4b86140c8a301&redirect_uri=http://43.200.97.14:8080/kakao">
+					 <a href="https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a6ce69b235d3336723f4b86140c8a301&redirect_uri=http://localhost:8080/kakao">
+					 <!--<a href="https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=a6ce69b235d3336723f4b86140c8a301&redirect_uri=http://43.200.97.14:8080/kakao">  -->
 					 	<img src="images/kakaobtn.png"/>
 					 </a>
 			  	</div>
