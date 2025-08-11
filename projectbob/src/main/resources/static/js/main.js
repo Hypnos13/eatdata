@@ -1074,11 +1074,20 @@ $(document).on('click', '.select-saved-address-btn2', function() {
 
 
 // 쿠폰모달 열기
-document.getElementById('openCouponModalBtn').addEventListener('click', function() {
+/*document.getElementById('openCouponModalBtn').addEventListener('click', function() {
   const couponModalEl = document.getElementById('couponModal');
   const couponModal = new bootstrap.Modal(couponModalEl);
   couponModal.show();
-});
+});*/
+
+const btn = document.getElementById('openCouponModalBtn');
+if (btn) {
+  btn.addEventListener('click', function() {
+    const couponModalEl = document.getElementById('couponModal');
+    const couponModal = new bootstrap.Modal(couponModalEl);
+    couponModal.show();
+  });
+}
 
 // 쿠폰 선택 버튼 클릭 이벤트 예시 (필요 시 추가 동작 구현)
 document.addEventListener('click', function(e) {
