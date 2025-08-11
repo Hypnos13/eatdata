@@ -1638,9 +1638,9 @@ $(document).on("click", ".modifyReview", function(){
 	let rno = $(this).data("no");
 	let ono = $(this).data("ono");
 	let menus = $(this).data("menus");
-	let mid = $(this).data("mid"); // Get mId from the button
-	let sIdFromButton = $(this).data("sid"); // Get sId from the button
-	console.log("sId from modify button:", sIdFromButton); // Add this line
+	let mid = $(this).data("mid"); 
+	let sIdFromButton = $(this).data("sid"); 
+	console.log("sId from modify button:", sIdFromButton); 
 	lastEditRno = rno;
 	
 	$reviewRow.after($("#reviewForm").removeClass("d-none"));
@@ -1680,18 +1680,8 @@ $(document).on("submit", "#reviewUpdateForm", function(e){
 	formData.append("rNo", $(form).attr("data-no"));
 	formData.append("oNo", $(form).data("ono"));
 	formData.append("sId", $(form).data("sid"));
-	let midValue = $(form).data("mid");
-	// Convert "undefined" string to null or actual number
-	if (typeof midValue === 'string' && midValue.toLowerCase() === 'undefined') {
-	    midValue = null; // Or 0, depending on what the backend expects for a missing mId
-	} else if (typeof midValue === 'string') {
-	    midValue = parseInt(midValue); // Ensure it's a number if it's a string representation of a number
-	    if (isNaN(midValue)) {
-	        midValue = null; // If parsing fails, set to null
-	    }
-	}
-    console.log("DEBUG: mId value before appending to formData:", midValue); // ADD THIS LINE
-	formData.append("mId", midValue);
+	formData.append("mId", $(form).data("mid"));
+
 	
 	console.log("전송할 rNo (수정):", $(form).attr("data-no"));
 	console.log("전송할 FormData:", formData);

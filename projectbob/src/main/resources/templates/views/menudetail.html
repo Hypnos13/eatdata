@@ -213,7 +213,7 @@
 									<span class="fw-bold" th:text="${#strings.substring(review.id,0,2) + '**님'}">ad**님</span>
 									<span class="text-muted small ms-2" th:text="${#dates.format(review.regDate, 'yyyy-MM-dd')}">날짜</span>
 									<div class="ms-auto">
-									<button th:if="${member != null and review.id == member.id}" class="modifyReview btn btn-outline-success btn-sm" th:data-no="${review.rNo}" th:data-ono="${review.oNo}" th:data-menus="${review.menus}" th:data-mid="${review.mId}">
+									<button th:if="${member != null and review.id == member.id}" class="modifyReview btn btn-outline-success btn-sm" th:data-no="${review.rNo}" th:data-ono="${review.oNo}" th:data-menus="${review.menus}">
 										<i class="bi bi-journal-text">수정</i>									
 									</button>
 									<button th:if="${member != null and review.id == member.id }" class="deleteReview btn btn-outline-dark btn-sm" th:data-no="${review.rNo}" th:data-sid="${review.sId}">
