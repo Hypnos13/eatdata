@@ -448,7 +448,7 @@ public class MenuAjaxController {
 	}
 
 	//댓글 수정 메서드
-	@PatchMapping("/reviewUpdate.ajax")
+	@PatchMapping("reviewUpdate.ajax")
 	@ResponseBody
 	public Map<String, Object> updateReview(@ModelAttribute Review review,
 			@RequestParam(value="reviewUploadFile", required=false) MultipartFile rPicture){
@@ -480,9 +480,7 @@ public class MenuAjaxController {
 				log.info("MenuAjaxController: Constructed uploadPath = {}", uploadPath); // 추가
 				log.info("MenuAjaxController: Target file location = {}", targetLocation); // 추가
 
-		        // 파일 저장
-		        rPicture.transferTo(targetLocation.toAbsolutePath().toFile());
-				log.info("MenuAjaxController: File saved successfully to {}", targetLocation); // 추가
+		        
 
 		        // DB에 저장할 웹 접근 가능한 URL 형식으로 설정
 				String fileUrl = fileUploadService.uploadFile(rPicture, subDirectory);
